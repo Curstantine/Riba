@@ -1,0 +1,13 @@
+[versions]
+android_version = "7.2.2"
+
+[libraries]
+core = "androidx.core:core-ktx:1.7.0"
+lifecycle_runtime = 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+
+[plugins]
+application = { id = "com.android.application", version.ref = "android_version" }
+library = { id = "com.android.library", version.ref = "android_version" }
+
+[bundles]
+androidx = ["core", "lifecycle_runtime"]

@@ -1,0 +1,8 @@
+[versions]
+kotlin_version = "1.7.10"
+
+[libraries]
+serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin_version" }
+
+[plugins]
+android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin_version" }
