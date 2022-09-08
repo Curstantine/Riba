@@ -8,7 +8,7 @@ object APIService {
     val mangadex: MangaDexService
 
     init {
-       val retrofitDex = Retrofit.Builder()
+        val retrofitDex = Retrofit.Builder()
             .baseUrl("https://api.mangadex.org/")
             .addConverterFactory(MoshiConverterFactory.create())
             .build()

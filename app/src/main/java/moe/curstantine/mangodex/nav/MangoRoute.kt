@@ -6,9 +6,10 @@ enum class RouteType {
 }
 
 sealed class MangoRoute(val path: String, val routeType: RouteType) {
-    object Home : MangoRoute( "home", RouteType.Default)
-    object Search : MangoRoute( "search", RouteType.Default)
-    object Library : MangoRoute( "library", RouteType.Default)
+    object Home : MangoRoute("home", RouteType.Default)
+    object Search : MangoRoute("search", RouteType.Default)
+    object Library : MangoRoute("library", RouteType.Default)
+    object Settings : MangoRoute("settings", RouteType.Empty)
 
     companion object {
         fun fromPath(path: String): MangoRoute {
@@ -16,6 +17,7 @@ sealed class MangoRoute(val path: String, val routeType: RouteType) {
                 Home.path -> Home
                 Search.path -> Search
                 Library.path -> Library
+                Settings.path -> Settings
                 else -> Home
             }
         }

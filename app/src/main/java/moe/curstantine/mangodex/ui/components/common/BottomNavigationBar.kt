@@ -52,7 +52,6 @@ sealed class MangoNavigationBarItem(
         label = { Text(stringResource(R.string.library)) },
     )
 
-
     companion object {
         fun values(): List<MangoNavigationBarItem> {
             return listOf(Home, Library, Search)

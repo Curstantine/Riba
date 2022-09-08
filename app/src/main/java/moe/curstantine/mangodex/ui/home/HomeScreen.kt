@@ -16,6 +16,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.api.APIService
+import moe.curstantine.mangodex.api.mangadex.models.DexEntityType
+import moe.curstantine.mangodex.api.mangadex.models.DexMangaAttributes
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.ui.components.common.FlexibleIndicator
 import moe.curstantine.mangodex.ui.manga.MangaCard
@@ -28,13 +30,20 @@ fun HomeScreen(mangoNavigator: MangoNavigator) {
     val mdListData = MutableLiveData<List<MDListCardData>>()
 
     LaunchedEffect(Unit, block = {
-        val mango = APIService.mangadex.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192")
-        seasonalManga.value = listOf(
+        val seasonalList = APIService.mangadex.getMDList("7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9")
+
+        val seasonalIds = seasonalList.data.relationships
+            .filter { relay -> relay.type == DexEntityType.Manga }
+            .map { relay -> relay.id }
+
+        val seasonalTitles = APIService.mangadex.getMangaList(seasonalIds)
+
+        seasonalManga.value = seasonalTitles.data.map {
             MangaCardData(
-                mango.data.id,
-                mango.data.attributes.title.english
+                it.id,
+                it.attributes.title.english
             )
-        )
+        }
     })
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
