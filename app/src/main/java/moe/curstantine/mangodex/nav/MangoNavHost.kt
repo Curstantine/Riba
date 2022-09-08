@@ -5,9 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import moe.curstantine.mangodex.ui.screens.home.HomeScreen
-import moe.curstantine.mangodex.ui.screens.library.LibraryScreen
-import moe.curstantine.mangodex.ui.screens.search.SearchScreen
+import moe.curstantine.mangodex.ui.home.HomeScreen
+import moe.curstantine.mangodex.ui.library.LibraryScreen
+import moe.curstantine.mangodex.ui.search.SearchScreen
 
 @Composable
 fun MangoNavHost(mangoNavigator: MangoNavigator, modifier: Modifier) {

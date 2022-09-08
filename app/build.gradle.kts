@@ -69,11 +69,15 @@ android {
 
 dependencies {
     implementation(androidx.bundles.androidx)
+
     implementation(compose.bundles.accompanist)
     implementation(compose.bundles.activity)
-    implementation(compose.bundles.ui)
+    implementation(compose.bundles.livedata)
     implementation(compose.bundles.material)
     implementation(compose.bundles.navigation)
+    implementation(compose.bundles.ui)
+
+    implementation(external.bundles.retrofit)
 }
 
 tasks {

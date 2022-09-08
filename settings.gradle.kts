@@ -32,6 +32,9 @@ dependencyResolutionManagement {
         create("compose") {
             from(files("gradle/compose.toml"))
         }
+        create("external") {
+            from(files("gradle/external.toml"))
+        }
     }
 }
 rootProject.name = "MangoDex"

@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.ui.screens.library
+package moe.curstantine.mangodex.ui.search
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import moe.curstantine.mangodex.nav.MangoNavigator
 
 @Composable
-fun LibraryScreen(mangoNavigator: MangoNavigator) {
+fun SearchScreen(mangoNavigator: MangoNavigator) {
     Column() {
-        Text("Library")
+        Text("Search")
     }
 }
