@@ -9,6 +9,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.nav.MangoRoute
 
@@ -35,19 +37,19 @@ sealed class MangoNavigationBarItem(
     object Home : MangoNavigationBarItem(
         route = MangoRoute.Home,
         icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
-        label = { Text("Home") },
+        label = { Text(stringResource(R.string.home)) },
     )
 
     object Search : MangoNavigationBarItem(
         route = MangoRoute.Search,
         icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
-        label = { Text("Search") },
+        label = { Text(stringResource(R.string.search)) },
     )
 
     object Library : MangoNavigationBarItem(
         route = MangoRoute.Library,
         icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
-        label = { Text("Library") },
+        label = { Text(stringResource(R.string.library)) },
     )
 
 
