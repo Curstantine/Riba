@@ -53,7 +53,7 @@ sealed class MangoNavigationBarItem(
 
     companion object {
         fun values(): List<MangoNavigationBarItem> {
-            return listOf(Home, Search, Library)
+            return listOf(Home, Library, Search)
         }
     }
 }
