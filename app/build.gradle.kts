@@ -32,11 +32,13 @@ android {
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
+            isShrinkResources = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
     }
@@ -71,6 +73,7 @@ dependencies {
     implementation(compose.bundles.activity)
     implementation(compose.bundles.ui)
     implementation(compose.bundles.material)
+    implementation(compose.bundles.navigation)
 }
 
 tasks {

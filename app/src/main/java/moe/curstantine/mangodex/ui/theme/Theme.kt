@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.accompanist.systemuicontroller.SystemUiController
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -23,6 +23,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun MangoDexTheme(
+    systemUiController: SystemUiController,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -37,7 +38,6 @@ fun MangoDexTheme(
     }
 
     val view = LocalView.current
-    val systemUiController = rememberSystemUiController()
 
     if (!view.isInEditMode) {
         DisposableEffect(systemUiController, darkTheme.not()) {
