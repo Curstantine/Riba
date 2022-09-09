@@ -1,6 +1,6 @@
 package moe.curstantine.mangodex.api.mangodex
 
-interface Error {
+interface InternalError {
     val humanString: String
     val additionalInfo: String?
 }

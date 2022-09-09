@@ -1,19 +1,19 @@
 package moe.curstantine.mangodex.api.mangadex
 
-import moe.curstantine.mangodex.api.mangodex.Error
+import moe.curstantine.mangodex.api.mangodex.InternalError
 
-enum class DexError(
+enum class DexInternalError(
     override val humanString: String,
     override val additionalInfo: String? = null,
-) : Error {
+) : InternalError {
     Unknown("Oof, came across an unknown error while trying to reach MangaDex!"),
     HTTP503("MangaDex servers are down for maintenance!", "Status Code: 503");
 
     companion object {
-        fun fromHTTP(code: Int): DexError {
+        fun fromHTTP(code: Int): DexInternalError {
             return when (code) {
-                503 -> DexError.HTTP503
-                else -> DexError.Unknown
+                503 -> DexInternalError.HTTP503
+                else -> DexInternalError.Unknown
             }
         }
     }

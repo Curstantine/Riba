@@ -7,11 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import moe.curstantine.mangodex.api.mangadex.models.DexMangaAttributes
 
 @Composable
-fun MangaCard(data: MangaCardData, onClick: (MangaCardData) -> Unit) {
+fun MangaCard(manga: DexMangaAttributes, onClick: (DexMangaAttributes) -> Unit) {
     Column(
         Modifier
             .width(120.dp)
@@ -19,7 +19,7 @@ fun MangaCard(data: MangaCardData, onClick: (MangaCardData) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         OutlinedCard(
-            onClick = { onClick.invoke(data) },
+            onClick = { onClick.invoke(manga) },
             modifier = Modifier
                 .height(170.dp)
                 .fillMaxWidth(),
@@ -27,18 +27,10 @@ fun MangaCard(data: MangaCardData, onClick: (MangaCardData) -> Unit) {
         )
 
         Text(
-            text = data.title,
+            text = manga.title.english,
             maxLines = 2,
             style = MaterialTheme.typography.bodySmall,
             overflow = TextOverflow.Ellipsis
         )
     }
 }
-
-@Preview
-@Composable
-fun MangaCardPreview() {
-    MangaCard(data = MangaCardData(id = "1", title = "Manga Title")) {}
-}
-
-data class MangaCardData(val id: String, val title: String)

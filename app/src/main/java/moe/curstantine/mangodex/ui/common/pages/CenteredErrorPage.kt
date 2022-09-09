@@ -14,11 +14,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.curstantine.mangodex.api.mangadex.DexConstants
-import moe.curstantine.mangodex.api.mangadex.DexError
-import moe.curstantine.mangodex.api.mangodex.Error
+import moe.curstantine.mangodex.api.mangadex.DexInternalError
+import moe.curstantine.mangodex.api.mangodex.InternalError
 
 @Composable
-fun CenteredErrorPage(error: Error) {
+fun CenteredErrorPage(internalError: InternalError) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -28,20 +28,20 @@ fun CenteredErrorPage(error: Error) {
     ) {
         Text(text = ":(", style = MaterialTheme.typography.displayMedium)
         Text(
-            text = error.humanString,
+            text = internalError.humanString,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
 
-        if (error.additionalInfo != null) {
+        if (internalError.additionalInfo != null) {
             Text(
-                text = error.additionalInfo!!,
+                text = internalError.additionalInfo!!,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center
             )
         }
 
-        if (error is DexError) {
+        if (internalError is DexInternalError) {
             val localCtx = LocalContext.current
             val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.statusPage)) }
 
