@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -16,40 +18,48 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.api.APIService
+import moe.curstantine.mangodex.api.mangadex.DexError
 import moe.curstantine.mangodex.api.mangadex.models.DexEntityType
-import moe.curstantine.mangodex.api.mangadex.models.DexMangaAttributes
 import moe.curstantine.mangodex.nav.MangoNavigator
-import moe.curstantine.mangodex.ui.components.common.FlexibleIndicator
+import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
+import moe.curstantine.mangodex.ui.common.pages.CenteredErrorPage
 import moe.curstantine.mangodex.ui.manga.MangaCard
 import moe.curstantine.mangodex.ui.manga.MangaCardData
 import moe.curstantine.mangodex.ui.mdlist.MDListCardData
+import retrofit2.HttpException
 
 @Composable
 fun HomeScreen(mangoNavigator: MangoNavigator) {
+    val errorState = remember { mutableStateOf<DexError?>(null) }
     val seasonalManga = MutableLiveData<List<MangaCardData>>()
     val mdListData = MutableLiveData<List<MDListCardData>>()
 
     LaunchedEffect(Unit, block = {
-        val seasonalList = APIService.mangadex.getMDList("7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9")
+        try {
+            val seasonalList = APIService.mangadex.getMDList("7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9")
+            val seasonalIds = seasonalList.data.relationships
+                .filter { relay -> relay.type == DexEntityType.Manga }
+                .map { relay -> relay.id }
 
-        val seasonalIds = seasonalList.data.relationships
-            .filter { relay -> relay.type == DexEntityType.Manga }
-            .map { relay -> relay.id }
-
-        val seasonalTitles = APIService.mangadex.getMangaList(seasonalIds)
-
-        seasonalManga.value = seasonalTitles.data.map {
-            MangaCardData(
-                it.id,
-                it.attributes.title.english
-            )
+            val seasonalTitles = APIService.mangadex.getMangaList(seasonalIds)
+            seasonalManga.value = seasonalTitles.data.map {
+                MangaCardData(
+                    it.id,
+                    it.attributes.title.english
+                )
+            }
+        } catch (e: HttpException) {
+            errorState.value = DexError.fromHTTP(e.code())
         }
     })
 
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Seasonal(seasonalManga)
 
-//        RecentlyAdded()
+    if (errorState.value == null) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Seasonal(seasonalManga)
+        }
+    } else {
+        CenteredErrorPage(error = errorState.value!!)
     }
 }
 

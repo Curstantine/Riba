@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.ui.components.common
+package moe.curstantine.mangodex.ui.common.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator

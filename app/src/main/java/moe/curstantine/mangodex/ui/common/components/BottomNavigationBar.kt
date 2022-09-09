@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.ui.components.common
+package moe.curstantine.mangodex.ui.common.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home

@@ -14,7 +14,7 @@ import moe.curstantine.mangodex.nav.MangoNavHost
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.nav.MangoRoute
 import moe.curstantine.mangodex.nav.RouteType
-import moe.curstantine.mangodex.ui.components.common.MangoNavigationBar
+import moe.curstantine.mangodex.ui.common.components.MangoNavigationBar
 import moe.curstantine.mangodex.ui.theme.MangoDexTheme
 
 class MainActivity : ComponentActivity() {
