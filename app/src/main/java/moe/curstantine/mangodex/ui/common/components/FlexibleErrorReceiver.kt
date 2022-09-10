@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.ui.common.pages
+package moe.curstantine.mangodex.ui.common.components
 
 import android.content.Intent
 import android.net.Uri
@@ -18,7 +18,10 @@ import moe.curstantine.mangodex.api.mangadex.DexInternalError
 import moe.curstantine.mangodex.api.mangodex.InternalError
 
 @Composable
-fun CenteredErrorPage(internalError: InternalError) {
+fun FlexibleErrorReceiver(internalError: InternalError) {
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -26,17 +29,16 @@ fun CenteredErrorPage(internalError: InternalError) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = ":(", style = MaterialTheme.typography.displayMedium)
         Text(
             text = internalError.humanString,
-            style = MaterialTheme.typography.bodyMedium,
+            style = typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
         if (internalError.additionalInfo != null) {
             Text(
                 text = internalError.additionalInfo!!,
-                style = MaterialTheme.typography.bodySmall,
+                style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
                 textAlign = TextAlign.Center
             )
         }

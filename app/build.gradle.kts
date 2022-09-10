@@ -11,6 +11,7 @@ object AppConfig {
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
 }
 
 android {
@@ -78,6 +79,8 @@ dependencies {
     implementation(compose.bundles.ui)
 
     implementation(external.bundles.retrofit)
+    implementation(external.bundles.moshi)
+    ksp(external.bundles.ksps)
 }
 
 tasks {

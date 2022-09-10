@@ -1,9 +1,15 @@
 [versions]
+moshi_version = "1.14.0"
 retrofit_version = "2.9.0"
 
 [libraries]
+moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi_version" }
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi_version" }
+
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
 retrofit_json = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit_version" }
 
 [bundles]
+ksps = ["moshi-kotlin"]
+moshi = ["moshi"]
 retrofit = ["retrofit", "retrofit_json"]
