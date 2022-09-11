@@ -5,6 +5,8 @@ import com.squareup.moshi.JsonClass
 typealias DexManga = DexResponse<DexMangaAttributes>
 typealias DexMangaCollection = DexCollectionResponse<DexMangaAttributes>
 
+typealias DexMangaData = DexResponseData<DexMangaAttributes>
+
 @JsonClass(generateAdapter = true)
 data class DexMangaAttributes(
     val title: DexLocaleObject,

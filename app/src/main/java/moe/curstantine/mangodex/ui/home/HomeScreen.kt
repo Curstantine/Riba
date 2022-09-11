@@ -70,6 +70,7 @@ class HomeViewModel : ViewModel() {
                     ids = seasonalList.data.data.relationships
                         .filter { relay -> relay.type == DexEntityType.Manga }
                         .map { relay -> relay.id },
+                    includes = listOf(DexEntityType.CoverArt)
                 )
 
                 withContext(Dispatchers.Main) {
@@ -82,7 +83,8 @@ class HomeViewModel : ViewModel() {
     private fun loadRecentlyAddedTitles() {
         viewModelScope.launch(Dispatchers.IO) {
             val recentlyAddedList = APIService.mangadex.getMangaList(
-                sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending)
+                sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
+                includes = listOf(DexEntityType.CoverArt)
             )
 
             withContext(Dispatchers.Main) {
