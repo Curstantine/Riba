@@ -10,6 +10,6 @@ enum class DexQueryOrderValue {
     Descending
 }
 
-enum class DexQueryOrderProperty(val propertyStr: String) {
+enum class DexQueryOrderProperty(val propStr: String) {
     CreatedAt("order[createdAt]")
 }

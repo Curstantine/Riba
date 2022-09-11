@@ -66,10 +66,13 @@ class HomeViewModel : ViewModel() {
             }
 
             if (seasonalList is Result.Success) {
+                val mangaIds = seasonalList.data.data.relationships
+                    .filter { relay -> relay.type == DexEntityType.Manga }
+                    .map { relay -> relay.id }
+
                 val seasonalManga = APIService.mangadex.getMangaList(
-                    ids = seasonalList.data.data.relationships
-                        .filter { relay -> relay.type == DexEntityType.Manga }
-                        .map { relay -> relay.id },
+                    ids = mangaIds,
+                    limit = mangaIds.size,
                     includes = listOf(DexEntityType.CoverArt)
                 )
 

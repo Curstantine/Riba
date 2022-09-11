@@ -24,6 +24,8 @@ class MangaDexHandler(private var service: MangaDexService) {
 
     suspend fun getMangaList(
         ids: List<String>? = null,
+        limit: Int = 10,
+        offset: Int?,
         sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
         includes: List<DexEntityType>? = null,
     ): Result<DexMangaCollection> {
@@ -32,9 +34,10 @@ class MangaDexHandler(private var service: MangaDexService) {
                 Result.Success(
                     service.getMangaList(
                         ids = ids,
+                        limit = limit,
+                        offset = offset,
                         includes = includes,
-                        sort = sort?.let { mapOf(Pair(it.first.propertyStr, it.second)) }
-                            ?: mapOf(),
+                        sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: mapOf(),
                     )
                 )
             } catch (e: Throwable) {
