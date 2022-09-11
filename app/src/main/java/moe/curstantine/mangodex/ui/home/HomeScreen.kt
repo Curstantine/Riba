@@ -13,10 +13,7 @@ import kotlinx.coroutines.withContext
 import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.api.APIService
 import moe.curstantine.mangodex.api.mangadex.DexConstants
-import moe.curstantine.mangodex.api.mangadex.models.DexEntityType
-import moe.curstantine.mangodex.api.mangadex.models.DexMangaCollection
-import moe.curstantine.mangodex.api.mangadex.models.DexQueryOrderProperty
-import moe.curstantine.mangodex.api.mangadex.models.DexQueryOrderValue
+import moe.curstantine.mangodex.api.mangadex.models.*
 import moe.curstantine.mangodex.api.mangodex.Result
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.ui.manga.MangaCardRow
@@ -55,31 +52,44 @@ class HomeViewModel : ViewModel() {
 
     private fun loadSeasonalTitles() {
         viewModelScope.launch(Dispatchers.IO) {
-            val seasonalList = APIService.mangadex.getMDList(DexConstants.SEASONAL_LIST)
+            lateinit var seasonalTitleIds: List<String>
+            val dbList = APIService.database.list().get(DexConstants.SEASONAL_LIST)
 
-            if (seasonalList is Result.Error) {
-                withContext(Dispatchers.Main) {
-                    seasonalTitles.value = seasonalList
+            if (dbList != null) {
+                seasonalTitleIds = dbList.titles
+            } else {
+                val seasonalList = APIService.mangadex.getMDList(DexConstants.SEASONAL_LIST)
+
+                if (seasonalList is Result.Error) {
+                    withContext(Dispatchers.Main) {
+                        seasonalTitles.value = seasonalList
+                    }
+
+                    return@launch
                 }
 
-                return@launch
-            }
+                if (seasonalList is Result.Success) {
+                    val seasonalData = seasonalList.data.data
+                    seasonalTitleIds = seasonalData.relationships
+                        .filter { relay -> relay.type == DexEntityType.Manga }
+                        .map { relay -> relay.id }
 
-            if (seasonalList is Result.Success) {
-                val mangaIds = seasonalList.data.data.relationships
-                    .filter { relay -> relay.type == DexEntityType.Manga }
-                    .map { relay -> relay.id }
-
-                val seasonalManga = APIService.mangadex.getMangaList(
-                    ids = mangaIds,
-                    limit = mangaIds.size,
-                    includes = listOf(DexEntityType.CoverArt)
-                )
-
-                withContext(Dispatchers.Main) {
-                    seasonalTitles.value = seasonalManga
+                    this.launch {
+                        APIService.database.list().insert(seasonalData.toMangoList())
+                    }
                 }
             }
+
+            val seasonalManga = APIService.mangadex.getMangaList(
+                ids = seasonalTitleIds,
+                limit = seasonalTitleIds.size,
+                includes = listOf(DexEntityType.CoverArt)
+            )
+
+            withContext(Dispatchers.Main) {
+                seasonalTitles.value = seasonalManga
+            }
+
         }
     }
 

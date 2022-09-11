@@ -2,6 +2,7 @@ package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import moe.curstantine.mangodex.api.mangodex.models.MangoList
 
 typealias DexMDList = DexResponse<DexMDListAttributes>
 typealias DexMDListData = DexResponseData<DexMDListAttributes>
@@ -26,3 +27,10 @@ enum class DexMDListVisibility {
         }
     }
 }
+
+fun DexMDListData.toMangoList() = MangoList(
+    id = id,
+    name = attributes.name,
+    visibility = attributes.visibility,
+    titles = relationships.filter { it.type == DexEntityType.Manga }.map { it.id },
+)

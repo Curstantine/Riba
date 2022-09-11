@@ -14,7 +14,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object APIService {
     val mangadex: MangaDexHandler = createDexHandler()
-    private lateinit var database: MangoDatabase
+    lateinit var database: MangoDatabase
 
     fun createMangoDatabase(context: Context) {
         val roomDatabase = Room.databaseBuilder(
