@@ -1,5 +1,6 @@
 package moe.curstantine.mangodex.api
 
+import com.squareup.moshi.Moshi
 import moe.curstantine.mangodex.api.mangadex.DexConstants
 import moe.curstantine.mangodex.api.mangadex.MangaDexHandler
 import moe.curstantine.mangodex.api.mangadex.MangaDexService
@@ -10,10 +11,15 @@ object APIService {
     val mangadex: MangaDexHandler
 
     init {
+        val moshi = Moshi.Builder()
+        for (mismatch in NormalizeMismatchType.mismatches) {
+            moshi.add(mismatch)
+        }
+
         val retrofitDex = Retrofit.Builder()
             .baseUrl(DexConstants.baseApi)
             .addConverterFactory(EnumConverter())
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi.build()))
             .build()
 
         mangadex = MangaDexHandler(retrofitDex.create(MangaDexService::class.java))
