@@ -25,7 +25,7 @@ class MangaDexHandler(private var service: MangaDexService) {
     suspend fun getMangaList(
         ids: List<String>? = null,
         limit: Int = 10,
-        offset: Int?,
+        offset: Int? = null,
         sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
         includes: List<DexEntityType>? = null,
     ): Result<DexMangaCollection> {

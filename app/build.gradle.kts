@@ -77,11 +77,13 @@ dependencies {
     implementation(compose.bundles.material)
     implementation(compose.bundles.navigation)
     implementation(compose.bundles.ui)
+    implementation(compose.bundles.room)
 
     implementation(external.coil)
     implementation(external.bundles.moshi)
     implementation(external.bundles.retrofit)
 
+    ksp(compose.bundles.ksps)
     ksp(external.bundles.ksps)
 }
 

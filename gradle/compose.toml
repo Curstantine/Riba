@@ -4,6 +4,7 @@ compiler_version = "1.3.0"
 compose_version = "1.3.0-beta01"
 material_version = "1.0.0-beta01"
 navigation_version = "2.5.1"
+room_version = "2.4.3"
 
 [libraries]
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "compose_version" }
@@ -23,6 +24,11 @@ ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_version" }
 
+room = { module = "androidx.room:room-runtime", version.ref = "room_version" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version" }
+room-ksp = { module = "androidx.room:room-compiler", version.ref = "room_version" }
+
+
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-systemuicontroller"]
 activity = ["activity-compose"]
@@ -30,3 +36,5 @@ livedata = ["livedata"]
 material = ["material", "material-icons-extended"]
 navigation = ["navigation"]
 ui = ["ui", "ui-tooling", "ui-tooling-preview"]
+room = ["room", "room-ktx"]
+ksps = ["room-ksp"]

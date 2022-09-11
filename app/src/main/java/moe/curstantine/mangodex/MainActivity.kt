@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import moe.curstantine.mangodex.api.APIService
 import moe.curstantine.mangodex.nav.MangoNavHost
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.nav.MangoRoute
@@ -20,6 +21,8 @@ import moe.curstantine.mangodex.ui.theme.MangoDexTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        APIService.createMangoDatabase(applicationContext)
+
         setContent {
             val systemUiController = rememberSystemUiController()
             val navHostController = rememberNavController()
