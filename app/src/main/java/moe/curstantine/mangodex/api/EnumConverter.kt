@@ -4,6 +4,9 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
+/**
+ * A [Converter.Factory] which converts enums to their string representation.
+ */
 @Target(AnnotationTarget.FIELD)
 annotation class EnumValue(val value: String)
 

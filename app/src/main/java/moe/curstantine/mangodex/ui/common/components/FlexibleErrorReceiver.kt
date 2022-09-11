@@ -43,14 +43,19 @@ fun FlexibleErrorReceiver(internalError: InternalError) {
             )
         }
 
-        if (internalError is DexInternalError) {
-            val localCtx = LocalContext.current
-            val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.statusPage)) }
+        Box(Modifier.height(16.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
 
-            Box(Modifier.height(16.dp))
-            FilledTonalButton(onClick = { localCtx.startActivity(intent) }) {
-                Text("Status Page")
+            if (internalError is DexInternalError) {
+                val localCtx = LocalContext.current
+                val intent =
+                    remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.statusPage)) }
+
+                FilledTonalButton(onClick = { localCtx.startActivity(intent) }) {
+                    Text("Status Page")
+                }
             }
+
         }
     }
 }

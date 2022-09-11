@@ -2,15 +2,7 @@ package moe.curstantine.mangodex.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.*
@@ -27,9 +19,7 @@ import moe.curstantine.mangodex.api.mangadex.models.DexQueryOrderProperty
 import moe.curstantine.mangodex.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.mangodex.api.mangodex.Result
 import moe.curstantine.mangodex.nav.MangoNavigator
-import moe.curstantine.mangodex.ui.common.components.FlexibleErrorReceiver
-import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
-import moe.curstantine.mangodex.ui.manga.MangaCard
+import moe.curstantine.mangodex.ui.manga.MangaCardRow
 
 @Composable
 fun HomeScreen(
@@ -37,81 +27,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = HomeScreenViewModelFactory())
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Seasonal(viewModel.getSeasonalTitles())
-        RecentlyAdded(viewModel.getRecentlyAddedTitles())
-    }
-
-}
-
-@Composable
-private fun Seasonal(data: LiveData<Result<DexMangaCollection>>) {
-    val result by data.observeAsState()
-
-    Column(
-        Modifier
-            .padding(horizontal = 12.dp)
-            .height(210.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        Text(
-            stringResource(R.string.seasonal),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        if (result == null) {
-            FlexibleIndicator(height = 210.dp)
-        }
-
-        if (result is Result.Error) {
-            FlexibleErrorReceiver((result as Result.Error).error)
-        }
-
-        if (result is Result.Success) {
-            val mangaList = (result as Result.Success).data.data
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(mangaList.size) { index ->
-                    MangaCard(mangaList.elementAt(index).attributes, onClick = {})
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecentlyAdded(data: LiveData<Result<DexMangaCollection>>) {
-    val result by data.observeAsState()
-
-    Column(
-        Modifier
-            .padding(horizontal = 12.dp)
-            .height(210.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        Text(
-            stringResource(R.string.recently_added),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        if (result == null) {
-            FlexibleIndicator(height = 210.dp)
-        }
-
-        if (result is Result.Error) {
-            FlexibleErrorReceiver((result as Result.Error).error)
-        }
-
-        if (result is Result.Success) {
-            val mangaList = (result as Result.Success).data.data
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(mangaList.size) { index ->
-                    MangaCard(mangaList.elementAt(index).attributes, onClick = {})
-                }
-            }
-        }
+        MangaCardRow(viewModel.getSeasonalTitles(), stringResource(R.string.seasonal))
+        MangaCardRow(viewModel.getRecentlyAddedTitles(), stringResource(R.string.recently_added))
     }
 }
 

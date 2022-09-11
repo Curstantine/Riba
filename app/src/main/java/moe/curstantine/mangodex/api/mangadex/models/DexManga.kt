@@ -1,8 +1,11 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
+import com.squareup.moshi.JsonClass
+
 typealias DexManga = DexResponse<DexMangaAttributes>
 typealias DexMangaCollection = DexCollectionResponse<DexMangaAttributes>
 
+@JsonClass(generateAdapter = true)
 data class DexMangaAttributes(
     val title: DexLocaleObject,
     val altTitles: List<DexLocaleObject>,

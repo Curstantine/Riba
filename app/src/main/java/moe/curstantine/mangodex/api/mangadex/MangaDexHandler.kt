@@ -1,11 +1,13 @@
 package moe.curstantine.mangodex.api.mangadex
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import moe.curstantine.mangodex.api.mangadex.models.*
 import moe.curstantine.mangodex.api.mangodex.Result
 import retrofit2.HttpException
+import java.util.*
 
 class MangaDexHandler(private var service: MangaDexService) {
     private val adapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
@@ -14,8 +16,8 @@ class MangaDexHandler(private var service: MangaDexService) {
         return contextualInvoke {
             try {
                 Result.Success(service.getManga(id))
-            } catch (e: HttpException) {
-                Result.Error(parseException(e))
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
             }
         }
     }
@@ -33,8 +35,8 @@ class MangaDexHandler(private var service: MangaDexService) {
                             ?: mapOf(),
                     )
                 )
-            } catch (e: HttpException) {
-                Result.Error(parseException(e))
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
             }
         }
     }
@@ -43,8 +45,8 @@ class MangaDexHandler(private var service: MangaDexService) {
         return contextualInvoke {
             try {
                 Result.Success(service.getMDList(id))
-            } catch (e: HttpException) {
-                Result.Error(parseException(e))
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
             }
         }
     }
@@ -55,12 +57,27 @@ class MangaDexHandler(private var service: MangaDexService) {
         }
     }
 
-    private fun parseException(e: HttpException): DexInternalError {
+    private fun handleException(e: Throwable): DexInternalError {
+        return when (e) {
+            is HttpException -> parseHttpException(e)
+            is JsonDataException -> DexInternalError("Invalid JSON response", e.message)
+            else -> DexErrorFactory.Unknown.error
+        }
+    }
+
+    private fun parseHttpException(e: HttpException): DexInternalError {
         val errorBody = e.response()?.errorBody()?.source()?.let { adapter.fromJson(it) }
 
         return if (errorBody != null) {
             val dexError = errorBody.errors.elementAt(0)
-            DexInternalError(dexError.title, dexError.detail)
+
+            val humanTitle = dexError.title.split("_").map { str ->
+                str.replaceFirstChar {
+                    it.titlecase(Locale.getDefault())
+                }
+            }
+
+            DexInternalError(humanTitle.joinToString(" "), dexError.detail)
         } else {
             DexErrorFactory.fromStatusCode(e.code())
         }

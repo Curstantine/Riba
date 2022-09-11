@@ -1,8 +1,9 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
-enum class DexStatus {
+enum class DexResult {
     @field:Json(name = "ok")
     Ok,
 
@@ -38,24 +39,34 @@ enum class DexEntityType {
     CoverArt,
 }
 
+@JsonClass(generateAdapter = true)
 data class DexLocaleObject(
     @field:Json(name = "en")
-    val english: String,
+    val english: String?,
+
+    @field:Json(name = "ja")
+    val japanese: String?,
+
+    @field:Json(name = "ja-ro")
+    val japaneseRomanized: String?,
 )
 
+@JsonClass(generateAdapter = true)
 data class DexRelationship(
     val id: String,
     val type: DexEntityType,
 )
 
+@JsonClass(generateAdapter = true)
 data class DexResponse<T>(
-    val status: DexStatus,
+    val result: DexResult,
     val response: DexResponseType,
     val data: DexResponseData<T>,
 )
 
+@JsonClass(generateAdapter = true)
 data class DexCollectionResponse<T>(
-    val status: DexStatus,
+    val result: DexResult,
     val response: DexResponseType,
     val data: List<DexResponseData<T>>,
     val limit: Int,
@@ -63,6 +74,7 @@ data class DexCollectionResponse<T>(
     val total: Int,
 )
 
+@JsonClass(generateAdapter = true)
 data class DexResponseData<T>(
     val id: String,
     val type: DexEntityType,

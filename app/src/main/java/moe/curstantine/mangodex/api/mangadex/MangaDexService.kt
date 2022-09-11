@@ -6,6 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
+@JvmSuppressWildcards
 interface MangaDexService {
     @GET("/manga/{id}")
     suspend fun getManga(@Path("id") id: String): DexManga

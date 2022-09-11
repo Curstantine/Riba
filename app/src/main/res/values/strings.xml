@@ -9,4 +9,6 @@
     <string name="seasonal">Seasonal</string>
     <string name="recently_added">Recently Added</string>
     <string name="md_lists">MDLists</string>
+
+    <string name="no_title">No Title</string>
 </resources>

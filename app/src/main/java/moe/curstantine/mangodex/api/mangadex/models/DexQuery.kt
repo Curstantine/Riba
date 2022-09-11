@@ -6,7 +6,7 @@ enum class DexQueryOrderValue {
     @EnumValue("asc")
     Ascending,
 
-    @EnumValue("dsc")
+    @EnumValue("desc")
     Descending
 }
 
