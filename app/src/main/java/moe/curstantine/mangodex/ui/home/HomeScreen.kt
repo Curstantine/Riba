@@ -55,7 +55,7 @@ class HomeViewModel : ViewModel() {
 
     private fun loadSeasonalTitles() {
         viewModelScope.launch(Dispatchers.IO) {
-            val seasonalList = APIService.mangadex.getMDList(DexConstants.seasonalList)
+            val seasonalList = APIService.mangadex.getMDList(DexConstants.SEASONAL_LIST)
 
             if (seasonalList is Result.Error) {
                 withContext(Dispatchers.Main) {

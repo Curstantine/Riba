@@ -3,13 +3,16 @@ moshi_version = "1.14.0"
 retrofit_version = "2.9.0"
 
 [libraries]
+coil = "io.coil-kt:coil-compose:2.2.1"
+
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi_version" }
+moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi_version" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi_version" }
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
 retrofit_json = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit_version" }
 
 [bundles]
+moshi = ["moshi", "moshi-adapters"]
 ksps = ["moshi-kotlin"]
-moshi = ["moshi"]
 retrofit = ["retrofit", "retrofit_json"]

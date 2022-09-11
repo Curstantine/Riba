@@ -11,3 +11,10 @@ data class DexMangaAttributes(
     val altTitles: List<DexLocaleObject>,
     val description: DexLocaleObject,
 )
+
+@JsonClass(generateAdapter = true)
+data class DexRelatedManga(
+    override val id: String,
+    override val type: DexEntityType,
+    val related: String?,
+) : DexRelationship

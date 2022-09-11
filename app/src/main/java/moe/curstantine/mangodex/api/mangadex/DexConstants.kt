@@ -1,9 +1,16 @@
 package moe.curstantine.mangodex.api.mangadex
 
 object DexConstants {
-    const val baseApi = "https://api.mangadex.org"
-    const val baseSite = "https://mangadex.org"
-    const val statusPage = "https://status.mangadex.org"
+    const val BASE_SITE = "https://mangadex.org"
+    const val BASE_API = "https://api.mangadex.org"
+    const val STATUS_PAGE = "https://status.mangadex.org"
 
-    const val seasonalList = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9"
+    /**
+     * Covers should follow the `COVER_URL/manga-id/cover-filename
+     *
+     * For thumbnail sizes, `COVER_URL/manga-id/cover-filename.{256, 512}.jpg`
+     */
+    const val COVER_URL = "https://uploads.mangadex.org/covers/"
+
+    const val SEASONAL_LIST = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9"
 }

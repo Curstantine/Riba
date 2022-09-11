@@ -24,13 +24,15 @@ class MangaDexHandler(private var service: MangaDexService) {
 
     suspend fun getMangaList(
         ids: List<String>? = null,
-        sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null
+        sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
+        includes: List<DexEntityType>? = null,
     ): Result<DexMangaCollection> {
         return contextualInvoke {
             try {
                 Result.Success(
                     service.getMangaList(
                         ids = ids,
+                        includes = includes,
                         sort = sort?.let { mapOf(Pair(it.first.propertyStr, it.second)) }
                             ?: mapOf(),
                     )

@@ -49,7 +49,7 @@ fun FlexibleErrorReceiver(internalError: InternalError) {
             if (internalError is DexInternalError) {
                 val localCtx = LocalContext.current
                 val intent =
-                    remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.statusPage)) }
+                    remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }
 
                 FilledTonalButton(onClick = { localCtx.startActivity(intent) }) {
                     Text("Status Page")

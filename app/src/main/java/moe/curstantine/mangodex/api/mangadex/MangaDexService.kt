@@ -14,7 +14,8 @@ interface MangaDexService {
     @GET("/manga")
     suspend fun getMangaList(
         @Query("ids[]") ids: List<String>?,
-        @QueryMap sort: Map<String, DexQueryOrderValue>?
+        @Query("includes[]") includes: List<DexEntityType>?,
+        @QueryMap sort: Map<String, DexQueryOrderValue>?,
     ): DexMangaCollection
 
     @GET("/list/{id}")

@@ -20,23 +20,46 @@ enum class DexResponseType {
 }
 
 enum class DexEntityType {
-    @field:Json(name = "manga")
-    Manga,
-
-    @field:Json(name = "custom_list")
-    CustomList,
-
-    @field:Json(name = "user")
-    User,
-
     @field:Json(name = "author")
     Author,
 
     @field:Json(name = "artist")
     Artist,
 
+    @field:Json(name = "chapter")
+    Chapter,
+
+    @field:Json(name = "custom_list")
+    CustomList,
+
     @field:Json(name = "cover_art")
     CoverArt,
+
+    @field:Json(name = "user")
+    User,
+
+    @field:Json(name = "tag")
+    Tag,
+
+    @field:Json(name = "manga")
+    Manga,
+
+    @field:Json(name = "scanlation_group")
+    ScanlationGroup;
+
+    override fun toString(): String {
+        return when (this) {
+            Author -> "author"
+            Artist -> "artist"
+            Chapter -> "chapter"
+            CustomList -> "custom_list"
+            CoverArt -> "cover_art"
+            User -> "user"
+            Tag -> "tag"
+            Manga -> "manga"
+            ScanlationGroup -> "scanlation_group"
+        }
+    }
 }
 
 @JsonClass(generateAdapter = true)
@@ -51,11 +74,17 @@ data class DexLocaleObject(
     val japaneseRomanized: String?,
 )
 
+interface DexRelationship {
+    val id: String
+    val type: DexEntityType
+}
+
 @JsonClass(generateAdapter = true)
-data class DexRelationship(
-    val id: String,
-    val type: DexEntityType,
-)
+data class DexRelationshipImpl(
+    override val id: String,
+    override val type: DexEntityType
+) : DexRelationship
+
 
 @JsonClass(generateAdapter = true)
 data class DexResponse<T>(

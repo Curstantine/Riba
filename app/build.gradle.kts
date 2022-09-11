@@ -78,8 +78,10 @@ dependencies {
     implementation(compose.bundles.navigation)
     implementation(compose.bundles.ui)
 
-    implementation(external.bundles.retrofit)
+    implementation(external.coil)
     implementation(external.bundles.moshi)
+    implementation(external.bundles.retrofit)
+
     ksp(external.bundles.ksps)
 }
 

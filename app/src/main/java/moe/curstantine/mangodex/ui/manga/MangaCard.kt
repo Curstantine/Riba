@@ -33,7 +33,9 @@ fun MangaCard(manga: DexMangaAttributes, onClick: (DexMangaAttributes) -> Unit) 
             modifier = Modifier
                 .height(170.dp)
                 .fillMaxWidth(),
-            content = {}
+            content = {
+
+            }
         )
 
         Text(
