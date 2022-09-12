@@ -11,5 +11,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "covers")
 data class MangoCover(
     @PrimaryKey val id: String,
-    @ColumnInfo val uri: String,
+    @ColumnInfo val fileName: String?,
 )

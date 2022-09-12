@@ -2,20 +2,30 @@ package moe.curstantine.mangodex.api.mangadex
 
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.mangodex.api.mangadex.models.*
 import moe.curstantine.mangodex.api.mangodex.Result
 import retrofit2.HttpException
+import java.sql.SQLException
 import java.util.*
 
-class MangaDexHandler(private var service: MangaDexService) {
+// TODO: Remove database and move to database handler as param
+class MangaDexHandler(
+    private var service: MangaDexService,
+    private var databaseHandler: MangaDexDatabaseHandler
+) {
     private val adapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
 
     suspend fun getManga(id: String): Result<DexManga> {
-        return contextualInvoke {
+        return contextualInvoke { scope ->
             try {
-                Result.Success(service.getManga(id))
+                val response = service.getManga(id)
+                scope.launch { databaseHandler.insertManga(response.data) }
+
+                Result.Success(response)
             } catch (e: Throwable) {
                 Result.Error(handleException(e))
             }
@@ -29,17 +39,19 @@ class MangaDexHandler(private var service: MangaDexService) {
         sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
         includes: List<DexEntityType>? = null,
     ): Result<DexMangaCollection> {
-        return contextualInvoke {
+        return contextualInvoke { scope ->
             try {
-                Result.Success(
-                    service.getMangaList(
-                        ids = ids,
-                        limit = limit,
-                        offset = offset,
-                        includes = includes,
-                        sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: mapOf(),
-                    )
+                val response = service.getMangaList(
+                    ids = ids,
+                    limit = limit,
+                    offset = offset,
+                    includes = includes,
+                    sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: mapOf()
                 )
+
+                scope.launch { response.data.map { databaseHandler.insertManga(it) } }
+
+                Result.Success(response)
             } catch (e: Throwable) {
                 Result.Error(handleException(e))
             }
@@ -49,16 +61,19 @@ class MangaDexHandler(private var service: MangaDexService) {
     suspend fun getMDList(id: String): Result<DexMDList> {
         return contextualInvoke {
             try {
-                Result.Success(service.getMDList(id))
+                val response = service.getMDList(id)
+                it.launch { databaseHandler.insertMDList(response.data) }
+
+                Result.Success(response)
             } catch (e: Throwable) {
                 Result.Error(handleException(e))
             }
         }
     }
 
-    private suspend fun <T> contextualInvoke(call: suspend () -> T): T {
+    private suspend fun <T> contextualInvoke(call: suspend (it: CoroutineScope) -> T): T {
         return withContext(Dispatchers.IO) {
-            call.invoke()
+            call.invoke(this)
         }
     }
 
@@ -66,7 +81,8 @@ class MangaDexHandler(private var service: MangaDexService) {
         return when (e) {
             is HttpException -> parseHttpException(e)
             is JsonDataException -> DexInternalError("Invalid JSON response", e.message)
-            else -> DexErrorFactory.Unknown.error
+            is SQLException -> DexInternalError("Database error", e.message)
+            else -> DexInternalError("Unknown error", e.message)
         }
     }
 

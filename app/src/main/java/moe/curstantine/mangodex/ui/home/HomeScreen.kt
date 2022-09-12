@@ -15,6 +15,7 @@ import moe.curstantine.mangodex.api.APIService
 import moe.curstantine.mangodex.api.mangadex.DexConstants
 import moe.curstantine.mangodex.api.mangadex.models.*
 import moe.curstantine.mangodex.api.mangodex.Result
+import moe.curstantine.mangodex.api.mangodex.models.MangoFulfilledManga
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.ui.manga.MangaCardRow
 
@@ -25,40 +26,47 @@ fun HomeScreen(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         MangaCardRow(viewModel.getSeasonalTitles(), stringResource(R.string.seasonal))
-        MangaCardRow(viewModel.getRecentlyAddedTitles(), stringResource(R.string.recently_added))
+//        MangaCardRow(viewModel.getRecentlyAddedTitles(), stringResource(R.string.recently_added))
     }
 }
 
 class HomeViewModel : ViewModel() {
-    private val seasonalTitles: MutableLiveData<Result<DexMangaCollection>> by lazy {
-        MutableLiveData<Result<DexMangaCollection>>().also {
+    private val seasonalTitles: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
+        MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
             loadSeasonalTitles()
         }
     }
 
-    private val recentlyAddedTitles: MutableLiveData<Result<DexMangaCollection>> by lazy {
-        MutableLiveData<Result<DexMangaCollection>>().also {
+    private val recentlyAddedTitles: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
+        MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
             loadRecentlyAddedTitles()
         }
     }
 
-    fun getSeasonalTitles(): LiveData<Result<DexMangaCollection>> {
+    fun getSeasonalTitles(): LiveData<Result<List<MangoFulfilledManga>>> {
         return seasonalTitles
     }
 
-    fun getRecentlyAddedTitles(): LiveData<Result<DexMangaCollection>> {
+    fun getRecentlyAddedTitles(): LiveData<Result<List<MangoFulfilledManga>>> {
         return recentlyAddedTitles
     }
 
     private fun loadSeasonalTitles() {
         viewModelScope.launch(Dispatchers.IO) {
             lateinit var seasonalTitleIds: List<String>
-            val dbList = APIService.database.list().get(DexConstants.SEASONAL_LIST)
+            lateinit var seasonalManga: Result<List<MangoFulfilledManga>>
 
-            if (dbList != null) {
-                seasonalTitleIds = dbList.titles
+            val localSeasonalList = APIService.database.list().get(DexConstants.SEASONAL_LIST)
+            if (localSeasonalList != null) {
+                seasonalTitleIds = localSeasonalList.titles
             } else {
                 val seasonalList = APIService.mangadex.getMDList(DexConstants.SEASONAL_LIST)
+
+                if (seasonalList is Result.Success) {
+                    seasonalTitleIds = seasonalList.data.data.relationships
+                        .filter { relay -> relay.type == DexEntityType.Manga }
+                        .map { relay -> relay.id }
+                }
 
                 if (seasonalList is Result.Error) {
                     withContext(Dispatchers.Main) {
@@ -67,24 +75,39 @@ class HomeViewModel : ViewModel() {
 
                     return@launch
                 }
-
-                if (seasonalList is Result.Success) {
-                    val seasonalData = seasonalList.data.data
-                    seasonalTitleIds = seasonalData.relationships
-                        .filter { relay -> relay.type == DexEntityType.Manga }
-                        .map { relay -> relay.id }
-
-                    this.launch {
-                        APIService.database.list().insert(seasonalData.toMangoList())
-                    }
-                }
             }
 
-            val seasonalManga = APIService.mangadex.getMangaList(
-                ids = seasonalTitleIds,
-                limit = seasonalTitleIds.size,
-                includes = listOf(DexEntityType.CoverArt)
-            )
+            val localSeasonalManga = APIService.database.manga().get(seasonalTitleIds)
+            if (localSeasonalManga.isNotEmpty()) {
+                seasonalManga = Result.Success(localSeasonalManga.map {
+                    MangoFulfilledManga(
+                        manga = it,
+                        cover = it.coverId?.let { coverId ->
+                            APIService.database.cover().get(coverId)
+                        },
+                        authors = null,
+                        artists = null,
+                    )
+                })
+            } else {
+                val serverSeasonalManga = APIService.mangadex.getMangaList(
+                    ids = seasonalTitleIds,
+                    includes = listOf(DexEntityType.CoverArt)
+                )
+
+                if (serverSeasonalManga is Result.Success) {
+                    seasonalManga = Result.Success(serverSeasonalManga.data.data.map { manga ->
+                        MangoFulfilledManga(
+                            manga = manga.toMangoManga(),
+                            cover = manga.relationships
+                                .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }
+                                ?.let { (it as DexRelatedCover).toMangoCover() },
+                            authors = null,
+                            artists = null,
+                        )
+                    })
+                }
+            }
 
             withContext(Dispatchers.Main) {
                 seasonalTitles.value = seasonalManga
@@ -101,7 +124,8 @@ class HomeViewModel : ViewModel() {
             )
 
             withContext(Dispatchers.Main) {
-                recentlyAddedTitles.value = recentlyAddedList
+                throw NotImplementedError()
+//                recentlyAddedTitles.value = recentlyAddedList
             }
         }
     }

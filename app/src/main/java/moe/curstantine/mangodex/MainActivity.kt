@@ -21,7 +21,7 @@ import moe.curstantine.mangodex.ui.theme.MangoDexTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        APIService.createMangoDatabase(applicationContext)
+        APIService.initialize(applicationContext)
 
         setContent {
             val systemUiController = rememberSystemUiController()

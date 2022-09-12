@@ -11,6 +11,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "artists")
 data class MangoArtist(
     @PrimaryKey val id: String,
-    @ColumnInfo val name: String,
+    @ColumnInfo val name: String?,
     @ColumnInfo val description: String?
 )

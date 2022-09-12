@@ -19,8 +19,8 @@ import moe.curstantine.mangodex.api.mangodex.models.*
 )
 @TypeConverters(Converters::class)
 abstract class MangoDatabase : RoomDatabase() {
-    abstract fun artist(): AuthorDao
-    abstract fun author(): ArtistDao
+    abstract fun artist(): ArtistDao
+    abstract fun author(): AuthorDao
     abstract fun cover(): CoverDao
     abstract fun list(): ListDao
     abstract fun manga(): MangaDao

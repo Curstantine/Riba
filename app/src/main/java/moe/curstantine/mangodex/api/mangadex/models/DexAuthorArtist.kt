@@ -1,6 +1,8 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.JsonClass
+import moe.curstantine.mangodex.api.mangodex.models.MangoArtist
+import moe.curstantine.mangodex.api.mangodex.models.MangoAuthor
 
 typealias DexAuthorArtist = DexResponse<DexAuthorArtistAttributes>
 typealias DexAuthorArtistCollection = DexCollectionResponse<DexAuthorArtistAttributes>
@@ -21,4 +23,29 @@ data class DexRelatedAuthorArtist(
     override val id: String,
     override val type: DexEntityType,
     val attributes: DexAuthorArtistAttributes?
-) : DexRelationship
+) : DexRelationship {
+    fun toMangoArtist(): MangoArtist = MangoArtist(
+        id = id,
+        name = attributes?.name,
+        description = attributes?.biography?.english,
+    )
+
+    fun toMangoAuthor(): MangoAuthor = MangoAuthor(
+        id = id,
+        name = attributes?.name,
+        description = attributes?.biography?.english,
+    )
+}
+
+fun DexAuthorArtistData.toMangoArtist(): MangoArtist = MangoArtist(
+    id = id,
+    name = attributes.name,
+    description = attributes.biography?.english,
+)
+
+fun DexAuthorArtistData.toMangoAuthor(): MangoAuthor = MangoAuthor(
+    id = id,
+    name = attributes.name,
+    description = attributes.biography.english,
+)
+

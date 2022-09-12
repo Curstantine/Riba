@@ -12,31 +12,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import coil.compose.AsyncImage
-import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.api.mangadex.CoverSize
 import moe.curstantine.mangodex.api.mangadex.DexUtils
-import moe.curstantine.mangodex.api.mangadex.models.DexMangaCollection
-import moe.curstantine.mangodex.api.mangadex.models.DexMangaData
-import moe.curstantine.mangodex.api.mangadex.models.DexRelatedCover
 import moe.curstantine.mangodex.api.mangodex.Result
+import moe.curstantine.mangodex.api.mangodex.models.MangoCover
+import moe.curstantine.mangodex.api.mangodex.models.MangoFulfilledManga
+import moe.curstantine.mangodex.api.mangodex.models.MangoManga
 import moe.curstantine.mangodex.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
 
 @Composable
-fun MangaCard(manga: DexMangaData, onClick: (DexMangaData) -> Unit) {
-    val attributes = manga.attributes
-    val cover = remember {
-        (manga.relationships.first { it is DexRelatedCover } as DexRelatedCover?)?.let {
-            DexUtils.getCoverUrl(
-                manga.id,
-                it.attributes!!.fileName,
-                CoverSize.Small
-            )
+fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Unit) {
+    val coverUrl = remember {
+        cover?.let {
+            it.fileName?.let { fileName ->
+                DexUtils.getCoverUrl(manga.id, fileName, CoverSize.Small)
+            }
         }
     }
 
@@ -54,12 +49,12 @@ fun MangaCard(manga: DexMangaData, onClick: (DexMangaData) -> Unit) {
                     .fillMaxWidth()
                     .heightIn(0.dp, 170.dp),
                 content = {
-                    if (cover != null) {
+                    if (coverUrl != null) {
                         AsyncImage(
                             modifier = Modifier.fillMaxWidth(),
-                            model = cover,
+                            model = coverUrl,
                             contentScale = ContentScale.FillWidth,
-                            contentDescription = "Cover for ${attributes.title.english}",
+                            contentDescription = "Cover for ${manga.title}",
                         )
                     }
                 }
@@ -68,7 +63,7 @@ fun MangaCard(manga: DexMangaData, onClick: (DexMangaData) -> Unit) {
 
 
         Text(
-            text = attributes.title.english ?: stringResource(R.string.no_title),
+            text = manga.title,
             maxLines = 2,
             style = MaterialTheme.typography.bodySmall,
             overflow = TextOverflow.Ellipsis
@@ -77,7 +72,7 @@ fun MangaCard(manga: DexMangaData, onClick: (DexMangaData) -> Unit) {
 }
 
 @Composable
-fun MangaCardRow(data: LiveData<Result<DexMangaCollection>>, title: String) {
+fun MangaCardRow(data: LiveData<Result<List<MangoFulfilledManga>>>, title: String) {
     val result by data.observeAsState()
 
     Column(
@@ -97,11 +92,13 @@ fun MangaCardRow(data: LiveData<Result<DexMangaCollection>>, title: String) {
         }
 
         if (result is Result.Success) {
-            val mangaList = (result as Result.Success).data.data
+            val mangaList = (result as Result.Success).data
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(mangaList.size) { index ->
-                    MangaCard(mangaList.elementAt(index), onClick = {})
+                    val fulfilledManga = mangaList.elementAt(index)
+
+                    MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {})
                 }
             }
         }
