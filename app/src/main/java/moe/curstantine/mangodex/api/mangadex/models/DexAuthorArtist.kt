@@ -3,10 +3,10 @@ package moe.curstantine.mangodex.api.mangadex.models
 import com.squareup.moshi.JsonClass
 import moe.curstantine.mangodex.api.mangodex.models.MangoAuthor
 
-typealias DexAuthorArtist = DexResponse<DexAuthorAttributes>
-typealias DexAuthorArtistCollection = DexCollectionResponse<DexAuthorAttributes>
+typealias DexAuthor = DexResponse<DexAuthorAttributes>
+typealias DexAuthorCollection = DexCollectionResponse<DexAuthorAttributes>
 
-typealias DexAuthorArtistData = DexResponseData<DexAuthorAttributes>
+typealias DexAuthorData = DexResponseData<DexAuthorAttributes>
 
 /**
  * Common data class for both [DexEntityType.Author] and [DexEntityType.Artist].
@@ -34,7 +34,7 @@ data class DexRelatedAuthor(
     )
 }
 
-fun DexAuthorArtistData.toMangoAuthor(): MangoAuthor = MangoAuthor(
+fun DexAuthorData.toMangoAuthor(): MangoAuthor = MangoAuthor(
     id = id,
     name = attributes.name,
     description = attributes.biography.english,

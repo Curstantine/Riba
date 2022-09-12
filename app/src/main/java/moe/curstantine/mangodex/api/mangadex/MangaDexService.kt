@@ -9,7 +9,7 @@ import retrofit2.http.QueryMap
 @JvmSuppressWildcards
 interface MangaDexService {
     @GET("/author/{id}")
-    suspend fun getAuthor(@Path("id") id: String): DexAuthorArtist
+    suspend fun getAuthor(@Path("id") id: String): DexAuthor
 
     @GET("/manga/{id}")
     suspend fun getManga(
@@ -23,6 +23,9 @@ interface MangaDexService {
     @GET("/cover/{id}")
     suspend fun getCover(@Path("id") id: String): DexCover
 
+    @GET("/author")
+    suspend fun getAuthorList(@Path("ids[]") id: List<String>): DexAuthorCollection
+
     @GET("/manga")
     suspend fun getMangaList(
         @Query("ids[]") ids: List<String>?,
@@ -31,5 +34,4 @@ interface MangaDexService {
         @Query("includes[]") includes: List<DexEntityType>?,
         @QueryMap sort: Map<String, DexQueryOrderValue>?,
     ): DexMangaCollection
-
 }
