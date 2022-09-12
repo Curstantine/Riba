@@ -24,7 +24,7 @@ fun HomeScreen(
     mangoNavigator: MangoNavigator,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Companion.Factory)
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         MangaCardRow(mangoNavigator, viewModel.getSeasonal(), stringResource(R.string.seasonal))
         MangaCardRow(mangoNavigator, viewModel.getRecent(), stringResource(R.string.recently_added))
     }
