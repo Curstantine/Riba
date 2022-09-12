@@ -43,11 +43,21 @@ class MangoNavigator(navController: NavHostController) {
         this.navController.navigate(route.path)
     }
 
-    fun navigateTo(route: MangoRoute, vararg args: String) {
-        this.navController.navigate(route.path + args.joinToString("/"))
+    fun navigateTo(route: MangoRoute, vararg args: Pair<String, String>) {
+        val path = route.path.let {
+            args.fold(it) { acc, pair ->
+                acc.replace("{${pair.first}}", pair.second)
+            }
+        }
+
+        this.navController.navigate(path)
+    }
+
+    fun popBackStack() {
+        this.navController.popBackStack()
     }
 
     fun getArgument(key: String): String? {
-        return navController.previousBackStackEntry?.arguments?.getString(key)
+        return navController.currentBackStackEntry?.arguments?.getString(key)
     }
 }

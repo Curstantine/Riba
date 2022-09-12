@@ -19,10 +19,10 @@ class MangaDexHandler(
 ) {
     private val adapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
 
-    suspend fun getManga(id: String): Result<DexManga> {
+    suspend fun getManga(id: String, includes: List<DexEntityType>? = null): Result<DexManga> {
         return contextualInvoke { scope ->
             try {
-                val response = service.getManga(id)
+                val response = service.getManga(id, includes)
                 scope.launch { databaseHandler.insertManga(response.data) }
 
                 Result.Success(response)

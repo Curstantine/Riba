@@ -119,7 +119,7 @@ fun MangaCardRow(
                     val fulfilledManga = mangaList.elementAt(index)
 
                     MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
-                        mangoNavigator.navigateTo(MangoRoute.Manga, it.id)
+                        mangoNavigator.navigateTo(MangoRoute.Manga, Pair("id", it.id))
                     })
                 }
             }

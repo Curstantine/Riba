@@ -8,8 +8,14 @@ import retrofit2.http.QueryMap
 
 @JvmSuppressWildcards
 interface MangaDexService {
+    @GET("/author/{id}")
+    suspend fun getAuthor(@Path("id") id: String): DexAuthorArtist
+
     @GET("/manga/{id}")
-    suspend fun getManga(@Path("id") id: String): DexManga
+    suspend fun getManga(
+        @Path("id") id: String,
+        @Query("includes[]") includes: List<DexEntityType>?
+    ): DexManga
 
     @GET("/list/{id}")
     suspend fun getMDList(@Path("id") id: String): DexMDList
