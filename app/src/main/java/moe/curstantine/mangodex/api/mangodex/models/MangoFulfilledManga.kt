@@ -7,5 +7,5 @@ class MangoFulfilledManga(
     val manga: MangoManga,
     val cover: MangoCover?,
     val authors: List<MangoAuthor>?,
-    val artists: List<MangoArtist>?,
+    val artists: List<MangoAuthor>?,
 )
