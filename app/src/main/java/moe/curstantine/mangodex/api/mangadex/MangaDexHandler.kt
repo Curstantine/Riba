@@ -19,24 +19,11 @@ class MangaDexHandler(
 ) {
     private val adapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
 
-    suspend fun getManga(id: String, includes: List<DexEntityType>? = null): Result<DexManga> {
-        return contextualInvoke { scope ->
-            try {
-                val response = service.getManga(id, includes)
-                scope.launch { databaseHandler.insertManga(response.data) }
-
-                Result.Success(response)
-            } catch (e: Throwable) {
-                Result.Error(handleException(e))
-            }
-        }
-    }
-
-    suspend fun getMDList(id: String): Result<DexMDList> {
+    suspend fun getAuthor(id: String): Result<DexAuthor> {
         return contextualInvoke {
             try {
-                val response = service.getMDList(id)
-                it.launch { databaseHandler.insertMDList(response.data) }
+                val response = service.getAuthor(id)
+                it.launch { databaseHandler.insertAuthor(response.data) }
 
                 Result.Success(response)
             } catch (e: Throwable) {
@@ -58,7 +45,20 @@ class MangaDexHandler(
         }
     }
 
-    suspend fun getMangaList(
+    suspend fun getManga(id: String, includes: List<DexEntityType>? = null): Result<DexManga> {
+        return contextualInvoke { scope ->
+            try {
+                val response = service.getManga(id, includes)
+                scope.launch { databaseHandler.insertManga(response.data) }
+
+                Result.Success(response)
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
+            }
+        }
+    }
+
+    suspend fun getManga(
         ids: List<String>? = null,
         limit: Int = 10,
         offset: Int? = null,
@@ -67,7 +67,7 @@ class MangaDexHandler(
     ): Result<DexMangaCollection> {
         return contextualInvoke { scope ->
             try {
-                val response = service.getMangaList(
+                val response = service.getManga(
                     ids = ids,
                     limit = limit,
                     offset = offset,
@@ -76,6 +76,19 @@ class MangaDexHandler(
                 )
 
                 scope.launch { response.data.map { databaseHandler.insertManga(it) } }
+
+                Result.Success(response)
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
+            }
+        }
+    }
+
+    suspend fun getMDList(id: String): Result<DexMDList> {
+        return contextualInvoke {
+            try {
+                val response = service.getMDList(id)
+                it.launch { databaseHandler.insertMDList(response.data) }
 
                 Result.Success(response)
             } catch (e: Throwable) {

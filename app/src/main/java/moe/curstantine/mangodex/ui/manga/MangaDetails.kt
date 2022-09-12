@@ -1,5 +1,6 @@
 package moe.curstantine.mangodex.ui.manga
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,6 +19,10 @@ fun MangaDetails(
 ) {
     val mangaId = remember { mangoNavigator.getArgument("id") }
     viewModel.mangaId = mangaId ?: throw IllegalArgumentException("id parameter is missing!")
+
+    Column {
+
+    }
 }
 
 class MangaDetailsViewModel : ViewModel() {
@@ -25,9 +30,7 @@ class MangaDetailsViewModel : ViewModel() {
     fun getDetails(): LiveData<Result<MangoFulfilledManga>> = details
 
     private val details: MutableLiveData<Result<MangoFulfilledManga>> by lazy {
-        MutableLiveData<Result<MangoFulfilledManga>>().also {
-            loadDetails()
-        }
+        MutableLiveData<Result<MangoFulfilledManga>>().also { loadDetails() }
     }
 
     private fun loadDetails() {
@@ -37,7 +40,7 @@ class MangaDetailsViewModel : ViewModel() {
 
             val artist = async {
                 val local = APIService.database.author().get(localManga.artistIds)
-                local.map { it.name == null }
+                local.first { it.name == null }.let { fullRefresh() }
             }
 
         }

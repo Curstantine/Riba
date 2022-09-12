@@ -11,11 +11,8 @@ interface MangaDexService {
     @GET("/author/{id}")
     suspend fun getAuthor(@Path("id") id: String): DexAuthor
 
-    @GET("/manga/{id}")
-    suspend fun getManga(
-        @Path("id") id: String,
-        @Query("includes[]") includes: List<DexEntityType>?
-    ): DexManga
+    @GET("/author")
+    suspend fun getAuthor(@Path("ids[]") id: List<String>): DexAuthorCollection
 
     @GET("/list/{id}")
     suspend fun getMDList(@Path("id") id: String): DexMDList
@@ -23,11 +20,14 @@ interface MangaDexService {
     @GET("/cover/{id}")
     suspend fun getCover(@Path("id") id: String): DexCover
 
-    @GET("/author")
-    suspend fun getAuthorList(@Path("ids[]") id: List<String>): DexAuthorCollection
+    @GET("/manga/{id}")
+    suspend fun getManga(
+        @Path("id") id: String,
+        @Query("includes[]") includes: List<DexEntityType>?
+    ): DexManga
 
     @GET("/manga")
-    suspend fun getMangaList(
+    suspend fun getManga(
         @Query("ids[]") ids: List<String>?,
         @Query("limit") limit: Int?,
         @Query("offset") offset: Int?,

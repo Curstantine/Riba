@@ -85,7 +85,7 @@ class HomeViewModel : ViewModel() {
                     )
                 })
             } else {
-                val serverSeasonalManga = APIService.mangadex.getMangaList(
+                val serverSeasonalManga = APIService.mangadex.getManga(
                     ids = seasonalTitleIds,
                     includes = listOf(DexEntityType.CoverArt),
                     limit = seasonalTitleIds.size
@@ -113,7 +113,7 @@ class HomeViewModel : ViewModel() {
 
     private fun loadRecent() {
         viewModelScope.launch(Dispatchers.IO) {
-            val recentlyAddedList = APIService.mangadex.getMangaList(
+            val recentlyAddedList = APIService.mangadex.getManga(
                 sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
                 includes = listOf(DexEntityType.CoverArt)
             )

@@ -9,6 +9,14 @@ import moe.curstantine.mangodex.api.mangodex.models.MangoCover
 
 class MangaDexDatabaseHandler(private val database: MangoDatabase) {
 
+    suspend fun insertAuthor(artist: DexAuthorData) = coroutineScope {
+        launch { database.author().insert(artist.toMangoAuthor()) }
+    }
+
+    suspend fun insertCover(cover: DexCoverData) = coroutineScope {
+        launch { database.cover().insert(cover.toMangoCover()) }
+    }
+
     suspend fun insertManga(manga: DexMangaData) = coroutineScope {
         val authors = mutableListOf<MangoAuthor>()
         var cover: MangoCover? = null
@@ -29,10 +37,6 @@ class MangaDexDatabaseHandler(private val database: MangoDatabase) {
 
     suspend fun insertMDList(list: DexMDListData) = coroutineScope {
         launch { database.list().insert(list.toMangoList()) }
-    }
-
-    suspend fun insertCover(cover: DexCoverData) = coroutineScope {
-        launch { database.cover().insert(cover.toMangoCover()) }
     }
 
 }
