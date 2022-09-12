@@ -87,7 +87,8 @@ class HomeViewModel : ViewModel() {
             } else {
                 val serverSeasonalManga = APIService.mangadex.getMangaList(
                     ids = seasonalTitleIds,
-                    includes = listOf(DexEntityType.CoverArt)
+                    includes = listOf(DexEntityType.CoverArt),
+                    limit = seasonalTitleIds.size
                 )
 
                 if (serverSeasonalManga is Result.Success) {
