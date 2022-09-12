@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import coil.compose.AsyncImage
+import kotlinx.coroutines.coroutineScope
+import moe.curstantine.mangodex.api.APIService
 import moe.curstantine.mangodex.api.mangadex.CoverSize
 import moe.curstantine.mangodex.api.mangadex.DexUtils
 import moe.curstantine.mangodex.api.mangodex.Result
@@ -29,6 +31,10 @@ import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
 fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Unit) {
     val coverUrl = remember {
         cover?.let {
+            if (it.fileName == null) {
+
+            }
+
             it.fileName?.let { fileName ->
                 DexUtils.getCoverUrl(manga.id, fileName, CoverSize.Small)
             }

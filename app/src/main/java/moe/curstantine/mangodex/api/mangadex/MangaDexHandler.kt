@@ -32,6 +32,32 @@ class MangaDexHandler(
         }
     }
 
+    suspend fun getMDList(id: String): Result<DexMDList> {
+        return contextualInvoke {
+            try {
+                val response = service.getMDList(id)
+                it.launch { databaseHandler.insertMDList(response.data) }
+
+                Result.Success(response)
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
+            }
+        }
+    }
+
+    suspend fun getCover(id: String): Result<DexCover> {
+        return contextualInvoke {
+            try {
+                val response = service.getCover(id)
+                it.launch { databaseHandler.insertCover(response.data) }
+
+                Result.Success(response)
+            } catch (e: Throwable) {
+                Result.Error(handleException(e))
+            }
+        }
+    }
+
     suspend fun getMangaList(
         ids: List<String>? = null,
         limit: Int = 10,
@@ -50,19 +76,6 @@ class MangaDexHandler(
                 )
 
                 scope.launch { response.data.map { databaseHandler.insertManga(it) } }
-
-                Result.Success(response)
-            } catch (e: Throwable) {
-                Result.Error(handleException(e))
-            }
-        }
-    }
-
-    suspend fun getMDList(id: String): Result<DexMDList> {
-        return contextualInvoke {
-            try {
-                val response = service.getMDList(id)
-                it.launch { databaseHandler.insertMDList(response.data) }
 
                 Result.Success(response)
             } catch (e: Throwable) {

@@ -34,4 +34,8 @@ class MangaDexDatabaseHandler(private val database: MangoDatabase) {
         launch { database.list().insert(list.toMangoList()) }
     }
 
+    suspend fun insertCover(cover: DexCoverData) = coroutineScope {
+        launch { database.cover().insert(cover.toMangoCover()) }
+    }
+
 }

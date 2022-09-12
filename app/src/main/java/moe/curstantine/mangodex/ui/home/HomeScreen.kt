@@ -22,15 +22,18 @@ import moe.curstantine.mangodex.ui.manga.MangaCardRow
 @Composable
 fun HomeScreen(
     mangoNavigator: MangoNavigator,
-    viewModel: HomeViewModel = viewModel(factory = HomeScreenViewModelFactory())
+    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Companion.Factory)
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        MangaCardRow(viewModel.getSeasonalTitles(), stringResource(R.string.seasonal))
-//        MangaCardRow(viewModel.getRecentlyAddedTitles(), stringResource(R.string.recently_added))
+        MangaCardRow(viewModel.getSeasonal(), stringResource(R.string.seasonal))
+        MangaCardRow(viewModel.getRecentlyAdded(), stringResource(R.string.recently_added))
     }
 }
 
 class HomeViewModel : ViewModel() {
+    fun getSeasonal(): LiveData<Result<List<MangoFulfilledManga>>> = seasonalTitles
+    fun getRecentlyAdded(): LiveData<Result<List<MangoFulfilledManga>>> = recentlyAddedTitles
+
     private val seasonalTitles: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
         MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
             loadSeasonalTitles()
@@ -41,14 +44,6 @@ class HomeViewModel : ViewModel() {
         MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
             loadRecentlyAddedTitles()
         }
-    }
-
-    fun getSeasonalTitles(): LiveData<Result<List<MangoFulfilledManga>>> {
-        return seasonalTitles
-    }
-
-    fun getRecentlyAddedTitles(): LiveData<Result<List<MangoFulfilledManga>>> {
-        return recentlyAddedTitles
     }
 
     private fun loadSeasonalTitles() {
@@ -112,7 +107,6 @@ class HomeViewModel : ViewModel() {
             withContext(Dispatchers.Main) {
                 seasonalTitles.value = seasonalManga
             }
-
         }
     }
 
@@ -124,16 +118,33 @@ class HomeViewModel : ViewModel() {
             )
 
             withContext(Dispatchers.Main) {
-                throw NotImplementedError()
-//                recentlyAddedTitles.value = recentlyAddedList
+                if (recentlyAddedList is Result.Success) {
+                    val titles = recentlyAddedList.data.data.map { manga ->
+                        MangoFulfilledManga(
+                            manga = manga.toMangoManga(),
+                            cover = manga.relationships
+                                .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }
+                                ?.let { (it as DexRelatedCover).toMangoCover() },
+                            authors = null,
+                            artists = null,
+                        )
+                    }
+
+                    recentlyAddedTitles.value = Result.Success(titles)
+                } else {
+                    recentlyAddedTitles.value = recentlyAddedList as Result.Error
+                }
+            }
+        }
+    }
+
+    companion object {
+        object Factory : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return HomeViewModel() as T
             }
         }
     }
 }
 
-class HomeScreenViewModelFactory : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return HomeViewModel() as T
-    }
-}
