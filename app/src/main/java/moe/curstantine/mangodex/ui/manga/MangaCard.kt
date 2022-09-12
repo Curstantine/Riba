@@ -12,12 +12,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import coil.compose.AsyncImage
-import kotlinx.coroutines.coroutineScope
-import moe.curstantine.mangodex.api.APIService
+import moe.curstantine.mangodex.R
 import moe.curstantine.mangodex.api.mangadex.CoverSize
 import moe.curstantine.mangodex.api.mangadex.DexUtils
 import moe.curstantine.mangodex.api.mangodex.Result
@@ -31,10 +32,6 @@ import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
 fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Unit) {
     val coverUrl = remember {
         cover?.let {
-            if (it.fileName == null) {
-
-            }
-
             it.fileName?.let { fileName ->
                 DexUtils.getCoverUrl(manga.id, fileName, CoverSize.Small)
             }
@@ -47,7 +44,6 @@ fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Un
             .height(250.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-
         Box(Modifier.height(170.dp), contentAlignment = Alignment.Center) {
             OutlinedCard(
                 onClick = { onClick.invoke(manga) },
@@ -55,7 +51,20 @@ fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Un
                     .fillMaxWidth()
                     .heightIn(0.dp, 170.dp),
                 content = {
-                    if (coverUrl != null) {
+                    if (coverUrl == null) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_cover),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F)
+                                ),
+                            )
+                        }
+                    } else {
                         AsyncImage(
                             modifier = Modifier.fillMaxWidth(),
                             model = coverUrl,
@@ -66,7 +75,6 @@ fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Un
                 }
             )
         }
-
 
         Text(
             text = manga.title,
