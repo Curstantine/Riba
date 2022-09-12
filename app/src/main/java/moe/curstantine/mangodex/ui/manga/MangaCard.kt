@@ -25,6 +25,8 @@ import moe.curstantine.mangodex.api.mangodex.Result
 import moe.curstantine.mangodex.api.mangodex.models.MangoCover
 import moe.curstantine.mangodex.api.mangodex.models.MangoFulfilledManga
 import moe.curstantine.mangodex.api.mangodex.models.MangoManga
+import moe.curstantine.mangodex.nav.MangoNavigator
+import moe.curstantine.mangodex.nav.MangoRoute
 import moe.curstantine.mangodex.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
 
@@ -86,7 +88,11 @@ fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Un
 }
 
 @Composable
-fun MangaCardRow(data: LiveData<Result<List<MangoFulfilledManga>>>, title: String) {
+fun MangaCardRow(
+    mangoNavigator: MangoNavigator,
+    data: LiveData<Result<List<MangoFulfilledManga>>>,
+    title: String
+) {
     val result by data.observeAsState()
 
     Column(
@@ -112,7 +118,9 @@ fun MangaCardRow(data: LiveData<Result<List<MangoFulfilledManga>>>, title: Strin
                 items(mangaList.size) { index ->
                     val fulfilledManga = mangaList.elementAt(index)
 
-                    MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {})
+                    MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
+                        mangoNavigator.navigateTo(MangoRoute.Manga, it.id)
+                    })
                 }
             }
         }

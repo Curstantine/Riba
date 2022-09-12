@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import moe.curstantine.mangodex.ui.home.HomeScreen
 import moe.curstantine.mangodex.ui.library.LibraryScreen
+import moe.curstantine.mangodex.ui.manga.MangaDetails
 import moe.curstantine.mangodex.ui.search.SearchScreen
 
 @Composable
@@ -20,6 +21,9 @@ fun MangoNavHost(mangoNavigator: MangoNavigator, modifier: Modifier) {
         }
         composable(MangoRoute.Search.path) {
             SearchScreen(mangoNavigator)
+        }
+        composable(MangoRoute.Manga.path) {
+            MangaDetails(mangoNavigator)
         }
     }
 }
@@ -37,5 +41,13 @@ class MangoNavigator(navController: NavHostController) {
 
     fun navigateTo(route: MangoRoute) {
         this.navController.navigate(route.path)
+    }
+
+    fun navigateTo(route: MangoRoute, vararg args: String) {
+        this.navController.navigate(route.path + args.joinToString("/"))
+    }
+
+    fun getArgument(key: String): String? {
+        return navController.previousBackStackEntry?.arguments?.getString(key)
     }
 }

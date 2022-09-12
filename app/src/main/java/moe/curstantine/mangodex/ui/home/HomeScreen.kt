@@ -25,28 +25,28 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Companion.Factory)
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        MangaCardRow(viewModel.getSeasonal(), stringResource(R.string.seasonal))
-        MangaCardRow(viewModel.getRecentlyAdded(), stringResource(R.string.recently_added))
+        MangaCardRow(mangoNavigator, viewModel.getSeasonal(), stringResource(R.string.seasonal))
+        MangaCardRow(mangoNavigator, viewModel.getRecent(), stringResource(R.string.recently_added))
     }
 }
 
 class HomeViewModel : ViewModel() {
-    fun getSeasonal(): LiveData<Result<List<MangoFulfilledManga>>> = seasonalTitles
-    fun getRecentlyAdded(): LiveData<Result<List<MangoFulfilledManga>>> = recentlyAddedTitles
+    fun getSeasonal(): LiveData<Result<List<MangoFulfilledManga>>> = seasonal
+    fun getRecent(): LiveData<Result<List<MangoFulfilledManga>>> = recent
 
-    private val seasonalTitles: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
+    private val seasonal: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
         MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
-            loadSeasonalTitles()
+            loadSeasonal()
         }
     }
 
-    private val recentlyAddedTitles: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
+    private val recent: MutableLiveData<Result<List<MangoFulfilledManga>>> by lazy {
         MutableLiveData<Result<List<MangoFulfilledManga>>>().also {
-            loadRecentlyAddedTitles()
+            loadRecent()
         }
     }
 
-    private fun loadSeasonalTitles() {
+    private fun loadSeasonal() {
         viewModelScope.launch(Dispatchers.IO) {
             lateinit var seasonalTitleIds: List<String>
             lateinit var seasonalManga: Result<List<MangoFulfilledManga>>
@@ -65,7 +65,7 @@ class HomeViewModel : ViewModel() {
 
                 if (seasonalList is Result.Error) {
                     withContext(Dispatchers.Main) {
-                        seasonalTitles.value = seasonalList
+                        seasonal.value = seasonalList
                     }
 
                     return@launch
@@ -105,12 +105,12 @@ class HomeViewModel : ViewModel() {
             }
 
             withContext(Dispatchers.Main) {
-                seasonalTitles.value = seasonalManga
+                seasonal.value = seasonalManga
             }
         }
     }
 
-    private fun loadRecentlyAddedTitles() {
+    private fun loadRecent() {
         viewModelScope.launch(Dispatchers.IO) {
             val recentlyAddedList = APIService.mangadex.getMangaList(
                 sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
@@ -130,9 +130,9 @@ class HomeViewModel : ViewModel() {
                         )
                     }
 
-                    recentlyAddedTitles.value = Result.Success(titles)
+                    recent.value = Result.Success(titles)
                 } else {
-                    recentlyAddedTitles.value = recentlyAddedList as Result.Error
+                    recent.value = recentlyAddedList as Result.Error
                 }
             }
         }

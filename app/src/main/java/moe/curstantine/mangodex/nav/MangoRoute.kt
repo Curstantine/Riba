@@ -10,6 +10,7 @@ sealed class MangoRoute(val path: String, val routeType: RouteType) {
     object Search : MangoRoute("search", RouteType.Default)
     object Library : MangoRoute("library", RouteType.Default)
     object Settings : MangoRoute("settings", RouteType.Empty)
+    object Manga : MangoRoute("manga/{id}", RouteType.Empty)
 
     companion object {
         fun fromPath(path: String): MangoRoute {
@@ -18,7 +19,8 @@ sealed class MangoRoute(val path: String, val routeType: RouteType) {
                 Search.path -> Search
                 Library.path -> Library
                 Settings.path -> Settings
-                else -> Home
+                Manga.path -> Manga
+                else -> throw IllegalArgumentException("No route found for path: $path")
             }
         }
     }
