@@ -7,7 +7,7 @@ import moe.curstantine.mangodex.nav.MangoNavigator
 
 @Composable
 fun LibraryScreen(mangoNavigator: MangoNavigator) {
-    Column() {
+    Column {
         Text("Library")
     }
 }

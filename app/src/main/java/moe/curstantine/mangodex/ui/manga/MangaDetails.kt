@@ -20,7 +20,7 @@ fun MangaDetails(
     viewModel.mangaId = mangaId ?: throw IllegalArgumentException("id parameter is missing!")
 }
 
-class MangaDetailsViewModel() : ViewModel() {
+class MangaDetailsViewModel : ViewModel() {
     var mangaId by mutableStateOf("")
     fun getDetails(): LiveData<Result<MangoFulfilledManga>> = details
 
@@ -36,11 +36,8 @@ class MangaDetailsViewModel() : ViewModel() {
             val localManga = APIService.database.manga().get(mangaId)!!
 
             val artist = async {
-                val local = APIService.database.artist().get(localManga.artistIds)
-
+                val local = APIService.database.author().get(localManga.artistIds)
                 local.map { it.name == null }
-
-
             }
 
         }

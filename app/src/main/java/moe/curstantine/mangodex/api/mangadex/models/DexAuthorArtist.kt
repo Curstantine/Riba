@@ -1,13 +1,12 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.JsonClass
-import moe.curstantine.mangodex.api.mangodex.models.MangoArtist
 import moe.curstantine.mangodex.api.mangodex.models.MangoAuthor
 
-typealias DexAuthorArtist = DexResponse<DexAuthorArtistAttributes>
-typealias DexAuthorArtistCollection = DexCollectionResponse<DexAuthorArtistAttributes>
+typealias DexAuthorArtist = DexResponse<DexAuthorAttributes>
+typealias DexAuthorArtistCollection = DexCollectionResponse<DexAuthorAttributes>
 
-typealias DexAuthorArtistData = DexResponseData<DexAuthorArtistAttributes>
+typealias DexAuthorArtistData = DexResponseData<DexAuthorAttributes>
 
 /**
  * Common data class for both [DexEntityType.Author] and [DexEntityType.Artist].
@@ -17,35 +16,23 @@ typealias DexAuthorArtistData = DexResponseData<DexAuthorArtistAttributes>
  * appear in [DexRelationship]s.
  */
 @JsonClass(generateAdapter = true)
-data class DexAuthorArtistAttributes(
+data class DexAuthorAttributes(
     val name: String,
     val biography: DexLocaleObject,
 )
 
 @JsonClass(generateAdapter = true)
-data class DexRelatedAuthorArtist(
+data class DexRelatedAuthor(
     override val id: String,
     override val type: DexEntityType,
-    val attributes: DexAuthorArtistAttributes?
+    val attributes: DexAuthorAttributes?
 ) : DexRelationship {
-    fun toMangoArtist(): MangoArtist = MangoArtist(
-        id = id,
-        name = attributes?.name,
-        description = attributes?.biography?.english,
-    )
-
     fun toMangoAuthor(): MangoAuthor = MangoAuthor(
         id = id,
         name = attributes?.name,
         description = attributes?.biography?.english,
     )
 }
-
-fun DexAuthorArtistData.toMangoArtist(): MangoArtist = MangoArtist(
-    id = id,
-    name = attributes.name,
-    description = attributes.biography.english,
-)
 
 fun DexAuthorArtistData.toMangoAuthor(): MangoAuthor = MangoAuthor(
     id = id,

@@ -9,7 +9,6 @@ import moe.curstantine.mangodex.api.mangodex.models.*
 @Database(
     version = 1,
     entities = [
-        MangoArtist::class,
         MangoAuthor::class,
         MangoManga::class,
         MangoCover::class,
@@ -19,7 +18,6 @@ import moe.curstantine.mangodex.api.mangodex.models.*
 )
 @TypeConverters(Converters::class)
 abstract class MangoDatabase : RoomDatabase() {
-    abstract fun artist(): ArtistDao
     abstract fun author(): AuthorDao
     abstract fun cover(): CoverDao
     abstract fun list(): ListDao

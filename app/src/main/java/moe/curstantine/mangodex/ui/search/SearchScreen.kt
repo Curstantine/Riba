@@ -7,7 +7,7 @@ import moe.curstantine.mangodex.nav.MangoNavigator
 
 @Composable
 fun SearchScreen(mangoNavigator: MangoNavigator) {
-    Column() {
+    Column {
         Text("Search")
     }
 }

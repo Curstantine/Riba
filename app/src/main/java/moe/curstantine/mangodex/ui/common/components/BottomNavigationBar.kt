@@ -16,7 +16,7 @@ import moe.curstantine.mangodex.nav.MangoRoute
 
 @Composable
 fun MangoNavigationBar(mangoNavigator: MangoNavigator) {
-    NavigationBar() {
+    NavigationBar {
 
         for (item in MangoNavigationBarItem.values()) {
             NavigationBarItem(
