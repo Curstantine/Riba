@@ -1,6 +1,6 @@
-package moe.curstantine.mangodex.api.mangodex
+package moe.curstantine.mangodex.api.riba
 
-object MangoConstants {
+object RibaConstants {
     const val REPO_URL = "https://github.com/Curstantine/MangoDex"
     const val ISSUES_URL = "https://github.com/Curstantine/MangoDex/issues"
 }

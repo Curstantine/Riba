@@ -1,59 +1,70 @@
 package moe.curstantine.mangodex.api.mangadex
 
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.mangodex.api.mangadex.models.*
-import moe.curstantine.mangodex.api.mangodex.Result
+import moe.curstantine.mangodex.api.riba.RibaError
+import moe.curstantine.mangodex.api.riba.RibaResult
 import retrofit2.HttpException
-import java.sql.SQLException
-import java.util.*
+import java.util.Locale
 
-// TODO: Remove database and move to database handler as param
 class MangaDexHandler(
     private var service: MangaDexService,
-    private var databaseHandler: MangaDexDatabaseHandler
+    private var databaseHandler: DexDatabaseHandler
 ) {
     private val adapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
 
-    suspend fun getAuthor(id: String): Result<DexAuthor> {
+    suspend fun getAuthor(id: String): RibaResult<DexAuthor> {
         return contextualInvoke {
             try {
                 val response = service.getAuthor(id)
                 it.launch { databaseHandler.insertAuthor(response.data) }
 
-                Result.Success(response)
+                RibaResult.Success(response)
             } catch (e: Throwable) {
-                Result.Error(handleException(e))
+                RibaResult.Error(handleException(e))
             }
         }
     }
 
-    suspend fun getCover(id: String): Result<DexCover> {
+    suspend fun getAuthor(ids: List<String>): RibaResult<DexAuthorCollection> {
+        return contextualInvoke { scope ->
+            try {
+                val response = service.getAuthor(ids)
+                scope.launch { response.data.forEach { databaseHandler.insertAuthor(it) } }
+
+                RibaResult.Success(response)
+            } catch (e: Throwable) {
+                RibaResult.Error(handleException(e))
+            }
+        }
+    }
+
+    suspend fun getCover(id: String): RibaResult<DexCover> {
         return contextualInvoke {
             try {
                 val response = service.getCover(id)
                 it.launch { databaseHandler.insertCover(response.data) }
 
-                Result.Success(response)
+                RibaResult.Success(response)
             } catch (e: Throwable) {
-                Result.Error(handleException(e))
+                RibaResult.Error(handleException(e))
             }
         }
     }
 
-    suspend fun getManga(id: String, includes: List<DexEntityType>? = null): Result<DexManga> {
+    suspend fun getManga(id: String, includes: List<DexEntityType>? = null): RibaResult<DexManga> {
         return contextualInvoke { scope ->
             try {
                 val response = service.getManga(id, includes)
                 scope.launch { databaseHandler.insertManga(response.data) }
 
-                Result.Success(response)
+                RibaResult.Success(response)
             } catch (e: Throwable) {
-                Result.Error(handleException(e))
+                RibaResult.Error(handleException(e))
             }
         }
     }
@@ -64,7 +75,7 @@ class MangaDexHandler(
         offset: Int? = null,
         sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
         includes: List<DexEntityType>? = null,
-    ): Result<DexMangaCollection> {
+    ): RibaResult<DexMangaCollection> {
         return contextualInvoke { scope ->
             try {
                 val response = service.getManga(
@@ -75,24 +86,24 @@ class MangaDexHandler(
                     sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: mapOf()
                 )
 
-                scope.launch { response.data.map { databaseHandler.insertManga(it) } }
+                scope.launch { response.data.forEach { databaseHandler.insertManga(it) } }
 
-                Result.Success(response)
+                RibaResult.Success(response)
             } catch (e: Throwable) {
-                Result.Error(handleException(e))
+                RibaResult.Error(handleException(e))
             }
         }
     }
 
-    suspend fun getMDList(id: String): Result<DexMDList> {
+    suspend fun getMDList(id: String): RibaResult<DexMDList> {
         return contextualInvoke {
             try {
                 val response = service.getMDList(id)
                 it.launch { databaseHandler.insertMDList(response.data) }
 
-                Result.Success(response)
+                RibaResult.Success(response)
             } catch (e: Throwable) {
-                Result.Error(handleException(e))
+                RibaResult.Error(handleException(e))
             }
         }
     }
@@ -103,16 +114,14 @@ class MangaDexHandler(
         }
     }
 
-    private fun handleException(e: Throwable): DexInternalError {
+    private fun handleException(e: Throwable): RibaError {
         return when (e) {
             is HttpException -> parseHttpException(e)
-            is JsonDataException -> DexInternalError("Invalid JSON response", e.message)
-            is SQLException -> DexInternalError("Database error", e.message)
-            else -> DexInternalError("Unknown error", e.message)
+            else -> RibaError.tryHandle(e)
         }
     }
 
-    private fun parseHttpException(e: HttpException): DexInternalError {
+    private fun parseHttpException(e: HttpException): RibaError {
         val errorBody = e.response()?.errorBody()?.source()?.let { adapter.fromJson(it) }
 
         return if (errorBody != null) {
@@ -124,9 +133,9 @@ class MangaDexHandler(
                 }
             }
 
-            DexInternalError(humanTitle.joinToString(" "), dexError.detail)
+            RibaError(humanTitle.joinToString(" "), dexError.detail)
         } else {
-            DexErrorFactory.fromStatusCode(e.code())
+            RibaError("", "")
         }
     }
 }

@@ -1,22 +1,22 @@
 package moe.curstantine.mangodex.api.database.dao
 
 import androidx.room.*
-import moe.curstantine.mangodex.api.mangodex.models.MangoAuthor
+import moe.curstantine.mangodex.api.riba.models.RibaAuthor
 
 @Dao
 interface AuthorDao {
     @Query("SELECT * FROM authors WHERE id = :id")
-    suspend fun get(id: String): MangoAuthor?
+    suspend fun get(id: String): RibaAuthor?
 
     @Query("SELECT * FROM authors WHERE id IN (:ids)")
-    suspend fun get(ids: List<String>): List<MangoAuthor>
+    suspend fun get(ids: List<String>): List<RibaAuthor>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(list: MangoAuthor)
+    suspend fun insert(list: RibaAuthor)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(lists: List<MangoAuthor>)
+    suspend fun insert(lists: List<RibaAuthor>)
 
     @Delete
-    suspend fun delete(list: MangoAuthor)
+    suspend fun delete(list: RibaAuthor)
 }

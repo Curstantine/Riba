@@ -14,11 +14,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.curstantine.mangodex.api.mangadex.DexConstants
-import moe.curstantine.mangodex.api.mangadex.DexInternalError
-import moe.curstantine.mangodex.api.mangodex.InternalError
+import moe.curstantine.mangodex.api.mangadex.DexError
+import moe.curstantine.mangodex.api.riba.RibaError
 
 @Composable
-fun FlexibleErrorReceiver(internalError: InternalError) {
+fun FlexibleErrorReceiver(error: RibaError) {
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
@@ -30,14 +30,14 @@ fun FlexibleErrorReceiver(internalError: InternalError) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = internalError.humanString,
+            text = error.humanString,
             style = typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
-        if (internalError.additionalInfo != null) {
+        if (error.additionalInfo != null) {
             Text(
-                text = internalError.additionalInfo!!,
+                text = error.additionalInfo,
                 style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
                 textAlign = TextAlign.Center
             )
@@ -46,7 +46,7 @@ fun FlexibleErrorReceiver(internalError: InternalError) {
         Box(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
 
-            if (internalError is DexInternalError) {
+            if (error is DexError) {
                 val localCtx = LocalContext.current
                 val intent =
                     remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }

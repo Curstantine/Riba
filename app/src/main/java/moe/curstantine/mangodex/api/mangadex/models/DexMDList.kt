@@ -2,7 +2,7 @@ package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import moe.curstantine.mangodex.api.mangodex.models.MangoList
+import moe.curstantine.mangodex.api.riba.models.RibaMangaList
 
 typealias DexMDList = DexResponse<DexMDListAttributes>
 typealias DexMDListData = DexResponseData<DexMDListAttributes>
@@ -28,7 +28,7 @@ enum class DexMDListVisibility {
     }
 }
 
-fun DexMDListData.toMangoList() = MangoList(
+fun DexMDListData.toMangoList() = RibaMangaList(
     id = id,
     name = attributes.name,
     visibility = attributes.visibility,

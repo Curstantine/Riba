@@ -9,7 +9,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import moe.curstantine.mangodex.api.APIService
 import moe.curstantine.mangodex.api.mangadex.models.DexEntityType
-import moe.curstantine.mangodex.api.mangodex.models.MangoFulfilledManga
+import moe.curstantine.mangodex.api.riba.RibaResult
+import moe.curstantine.mangodex.api.riba.models.RibaFulfilledManga
 import moe.curstantine.mangodex.nav.MangoNavigator
 
 @Composable
@@ -27,10 +28,10 @@ fun MangaDetails(
 
 class MangaDetailsViewModel : ViewModel() {
     var mangaId by mutableStateOf("")
-    fun getDetails(): LiveData<Result<MangoFulfilledManga>> = details
+    fun getDetails(): LiveData<RibaResult<RibaFulfilledManga>> = details
 
-    private val details: MutableLiveData<Result<MangoFulfilledManga>> by lazy {
-        MutableLiveData<Result<MangoFulfilledManga>>().also { loadDetails() }
+    private val details: MutableLiveData<RibaResult<RibaFulfilledManga>> by lazy {
+        MutableLiveData<RibaResult<RibaFulfilledManga>>().also { loadDetails() }
     }
 
     private fun loadDetails() {
@@ -39,10 +40,14 @@ class MangaDetailsViewModel : ViewModel() {
             val localManga = APIService.database.manga().get(mangaId)!!
 
             val artist = async {
-                val local = APIService.database.author().get(localManga.artistIds)
-                local.first { it.name == null }.let { fullRefresh() }
-            }
+                try {
+                    val local = APIService.database.author().get(localManga.artistIds)
+                    val missingArtistIds = local.filter { it.name == null }.map { it.id }
+                    val missingArtists = APIService.mangadex.getAuthor(missingArtistIds)
+                } catch (e: Throwable) {
 
+                }
+            }
         }
     }
 

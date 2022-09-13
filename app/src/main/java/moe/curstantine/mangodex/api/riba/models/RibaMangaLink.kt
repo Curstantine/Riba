@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.api.mangodex.models
+package moe.curstantine.mangodex.api.riba.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -13,7 +13,7 @@ import androidx.room.PrimaryKey
  * @param kt Kitsu id
  */
 @Entity(tableName = "manga_links")
-data class MangoMangaLink(
+data class RibaMangaLink(
     @PrimaryKey val mangaId: String,
     @ColumnInfo val al: String?,
     @ColumnInfo val mal: String?,

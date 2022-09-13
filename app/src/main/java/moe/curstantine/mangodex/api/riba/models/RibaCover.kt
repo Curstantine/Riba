@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.api.mangodex.models
+package moe.curstantine.mangodex.api.riba.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
  * external APIs should transform to this data class.
  */
 @Entity(tableName = "covers")
-data class MangoCover(
+data class RibaCover(
     @PrimaryKey val id: String,
     @ColumnInfo val fileName: String?,
 )

@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import moe.curstantine.mangodex.api.database.MangoDatabase
+import moe.curstantine.mangodex.api.database.RibaDatabase
 import moe.curstantine.mangodex.api.mangadex.DexConstants
-import moe.curstantine.mangodex.api.mangadex.MangaDexDatabaseHandler
+import moe.curstantine.mangodex.api.mangadex.DexDatabaseHandler
 import moe.curstantine.mangodex.api.mangadex.MangaDexHandler
 import moe.curstantine.mangodex.api.mangadex.MangaDexService
 import moe.curstantine.mangodex.api.mangadex.models.*
@@ -15,18 +15,18 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object APIService {
     lateinit var mangadex: MangaDexHandler
-    lateinit var database: MangoDatabase
+    lateinit var database: RibaDatabase
 
     fun initialize(context: Context) {
         val roomDatabase = Room.databaseBuilder(
-            context, MangoDatabase::class.java, "MangoDatabase"
+            context, RibaDatabase::class.java, "MangoDatabase"
         )
 
         this.database = roomDatabase.build()
         this.mangadex = createDexHandler(this.database)
     }
 
-    private fun createDexHandler(database: MangoDatabase): MangaDexHandler {
+    private fun createDexHandler(database: RibaDatabase): MangaDexHandler {
         val dexMoshi = Moshi.Builder()
         for (mismatch in NormalizeMismatchType.mismatches) {
             dexMoshi.add(mismatch)
@@ -52,7 +52,7 @@ object APIService {
 
         return MangaDexHandler(
             retrofitDex.create(MangaDexService::class.java),
-            MangaDexDatabaseHandler(database)
+            DexDatabaseHandler(database)
         )
     }
 }

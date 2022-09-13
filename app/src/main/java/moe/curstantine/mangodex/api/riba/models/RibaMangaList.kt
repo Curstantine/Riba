@@ -1,4 +1,4 @@
-package moe.curstantine.mangodex.api.mangodex.models
+package moe.curstantine.mangodex.api.riba.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -10,7 +10,7 @@ import moe.curstantine.mangodex.api.mangadex.models.DexMDListVisibility
  * external APIs should transform to this data class.
  */
 @Entity(tableName = "lists")
-data class MangoList(
+data class RibaMangaList(
     @PrimaryKey val id: String,
     @ColumnInfo val name: String,
     @ColumnInfo val visibility: DexMDListVisibility,

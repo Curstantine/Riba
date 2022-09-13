@@ -1,7 +1,7 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.JsonClass
-import moe.curstantine.mangodex.api.mangodex.models.MangoCover
+import moe.curstantine.mangodex.api.riba.models.RibaCover
 
 typealias DexCover = DexResponse<DexCoverAttributes>
 typealias DexCoverCollection = DexCollectionResponse<DexCoverAttributes>
@@ -20,13 +20,13 @@ data class DexRelatedCover(
     override val type: DexEntityType,
     val attributes: DexCoverAttributes?,
 ) : DexRelationship {
-    fun toMangoCover(): MangoCover = MangoCover(
+    fun toMangoCover(): RibaCover = RibaCover(
         id = id,
         fileName = attributes?.fileName,
     )
 }
 
-fun DexCoverData.toMangoCover(): MangoCover = MangoCover(
+fun DexCoverData.toMangoCover(): RibaCover = RibaCover(
     id = id,
     fileName = attributes.fileName
 )

@@ -2,12 +2,12 @@ package moe.curstantine.mangodex.api.mangadex
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import moe.curstantine.mangodex.api.database.MangoDatabase
+import moe.curstantine.mangodex.api.database.RibaDatabase
 import moe.curstantine.mangodex.api.mangadex.models.*
-import moe.curstantine.mangodex.api.mangodex.models.MangoAuthor
-import moe.curstantine.mangodex.api.mangodex.models.MangoCover
+import moe.curstantine.mangodex.api.riba.models.RibaAuthor
+import moe.curstantine.mangodex.api.riba.models.RibaCover
 
-class MangaDexDatabaseHandler(private val database: MangoDatabase) {
+class DexDatabaseHandler(private val database: RibaDatabase) {
 
     suspend fun insertAuthor(artist: DexAuthorData) = coroutineScope {
         launch { database.author().insert(artist.toMangoAuthor()) }
@@ -18,8 +18,8 @@ class MangaDexDatabaseHandler(private val database: MangoDatabase) {
     }
 
     suspend fun insertManga(manga: DexMangaData) = coroutineScope {
-        val authors = mutableListOf<MangoAuthor>()
-        var cover: MangoCover? = null
+        val authors = mutableListOf<RibaAuthor>()
+        var cover: RibaCover? = null
 
         for (relationship in manga.relationships) {
             when (relationship.type) {

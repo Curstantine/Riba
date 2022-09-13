@@ -48,5 +48,4 @@ class NormalizeMismatchType<T> private constructor(
             )
         )
     }
-
 }

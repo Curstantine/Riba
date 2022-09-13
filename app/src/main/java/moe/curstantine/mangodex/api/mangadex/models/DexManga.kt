@@ -1,7 +1,7 @@
 package moe.curstantine.mangodex.api.mangadex.models
 
 import com.squareup.moshi.JsonClass
-import moe.curstantine.mangodex.api.mangodex.models.MangoManga
+import moe.curstantine.mangodex.api.riba.models.RibaManga
 
 typealias DexManga = DexResponse<DexMangaAttributes>
 typealias DexMangaCollection = DexCollectionResponse<DexMangaAttributes>
@@ -22,7 +22,7 @@ data class DexRelatedManga(
     val related: String?,
 ) : DexRelationship
 
-fun DexMangaData.toMangoManga(): MangoManga {
+fun DexMangaData.toMangoManga(): RibaManga {
     val altTitles = attributes.altTitles
         .filter { it.english != null || it.japanese != null || it.japaneseRomanized != null }
         .mapNotNull { it.english ?: it.japanese ?: it.japaneseRomanized }
@@ -44,7 +44,7 @@ fun DexMangaData.toMangoManga(): MangoManga {
         }
     }
 
-    return MangoManga(
+    return RibaManga(
         id = id,
         title = attributes.title.english!!,
         altTitles = altTitles,

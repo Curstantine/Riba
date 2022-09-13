@@ -19,23 +19,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import coil.compose.AsyncImage
 import moe.curstantine.mangodex.R
-import moe.curstantine.mangodex.api.mangadex.CoverSize
+import moe.curstantine.mangodex.api.mangadex.DexCoverSize
 import moe.curstantine.mangodex.api.mangadex.DexUtils
-import moe.curstantine.mangodex.api.mangodex.Result
-import moe.curstantine.mangodex.api.mangodex.models.MangoCover
-import moe.curstantine.mangodex.api.mangodex.models.MangoFulfilledManga
-import moe.curstantine.mangodex.api.mangodex.models.MangoManga
+import moe.curstantine.mangodex.api.riba.RibaResult
+import moe.curstantine.mangodex.api.riba.models.RibaCover
+import moe.curstantine.mangodex.api.riba.models.RibaFulfilledManga
+import moe.curstantine.mangodex.api.riba.models.RibaManga
 import moe.curstantine.mangodex.nav.MangoNavigator
 import moe.curstantine.mangodex.nav.MangoRoute
 import moe.curstantine.mangodex.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.mangodex.ui.common.components.FlexibleIndicator
 
 @Composable
-fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Unit) {
+fun MangaCard(manga: RibaManga, cover: RibaCover?, onClick: (RibaManga) -> Unit) {
     val coverUrl = remember {
         cover?.let {
             it.fileName?.let { fileName ->
-                DexUtils.getCoverUrl(manga.id, fileName, CoverSize.Small)
+                DexUtils.getCoverUrl(manga.id, fileName, DexCoverSize.Small)
             }
         }
     }
@@ -90,7 +90,7 @@ fun MangaCard(manga: MangoManga, cover: MangoCover?, onClick: (MangoManga) -> Un
 @Composable
 fun MangaCardRow(
     mangoNavigator: MangoNavigator,
-    data: LiveData<Result<List<MangoFulfilledManga>>>,
+    data: LiveData<RibaResult<List<RibaFulfilledManga>>>,
     title: String
 ) {
     val result by data.observeAsState()
@@ -107,12 +107,12 @@ fun MangaCardRow(
             FlexibleIndicator(height = 250.dp)
         }
 
-        if (result is Result.Error) {
-            FlexibleErrorReceiver((result as Result.Error).error)
+        if (result is RibaResult.Error) {
+            FlexibleErrorReceiver((result as RibaResult.Error).error)
         }
 
-        if (result is Result.Success) {
-            val mangaList = (result as Result.Success).data
+        if (result is RibaResult.Success) {
+            val mangaList = (result as RibaResult.Success).data
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(mangaList.size) { index ->

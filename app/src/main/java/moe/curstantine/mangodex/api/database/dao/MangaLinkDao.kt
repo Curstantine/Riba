@@ -1,22 +1,22 @@
 package moe.curstantine.mangodex.api.database.dao
 
 import androidx.room.*
-import moe.curstantine.mangodex.api.mangodex.models.MangoMangaLink
+import moe.curstantine.mangodex.api.riba.models.RibaMangaLink
 
 @Dao
 interface MangaLinkDao {
     @Query("SELECT * FROM manga_links WHERE mangaId = :mangaId")
-    suspend fun get(mangaId: String): MangoMangaLink?
+    suspend fun get(mangaId: String): RibaMangaLink?
 
     @Query("SELECT * FROM manga_links WHERE mangaId IN (:mangaIds)")
-    suspend fun get(mangaIds: List<String>): List<MangoMangaLink>
+    suspend fun get(mangaIds: List<String>): List<RibaMangaLink>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(manga: MangoMangaLink)
+    suspend fun insert(manga: RibaMangaLink)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(manga: List<MangoMangaLink>)
+    suspend fun insert(manga: List<RibaMangaLink>)
 
     @Delete
-    suspend fun delete(manga: MangoMangaLink)
+    suspend fun delete(manga: RibaMangaLink)
 }
