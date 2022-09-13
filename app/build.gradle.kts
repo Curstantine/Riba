@@ -1,5 +1,5 @@
 object AppConfig {
-    const val applicationId = "moe.curstantine.mangodex"
+    const val applicationId = "moe.curstantine.riba"
     const val versionCode = 1
     const val versionName = "1.0"
 
@@ -45,11 +45,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_16
+        targetCompatibility = JavaVersion.VERSION_16
     }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "16"
     }
 
     buildFeatures {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="moe.curstantine.mangodex">
+    package="moe.curstantine.riba">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,7 +16,7 @@
         android:theme="@style/Theme.MangoDex"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="moe.curstantine.riba.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MangoDex">
             <intent-filter>
