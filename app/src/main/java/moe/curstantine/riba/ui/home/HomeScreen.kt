@@ -13,7 +13,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.APIService
 import moe.curstantine.riba.api.mangadex.DexConstants
@@ -57,7 +56,6 @@ class HomeViewModel : ViewModel() {
     private fun loadSeasonal() {
         viewModelScope.launch(Dispatchers.IO) {
             lateinit var seasonalTitleIds: List<String>
-            lateinit var seasonalManga: RibaResult<List<RibaFulFilledManga>>
 
             val localSeasonalList = APIService.database.list().get(DexConstants.SEASONAL_LIST)
             if (localSeasonalList != null) {
@@ -69,38 +67,35 @@ class HomeViewModel : ViewModel() {
                     seasonalTitleIds = seasonalList.data.data.relationships
                         .filter { relay -> relay.type == DexEntityType.Manga }
                         .map { relay -> relay.id }
-                }
-
-                if (seasonalList is RibaResult.Error) {
-                    withContext(Dispatchers.Main) {
-                        seasonal.value = seasonalList
-                    }
-
-                    return@launch
+                } else if (seasonalList is RibaResult.Error) {
+                    return@launch seasonal.postValue(seasonalList)
                 }
             }
 
             val localSeasonalManga = APIService.database.manga().get(seasonalTitleIds)
             if (localSeasonalManga.isNotEmpty()) {
-                seasonalManga = RibaResult.Success(localSeasonalManga.map {
-                    RibaFulFilledManga(
-                        manga = it,
-                        cover = it.coverId?.let { coverId ->
-                            APIService.database.cover().get(coverId)
-                        },
-                        authors = null,
-                        artists = null,
-                    )
-                })
-            } else {
-                val serverSeasonalManga = APIService.mangadex.getManga(
-                    ids = seasonalTitleIds,
-                    includes = listOf(DexEntityType.CoverArt),
-                    limit = seasonalTitleIds.size
+                return@launch seasonal.postValue(
+                    RibaResult.Success(localSeasonalManga.map {
+                        RibaFulFilledManga(
+                            manga = it,
+                            cover = it.coverId?.let { coverId ->
+                                APIService.database.cover().get(coverId)
+                            },
+                            authors = null,
+                            artists = null,
+                        )
+                    })
                 )
+            }
 
-                if (serverSeasonalManga is RibaResult.Success) {
-                    seasonalManga = RibaResult.Success(serverSeasonalManga.data.data.map { manga ->
+            val serverSeasonalManga = APIService.mangadex.getManga(
+                ids = seasonalTitleIds,
+                includes = listOf(DexEntityType.CoverArt),
+                limit = seasonalTitleIds.size
+            )
+            if (serverSeasonalManga is RibaResult.Success) {
+                return@launch seasonal.postValue(
+                    RibaResult.Success(serverSeasonalManga.data.data.map { manga ->
                         RibaFulFilledManga(
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
@@ -110,11 +105,9 @@ class HomeViewModel : ViewModel() {
                             artists = null,
                         )
                     })
-                }
-            }
-
-            withContext(Dispatchers.Main) {
-                seasonal.value = seasonalManga
+                )
+            } else if (serverSeasonalManga is RibaResult.Error) {
+                return@launch seasonal.postValue(serverSeasonalManga)
             }
         }
     }
@@ -126,9 +119,9 @@ class HomeViewModel : ViewModel() {
                 includes = listOf(DexEntityType.CoverArt)
             )
 
-            withContext(Dispatchers.Main) {
-                if (recentlyAddedList is RibaResult.Success) {
-                    val titles = recentlyAddedList.data.data.map { manga ->
+            if (recentlyAddedList is RibaResult.Success) {
+                return@launch recent.postValue(
+                    RibaResult.Success(recentlyAddedList.data.data.map { manga ->
                         RibaFulFilledManga(
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
@@ -137,12 +130,10 @@ class HomeViewModel : ViewModel() {
                             authors = null,
                             artists = null,
                         )
-                    }
-
-                    recent.value = RibaResult.Success(titles)
-                } else {
-                    recent.value = recentlyAddedList as RibaResult.Error
-                }
+                    })
+                )
+            } else if (recentlyAddedList is RibaResult.Error) {
+                return@launch recent.postValue(recentlyAddedList)
             }
         }
     }
