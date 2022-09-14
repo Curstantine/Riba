@@ -5,11 +5,11 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class DexErrorResponse(
     val result: DexResult,
-    val errors: List<DexError>
+    val errors: List<DexErrorAttributes>
 )
 
 @JsonClass(generateAdapter = true)
-data class DexError(
+data class DexErrorAttributes(
     val id: String,
     val status: Int,
     val title: String,

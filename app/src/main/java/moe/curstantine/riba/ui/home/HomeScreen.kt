@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,9 +17,13 @@ import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.APIService
 import moe.curstantine.riba.api.mangadex.DexConstants
-import moe.curstantine.riba.api.mangadex.models.*
+import moe.curstantine.riba.api.mangadex.models.DexEntityType
+import moe.curstantine.riba.api.mangadex.models.DexQueryOrderProperty
+import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
+import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
+import moe.curstantine.riba.api.mangadex.models.toMangoManga
 import moe.curstantine.riba.api.riba.RibaResult
-import moe.curstantine.riba.api.riba.models.RibaFulfilledManga
+import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.manga.MangaCardRow
 
@@ -31,17 +39,17 @@ fun HomeScreen(
 }
 
 class HomeViewModel : ViewModel() {
-    fun getSeasonal(): LiveData<RibaResult<List<RibaFulfilledManga>>> = seasonal
-    fun getRecent(): LiveData<RibaResult<List<RibaFulfilledManga>>> = recent
+    fun getSeasonal(): LiveData<RibaResult<List<RibaFulFilledManga>>> = seasonal
+    fun getRecent(): LiveData<RibaResult<List<RibaFulFilledManga>>> = recent
 
-    private val seasonal: MutableLiveData<RibaResult<List<RibaFulfilledManga>>> by lazy {
-        MutableLiveData<RibaResult<List<RibaFulfilledManga>>>().also {
+    private val seasonal: MutableLiveData<RibaResult<List<RibaFulFilledManga>>> by lazy {
+        MutableLiveData<RibaResult<List<RibaFulFilledManga>>>().also {
             loadSeasonal()
         }
     }
 
-    private val recent: MutableLiveData<RibaResult<List<RibaFulfilledManga>>> by lazy {
-        MutableLiveData<RibaResult<List<RibaFulfilledManga>>>().also {
+    private val recent: MutableLiveData<RibaResult<List<RibaFulFilledManga>>> by lazy {
+        MutableLiveData<RibaResult<List<RibaFulFilledManga>>>().also {
             loadRecent()
         }
     }
@@ -49,7 +57,7 @@ class HomeViewModel : ViewModel() {
     private fun loadSeasonal() {
         viewModelScope.launch(Dispatchers.IO) {
             lateinit var seasonalTitleIds: List<String>
-            lateinit var seasonalManga: RibaResult<List<RibaFulfilledManga>>
+            lateinit var seasonalManga: RibaResult<List<RibaFulFilledManga>>
 
             val localSeasonalList = APIService.database.list().get(DexConstants.SEASONAL_LIST)
             if (localSeasonalList != null) {
@@ -75,7 +83,7 @@ class HomeViewModel : ViewModel() {
             val localSeasonalManga = APIService.database.manga().get(seasonalTitleIds)
             if (localSeasonalManga.isNotEmpty()) {
                 seasonalManga = RibaResult.Success(localSeasonalManga.map {
-                    RibaFulfilledManga(
+                    RibaFulFilledManga(
                         manga = it,
                         cover = it.coverId?.let { coverId ->
                             APIService.database.cover().get(coverId)
@@ -93,7 +101,7 @@ class HomeViewModel : ViewModel() {
 
                 if (serverSeasonalManga is RibaResult.Success) {
                     seasonalManga = RibaResult.Success(serverSeasonalManga.data.data.map { manga ->
-                        RibaFulfilledManga(
+                        RibaFulFilledManga(
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
                                 .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }
@@ -121,7 +129,7 @@ class HomeViewModel : ViewModel() {
             withContext(Dispatchers.Main) {
                 if (recentlyAddedList is RibaResult.Success) {
                     val titles = recentlyAddedList.data.data.map { manga ->
-                        RibaFulfilledManga(
+                        RibaFulFilledManga(
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
                                 .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }

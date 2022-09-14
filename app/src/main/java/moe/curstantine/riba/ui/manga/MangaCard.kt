@@ -31,10 +31,10 @@ import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaCover
-import moe.curstantine.riba.api.riba.models.RibaFulfilledManga
+import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
-import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.nav.MangoRoute
+import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 
@@ -98,7 +98,7 @@ fun MangaCard(manga: RibaManga, cover: RibaCover?, onClick: (RibaManga) -> Unit)
 @Composable
 fun MangaCardRow(
     ribaNavigator: RibaNavigator,
-    data: LiveData<RibaResult<List<RibaFulfilledManga>>>,
+    data: LiveData<RibaResult<List<RibaFulFilledManga>>>,
     title: String
 ) {
     val result by data.observeAsState()
