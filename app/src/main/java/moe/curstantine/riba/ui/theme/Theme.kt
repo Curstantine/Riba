@@ -2,28 +2,26 @@ package moe.curstantine.riba.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import com.google.accompanist.systemuicontroller.SystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
+private val DarkColorScheme = darkColorScheme()
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-)
+private val LightColorScheme = lightColorScheme()
 
 @Composable
-fun MangoDexTheme(
-    systemUiController: SystemUiController,
+fun RibaTheme(
+    systemUiController: SystemUiController = rememberSystemUiController(),
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -42,8 +40,8 @@ fun MangoDexTheme(
     if (!view.isInEditMode) {
         DisposableEffect(systemUiController, darkTheme.not()) {
             systemUiController.setSystemBarsColor(
-                color = colorScheme.background,
-                darkIcons = darkTheme.not()
+                color = Color.Transparent,
+                darkIcons = darkTheme.not(),
             )
 
             onDispose {}

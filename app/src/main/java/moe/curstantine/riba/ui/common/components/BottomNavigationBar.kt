@@ -35,21 +35,21 @@ sealed class MangoNavigationBarItem(
     val label: @Composable () -> Unit,
 ) {
     object Home : MangoNavigationBarItem(
-        route = MangoRoute.Home,
+        route = MangoRoute.Vanilla.Home,
         icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
         label = { Text(stringResource(R.string.home)) },
     )
 
-    object Search : MangoNavigationBarItem(
-        route = MangoRoute.Search,
-        icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
-        label = { Text(stringResource(R.string.search)) },
-    )
-
     object Library : MangoNavigationBarItem(
-        route = MangoRoute.Library,
+        route = MangoRoute.Vanilla.Library,
         icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
         label = { Text(stringResource(R.string.library)) },
+    )
+
+    object Search : MangoNavigationBarItem(
+        route = MangoRoute.Vanilla.Search,
+        icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
+        label = { Text(stringResource(R.string.search)) },
     )
 
     companion object {

@@ -4,37 +4,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import moe.curstantine.riba.ui.home.HomeScreen
-import moe.curstantine.riba.ui.library.LibraryScreen
-import moe.curstantine.riba.ui.manga.MangaDetails
-import moe.curstantine.riba.ui.search.SearchScreen
+import moe.curstantine.riba.nav.graphs.baseGraph
+import moe.curstantine.riba.nav.graphs.vanillaGraph
+
 
 @Composable
 fun RibaNavHost(ribaNavigator: RibaNavigator, modifier: Modifier) {
-    NavHost(ribaNavigator.navController, startDestination = MangoRoute.Home.path, modifier) {
-        composable(MangoRoute.Home.path) {
-            HomeScreen(ribaNavigator)
-        }
-        composable(MangoRoute.Library.path) {
-            LibraryScreen(ribaNavigator)
-        }
-        composable(MangoRoute.Search.path) {
-            SearchScreen(ribaNavigator)
-        }
-        composable(MangoRoute.Manga.path) {
-            MangaDetails(ribaNavigator)
-        }
+    NavHost(
+        navController = ribaNavigator.navController,
+        startDestination = MangoRoute.Vanilla.route,
+        route = MangoRoute.route,
+        modifier = modifier
+    ) {
+        vanillaGraph(ribaNavigator)
+        baseGraph(ribaNavigator)
     }
 }
 
-class RibaNavigator(navController: NavHostController) {
-    var navController: NavHostController
 
-    init {
-        this.navController = navController
-    }
-
+class RibaNavigator(val navController: NavHostController) {
     fun currentRoute(): String? {
         return navController.currentDestination?.route
     }

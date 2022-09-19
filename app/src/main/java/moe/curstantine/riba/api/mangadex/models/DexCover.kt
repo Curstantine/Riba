@@ -20,15 +20,19 @@ data class DexRelatedCover(
     override val type: DexEntityType,
     val attributes: DexCoverAttributes?,
 ) : DexRelationship {
-    fun toMangoCover(): RibaCover = RibaCover(
+    fun toMangoCover(mangaId: String): RibaCover = RibaCover(
         id = id,
+        mangaId = mangaId,
+        volume = attributes?.volume,
         fileName = attributes?.fileName,
     )
 }
 
 fun DexCoverData.toMangoCover(): RibaCover = RibaCover(
     id = id,
-    fileName = attributes.fileName
+    mangaId = relationships.first { it.type == DexEntityType.Manga }.id,
+    volume = attributes.volume,
+    fileName = attributes.fileName,
 )
 
 

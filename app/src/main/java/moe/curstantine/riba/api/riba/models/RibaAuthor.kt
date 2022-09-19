@@ -13,4 +13,12 @@ data class RibaAuthor(
     @PrimaryKey val id: String,
     @ColumnInfo val name: String?,
     @ColumnInfo val description: String?
-)
+) {
+    companion object {
+        fun getDefault() = RibaAuthor(
+            "fc343004-569b-4750-aba0-05ab35efc17c",
+            "Hologfx",
+            "Holo"
+        )
+    }
+}

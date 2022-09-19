@@ -1,10 +1,17 @@
 package moe.curstantine.riba.ui.manga
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,9 +33,11 @@ import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaResultManga
 import moe.curstantine.riba.nav.RibaNavigator
+import moe.curstantine.riba.ui.common.components.FlexibleIndicator
+import moe.curstantine.riba.ui.theme.RibaTheme
 
 @Composable
-fun MangaDetails(
+fun MangaDetailScreen(
     ribaNavigator: RibaNavigator,
     viewModel: MangaDetailsViewModel = viewModel(factory = MangaDetailsViewModel.Companion.Factory)
 ) {
@@ -39,12 +48,36 @@ fun MangaDetails(
 
     val manga = viewModel.getDetails().observeAsState()
 
-    Column {
-        if (manga.value == null) {
-            Text("Loading...")
-        } else {
-            Text(manga.value!!.manga.unwrap()!!.title)
+    if (manga.value == null) {
+        FlexibleIndicator()
+    } else {
+        MangaDetailBody(manga.value!!)
+    }
+
+}
+
+@Composable
+fun MangaDetailBody(details: RibaResultManga) {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val list = (0..75).map { it.toString() }
+        items(count = list.size) {
+            Text(
+                text = list[it],
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
         }
+    }
+
+}
+
+@Preview
+@Composable
+fun MangaDetailPreview() {
+    RibaTheme {
+        MangaDetailBody(RibaResultManga.getDefault())
     }
 }
 
