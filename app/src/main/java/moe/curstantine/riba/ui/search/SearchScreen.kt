@@ -1,13 +1,17 @@
 package moe.curstantine.riba.ui.search
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.Modifier
 import moe.curstantine.riba.nav.RibaNavigator
 
 @Composable
-fun SearchScreen(ribaNavigator: RibaNavigator) {
-    Column {
+fun SearchScreen(ribaNavigator: RibaNavigator, paddingValues: State<PaddingValues>) {
+    Column(Modifier.padding(paddingValues.value)) {
         Text("Search")
     }
 }

@@ -1,7 +1,10 @@
 package moe.curstantine.riba.nav
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import moe.curstantine.riba.nav.graphs.baseGraph
@@ -9,15 +12,21 @@ import moe.curstantine.riba.nav.graphs.vanillaGraph
 
 
 @Composable
-fun RibaNavHost(ribaNavigator: RibaNavigator, modifier: Modifier) {
+fun RibaNavHost(ribaNavigator: RibaNavigator, paddingValues: PaddingValues) {
+    val paddingValue = remember { mutableStateOf(paddingValues) }
+
+    DisposableEffect(paddingValues) {
+        paddingValue.value = paddingValues
+        onDispose { }
+    }
+
     NavHost(
         navController = ribaNavigator.navController,
         startDestination = MangoRoute.Vanilla.route,
         route = MangoRoute.route,
-        modifier = modifier
     ) {
-        vanillaGraph(ribaNavigator)
-        baseGraph(ribaNavigator)
+        vanillaGraph(ribaNavigator, paddingValue)
+        baseGraph(ribaNavigator, paddingValue)
     }
 }
 

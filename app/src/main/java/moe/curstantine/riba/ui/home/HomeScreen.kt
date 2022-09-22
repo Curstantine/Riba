@@ -1,8 +1,13 @@
 package moe.curstantine.riba.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
@@ -10,7 +15,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
@@ -29,11 +33,18 @@ import moe.curstantine.riba.ui.manga.MangaCardRow
 @Composable
 fun HomeScreen(
     ribaNavigator: RibaNavigator,
-    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Companion.Factory)
+    paddingValues: State<PaddingValues>,
+    viewModel: HomeViewModel
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        MangaCardRow(ribaNavigator, viewModel.getSeasonal(), stringResource(R.string.seasonal))
-        MangaCardRow(ribaNavigator, viewModel.getRecent(), stringResource(R.string.recently_added))
+    Box(modifier = Modifier.padding(paddingValues.value)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            MangaCardRow(ribaNavigator, viewModel.getSeasonal(), stringResource(R.string.seasonal))
+            MangaCardRow(
+                ribaNavigator,
+                viewModel.getRecent(),
+                stringResource(R.string.recently_added)
+            )
+        }
     }
 }
 
@@ -147,4 +158,3 @@ class HomeViewModel : ViewModel() {
         }
     }
 }
-

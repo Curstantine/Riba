@@ -8,13 +8,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -41,22 +42,8 @@ class MainActivity : ComponentActivity() {
                 navBackStackEntry?.destination?.route ?: MangoRoute.Vanilla.Home.path
             )
 
-            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
             RibaTheme {
                 Scaffold(
-                    topBar = {
-                        AnimatedVisibility(
-                            route.path == MangoRoute.Base.Manga.path,
-                            exit = fadeOut() + shrinkVertically(),
-                            enter = fadeIn() + expandVertically()
-                        ) {
-                            SmallTopAppBar(
-                                title = {},
-                                scrollBehavior = scrollBehavior
-                            )
-                        }
-                    },
                     bottomBar = {
                         AnimatedVisibility(
                             route.routeType == RouteType.Default,
@@ -66,14 +53,7 @@ class MainActivity : ComponentActivity() {
                             MangoNavigationBar(ribaNavigator)
                         }
                     },
-                    content = {
-                        RibaNavHost(
-                            ribaNavigator,
-                            Modifier
-                                .padding(it)
-                                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                        )
-                    }
+                    content = { RibaNavHost(ribaNavigator, it) }
                 )
             }
         }
