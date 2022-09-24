@@ -19,6 +19,7 @@ typealias DexAuthorData = DexResponseData<DexAuthorAttributes>
 data class DexAuthorAttributes(
     val name: String,
     val biography: DexLocaleObject,
+    val version: Int,
 )
 
 @JsonClass(generateAdapter = true)
@@ -27,16 +28,18 @@ data class DexRelatedAuthor(
     override val type: DexEntityType,
     val attributes: DexAuthorAttributes?
 ) : DexRelationship {
-    fun toMangoAuthor(): RibaAuthor = RibaAuthor(
+    fun toRibaAuthor(): RibaAuthor = RibaAuthor(
         id = id,
         name = attributes?.name,
         description = attributes?.biography?.english,
+        version = attributes?.version ?: -1,
     )
 }
 
-fun DexAuthorData.toMangoAuthor(): RibaAuthor = RibaAuthor(
+fun DexAuthorData.toRibaAuthor(): RibaAuthor = RibaAuthor(
     id = id,
     name = attributes.name,
     description = attributes.biography.english,
+    version = attributes.version,
 )
 

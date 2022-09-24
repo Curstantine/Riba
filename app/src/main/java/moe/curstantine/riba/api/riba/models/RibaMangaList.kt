@@ -15,4 +15,6 @@ data class RibaMangaList(
     @ColumnInfo val name: String,
     @ColumnInfo val visibility: DexMDListVisibility,
     @ColumnInfo val titles: List<String>,
+    @ColumnInfo val userId: String,
+    @ColumnInfo val version: Int,
 )

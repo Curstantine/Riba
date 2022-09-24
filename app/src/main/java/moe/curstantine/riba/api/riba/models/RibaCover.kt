@@ -14,6 +14,7 @@ data class RibaCover(
     @ColumnInfo val mangaId: String,
     @ColumnInfo val volume: String?,
     @ColumnInfo val fileName: String?,
+    @ColumnInfo val version: Int,
 ) {
     companion object {
         fun getDefault() = RibaCover(
@@ -21,6 +22,7 @@ data class RibaCover(
             mangaId = "9c33607-9180-4ba6-b85c-e4b5faee7192",
             volume = null,
             fileName = "c18da525-e34f-4128-a696-4477b6ce6827.png",
+            version = 0
         )
     }
 }

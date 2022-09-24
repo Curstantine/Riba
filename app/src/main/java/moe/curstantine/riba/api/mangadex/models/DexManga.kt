@@ -13,6 +13,7 @@ data class DexMangaAttributes(
     val title: DexLocaleObject,
     val altTitles: List<DexLocaleObject>,
     val description: DexLocaleObject,
+    val version: Int,
 )
 
 @JsonClass(generateAdapter = true)
@@ -44,13 +45,15 @@ fun DexMangaData.toMangoManga(): RibaManga {
         }
     }
 
+    // TODO: Handle nullable title
     return RibaManga(
         id = id,
-        title = attributes.title.english!!,
+        title = attributes.title.english ?: attributes.title.japanese ?: attributes.title.japaneseRomanized ?: "N/A",
         altTitles = altTitles,
         description = description,
         artistIds = artistIds,
         authorIds = authorIds,
         coverId = coverId,
+        version = attributes.version
     )
 }

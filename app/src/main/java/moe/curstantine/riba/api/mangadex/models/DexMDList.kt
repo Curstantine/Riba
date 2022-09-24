@@ -11,6 +11,7 @@ typealias DexMDListData = DexResponseData<DexMDListAttributes>
 data class DexMDListAttributes(
     val name: String,
     val visibility: DexMDListVisibility,
+    val version : Int,
 )
 
 enum class DexMDListVisibility {
@@ -33,4 +34,6 @@ fun DexMDListData.toMangoList() = RibaMangaList(
     name = attributes.name,
     visibility = attributes.visibility,
     titles = relationships.filter { it.type == DexEntityType.Manga }.map { it.id },
+    userId = relationships.first { it.type == DexEntityType.User }.id,
+    version = attributes.version,
 )

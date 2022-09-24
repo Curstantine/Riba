@@ -1,6 +1,13 @@
 package moe.curstantine.riba.api.mangadex
 
-import moe.curstantine.riba.api.mangadex.models.*
+import moe.curstantine.riba.api.mangadex.models.DexAuthor
+import moe.curstantine.riba.api.mangadex.models.DexAuthorCollection
+import moe.curstantine.riba.api.mangadex.models.DexCover
+import moe.curstantine.riba.api.mangadex.models.DexEntityType
+import moe.curstantine.riba.api.mangadex.models.DexMDList
+import moe.curstantine.riba.api.mangadex.models.DexManga
+import moe.curstantine.riba.api.mangadex.models.DexMangaCollection
+import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -12,7 +19,12 @@ interface MangaDexService {
     suspend fun getAuthor(@Path("id") id: String): DexAuthor
 
     @GET("/author")
-    suspend fun getAuthor(@Path("ids[]") id: List<String>): DexAuthorCollection
+    suspend fun getAuthor(
+        @Query("ids[]") ids: List<String>?,
+        @Query("limit") limit: Int?,
+        @Query("offset") offset: Int?,
+        @Query("includes[]") includes: List<DexEntityType>?,
+    ): DexAuthorCollection
 
     @GET("/list/{id}")
     suspend fun getMDList(@Path("id") id: String): DexMDList

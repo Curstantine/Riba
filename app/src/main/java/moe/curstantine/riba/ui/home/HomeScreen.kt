@@ -111,7 +111,7 @@ class HomeViewModel : ViewModel() {
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
                                 .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }
-                                ?.let { (it as DexRelatedCover).toMangoCover(manga.id) },
+                                ?.let { (it as DexRelatedCover).toRibaCover(manga.id) },
                             authors = null,
                             artists = null,
                         )
@@ -137,7 +137,7 @@ class HomeViewModel : ViewModel() {
                             manga = manga.toMangoManga(),
                             cover = manga.relationships
                                 .firstOrNull { relay -> relay.type == DexEntityType.CoverArt }
-                                ?.let { (it as DexRelatedCover).toMangoCover(manga.id) },
+                                ?.let { (it as DexRelatedCover).toRibaCover(manga.id) },
                             authors = null,
                             artists = null,
                         )

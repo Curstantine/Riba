@@ -11,7 +11,10 @@
     <string name="md_lists">MDLists</string>
 
     <string name="no_title">No Title</string>
+    <string name="no_artists">No Valid Artists</string>
     <string name="no_cover">Cover Not Available</string>
 
     <string name="back">Back</string>
+    <string name="more">More</string>
+
 </resources>

@@ -12,6 +12,7 @@ typealias DexCoverData = DexResponseData<DexCoverAttributes>
 data class DexCoverAttributes(
     val fileName: String,
     val volume: String?,
+    val version: Int,
 )
 
 @JsonClass(generateAdapter = true)
@@ -20,19 +21,21 @@ data class DexRelatedCover(
     override val type: DexEntityType,
     val attributes: DexCoverAttributes?,
 ) : DexRelationship {
-    fun toMangoCover(mangaId: String): RibaCover = RibaCover(
+    fun toRibaCover(mangaId: String): RibaCover = RibaCover(
         id = id,
         mangaId = mangaId,
         volume = attributes?.volume,
         fileName = attributes?.fileName,
+        version = attributes?.version ?: -1,
     )
 }
 
-fun DexCoverData.toMangoCover(): RibaCover = RibaCover(
+fun DexCoverData.toRibaCover(): RibaCover = RibaCover(
     id = id,
     mangaId = relationships.first { it.type == DexEntityType.Manga }.id,
     volume = attributes.volume,
     fileName = attributes.fileName,
+    version = attributes.version,
 )
 
 

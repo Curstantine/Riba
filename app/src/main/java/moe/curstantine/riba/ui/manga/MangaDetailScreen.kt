@@ -1,13 +1,17 @@
 package moe.curstantine.riba.ui.manga
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +21,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -30,16 +39,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.APIService
+import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
-import moe.curstantine.riba.api.mangadex.models.toMangoCover
+import moe.curstantine.riba.api.mangadex.models.toRibaCover
 import moe.curstantine.riba.api.riba.RibaError
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
@@ -54,6 +70,7 @@ fun MangaDetailScreen(
     paddingValues: State<PaddingValues>,
     viewModel: MangaDetailsViewModel = viewModel(factory = MangaDetailsViewModel.Companion.Factory)
 ) {
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     viewModel.mangaId = remember {
         ribaNavigator.getArgument("id")
             ?: throw IllegalArgumentException("id parameter is missing!")
@@ -61,26 +78,29 @@ fun MangaDetailScreen(
 
     val manga = viewModel.getDetails().observeAsState()
     if (manga.value == null) FlexibleIndicator() else {
-        MangaDetailBody(ribaNavigator, paddingValues, manga.value!!)
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing),
+            onRefresh = { viewModel.fullRefresh() },
+            content = {
+                MangaDetailBody(ribaNavigator, paddingValues, manga.value!!)
+            }
+        )
     }
 }
 
 @Composable
 fun MangaDetailBody(
-    ribaNavigator: RibaNavigator,
-    paddingValues: State<PaddingValues>,
-    details: RibaResultManga
+    ribaNavigator: RibaNavigator, paddingValues: State<PaddingValues>, details: RibaResultManga
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     LazyColumn(
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .padding(paddingValues.value),
-        contentPadding = PaddingValues(top = 64.dp),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         val list = (0..75).map { it.toString() }
+
+        item { MangaDetailHeader(paddingValues, details) }
 
         items(list.size) {
             Text(
@@ -94,6 +114,53 @@ fun MangaDetailBody(
     }
 
     ScreenTopBar(ribaNavigator, scrollBehavior)
+
+}
+
+@Composable
+private fun MangaDetailHeader(
+    paddingValues: State<PaddingValues>, details: RibaResultManga
+) {
+    val typography = MaterialTheme.typography
+    val colorScheme = MaterialTheme.colorScheme
+
+    val artistNames = details.artists?.unwrap()?.map { it.name }?.joinToString(", ")
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(paddingValues.value)
+            .padding(top = 64.dp)
+            .padding(horizontal = 16.dp)
+            .heightIn(min = 280.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            MangaCover(
+                details.cover?.unwrap(),
+                maxHeight = 200.dp,
+                coverSize = DexCoverSize.Medium,
+                elevation = 6.dp,
+            )
+
+            Column {
+                Text(
+                    text = details.manga.unwrap()?.title ?: stringResource(R.string.no_title),
+                    style = typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+
+                Text(
+                    text = artistNames ?: stringResource(R.string.no_artists),
+                    style = typography.labelMedium.copy(
+                        color = colorScheme.onBackground.copy(alpha = 0.75F)
+                    )
+                )
+
+                // TODO: Handles favorites, scoring and etc
+            }
+        }
+
+
+    }
 }
 
 @Composable
@@ -107,18 +174,25 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
             titleContentColor = Color.Transparent
         ),
         actions = {
-            IconButton(
-                onClick = { ribaNavigator.popBackStack() },
-                content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) }
-            )
+            IconButton(onClick = { ribaNavigator.popBackStack() },
+                content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) })
 
             Spacer(Modifier.fillMaxWidth())
+
+            // TODO: Handle more
+            IconButton(onClick = { },
+                content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) })
         },
     )
 }
 
 class MangaDetailsViewModel : ViewModel() {
     lateinit var mangaId: String
+
+    private val _isRefreshing = MutableStateFlow(false)
+
+    val isRefreshing: StateFlow<Boolean>
+        get() = _isRefreshing.asStateFlow()
 
     fun getDetails(): LiveData<RibaResultManga> = details
 
@@ -131,13 +205,13 @@ class MangaDetailsViewModel : ViewModel() {
             // Manga is already fetched by the time we get here
             val localManga = APIService.database.manga().get(mangaId)!!
 
-            val artists: Deferred<RibaResult<List<RibaAuthor>>> = async {
+            val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
                 conditionallyGetAuthorType(localManga.artistIds, Dispatchers.IO)
             }
-            val authors: Deferred<RibaResult<List<RibaAuthor>>> = async {
+            val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
                 conditionallyGetAuthorType(localManga.authorIds, Dispatchers.IO)
             }
-            val cover: Deferred<RibaResult<RibaCover?>> = async {
+            val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
                 if (localManga.coverId == null) {
                     return@async RibaResult.Success(null)
                 }
@@ -149,9 +223,10 @@ class MangaDetailsViewModel : ViewModel() {
 
                 val remote = APIService.mangadex.getCover(localManga.coverId)
                 if (remote is RibaResult.Success) {
-                    return@async RibaResult.Success(remote.data.data.toMangoCover())
-                } else return@async remote as RibaResult.Error
-
+                    return@async RibaResult.Success(remote.data.data.toRibaCover())
+                } else {
+                    return@async remote as RibaResult.Error
+                }
             }
 
             details.postValue(
@@ -167,26 +242,26 @@ class MangaDetailsViewModel : ViewModel() {
     }
 
     private suspend fun conditionallyGetAuthorType(
-        ids: List<String>,
-        dispatcher: CoroutineDispatcher
+        ids: List<String>, dispatcher: CoroutineDispatcher
     ): RibaResult<List<RibaAuthor>> {
         return withContext(dispatcher) {
             try {
                 val local = APIService.database.author().get(ids)
                 val missingArtistIds = local.filter { it.name == null }.map { it.id }
 
-                if (missingArtistIds.isNotEmpty()) {
-                    return@withContext when (
-                        val missingArtists = APIService.mangadex.getAuthor(missingArtistIds)
-                    ) {
-                        is RibaResult.Error -> missingArtists
-                        is RibaResult.Success -> {
-                            RibaResult.Success(
-                                APIService.database.author().get(ids)
-                            )
-                        }
+                if (missingArtistIds.isNotEmpty()) return@withContext when (
+                    val missingArtists = APIService.mangadex.getAuthor(
+                        ids = missingArtistIds, forceInsert = true
+                    )
+                ) {
+                    is RibaResult.Error -> missingArtists
+                    is RibaResult.Success -> {
+                        RibaResult.Success(
+                            APIService.database.author().get(ids)
+                        )
                     }
                 }
+
 
                 return@withContext RibaResult.Success(local)
             } catch (e: Throwable) {
@@ -196,16 +271,23 @@ class MangaDetailsViewModel : ViewModel() {
     }
 
 
-    private fun fullRefresh() {
+    fun fullRefresh() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isRefreshing.emit(true)
+
             APIService.mangadex.getManga(
-                mangaId,
-                listOf(
+                id = mangaId,
+                includes = listOf(
                     DexEntityType.CoverArt,
                     DexEntityType.Artist,
                     DexEntityType.Author,
                 ),
+                forceInsert = true
             )
+
+            loadDetails()
+
+            _isRefreshing.emit(false)
         }
     }
 
@@ -217,4 +299,14 @@ class MangaDetailsViewModel : ViewModel() {
             }
         }
     }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun DetailBodyPreview() {
+    MangaDetailBody(
+        RibaNavigator(rememberNavController()),
+        remember { mutableStateOf(PaddingValues()) },
+        RibaResultManga.getDefault(),
+    )
 }
