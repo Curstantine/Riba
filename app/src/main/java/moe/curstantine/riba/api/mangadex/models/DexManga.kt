@@ -13,6 +13,7 @@ data class DexMangaAttributes(
     val title: DexLocaleObject,
     val altTitles: List<DexLocaleObject>,
     val description: DexLocaleObject,
+    val contentRating: DexContentRating,
     val version: Int,
 )
 
@@ -54,6 +55,7 @@ fun DexMangaData.toMangoManga(): RibaManga {
         artistIds = artistIds,
         authorIds = authorIds,
         coverId = coverId,
-        version = attributes.version
+        version = attributes.version,
+        contentRating = attributes.contentRating,
     )
 }

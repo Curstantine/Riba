@@ -13,7 +13,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -36,11 +35,10 @@ fun MangaCover(
     elevation: Dp = 4.dp,
     onClick: () -> Unit = {}
 ) {
-    val coverUrl = remember {
-        cover?.fileName?.let { fileName ->
-            DexUtils.getCoverUrl(cover.mangaId, fileName, coverSize)
-        }
+    val coverUrl: String? = cover?.fileName?.let { fileName ->
+        DexUtils.getCoverUrl(cover.mangaId, fileName, coverSize)
     }
+
 
     Box(
         Modifier
@@ -48,32 +46,32 @@ fun MangaCover(
             .widthIn(max = maxHeight.times(0.75F)), contentAlignment = Alignment.Center
     ) {
         ElevatedCard(
+            enabled = coverUrl != null,
             onClick = { onClick.invoke() },
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(0.dp, maxHeight),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation),
-            content = {
-                if (coverUrl == null) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stringResource(R.string.no_cover),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F)
-                            ),
-                        )
-                    }
-                } else {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxWidth(),
-                        model = coverUrl,
-                        contentScale = ContentScale.FillWidth,
-                        contentDescription = "Cover for ${cover?.mangaId}",
+        ) {
+            if (coverUrl == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(R.string.no_cover),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F)
+                        ),
                     )
                 }
+            } else {
+                AsyncImage(
+                    modifier = Modifier.fillMaxWidth(),
+                    model = coverUrl,
+                    contentScale = ContentScale.FillWidth,
+                    contentDescription = "Cover for ${cover?.mangaId}",
+                )
             }
-        )
+        }
     }
 }
 

@@ -1,7 +1,8 @@
 package moe.curstantine.riba.api.database
 
 import androidx.room.TypeConverter
-import moe.curstantine.riba.api.mangadex.models.DexMDListVisibility
+import moe.curstantine.riba.api.mangadex.models.DexContentRating
+import moe.curstantine.riba.api.mangadex.models.DexListVisibility
 
 class Converters {
     @TypeConverter
@@ -11,12 +12,14 @@ class Converters {
     fun stringToList(string: String): List<String> = string.split(",")
 
     @TypeConverter
-    fun dexMDListVisibilityToString(visibility: DexMDListVisibility): String = visibility.toString()
+    fun dexVisibilityToStr(visibility: DexListVisibility): String = visibility.toString()
 
     @TypeConverter
-    fun stringToDexMDListVisibility(visibility: String) = when (visibility) {
-        "public" -> DexMDListVisibility.Public
-        "private" -> DexMDListVisibility.Private
-        else -> Exception("Unknown visibility: $visibility")
-    }
+    fun strToDexVisibility(visibility: String) = DexListVisibility.fromString(visibility)
+
+    @TypeConverter
+    fun dexRatingToStr(rating: DexContentRating): String = rating.toString()
+
+    @TypeConverter
+    fun strToDexRating(rating: String) = DexContentRating.fromString(rating)
 }

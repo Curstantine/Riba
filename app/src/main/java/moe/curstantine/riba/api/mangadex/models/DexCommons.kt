@@ -19,6 +19,50 @@ enum class DexResponseType {
     Collection
 }
 
+enum class DexContentRating {
+    @field:Json(name = "safe")
+    Safe,
+
+    @field:Json(name = "suggestive")
+    Suggestive,
+
+    @field:Json(name = "erotica")
+    Erotica,
+
+    @field:Json(name = "pornographic")
+    Pornographic;
+
+    override fun toString(): String {
+        return when (this) {
+            Safe -> "safe"
+            Suggestive -> "suggestive"
+            Erotica -> "erotica"
+            Pornographic -> "pornographic"
+        }
+    }
+
+    fun toHumanString(): String {
+        return when (this) {
+            Safe -> "Safe"
+            Suggestive -> "Suggestive"
+            Erotica -> "Erotica"
+            Pornographic -> "Pornographic"
+        }
+    }
+
+    companion object {
+        fun fromString(string: String): DexContentRating {
+            return when (string) {
+                "safe" -> Safe
+                "suggestive" -> Suggestive
+                "erotica" -> Erotica
+                "pornographic" -> Pornographic
+                else -> throw IllegalArgumentException("Unknown content rating: $string")
+            }
+        }
+    }
+}
+
 enum class DexEntityType {
     @field:Json(name = "author")
     Author,

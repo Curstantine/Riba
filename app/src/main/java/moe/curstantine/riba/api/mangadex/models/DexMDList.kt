@@ -10,11 +10,11 @@ typealias DexMDListData = DexResponseData<DexMDListAttributes>
 @JsonClass(generateAdapter = true)
 data class DexMDListAttributes(
     val name: String,
-    val visibility: DexMDListVisibility,
+    val visibility: DexListVisibility,
     val version : Int,
 )
 
-enum class DexMDListVisibility {
+enum class DexListVisibility {
     @Json(name = "public")
     Public,
 
@@ -25,6 +25,16 @@ enum class DexMDListVisibility {
         return when (this) {
             Public -> "public"
             Private -> "private"
+        }
+    }
+
+    companion object {
+        fun fromString(string: String): DexListVisibility {
+            return when (string) {
+                "public" -> Public
+                "private" -> Private
+                else -> throw IllegalArgumentException("Unknown visibility: $string")
+            }
         }
     }
 }

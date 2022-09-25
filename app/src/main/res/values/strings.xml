@@ -6,15 +6,19 @@
     <string name="library">Library</string>
     <string name="settings">Settings</string>
 
+    <string name="md_lists">MDLists</string>
     <string name="seasonal">Seasonal</string>
     <string name="recently_added">Recently Added</string>
-    <string name="md_lists">MDLists</string>
 
     <string name="no_title">No Title</string>
-    <string name="no_artists">No Valid Artists</string>
+    <string name="no_author_artists">No Valid Authors/Artists</string>
     <string name="no_cover">Cover Not Available</string>
 
     <string name="back">Back</string>
     <string name="more">More</string>
+
+    <string name="content_rating">Content Rating</string>
+    <string name="authors">Authors</string>
+    <string name="artists">Artists</string>
 
 </resources>

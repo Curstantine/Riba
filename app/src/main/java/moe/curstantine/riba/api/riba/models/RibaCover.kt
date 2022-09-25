@@ -21,7 +21,7 @@ data class RibaCover(
             id = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f",
             mangaId = "9c33607-9180-4ba6-b85c-e4b5faee7192",
             volume = null,
-            fileName = "c18da525-e34f-4128-a696-4477b6ce6827.png",
+            fileName = null,
             version = 0
         )
     }
