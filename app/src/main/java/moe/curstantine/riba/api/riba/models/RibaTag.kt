@@ -10,12 +10,14 @@ data class RibaTag(
     @PrimaryKey val id: String,
     @ColumnInfo val name: String?,
     @ColumnInfo val group: DexMangaTagGroup,
-) {
+    @ColumnInfo val version: Int,
+    ) {
     companion object {
         fun getDefault() = RibaTag(
             id = "0",
             name = "Misc",
             group = DexMangaTagGroup.Format,
+            version = 0,
         )
     }
 }

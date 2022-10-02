@@ -12,6 +12,7 @@ typealias DexTagData = DexResponseData<DexTagAttributes>
 data class DexTagAttributes(
     val name: DexLocaleObject,
     val group: DexMangaTagGroup,
+    val version: Int,
 )
 
 fun DexTagData.toRibaTag() = RibaTag(

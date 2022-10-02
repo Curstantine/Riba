@@ -10,12 +10,15 @@ import moe.curstantine.riba.api.mangadex.models.DexMDListData
 import moe.curstantine.riba.api.mangadex.models.DexMangaData
 import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
 import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
-import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
-import moe.curstantine.riba.api.mangadex.models.toRibaManga
+import moe.curstantine.riba.api.mangadex.models.DexTagData
 import moe.curstantine.riba.api.mangadex.models.toRibaAuthor
 import moe.curstantine.riba.api.mangadex.models.toRibaCover
+import moe.curstantine.riba.api.mangadex.models.toRibaManga
+import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
+import moe.curstantine.riba.api.mangadex.models.toRibaTag
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
+import moe.curstantine.riba.api.riba.models.RibaTag
 
 class DexDatabaseHandler(private val database: RibaDatabase) {
 
@@ -28,8 +31,7 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
      *
      * Use [force] to force remove the guard.
      *
-     * Also see:
-     *  - [insertAuthor] with [DexAuthorData] signature.
+     * @see [insertAuthor] with [DexAuthorData] signature.
      */
     private suspend fun insertAuthor(author: RibaAuthor, force: Boolean = false) = coroutineScope {
         val oldAuthor = database.author().get(author.id)
@@ -51,8 +53,7 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
      *
      * Use [force] to force remove the guard.
      *
-     * Also see:
-     *  - [insertAuthor] with [RibaAuthor] signature.
+     * @see [insertAuthor] with [RibaAuthor] signature.
      */
     suspend fun insertAuthor(author: DexAuthorData, force: Boolean = false) =
         insertAuthor(author.toRibaAuthor(), force)
@@ -66,8 +67,7 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
      *
      * Use [force] to force remove the guard.
      *
-     * Also see:
-     *  - [insertCover] with [DexCoverData] signature.
+     * @see [insertCover] with [DexCoverData] signature.
      */
     private suspend fun insertCover(cover: RibaCover, force: Boolean = false) = coroutineScope {
         val oldCover = database.cover().get(cover.id)
@@ -89,11 +89,46 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
      *
      * Use [force] to force remove the guard.
      *
-     * Also see:
-     *  - [insertCover] with [RibaCover] signature.
+     * @see [insertCover] with [RibaCover] signature.
      */
     suspend fun insertCover(cover: DexCoverData, force: Boolean = false) =
         insertCover(cover.toRibaCover(), force)
+
+    /**
+     * Inserts a [RibaTag] into the database.
+     *
+     * Guards against inserting a tag with the same version as in the database,
+     * this guard will take place regardless whether the already existing tag has
+     * higher null values or not.
+     *
+     * Use [force] to force remove the guard.
+     *
+     * @see [insertTag] with [DexTagData] signature.
+     */
+    private suspend fun insertTag(tag: RibaTag, force: Boolean = false) = coroutineScope {
+        val oldTag = database.tag().get(tag.id)
+
+        // We don't want to insert tags with the same version.
+        if (force.not() && oldTag != null && oldTag.version >= tag.version) {
+            return@coroutineScope
+        }
+
+        launch { database.tag().insert(tag) }
+    }
+
+    /**
+     * Inserts a [DexTagData] into the database.
+     *
+     * Guards against inserting a tag with the same version as in the database,
+     * this guard will take place regardless whether the already existing tag has
+     * higher null values or not.
+     *
+     * Use [force] to force remove the guard.
+     *
+     * @see [insertTag] with [RibaTag] signature.
+     */
+    suspend fun insertTag(tag: DexTagData, force: Boolean = false) =
+        insertTag(tag.toRibaTag(), force)
 
 
     /**
@@ -132,6 +167,7 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
 
             cover?.let { insertCover(it) }
             authors.forEach { insertAuthor(it) }
+            manga.attributes.tags.forEach { insertTag(it) }
         }
     }
 
