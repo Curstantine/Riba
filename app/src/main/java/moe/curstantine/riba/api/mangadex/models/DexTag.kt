@@ -19,4 +19,5 @@ fun DexTagData.toRibaTag() = RibaTag(
     id = id,
     name = attributes.name.let { it.english ?: it.japaneseRomanized ?: it.japanese },
     group = attributes.group,
+    version = attributes.version,
 )

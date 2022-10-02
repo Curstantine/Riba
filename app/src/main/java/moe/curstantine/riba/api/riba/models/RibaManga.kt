@@ -38,7 +38,7 @@ data class RibaManga(
                 "fc343004-569b-4750-aba0-05ab35efc17c"
             ),
             authorIds = listOf("fc343004-569b-4750-aba0-05ab35efc17c"),
-            tagIds = listOf(),
+            tagIds = listOf("423e2eae-a7a2-4a8b-ac03-a8351462d71d"),
             coverId = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f",
             version = 0
         )

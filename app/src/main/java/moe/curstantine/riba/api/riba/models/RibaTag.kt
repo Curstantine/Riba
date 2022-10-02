@@ -14,9 +14,9 @@ data class RibaTag(
     ) {
     companion object {
         fun getDefault() = RibaTag(
-            id = "0",
-            name = "Misc",
-            group = DexMangaTagGroup.Format,
+            id = "423e2eae-a7a2-4a8b-ac03-a8351462d71d",
+            name = "Romance",
+            group = DexMangaTagGroup.Genre,
             version = 0,
         )
     }
