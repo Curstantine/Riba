@@ -63,7 +63,6 @@ import moe.curstantine.riba.api.APIService
 import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.toRibaCover
-import moe.curstantine.riba.api.riba.RibaError
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
@@ -161,7 +160,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
 
             Column {
                 Text(
-                    text = manga.title,
+                    text = manga.title ?: stringResource(R.string.no_title),
                     style = typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         fontFamily = Rubik
@@ -286,7 +285,7 @@ class MangaDetailsViewModel : ViewModel() {
 
                 val remote = APIService.mangadex.getCover(localManga.coverId)
                 if (remote is RibaResult.Success) {
-                    return@async RibaResult.Success(remote.data.data.toRibaCover())
+                    return@async RibaResult.Success(remote.value.data.toRibaCover())
                 } else {
                     return@async remote as RibaResult.Error
                 }
@@ -308,28 +307,23 @@ class MangaDetailsViewModel : ViewModel() {
         ids: List<String>, dispatcher: CoroutineDispatcher
     ): RibaResult<List<RibaAuthor>> {
         return withContext(dispatcher) {
-            try {
-                val local = APIService.database.author().get(ids)
-                val missingArtistIds = local.filter { it.name == null }.map { it.id }
+            val local = APIService.database.author().get(ids)
+            val missingArtistIds = local.filter { it.name == null }.map { it.id }
 
-                if (missingArtistIds.isNotEmpty()) return@withContext when (
-                    val missingArtists = APIService.mangadex.getAuthor(
-                        ids = missingArtistIds, forceInsert = true
-                    )
+            if (missingArtistIds.isNotEmpty()) {
+                return@withContext when (val missing =
+                    APIService.mangadex.getAuthor(ids = missingArtistIds, forceInsert = true)
                 ) {
-                    is RibaResult.Error -> missingArtists
-                    is RibaResult.Success -> {
-                        RibaResult.Success(
-                            APIService.database.author().get(ids)
-                        )
-                    }
+                    is RibaResult.Error -> missing
+                    is RibaResult.Success -> RibaResult.Success(
+                        APIService.database.author().get(ids)
+                    )
+
                 }
-
-
-                return@withContext RibaResult.Success(local)
-            } catch (e: Throwable) {
-                return@withContext RibaResult.Error(RibaError.tryHandle(e))
             }
+
+
+            return@withContext RibaResult.Success(local)
         }
     }
 

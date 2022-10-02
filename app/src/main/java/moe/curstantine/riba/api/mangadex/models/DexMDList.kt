@@ -39,7 +39,7 @@ enum class DexListVisibility {
     }
 }
 
-fun DexMDListData.toMangoList() = RibaMangaList(
+fun DexMDListData.toRibaMangaList() = RibaMangaList(
     id = id,
     name = attributes.name,
     visibility = attributes.visibility,
@@ -47,3 +47,10 @@ fun DexMDListData.toMangoList() = RibaMangaList(
     userId = relationships.first { it.type == DexEntityType.User }.id,
     version = attributes.version,
 )
+
+/**
+ * Depends on [DexMDListData]'s [DexRelationship]
+ */
+fun DexMDListData.getRibaMangaList() {
+
+}

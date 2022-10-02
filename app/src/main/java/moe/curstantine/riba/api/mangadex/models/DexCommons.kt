@@ -2,7 +2,9 @@ package moe.curstantine.riba.api.mangadex.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import moe.curstantine.riba.api.mangadex.DexUtils
 
+@Suppress("unused")
 enum class DexResult {
     @field:Json(name = "ok")
     Ok,
@@ -11,6 +13,7 @@ enum class DexResult {
     Error
 }
 
+@Suppress("unused")
 enum class DexResponseType {
     @field:Json(name = "entity")
     Entity,
@@ -19,50 +22,7 @@ enum class DexResponseType {
     Collection
 }
 
-enum class DexContentRating {
-    @field:Json(name = "safe")
-    Safe,
-
-    @field:Json(name = "suggestive")
-    Suggestive,
-
-    @field:Json(name = "erotica")
-    Erotica,
-
-    @field:Json(name = "pornographic")
-    Pornographic;
-
-    override fun toString(): String {
-        return when (this) {
-            Safe -> "safe"
-            Suggestive -> "suggestive"
-            Erotica -> "erotica"
-            Pornographic -> "pornographic"
-        }
-    }
-
-    fun toHumanString(): String {
-        return when (this) {
-            Safe -> "Safe"
-            Suggestive -> "Suggestive"
-            Erotica -> "Erotica"
-            Pornographic -> "Pornographic"
-        }
-    }
-
-    companion object {
-        fun fromString(string: String): DexContentRating {
-            return when (string) {
-                "safe" -> Safe
-                "suggestive" -> Suggestive
-                "erotica" -> Erotica
-                "pornographic" -> Pornographic
-                else -> throw IllegalArgumentException("Unknown content rating: $string")
-            }
-        }
-    }
-}
-
+@Suppress("unused")
 enum class DexEntityType {
     @field:Json(name = "author")
     Author,
@@ -91,19 +51,8 @@ enum class DexEntityType {
     @field:Json(name = "scanlation_group")
     ScanlationGroup;
 
-    override fun toString(): String {
-        return when (this) {
-            Author -> "author"
-            Artist -> "artist"
-            Chapter -> "chapter"
-            CustomList -> "custom_list"
-            CoverArt -> "cover_art"
-            User -> "user"
-            Tag -> "tag"
-            Manga -> "manga"
-            ScanlationGroup -> "scanlation_group"
-        }
-    }
+    override fun toString(): String = DexUtils.toNormalizedString(name)
+    fun toTitleCase(): String = DexUtils.toTitleCase(name)
 }
 
 @JsonClass(generateAdapter = true)
@@ -117,17 +66,6 @@ data class DexLocaleObject(
     @field:Json(name = "ja-ro")
     val japaneseRomanized: String?,
 )
-
-interface DexRelationship {
-    val id: String
-    val type: DexEntityType
-}
-
-@JsonClass(generateAdapter = true)
-data class DexRelationshipImpl(
-    override val id: String,
-    override val type: DexEntityType
-) : DexRelationship
 
 
 @JsonClass(generateAdapter = true)

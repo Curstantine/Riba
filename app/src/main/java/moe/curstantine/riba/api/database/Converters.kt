@@ -3,6 +3,7 @@ package moe.curstantine.riba.api.database
 import androidx.room.TypeConverter
 import moe.curstantine.riba.api.mangadex.models.DexContentRating
 import moe.curstantine.riba.api.mangadex.models.DexListVisibility
+import moe.curstantine.riba.api.mangadex.models.DexMangaTagGroup
 
 class Converters {
     @TypeConverter
@@ -22,4 +23,10 @@ class Converters {
 
     @TypeConverter
     fun strToDexRating(rating: String) = DexContentRating.fromString(rating)
+
+    @TypeConverter
+    fun dexTagGroupToString(group: DexMangaTagGroup): String = group.toString()
+
+    @TypeConverter
+    fun stringToDexTagGroup(group: String): DexMangaTagGroup = DexMangaTagGroup.fromString(group)
 }

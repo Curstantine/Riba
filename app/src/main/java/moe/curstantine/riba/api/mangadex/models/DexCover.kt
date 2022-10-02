@@ -15,6 +15,17 @@ data class DexCoverAttributes(
     val version: Int,
 )
 
+fun DexCoverData.toRibaCover(): RibaCover = RibaCover(
+    id = id,
+    mangaId = relationships.first { it.type == DexEntityType.Manga }.id,
+    volume = attributes.volume,
+    fileName = attributes.fileName,
+    version = attributes.version,
+)
+
+/**
+ * [DexRelationship] that contains a [DexCover]
+ */
 @JsonClass(generateAdapter = true)
 data class DexRelatedCover(
     override val id: String,
@@ -29,13 +40,4 @@ data class DexRelatedCover(
         version = attributes?.version ?: -1,
     )
 }
-
-fun DexCoverData.toRibaCover(): RibaCover = RibaCover(
-    id = id,
-    mangaId = relationships.first { it.type == DexEntityType.Manga }.id,
-    volume = attributes.volume,
-    fileName = attributes.fileName,
-    version = attributes.version,
-)
-
 

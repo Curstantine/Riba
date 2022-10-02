@@ -10,8 +10,8 @@ import moe.curstantine.riba.api.mangadex.models.DexMDListData
 import moe.curstantine.riba.api.mangadex.models.DexMangaData
 import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
 import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
-import moe.curstantine.riba.api.mangadex.models.toMangoList
-import moe.curstantine.riba.api.mangadex.models.toMangoManga
+import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
+import moe.curstantine.riba.api.mangadex.models.toRibaManga
 import moe.curstantine.riba.api.mangadex.models.toRibaAuthor
 import moe.curstantine.riba.api.mangadex.models.toRibaCover
 import moe.curstantine.riba.api.riba.models.RibaAuthor
@@ -113,7 +113,7 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
             return@coroutineScope
         }
 
-        launch { database.manga().insert(manga.toMangoManga()) }
+        launch { database.manga().insert(manga.toRibaManga()) }
         launch {
             var cover: RibaCover? = null
             val authors = mutableListOf<RibaAuthor>()
@@ -152,6 +152,6 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
             return@coroutineScope
         }
 
-        launch { database.list().insert(list.toMangoList()) }
+        launch { database.list().insert(list.toRibaMangaList()) }
     }
 }

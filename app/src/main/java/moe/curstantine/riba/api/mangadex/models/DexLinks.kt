@@ -4,6 +4,7 @@ import com.squareup.moshi.Json
 
 typealias DexLinks = Map<DexLink, String>
 
+@Suppress("unused")
 enum class DexLink {
     @Json(name = "al")
     AniList,

@@ -12,9 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
+import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
@@ -34,7 +36,7 @@ fun MangaCard(manga: RibaManga, cover: RibaCover?, onClick: (RibaManga) -> Unit)
     ) {
         MangaCover(cover, onClick = { onClick(manga) })
         Text(
-            text = manga.title,
+            text = manga.title ?: stringResource(R.string.no_title),
             maxLines = 2,
             style = MaterialTheme.typography.bodySmall,
             overflow = TextOverflow.Ellipsis
@@ -67,7 +69,7 @@ fun MangaCardRow(
         }
 
         if (result is RibaResult.Success) {
-            val mangaList = (result as RibaResult.Success).data
+            val mangaList = (result as RibaResult.Success).value
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(mangaList.size) { index ->

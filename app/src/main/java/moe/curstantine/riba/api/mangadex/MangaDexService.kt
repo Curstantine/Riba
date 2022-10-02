@@ -27,7 +27,10 @@ interface MangaDexService {
     ): DexAuthorCollection
 
     @GET("/list/{id}")
-    suspend fun getMDList(@Path("id") id: String): DexMDList
+    suspend fun getMDList(
+        @Path("id") id: String,
+        @Query("includes[]") includes: List<DexEntityType>?
+    ): DexMDList
 
     @GET("/cover/{id}")
     suspend fun getCover(@Path("id") id: String): DexCover

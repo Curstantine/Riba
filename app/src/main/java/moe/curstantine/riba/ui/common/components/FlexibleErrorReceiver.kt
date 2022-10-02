@@ -2,7 +2,13 @@ package moe.curstantine.riba.ui.common.components
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,10 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
-import moe.curstantine.riba.api.riba.RibaError
+import moe.curstantine.riba.api.riba.RibaIntlError
 
 @Composable
-fun FlexibleErrorReceiver(error: RibaError) {
+fun FlexibleErrorReceiver(error: RibaIntlError) {
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
@@ -30,14 +36,14 @@ fun FlexibleErrorReceiver(error: RibaError) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = error.humanString,
+            text = error.human,
             style = typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
-        if (error.additionalInfo != null) {
+        if (error.additional != null) {
             Text(
-                text = error.additionalInfo,
+                text = error.additional!!,
                 style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
                 textAlign = TextAlign.Center
             )

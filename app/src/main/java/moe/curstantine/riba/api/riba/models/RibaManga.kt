@@ -12,12 +12,13 @@ import moe.curstantine.riba.api.mangadex.models.DexContentRating
 @Entity(tableName = "manga")
 data class RibaManga(
     @PrimaryKey val id: String,
-    @ColumnInfo val title: String,
+    @ColumnInfo val title: String?,
     @ColumnInfo val altTitles: List<String>?,
     @ColumnInfo val description: String?,
     @ColumnInfo val contentRating: DexContentRating,
     @ColumnInfo val artistIds: List<String>,
     @ColumnInfo val authorIds: List<String>,
+    @ColumnInfo val tagIds: List<String>,
     @ColumnInfo val coverId: String?,
     /**
      * Version that increments when the manga is updated.
@@ -37,6 +38,7 @@ data class RibaManga(
                 "fc343004-569b-4750-aba0-05ab35efc17c"
             ),
             authorIds = listOf("fc343004-569b-4750-aba0-05ab35efc17c"),
+            tagIds = listOf(),
             coverId = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f",
             version = 0
         )

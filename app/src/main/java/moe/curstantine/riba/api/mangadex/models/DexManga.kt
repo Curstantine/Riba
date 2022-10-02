@@ -1,6 +1,9 @@
 package moe.curstantine.riba.api.mangadex.models
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import moe.curstantine.riba.api.mangadex.DexUtils
+import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
 
 typealias DexManga = DexResponse<DexMangaAttributes>
@@ -14,17 +17,11 @@ data class DexMangaAttributes(
     val altTitles: List<DexLocaleObject>,
     val description: DexLocaleObject,
     val contentRating: DexContentRating,
+    val tags: List<DexTagData>,
     val version: Int,
 )
 
-@JsonClass(generateAdapter = true)
-data class DexRelatedManga(
-    override val id: String,
-    override val type: DexEntityType,
-    val related: String?,
-) : DexRelationship
-
-fun DexMangaData.toMangoManga(): RibaManga {
+fun DexMangaData.toRibaManga(): RibaManga {
     val altTitles = attributes.altTitles
         .filter { it.english != null || it.japanese != null || it.japaneseRomanized != null }
         .mapNotNull { it.english ?: it.japanese ?: it.japaneseRomanized }
@@ -46,16 +43,136 @@ fun DexMangaData.toMangoManga(): RibaManga {
         }
     }
 
-    // TODO: Handle nullable title
     return RibaManga(
         id = id,
-        title = attributes.title.english ?: attributes.title.japanese ?: attributes.title.japaneseRomanized ?: "N/A",
+        title = attributes.title.english
+            ?: attributes.title.japanese
+            ?: attributes.title.japaneseRomanized,
         altTitles = altTitles,
         description = description,
         artistIds = artistIds,
         authorIds = authorIds,
         coverId = coverId,
         version = attributes.version,
+        tagIds = attributes.tags.map { it.id },
         contentRating = attributes.contentRating,
     )
+}
+
+fun DexMangaCollection.toRibaMangaList(): List<RibaManga> {
+    return this.data.map { it.toRibaManga() }
+}
+
+fun DexMangaData.toFulfilledRibaManga(): RibaFulFilledManga {
+    return RibaFulFilledManga(
+        manga = this.toRibaManga(),
+        artists = this.relationships.filter { it.type == DexEntityType.Artist }
+            .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
+        authors = this.relationships.filter { it.type == DexEntityType.Author }
+            .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
+        cover = this.relationships.firstOrNull { it.type == DexEntityType.CoverArt }
+            ?.let { (it as DexRelatedCover).toRibaCover(this.id) },
+    )
+}
+
+/**
+ * A [DexRelationship] that contains a [DexManga]; used for both
+ * sibling-sibling and parent-related relationships.
+ *
+ * e.g.:
+ * - [DexAuthor]'s [DexRelationship] is [DexRelatedManga]
+ * - [DexManga]'s [DexRelationship] is [DexRelatedManga] ([related] is non-null)
+ *
+ * @property related is only non-null when the relationship is sibling-sibling.
+ */
+@JsonClass(generateAdapter = true)
+data class DexRelatedManga(
+    override val id: String,
+    override val type: DexEntityType,
+    val related: DexMangaRelationType?,
+) : DexRelationship
+
+/**
+ * The type of relationship between two [DexManga]s.
+ */
+@Suppress("unused")
+enum class DexMangaRelationType {
+    @field:Json(name = "monochrome")
+    Monochrome,
+
+    @field:Json(name = "colored")
+    Colored,
+
+    @field:Json(name = "preserialization")
+    Preserialization,
+
+    @field:Json(name = "serialization")
+    Serialization,
+
+    @field:Json(name = "prequel")
+    Prequel,
+
+    @field:Json(name = "sequel")
+    Sequel,
+
+    @field:Json(name = "main_story")
+    MainStory,
+
+    @field:Json(name = "side_story")
+    SideStory,
+
+    @field:Json(name = "adapted_from")
+    AdaptedFrom,
+
+    @field:Json(name = "spin_off")
+    SpinOff,
+
+    @field:Json(name = "based_on")
+    BasedOn,
+
+    @field:Json(name = "doujinshi")
+    Doujinshi,
+
+    @field:Json(name = "same_franchise")
+    SameFranchise,
+
+    @field:Json(name = "shared_universe")
+    SharedUniverse,
+
+    @field:Json(name = "alternate_story")
+    AlternateStory,
+
+    @field:Json(name = "alternate_version")
+    AlternateVersion;
+
+    override fun toString(): String = DexUtils.toNormalizedString(name)
+    fun toTitleCase(): String = DexUtils.toTitleCase(name)
+}
+
+/**
+ * Group types for tags in a Manga.
+ */
+@Suppress("unused")
+enum class DexMangaTagGroup {
+    @field:Json(name = "content")
+    Content,
+
+    @field:Json(name = "genre")
+    Genre,
+
+    @field:Json(name = "theme")
+    Theme,
+
+    @field:Json(name = "format")
+    Format;
+
+    override fun toString(): String = DexUtils.toNormalizedString(name)
+    fun toTitleCase(): String = DexUtils.toTitleCase(name)
+
+    companion object {
+        fun fromString(string: String): DexMangaTagGroup {
+            return values().find { it.toString() == string }
+                ?: throw IllegalArgumentException("Invalid tag group: $string")
+        }
+    }
 }
