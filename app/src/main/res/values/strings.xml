@@ -20,5 +20,8 @@
     <string name="content_rating">Content Rating</string>
     <string name="authors">Authors</string>
     <string name="artists">Artists</string>
+    <string name="tags">Tags</string>
+    <string name="genre">Genre</string>
+    <string name="theme">Theme</string>
 
 </resources>

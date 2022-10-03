@@ -72,6 +72,7 @@ fun DexMangaData.toFulfilledRibaManga(): RibaFulFilledManga {
             .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
         cover = this.relationships.firstOrNull { it.type == DexEntityType.CoverArt }
             ?.let { (it as DexRelatedCover).toRibaCover(this.id) },
+        tags = this.attributes.tags.map { it.toRibaTag() }
     )
 }
 

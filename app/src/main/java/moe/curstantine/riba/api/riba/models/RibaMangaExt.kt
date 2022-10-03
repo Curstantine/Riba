@@ -10,6 +10,7 @@ class RibaResultManga(
     val cover: RibaResult<RibaCover?>?,
     val authors: RibaResult<List<RibaAuthor>>?,
     val artists: RibaResult<List<RibaAuthor>>?,
+    val tags: RibaResult<List<RibaTag>>?,
 ) {
     companion object {
         fun getDefault(): RibaResultManga = RibaResultManga(
@@ -17,6 +18,7 @@ class RibaResultManga(
             RibaResult.Success(RibaCover.getDefault()),
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
+            RibaResult.Success(listOf(RibaTag.getDefault())),
         )
     }
 }
@@ -29,6 +31,7 @@ class RibaFulFilledManga(
     val cover: RibaCover?,
     val authors: List<RibaAuthor>?,
     val artists: List<RibaAuthor>?,
+    val tags: List<RibaTag>?,
 ) {
     companion object {
         fun getDefault(): RibaFulFilledManga = RibaFulFilledManga(
@@ -36,6 +39,7 @@ class RibaFulFilledManga(
             RibaCover.getDefault(),
             listOf(RibaAuthor.getDefault()),
             listOf(RibaAuthor.getDefault()),
+            listOf(RibaTag.getDefault()),
         )
     }
 }

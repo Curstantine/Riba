@@ -18,9 +18,9 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -67,6 +67,7 @@ import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaResultManga
+import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Rubik
@@ -153,7 +154,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             MangaCover(
                 details.cover?.unwrap(),
-                maxHeight = 240.dp,
+                maxHeight = 220.dp,
                 coverSize = DexCoverSize.Medium,
                 elevation = 6.dp,
             )
@@ -189,6 +190,15 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                 DetailChipRow(artists, stringResource(R.string.artists), chipRowWidth)
             }
         }
+
+        BoxWithConstraints {
+            val chipRowWidth = remember { maxWidth / 2 }
+
+
+
+            DetailChipRow(authors, stringResource(R.string.authors), chipRowWidth)
+
+        }
     }
 }
 
@@ -215,7 +225,8 @@ private fun DetailChipRow(values: List<String>, label: String, width: Dp) {
 
 @Composable
 private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) {
-    SmallTopAppBar(
+    // TODO: Handle more
+    TopAppBar(
         title = {},
         scrollBehavior = scrollBehavior,
         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -244,7 +255,7 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
                 onClick = { },
                 content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) }
             )
-        },
+        }
     )
 }
 
@@ -283,12 +294,18 @@ class MangaDetailsViewModel : ViewModel() {
                     return@async RibaResult.Success(local)
                 }
 
-                val remote = APIService.mangadex.getCover(localManga.coverId)
-                if (remote is RibaResult.Success) {
-                    return@async RibaResult.Success(remote.value.data.toRibaCover())
-                } else {
-                    return@async remote as RibaResult.Error
+                val remote = APIService.mangadex.getCover(localManga.coverId).map {
+                    it.data.toRibaCover()
                 }
+
+                return@async remote
+            }
+            val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
+                val local = APIService.database.tag().get(localManga.tagIds)
+//                TODO: Try to retrieve tags.
+//                val missing = local.filter { it.name == null }.map { it.id }
+
+                return@async RibaResult.Success(local)
             }
 
             details.postValue(
@@ -297,6 +314,7 @@ class MangaDetailsViewModel : ViewModel() {
                     artists = artists.await(),
                     authors = authors.await(),
                     cover = cover.await(),
+                    tags = tags.await(),
                 )
             )
 

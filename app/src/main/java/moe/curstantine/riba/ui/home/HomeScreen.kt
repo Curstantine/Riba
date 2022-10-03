@@ -83,6 +83,7 @@ class HomeViewModel : ViewModel() {
                 RibaFulFilledManga(
                     manga = it,
                     cover = it.coverId?.let { id -> APIService.database.cover().get(id) },
+                    tags = null,
                     authors = null,
                     artists = null,
                 )
