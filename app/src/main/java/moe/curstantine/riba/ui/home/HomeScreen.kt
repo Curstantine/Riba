@@ -112,13 +112,4 @@ class HomeViewModel : ViewModel() {
             return@launch recent.postValue(recentlyAddedList)
         }
     }
-
-    companion object {
-        object Factory : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel() as T
-            }
-        }
-    }
 }

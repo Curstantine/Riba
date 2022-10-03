@@ -141,6 +141,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
 
     val authors = details.authors!!.unwrap()!!.map { it.name!! }
     val artists = details.artists!!.unwrap()!!.map { it.name!! }
+    val tags = details.tags!!.unwrap()!!.map { tag -> tag.name!! }
     val artistsAndAuthors = remember {
         val it = authors + artists.filter { it !in authors }
         it.ifEmpty { null }
@@ -183,21 +184,17 @@ private fun MangaDetailHeader(details: RibaResultManga) {
         Spacer(modifier = Modifier.height(16.dp))
 
         BoxWithConstraints {
-            val chipRowWidth = remember { maxWidth / 2 }
+            val constraints = this
+            val halfRowWidth = remember { maxWidth / 2 }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                DetailChipRow(authors, stringResource(R.string.authors), chipRowWidth)
-                DetailChipRow(artists, stringResource(R.string.artists), chipRowWidth)
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    DetailChipRow(authors, stringResource(R.string.authors), halfRowWidth)
+                    DetailChipRow(artists, stringResource(R.string.artists), halfRowWidth)
+                }
+
+                DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
             }
-        }
-
-        BoxWithConstraints {
-            val chipRowWidth = remember { maxWidth / 2 }
-
-
-
-            DetailChipRow(authors, stringResource(R.string.authors), chipRowWidth)
-
         }
     }
 }
@@ -217,7 +214,11 @@ private fun DetailChipRow(values: List<String>, label: String, width: Dp) {
         FlowRow(
             mainAxisSpacing = 8.dp,
             content = {
-                values.map { SuggestionChip(onClick = {}, label = { Text(it) }) }
+                values.map {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(it, maxLines = 1) })
+                }
             }
         )
     }
