@@ -24,4 +24,5 @@
     <string name="genre">Genre</string>
     <string name="theme">Theme</string>
 
+    <string name="not_available">N/A</string>
 </resources>

@@ -8,6 +8,7 @@ import moe.curstantine.riba.api.mangadex.models.DexCoverData
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexMDListData
 import moe.curstantine.riba.api.mangadex.models.DexMangaData
+import moe.curstantine.riba.api.mangadex.models.DexMangaStatistics
 import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
 import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
 import moe.curstantine.riba.api.mangadex.models.DexTagData
@@ -21,7 +22,6 @@ import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaTag
 
 class DexDatabaseHandler(private val database: RibaDatabase) {
-
     /**
      * Inserts a [RibaAuthor] into the database.
      *
@@ -127,9 +127,8 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
      *
      * @see [insertTag] with [RibaTag] signature.
      */
-    suspend fun insertTag(tag: DexTagData, force: Boolean = false) =
+    private suspend fun insertTag(tag: DexTagData, force: Boolean = false) =
         insertTag(tag.toRibaTag(), force)
-
 
     /**
      * Inserts a [DexMangaData] into the database with its [RibaAuthor], [RibaCover] and etc.
@@ -169,6 +168,15 @@ class DexDatabaseHandler(private val database: RibaDatabase) {
             authors.forEach { insertAuthor(it) }
             manga.attributes.tags.forEach { insertTag(it) }
         }
+    }
+
+    /**
+     * Inserts a [DexMangaStatistics] into the database.
+     *
+     * This isn't guarded because of its cardinality.
+     */
+    suspend fun insertMangaStatistic(statistic: DexMangaStatistics) = coroutineScope {
+        launch { database.statistic().insert(statistic.toRibaStatistics()) }
     }
 
     /**

@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
+import moe.curstantine.riba.api.riba.models.RibaStatistic
 
 typealias DexManga = DexResponse<DexMangaAttributes>
 typealias DexMangaCollection = DexCollectionResponse<DexMangaAttributes>
@@ -72,7 +73,8 @@ fun DexMangaData.toFulfilledRibaManga(): RibaFulFilledManga {
             .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
         cover = this.relationships.firstOrNull { it.type == DexEntityType.CoverArt }
             ?.let { (it as DexRelatedCover).toRibaCover(this.id) },
-        tags = this.attributes.tags.map { it.toRibaTag() }
+        tags = this.attributes.tags.map { it.toRibaTag() },
+        statistic = null,
     )
 }
 
@@ -92,6 +94,45 @@ data class DexRelatedManga(
     override val type: DexEntityType,
     val related: DexMangaRelationType?,
 ) : DexRelationship
+
+/**
+ * Statistics object returned by both queries and single GETs.
+ *
+ * @property statistics contains a map with manga uuids as keys and [DexMangaStatistic] as values.
+ */
+@JsonClass(generateAdapter = true)
+data class DexMangaStatistics(
+    override val result: DexResult,
+    val statistics: Map<String, DexMangaStatistic>
+) : DexBaseResponse {
+    fun toRibaStatistics(): List<RibaStatistic> {
+        return this.statistics.map { (id, stat) -> stat.toRibaStatistic(id) }
+    }
+}
+
+/**
+ * Statistic object for a [DexManga].
+ *
+ * Usually wrapped within a map with the key being the id of the [DexManga].
+ */
+@JsonClass(generateAdapter = true)
+data class DexMangaStatistic(
+    val follows: Int,
+    val rating: ShadowedDexStatisticsObject,
+) {
+    fun toRibaStatistic(id: String): RibaStatistic = RibaStatistic(
+        id = id,
+        follows = follows,
+        average = rating.average,
+        bayesian = rating.bayesian,
+    )
+}
+
+@JsonClass(generateAdapter = true)
+data class ShadowedDexStatisticsObject(
+    val average: Float,
+    val bayesian: Float,
+)
 
 /**
  * The type of relationship between two [DexManga]s.

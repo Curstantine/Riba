@@ -68,22 +68,26 @@ data class DexLocaleObject(
 )
 
 
+interface DexBaseResponse {
+    val result: DexResult
+}
+
 @JsonClass(generateAdapter = true)
 data class DexResponse<T>(
-    val result: DexResult,
+    override val result: DexResult,
     val response: DexResponseType,
     val data: DexResponseData<T>,
-)
+) : DexBaseResponse
 
 @JsonClass(generateAdapter = true)
 data class DexCollectionResponse<T>(
-    val result: DexResult,
+    override val result: DexResult,
     val response: DexResponseType,
     val data: List<DexResponseData<T>>,
     val limit: Int,
     val offset: Int,
     val total: Int,
-)
+): DexBaseResponse
 
 @JsonClass(generateAdapter = true)
 data class DexResponseData<T>(

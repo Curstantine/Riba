@@ -10,11 +10,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -67,10 +73,12 @@ import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaResultManga
+import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Rubik
+import kotlin.math.roundToInt
 
 @Composable
 fun MangaDetailScreen(
@@ -138,6 +146,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
     val colorScheme = MaterialTheme.colorScheme
 
     val manga = details.manga.unwrap()!!
+    val stats = details.statistic!!.unwrap()!!
 
     val authors = details.authors!!.unwrap()!!.map { it.name!! }
     val artists = details.artists!!.unwrap()!!.map { it.name!! }
@@ -147,12 +156,17 @@ private fun MangaDetailHeader(details: RibaResultManga) {
         it.ifEmpty { null }
     }
 
+    val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            modifier = Modifier.height(220.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             MangaCover(
                 details.cover?.unwrap(),
                 maxHeight = 220.dp,
@@ -172,22 +186,85 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                 Text(
                     text = artistsAndAuthors?.joinToString(", ")
                         ?: stringResource(R.string.no_author_artists),
-                    style = typography.labelMedium.copy(
-                        color = colorScheme.onBackground.copy(alpha = 0.75F)
-                    )
+                    style = typography.labelMedium.copy(color = mutedOnBackground)
                 )
 
-                // TODO: Handles favorites, scoring and etc
+                Spacer(modifier = Modifier.weight(1F))
+
+                FlowRow(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    mainAxisSpacing = 12.dp,
+                ) {
+                    val textStyle = remember {
+                        typography.labelLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Rubik
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            tint = colorScheme.primary,
+                            imageVector = Icons.Rounded.Star,
+                            contentDescription = "Rating",
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = stats.bayesian.roundToInt().toString(),
+                            style = textStyle,
+                            color = colorScheme.primary
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            tint = mutedOnBackground,
+                            imageVector = Icons.Rounded.Bookmark,
+                            contentDescription = "Follows",
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = stats.follows.toString(),
+                            style = textStyle,
+                            color = mutedOnBackground
+                        )
+                    }
+
+                    // TODO: Add total views
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            tint = mutedOnBackground.copy(alpha = 0.5F),
+                            imageVector = Icons.Rounded.Visibility,
+                            contentDescription = "Views",
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = stringResource(R.string.not_available),
+                            style = textStyle,
+                            color = mutedOnBackground.copy(alpha = 0.5F)
+                        )
+                    }
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (manga.description != null) {
+            Text(
+                text = manga.description,
+
+            )
+        }
 
         BoxWithConstraints {
             val constraints = this
             val halfRowWidth = remember { maxWidth / 2 }
 
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     DetailChipRow(authors, stringResource(R.string.authors), halfRowWidth)
                     DetailChipRow(artists, stringResource(R.string.artists), halfRowWidth)
@@ -285,6 +362,21 @@ class MangaDetailsViewModel : ViewModel() {
             val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
                 conditionallyGetAuthorType(localManga.authorIds, Dispatchers.IO)
             }
+
+            val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
+                val local = APIService.database.statistic().get(mangaId)
+
+                if (local != null) {
+                    return@async RibaResult.Success(local)
+                }
+
+                val remote = APIService.mangadex.getMangaStatistics(mangaId).map {
+                    it.statistics[mangaId]!!.toRibaStatistic(mangaId)
+                }
+
+                return@async remote
+            }
+
             val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
                 if (localManga.coverId == null) {
                     return@async RibaResult.Success(null)
@@ -316,6 +408,7 @@ class MangaDetailsViewModel : ViewModel() {
                     authors = authors.await(),
                     cover = cover.await(),
                     tags = tags.await(),
+                    statistic = statistic.await()
                 )
             )
 

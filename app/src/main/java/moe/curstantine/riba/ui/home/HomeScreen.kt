@@ -86,6 +86,7 @@ class HomeViewModel : ViewModel() {
                     tags = null,
                     authors = null,
                     artists = null,
+                    statistic = null,
                 )
             }
             if (localTitles.size == seasonalIds.size) {

@@ -5,6 +5,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import moe.curstantine.riba.api.mangadex.models.DexMangaTagGroup
 
+/**
+ * Generalized Tag object that's used by the app, all external APIs should dissolve to this.
+ */
 @Entity(tableName = "tags")
 data class RibaTag(
     @PrimaryKey val id: String,

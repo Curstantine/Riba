@@ -8,12 +8,14 @@ import moe.curstantine.riba.api.database.dao.CoverDao
 import moe.curstantine.riba.api.database.dao.ListDao
 import moe.curstantine.riba.api.database.dao.MangaDao
 import moe.curstantine.riba.api.database.dao.MangaLinkDao
+import moe.curstantine.riba.api.database.dao.StatisticDao
 import moe.curstantine.riba.api.database.dao.TagDao
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaManga
 import moe.curstantine.riba.api.riba.models.RibaMangaLink
 import moe.curstantine.riba.api.riba.models.RibaMangaList
+import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
 
 @Database(
@@ -25,6 +27,7 @@ import moe.curstantine.riba.api.riba.models.RibaTag
         RibaMangaList::class,
         RibaMangaLink::class,
         RibaTag::class,
+        RibaStatistic::class,
     ],
 )
 @TypeConverters(Converters::class)
@@ -35,4 +38,5 @@ abstract class RibaDatabase : RoomDatabase() {
     abstract fun manga(): MangaDao
     abstract fun mangaLink(): MangaLinkDao
     abstract fun tag(): TagDao
+    abstract fun statistic(): StatisticDao
 }
