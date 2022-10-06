@@ -55,6 +55,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +78,7 @@ import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
+import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.Rubik
 import kotlin.math.roundToInt
 
@@ -161,7 +163,8 @@ private fun MangaDetailHeader(details: RibaResultManga) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Row(
             modifier = Modifier.height(220.dp),
@@ -251,15 +254,6 @@ private fun MangaDetailHeader(details: RibaResultManga) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (manga.description != null) {
-            Text(
-                text = manga.description,
-
-            )
-        }
-
         BoxWithConstraints {
             val constraints = this
             val halfRowWidth = remember { maxWidth / 2 }
@@ -272,6 +266,17 @@ private fun MangaDetailHeader(details: RibaResultManga) {
 
                 DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
             }
+        }
+
+        if (manga.description != null) {
+            // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
+            MarkdownText(
+                markdown = manga.description,
+                style = typography.bodyMedium.copy(
+                    fontFamily = Nunito,
+                    color = colorScheme.onBackground.copy(alpha = 0.75F)
+                )
+            )
         }
     }
 }
