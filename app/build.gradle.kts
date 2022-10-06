@@ -82,6 +82,7 @@ dependencies {
     implementation(compose.bundles.room)
 
     implementation(external.coil)
+    implementation(external.markdown)
     implementation(external.bundles.moshi)
     implementation(external.bundles.retrofit)
 

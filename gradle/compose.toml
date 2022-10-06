@@ -20,13 +20,13 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation_version" }
 
-ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_version" }
-
 room = { module = "androidx.room:room-runtime", version.ref = "room_version" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version" }
 room-ksp = { module = "androidx.room:room-compiler", version.ref = "room_version" }
+
+ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
+ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
+ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose_version" }
 
 
 [bundles]

@@ -3,7 +3,9 @@ moshi_version = "1.14.0"
 retrofit_version = "2.9.0"
 
 [libraries]
-coil = "io.coil-kt:coil-compose:2.2.1"
+coil = "io.coil-kt:coil-compose:2.2.2"
+
+markdown = "com.github.jeziellago:compose-markdown:0.3.0"
 
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi_version" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi_version" }
