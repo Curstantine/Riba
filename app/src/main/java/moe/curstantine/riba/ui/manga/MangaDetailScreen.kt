@@ -1,5 +1,6 @@
 package moe.curstantine.riba.ui.manga
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -16,13 +17,20 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,12 +43,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -66,8 +78,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
+import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.APIService
 import moe.curstantine.riba.api.mangadex.DexCoverSize
+import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.toRibaCover
 import moe.curstantine.riba.api.riba.RibaResult
@@ -84,13 +98,13 @@ import kotlin.math.roundToInt
 
 @Composable
 fun MangaDetailScreen(
-    ribaNavigator: RibaNavigator,
+    state: RibaHostState,
     paddingValues: State<PaddingValues>,
     viewModel: MangaDetailsViewModel = viewModel(factory = MangaDetailsViewModel.Companion.Factory)
 ) {
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     viewModel.mangaId = remember {
-        ribaNavigator.getArgument("id")
+        state.navigator.getArgument("id")
             ?: throw IllegalArgumentException("id parameter is missing!")
     }
 
@@ -100,7 +114,7 @@ fun MangaDetailScreen(
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = { viewModel.fullRefresh() },
             content = {
-                MangaDetailBody(ribaNavigator, paddingValues, manga.value!!)
+                MangaDetailBody(state.navigator, paddingValues, manga.value!!)
             }
         )
     }
@@ -146,6 +160,8 @@ fun MangaDetailBody(
 private fun MangaDetailHeader(details: RibaResultManga) {
     val typography = MaterialTheme.typography
     val colorScheme = MaterialTheme.colorScheme
+    val clipboardManager = LocalClipboardManager.current
+    val coroutineScope = rememberCoroutineScope()
 
     val manga = details.manga.unwrap()!!
     val stats = details.statistic!!.unwrap()!!
@@ -159,12 +175,13 @@ private fun MangaDetailHeader(details: RibaResultManga) {
     }
 
     val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+    val isDetailsExpanded = remember { mutableStateOf(false) }
+    var isInLibrary by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier.height(220.dp),
@@ -198,12 +215,10 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                     modifier = Modifier.padding(bottom = 8.dp),
                     mainAxisSpacing = 12.dp,
                 ) {
-                    val textStyle = remember {
-                        typography.labelLarge.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = Rubik
-                        )
-                    }
+                    val textStyle = typography.labelLarge.copy(
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = Rubik
+                    )
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -254,6 +269,42 @@ private fun MangaDetailHeader(details: RibaResultManga) {
             }
         }
 
+        Row(
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+
+            OutlinedIconToggleButton(
+                checked = isInLibrary,
+                onCheckedChange = { isInLibrary = it },
+                content = {
+                    Icon(
+                        Icons.Rounded.BookmarkAdd,
+                        contentDescription = stringResource(R.string.add_to_library)
+                    )
+                }
+            )
+
+            OutlinedIconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(manga.id)))
+                    }
+                },
+                content = {
+                    Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+                }
+            )
+
+            Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+                Icon(
+                    Icons.Rounded.Book,
+                    contentDescription = stringResource(R.string.start_reading)
+                )
+                Text(text = stringResource(R.string.start_reading))
+            }
+        }
+
         BoxWithConstraints {
             val constraints = this
             val halfRowWidth = remember { maxWidth / 2 }
@@ -269,14 +320,30 @@ private fun MangaDetailHeader(details: RibaResultManga) {
         }
 
         if (manga.description != null) {
-            // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-            MarkdownText(
-                markdown = manga.description,
-                style = typography.bodyMedium.copy(
-                    fontFamily = Nunito,
-                    color = colorScheme.onBackground.copy(alpha = 0.75F)
+            Column {
+                // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
+                AnimatedVisibility(isDetailsExpanded.value) {
+                    MarkdownText(
+                        markdown = manga.description,
+                        style = typography.bodyMedium.copy(
+                            fontFamily = Nunito,
+                            color = colorScheme.onBackground.copy(alpha = 0.75F)
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                FilledTonalButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { isDetailsExpanded.value = !isDetailsExpanded.value },
+                    content = {
+                        Text(
+                            text = if (isDetailsExpanded.value) stringResource(R.string.show_less)
+                            else stringResource(R.string.show_more)
+                        )
+                    }
                 )
-            )
+            }
         }
     }
 }

@@ -12,4 +12,8 @@ object DexUtils {
             if (size != DexCoverSize.Source) it + ".${size.size}.jpg" else it
         }
     }
+
+    fun getMangaUrl(mangaId: String): String {
+        return DexConstants.BASE_SITE + "/title/" + mangaId
+    }
 }

@@ -16,6 +16,12 @@
 
     <string name="back">Back</string>
     <string name="more">More</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+    <string name="share">Share</string>
+    <string name="add_to_library">Add to Library</string>
+    <string name="start_reading">Start Reading</string>
+    <string name="continue_from_chapter">Continue from %s</string>
 
     <string name="content_rating">Content Rating</string>
     <string name="authors">Authors</string>
@@ -25,4 +31,6 @@
     <string name="theme">Theme</string>
 
     <string name="not_available">N/A</string>
+    <string name="show_more">Show More</string>
+    <string name="show_less">Show Less</string>
 </resources>

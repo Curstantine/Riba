@@ -7,10 +7,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import moe.curstantine.riba.nav.RibaNavigator
+import moe.curstantine.riba.RibaHostState
 
 @Composable
-fun SearchScreen(ribaNavigator: RibaNavigator, paddingValues: State<PaddingValues>) {
+fun SearchScreen(state: RibaHostState, paddingValues: State<PaddingValues>) {
     Column(Modifier.padding(paddingValues.value)) {
         Text("Search")
     }

@@ -13,11 +13,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
+import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.APIService
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -26,20 +26,23 @@ import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.mangadex.models.toFulfilledRibaManga
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
-import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.manga.MangaCardRow
 
 @Composable
 fun HomeScreen(
-    ribaNavigator: RibaNavigator,
+    state: RibaHostState,
     paddingValues: State<PaddingValues>,
     viewModel: HomeViewModel
 ) {
     Box(modifier = Modifier.padding(paddingValues.value)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MangaCardRow(ribaNavigator, viewModel.getSeasonal(), stringResource(R.string.seasonal))
             MangaCardRow(
-                ribaNavigator,
+                state.navigator,
+                viewModel.getSeasonal(),
+                stringResource(R.string.seasonal)
+            )
+            MangaCardRow(
+                state.navigator,
                 viewModel.getRecent(),
                 stringResource(R.string.recently_added)
             )
