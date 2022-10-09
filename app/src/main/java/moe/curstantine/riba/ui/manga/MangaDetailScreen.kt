@@ -185,7 +185,7 @@ private fun MangaDetailHeader(
 
     val shareMessage = stringResource(
         R.string.copied_to_clipboard,
-        stringResource(R.string.manga).lowercase()
+        stringResource(R.string.link).lowercase()
     )
 
     Column(
