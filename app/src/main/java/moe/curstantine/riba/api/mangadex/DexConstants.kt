@@ -11,7 +11,7 @@ object DexConstants {
      * For thumbnail sizes, `COVER_URL/manga-id/cover-filename.[DexCoverSize].jpg`
      */
     const val COVER_URL = "https://uploads.mangadex.org/covers/"
-    const val SEASONAL_LIST = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9"
+    const val SEASONAL_LIST = "4be9338a-3402-4f98-b467-43fb56663927"
 }
 
 enum class DexCoverSize(val size: Int) {
