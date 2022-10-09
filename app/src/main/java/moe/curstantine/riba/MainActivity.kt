@@ -37,8 +37,8 @@ class MainActivity : ComponentActivity() {
 
             RibaTheme {
                 Scaffold(
-                    content = { RibaNavHost(ribaHostState, it) },
                     snackbarHost = { SnackbarHost(ribaHostState.snackbarHost) },
+                    content = { RibaNavHost(ribaHostState, it) },
                     bottomBar = {
                         AnimatedVisibility(
                             currentRoute.routeType == RouteType.Default,

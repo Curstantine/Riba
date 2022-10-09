@@ -1,5 +1,6 @@
 package moe.curstantine.riba.ui.manga
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -31,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedIconToggleButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -68,10 +73,12 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,36 +103,43 @@ import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.Rubik
 import kotlin.math.roundToInt
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MangaDetailScreen(
     state: RibaHostState,
     paddingValues: State<PaddingValues>,
     viewModel: MangaDetailsViewModel = viewModel(factory = MangaDetailsViewModel.Companion.Factory)
 ) {
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    viewModel.mangaId = remember {
+    val mangaId = remember {
         state.navigator.getArgument("id")
             ?: throw IllegalArgumentException("id parameter is missing!")
     }
 
-    val manga = viewModel.getDetails().observeAsState()
-    if (manga.value == null) FlexibleIndicator() else {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing),
-            onRefresh = { viewModel.fullRefresh() },
-            content = {
-                MangaDetailBody(state.navigator, paddingValues, manga.value!!)
-            }
-        )
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val manga = viewModel.getDetails(mangaId).observeAsState()
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = { viewModel.refresh() }) {
+        if (manga.value == null) FlexibleIndicator() else {
+            Scaffold(
+                topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+                content = {
+                    MangaDetailBody(state, scrollBehavior, paddingValues, manga.value!!)
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun MangaDetailBody(
-    ribaNavigator: RibaNavigator, paddingValues: State<PaddingValues>, details: RibaResultManga
+    state: RibaHostState,
+    scrollBehavior: TopAppBarScrollBehavior,
+    paddingValues: State<PaddingValues>,
+    details: RibaResultManga
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     LazyColumn(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -140,7 +154,7 @@ fun MangaDetailBody(
             )
         }
 
-        item { MangaDetailHeader(details) }
+        item { MangaDetailHeader(state, details) }
 
         items(list.size) {
             Text(
@@ -153,11 +167,10 @@ fun MangaDetailBody(
         }
     }
 
-    ScreenTopBar(ribaNavigator, scrollBehavior)
 }
 
 @Composable
-private fun MangaDetailHeader(details: RibaResultManga) {
+private fun MangaDetailHeader(hostState: RibaHostState, details: RibaResultManga) {
     val typography = MaterialTheme.typography
     val colorScheme = MaterialTheme.colorScheme
     val clipboardManager = LocalClipboardManager.current
@@ -177,6 +190,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
     val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
     val isDetailsExpanded = remember { mutableStateOf(false) }
     var isInLibrary by remember { mutableStateOf(false) }
+    var hasTrackers by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -184,7 +198,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
             .padding(horizontal = 16.dp)
     ) {
         Row(
-            modifier = Modifier.height(220.dp),
+            modifier = Modifier.heightIn(220.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             MangaCover(
@@ -194,22 +208,25 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                 elevation = 6.dp,
             )
 
-            Column {
-                Text(
-                    text = manga.title ?: stringResource(R.string.no_title),
-                    style = typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = Rubik
+            Column(
+                modifier = Modifier.heightIn(220.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(Modifier.padding(bottom = 16.dp)) {
+                    Text(
+                        text = manga.title ?: stringResource(R.string.no_title),
+                        style = typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = Rubik
+                        )
                     )
-                )
+                    Text(
+                        text = artistsAndAuthors?.joinToString(", ")
+                            ?: stringResource(R.string.no_author_artists),
+                        style = typography.labelMedium.copy(color = mutedOnBackground)
+                    )
 
-                Text(
-                    text = artistsAndAuthors?.joinToString(", ")
-                        ?: stringResource(R.string.no_author_artists),
-                    style = typography.labelMedium.copy(color = mutedOnBackground)
-                )
-
-                Spacer(modifier = Modifier.weight(1F))
+                }
 
                 FlowRow(
                     modifier = Modifier.padding(bottom = 8.dp),
@@ -229,7 +246,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
-                            text = stats.bayesian.roundToInt().toString(),
+                            text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
                             style = textStyle,
                             color = colorScheme.primary
                         )
@@ -253,7 +270,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                     // TODO: Add total views
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            tint = mutedOnBackground.copy(alpha = 0.5F),
+                            tint = mutedOnBackground.copy(alpha = 0.35F),
                             imageVector = Icons.Rounded.Visibility,
                             contentDescription = "Views",
                             modifier = Modifier.size(22.dp)
@@ -262,7 +279,7 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                         Text(
                             text = stringResource(R.string.not_available),
                             style = textStyle,
-                            color = mutedOnBackground.copy(alpha = 0.5F)
+                            color = mutedOnBackground.copy(alpha = 0.35F)
                         )
                     }
                 }
@@ -285,10 +302,21 @@ private fun MangaDetailHeader(details: RibaResultManga) {
                 }
             )
 
+            OutlinedIconToggleButton(
+                checked = hasTrackers,
+                onCheckedChange = { hasTrackers = it },
+                content = {
+                    Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
+                }
+            )
+
+            val shareMessage = stringResource(R.string.copied_to_clipboard, R.string.manga)
+
             OutlinedIconButton(
                 onClick = {
                     coroutineScope.launch {
                         clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(manga.id)))
+                        hostState.snackbarHost.showSnackbar(message = shareMessage)
                     }
                 },
                 content = {
@@ -374,8 +402,7 @@ private fun DetailChipRow(values: List<String>, label: String, width: Dp) {
 }
 
 @Composable
-private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) {
-    // TODO: Handle more
+private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) =
     TopAppBar(
         title = {},
         scrollBehavior = scrollBehavior,
@@ -407,84 +434,82 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
             )
         }
     )
-}
+
 
 class MangaDetailsViewModel : ViewModel() {
     lateinit var mangaId: String
 
     private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
 
-    val isRefreshing: StateFlow<Boolean>
-        get() = _isRefreshing.asStateFlow()
-
-    fun getDetails(): LiveData<RibaResultManga> = details
-
-    private val details: MutableLiveData<RibaResultManga> by lazy {
-        MutableLiveData<RibaResultManga>().also { loadDetails() }
+    fun getDetails(id: String): LiveData<RibaResultManga> {
+        mangaId = id
+        return details
     }
 
-    private fun loadDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
-            // Manga is already fetched by the time we get here
-            val localManga = APIService.database.manga().get(mangaId)!!
+    private val details: MutableLiveData<RibaResultManga> by lazy {
+        MutableLiveData<RibaResultManga>().also { loadDetails(mangaId) }
+    }
 
-            val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-                conditionallyGetAuthorType(localManga.artistIds, Dispatchers.IO)
-            }
-            val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-                conditionallyGetAuthorType(localManga.authorIds, Dispatchers.IO)
-            }
+    private fun loadDetails(id: String) = viewModelScope.launch(Dispatchers.IO) {
+        // Manga is already fetched by the time we get here
+        val localManga = APIService.database.manga().get(id)!!
 
-            val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
-                val local = APIService.database.statistic().get(mangaId)
+        val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
+            conditionallyGetAuthorType(localManga.artistIds, Dispatchers.IO)
+        }
+        val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
+            conditionallyGetAuthorType(localManga.authorIds, Dispatchers.IO)
+        }
 
-                if (local != null) {
-                    return@async RibaResult.Success(local)
-                }
+        val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
+            val local = APIService.database.statistic().get(id)
 
-                val remote = APIService.mangadex.getMangaStatistics(mangaId).map {
-                    it.statistics[mangaId]!!.toRibaStatistic(mangaId)
-                }
-
-                return@async remote
-            }
-
-            val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
-                if (localManga.coverId == null) {
-                    return@async RibaResult.Success(null)
-                }
-
-                val local = APIService.database.cover().get(localManga.coverId)
-                if (local?.fileName != null) {
-                    return@async RibaResult.Success(local)
-                }
-
-                val remote = APIService.mangadex.getCover(localManga.coverId).map {
-                    it.data.toRibaCover()
-                }
-
-                return@async remote
-            }
-            val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
-                val local = APIService.database.tag().get(localManga.tagIds)
-//                TODO: Try to retrieve tags.
-//                val missing = local.filter { it.name == null }.map { it.id }
-
+            if (local != null) {
                 return@async RibaResult.Success(local)
             }
 
-            details.postValue(
-                RibaResultManga(
-                    manga = RibaResult.Success(localManga),
-                    artists = artists.await(),
-                    authors = authors.await(),
-                    cover = cover.await(),
-                    tags = tags.await(),
-                    statistic = statistic.await()
-                )
-            )
+            val remote = APIService.mangadex.getMangaStatistics(id).map {
+                it.statistics[id]!!.toRibaStatistic(id)
+            }
 
+            return@async remote
         }
+
+        val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
+            if (localManga.coverId == null) {
+                return@async RibaResult.Success(null)
+            }
+
+            val local = APIService.database.cover().get(localManga.coverId)
+            if (local?.fileName != null) {
+                return@async RibaResult.Success(local)
+            }
+
+            val remote = APIService.mangadex.getCover(localManga.coverId).map {
+                it.data.toRibaCover()
+            }
+
+            return@async remote
+        }
+        val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
+            val local = APIService.database.tag().get(localManga.tagIds)
+//                TODO: Try to retrieve tags.
+//                val missing = local.filter { it.name == null }.map { it.id }
+
+            return@async RibaResult.Success(local)
+        }
+
+        details.postValue(
+            RibaResultManga(
+                manga = RibaResult.Success(localManga),
+                artists = artists.await(),
+                authors = authors.await(),
+                cover = cover.await(),
+                tags = tags.await(),
+                statistic = statistic.await()
+            )
+        )
     }
 
     private suspend fun conditionallyGetAuthorType(
@@ -512,7 +537,8 @@ class MangaDetailsViewModel : ViewModel() {
     }
 
 
-    fun fullRefresh() {
+    fun refresh() {
+        viewModelScope.coroutineContext.cancel(CancellationException("Full refresh attempted."))
         viewModelScope.launch(Dispatchers.IO) {
             _isRefreshing.emit(true)
 
@@ -526,8 +552,7 @@ class MangaDetailsViewModel : ViewModel() {
                 forceInsert = true
             )
 
-            loadDetails()
-
+            loadDetails(mangaId)
             _isRefreshing.emit(false)
         }
     }
@@ -546,7 +571,8 @@ class MangaDetailsViewModel : ViewModel() {
 @Preview(showBackground = true)
 private fun DetailBodyPreview() {
     MangaDetailBody(
-        RibaNavigator(rememberNavController()),
+        RibaHostState(RibaNavigator(rememberNavController()), SnackbarHostState()),
+        TopAppBarDefaults.enterAlwaysScrollBehavior(),
         remember { mutableStateOf(PaddingValues()) },
         RibaResultManga.getDefault(),
     )

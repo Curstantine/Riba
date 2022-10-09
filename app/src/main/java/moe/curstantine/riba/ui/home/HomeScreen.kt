@@ -36,6 +36,7 @@ fun HomeScreen(
 ) {
     Box(modifier = Modifier.padding(paddingValues.value)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
             MangaCardRow(
                 state.navigator,
                 viewModel.getSeasonal(),

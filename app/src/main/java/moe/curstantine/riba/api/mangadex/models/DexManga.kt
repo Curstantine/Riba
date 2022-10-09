@@ -60,10 +60,6 @@ fun DexMangaData.toRibaManga(): RibaManga {
     )
 }
 
-fun DexMangaCollection.toRibaMangaList(): List<RibaManga> {
-    return this.data.map { it.toRibaManga() }
-}
-
 fun DexMangaData.toFulfilledRibaManga(): RibaFulFilledManga {
     return RibaFulFilledManga(
         manga = this.toRibaManga(),
@@ -123,14 +119,12 @@ data class DexMangaStatistic(
     fun toRibaStatistic(id: String): RibaStatistic = RibaStatistic(
         id = id,
         follows = follows,
-        average = rating.average,
         bayesian = rating.bayesian,
     )
 }
 
 @JsonClass(generateAdapter = true)
 data class ShadowedDexStatisticsObject(
-    val average: Float,
     val bayesian: Float,
 )
 

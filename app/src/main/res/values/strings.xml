@@ -22,10 +22,15 @@
     <string name="add_to_library">Add to Library</string>
     <string name="start_reading">Start Reading</string>
     <string name="continue_from_chapter">Continue from %s</string>
+    <string name="copied_to_clipboard">Copied %s to clipboard</string>
+
+    <string name="trackers">Trackers</string>
 
     <string name="content_rating">Content Rating</string>
     <string name="authors">Authors</string>
     <string name="artists">Artists</string>
+    <string name="manga">Manga</string>
+
     <string name="tags">Tags</string>
     <string name="genre">Genre</string>
     <string name="theme">Theme</string>
