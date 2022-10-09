@@ -1,6 +1,5 @@
 package moe.curstantine.riba.ui.manga
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,8 +40,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -52,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -73,12 +71,10 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -103,11 +99,9 @@ import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.Rubik
 import kotlin.math.roundToInt
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MangaDetailScreen(
     state: RibaHostState,
-    paddingValues: State<PaddingValues>,
     viewModel: MangaDetailsViewModel = viewModel(factory = MangaDetailsViewModel.Companion.Factory)
 ) {
     val mangaId = remember {
@@ -121,23 +115,22 @@ fun MangaDetailScreen(
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = { viewModel.refresh() }) {
-        if (manga.value == null) FlexibleIndicator() else {
+        onRefresh = { viewModel.refresh() }
+    ) {
+        if (manga.value == null || isRefreshing) FlexibleIndicator() else {
             Scaffold(
                 topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-                content = {
-                    MangaDetailBody(state, scrollBehavior, paddingValues, manga.value!!)
-                }
+                content = { MangaDetailBody(state, scrollBehavior, it, manga.value!!) }
             )
         }
     }
 }
 
 @Composable
-fun MangaDetailBody(
+private fun MangaDetailBody(
     state: RibaHostState,
     scrollBehavior: TopAppBarScrollBehavior,
-    paddingValues: State<PaddingValues>,
+    paddingValues: PaddingValues,
     details: RibaResultManga
 ) {
     LazyColumn(
@@ -146,15 +139,7 @@ fun MangaDetailBody(
     ) {
         val list = (0..75).map { it.toString() }
 
-        item {
-            Spacer(
-                Modifier
-                    .padding(paddingValues.value)
-                    .height((64 - scrollBehavior.state.collapsedFraction.times(64)).dp)
-            )
-        }
-
-        item { MangaDetailHeader(state, details) }
+        item { MangaDetailHeader(state, paddingValues, details) }
 
         items(list.size) {
             Text(
@@ -170,7 +155,11 @@ fun MangaDetailBody(
 }
 
 @Composable
-private fun MangaDetailHeader(hostState: RibaHostState, details: RibaResultManga) {
+private fun MangaDetailHeader(
+    hostState: RibaHostState,
+    paddingValues: PaddingValues,
+    details: RibaResultManga
+) {
     val typography = MaterialTheme.typography
     val colorScheme = MaterialTheme.colorScheme
     val clipboardManager = LocalClipboardManager.current
@@ -195,7 +184,10 @@ private fun MangaDetailHeader(hostState: RibaHostState, details: RibaResultManga
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(colorScheme.surfaceColorAtElevation(2.dp))
+            .padding(paddingValues)
             .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
     ) {
         Row(
             modifier = Modifier.heightIn(220.dp),
@@ -205,7 +197,6 @@ private fun MangaDetailHeader(hostState: RibaHostState, details: RibaResultManga
                 details.cover?.unwrap(),
                 maxHeight = 220.dp,
                 coverSize = DexCoverSize.Medium,
-                elevation = 6.dp,
             )
 
             Column(
@@ -411,14 +402,6 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
             containerColor = Color.Transparent,
             titleContentColor = Color.Transparent
         ),
-        modifier = Modifier
-            .background(
-                brush = Brush.verticalGradient(
-                    startY = 75F,
-                    endY = 200F,
-                    colors = listOf(MaterialTheme.colorScheme.surface, Color.Transparent),
-                )
-            ),
         actions = {
             IconButton(
                 onClick = { ribaNavigator.popBackStack() },
@@ -527,7 +510,6 @@ class MangaDetailsViewModel : ViewModel() {
                     is RibaResult.Success -> RibaResult.Success(
                         APIService.database.author().get(ids)
                     )
-
                 }
             }
 
@@ -538,7 +520,6 @@ class MangaDetailsViewModel : ViewModel() {
 
 
     fun refresh() {
-        viewModelScope.coroutineContext.cancel(CancellationException("Full refresh attempted."))
         viewModelScope.launch(Dispatchers.IO) {
             _isRefreshing.emit(true)
 
@@ -551,8 +532,8 @@ class MangaDetailsViewModel : ViewModel() {
                 ),
                 forceInsert = true
             )
-
             loadDetails(mangaId)
+
             _isRefreshing.emit(false)
         }
     }
@@ -570,10 +551,11 @@ class MangaDetailsViewModel : ViewModel() {
 @Composable
 @Preview(showBackground = true)
 private fun DetailBodyPreview() {
-    MangaDetailBody(
-        RibaHostState(RibaNavigator(rememberNavController()), SnackbarHostState()),
-        TopAppBarDefaults.enterAlwaysScrollBehavior(),
-        remember { mutableStateOf(PaddingValues()) },
-        RibaResultManga.getDefault(),
+    val state = RibaHostState(RibaNavigator(rememberNavController()), SnackbarHostState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    Scaffold(
+        topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+        content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
     )
 }

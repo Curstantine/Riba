@@ -12,7 +12,7 @@ import moe.curstantine.riba.ui.manga.MangaDetailScreen
 fun NavGraphBuilder.baseGraph(state: RibaHostState, paddingValues: State<PaddingValues>) {
     navigation(startDestination = MangoRoute.Base.Manga.path, route = MangoRoute.Base.route) {
         composable(MangoRoute.Base.Manga.path) {
-            MangaDetailScreen(state, paddingValues)
+            MangaDetailScreen(state)
         }
         composable(MangoRoute.Vanilla.Library.path) {
             throw NotImplementedError()
