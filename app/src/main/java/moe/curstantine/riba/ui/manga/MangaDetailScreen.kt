@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -120,6 +121,7 @@ fun MangaDetailScreen(
         if (manga.value == null || isRefreshing) FlexibleIndicator() else {
             Scaffold(
                 topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+                snackbarHost = { SnackbarHost(state.snackbarHost) },
                 content = { MangaDetailBody(state, scrollBehavior, it, manga.value!!) }
             )
         }
@@ -180,6 +182,11 @@ private fun MangaDetailHeader(
     val isDetailsExpanded = remember { mutableStateOf(false) }
     var isInLibrary by remember { mutableStateOf(false) }
     var hasTrackers by remember { mutableStateOf(false) }
+
+    val shareMessage = stringResource(
+        R.string.copied_to_clipboard,
+        stringResource(R.string.manga).lowercase()
+    )
 
     Column(
         modifier = Modifier
@@ -300,8 +307,6 @@ private fun MangaDetailHeader(
                     Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
                 }
             )
-
-            val shareMessage = stringResource(R.string.copied_to_clipboard, R.string.manga)
 
             OutlinedIconButton(
                 onClick = {
