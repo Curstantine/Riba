@@ -5,13 +5,13 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import moe.curstantine.riba.api.mangadex.DexError.Companion.tryHandle
 import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
-import moe.curstantine.riba.api.riba.RibaIntlError
+import moe.curstantine.riba.api.riba.RibaError
 import retrofit2.HttpException
 import java.sql.SQLException
 import java.util.Locale
 
 /**
- * [RibaIntlError] implementation for [MangaDexService] errors.
+ * [RibaError] implementation for [MangaDexService] errors.
  *
  * Try to use [tryHandle] as much as possible, it'll does all the required background work for you
  * (logging, human-readable errors and etc).
@@ -19,7 +19,10 @@ import java.util.Locale
  * @param human Human-readable error message.
  * @param additional Additional information about the error.
  */
-open class DexError(override val human: String, override var additional: String?) : RibaIntlError {
+open class DexError(
+    override val human: String,
+    override var additional: String?
+) : RibaError, Throwable("DexError: $human ($additional)") {
     fun setAdditional(additional: String?): DexError {
         this.additional = additional
         return this
@@ -43,6 +46,14 @@ open class DexError(override val human: String, override var additional: String?
         object DatabaseError : DexError(
             "Came across an error while trying to access the database!", null
         )
+
+        /**
+         * Logger tags used to quickly locate the source of error from logcat.
+         */
+        enum class LogTag(val tag: String) :
+            RibaError.Companion.LogTag {
+            MISSING("DexMissingContent"),
+        }
 
         fun tryHandle(e: Throwable): DexError {
             Log.e("DexError", e.stackTraceToString())

@@ -101,8 +101,8 @@ data class DexMangaStatistics(
     override val result: DexResult,
     val statistics: Map<String, DexMangaStatistic>
 ) : DexBaseResponse {
-    fun toRibaStatistics(): List<RibaStatistic> {
-        return this.statistics.map { (id, stat) -> stat.toRibaStatistic(id) }
+    fun toRibaStatisticCollection(): Map<String, RibaStatistic> {
+        return this.statistics.mapValues { it.value.toRibaStatistic(it.key) }
     }
 }
 

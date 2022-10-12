@@ -1,16 +1,22 @@
 package moe.curstantine.riba.api.riba
 
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
-
 sealed class RibaResult<out R> {
     data class Success<out T>(val value: T) : RibaResult<T>()
-    data class Error(val error: RibaIntlError) : RibaResult<Nothing>()
+    data class Error(val error: RibaError) : RibaResult<Nothing>()
 
     fun unwrap(): R? = when (this) {
         is Success -> value
         is Error -> null
+    }
+
+    fun unwrapError(): RibaError? = when (this) {
+        is Success -> null
+        is Error -> error
+    }
+
+    fun asError(): Error = when (this) {
+        is Success -> Error(RibaError.Companion.Impl.ResultNotError)
+        is Error -> Error(error)
     }
 
     // function that maps over the value of the result

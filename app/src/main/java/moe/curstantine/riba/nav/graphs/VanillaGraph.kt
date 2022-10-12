@@ -13,7 +13,7 @@ import moe.curstantine.riba.ui.library.LibraryScreen
 import moe.curstantine.riba.ui.search.SearchScreen
 
 fun NavGraphBuilder.vanillaGraph(state: RibaHostState, paddingValues: State<PaddingValues>) {
-    val homeViewModel = HomeViewModel();
+    val homeViewModel = HomeViewModel(state.service);
 
     navigation(startDestination = MangoRoute.Vanilla.Home.path, route = MangoRoute.Vanilla.route) {
         composable(MangoRoute.Vanilla.Home.path) {

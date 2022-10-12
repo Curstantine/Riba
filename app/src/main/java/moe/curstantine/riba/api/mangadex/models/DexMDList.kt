@@ -47,10 +47,3 @@ fun DexMDListData.toRibaMangaList() = RibaMangaList(
     userId = relationships.first { it.type == DexEntityType.User }.id,
     version = attributes.version,
 )
-
-/**
- * Depends on [DexMDListData]'s [DexRelationship]
- */
-fun DexMDListData.getRibaMangaList() {
-
-}

@@ -14,7 +14,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
-import moe.curstantine.riba.api.APIService
+import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.nav.RibaNavHost
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.nav.RouteType
@@ -24,13 +24,15 @@ import moe.curstantine.riba.ui.theme.RibaTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        APIService.initialize(applicationContext)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val service = RibaAPIService(applicationContext)
 
         setContent {
             val ribaHostState = RibaHostState(
                 RibaNavigator(rememberNavController()),
                 SnackbarHostState(),
+                service,
             )
 
             val currentRoute by ribaHostState.navigator.currentRouteAsState()

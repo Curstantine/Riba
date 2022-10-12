@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.nav.graphs.baseGraph
 import moe.curstantine.riba.nav.graphs.vanillaGraph
@@ -49,6 +50,13 @@ class RibaNavigator(val navController: NavHostController) {
             ?: MangoRoute.Vanilla.Home.path
 
         return remember(route) { mutableStateOf(MangoRoute.fromPath(route)) }
+    }
+
+    companion object {
+        @Composable
+        fun createDummy(): RibaNavigator {
+            return RibaNavigator(rememberNavController())
+        }
     }
 }
 

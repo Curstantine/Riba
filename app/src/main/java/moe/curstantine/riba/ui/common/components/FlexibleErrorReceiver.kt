@@ -21,10 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
-import moe.curstantine.riba.api.riba.RibaIntlError
+import moe.curstantine.riba.api.riba.RibaError
 
 @Composable
-fun FlexibleErrorReceiver(error: RibaIntlError) {
+fun FlexibleErrorReceiver(error: RibaError) {
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 

@@ -14,6 +14,27 @@ class RibaResultManga(
     val statistic: RibaResult<RibaStatistic>?,
 ) {
     companion object {
+        /**
+         * Usage is discouraged, use this only when you need to eagerly pass an error
+         */
+        fun fromNullables(
+            manga: RibaResult<RibaManga>,
+            cover: RibaResult<RibaCover?>? = null,
+            authors: RibaResult<List<RibaAuthor>>? = null,
+            artists: RibaResult<List<RibaAuthor>>? = null,
+            tags: RibaResult<List<RibaTag>>? = null,
+            statistic: RibaResult<RibaStatistic>? = null,
+        ): RibaResultManga {
+            return RibaResultManga(
+                manga,
+                cover,
+                authors,
+                artists,
+                tags,
+                statistic,
+            )
+        }
+
         fun getDefault(): RibaResultManga = RibaResultManga(
             RibaResult.Success(RibaManga.getDefault()),
             RibaResult.Success(RibaCover.getDefault()),
