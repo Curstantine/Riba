@@ -14,6 +14,14 @@ sealed class RibaResult<out R> {
         is Error -> error
     }
 
+    fun bubble(): R = when (this) {
+        is Success -> value
+        is Error -> {
+            if (error is Throwable) throw error
+            else throw RibaError.Companion.Impl.ResultNotError
+        }
+    }
+
     fun asError(): Error = when (this) {
         is Success -> Error(RibaError.Companion.Impl.ResultNotError)
         is Error -> Error(error)

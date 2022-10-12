@@ -37,13 +37,23 @@ data class DexUserAuthBody(
 )
 
 /**
+ * POST body that's needed to refresh a token using the refresh token.
+ *
+ * @property token Refresh token returned by the auth.
+ */
+@JsonClass(generateAdapter = true)
+data class DexUserAuthRefreshBody(
+    val token: String,
+)
+
+/**
  * Response returned by the server when trying to log in.
  */
 @JsonClass(generateAdapter = true)
 data class DexUserAuthResponse(
     override val result: DexResult,
     val token: DexUserAuthTokens,
-): DexBaseResponse
+) : DexBaseResponse
 
 /**
  * Tokens returned by the server when trying to log in,

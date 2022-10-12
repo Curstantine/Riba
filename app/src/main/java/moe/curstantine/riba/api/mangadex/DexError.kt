@@ -22,7 +22,7 @@ import java.util.Locale
 open class DexError(
     override val human: String,
     override var additional: String?
-) : RibaError, Throwable("DexError: $human ($additional)") {
+) : RibaError, Throwable("$DexError: $human ($additional)") {
     fun setAdditional(additional: String?): DexError {
         this.additional = additional
         return this
@@ -47,21 +47,29 @@ open class DexError(
             "Came across an error while trying to access the database!", null
         )
 
+        object NotAuthenticated : DexError(
+            "User not authenticated!", "This action requires the user to be authenticated."
+        )
+
+        object ReAuthenticationRequired : DexError(
+            "Re-authentication required!", "Both the session and refresh tokens are invalid."
+        )
+
         /**
          * Logger tags used to quickly locate the source of error from logcat.
          */
         enum class LogTag(val tag: String) :
             RibaError.Companion.LogTag {
             MISSING("DexMissingContent"),
+            RESTRICTED("DexRestrictedContent"),
         }
 
         fun tryHandle(e: Throwable): DexError {
-            Log.e("DexError", e.stackTraceToString())
-
             return when (e) {
                 is HttpException -> fromHttpException(e)
                 is JsonDataException -> InvalidJSON.setAdditional(e.message)
                 is SQLException -> DatabaseError.setAdditional(e.message)
+                is DexError -> e
                 else -> Unknown.setAdditional(e.message)
             }
         }

@@ -12,6 +12,16 @@ object DexConstants {
      */
     const val COVER_URL = "https://uploads.mangadex.org/covers/"
     const val SEASONAL_LIST = "4be9338a-3402-4f98-b467-43fb56663927"
+
+    /**
+     * 15 minutes in seconds
+     */
+    const val SESSION_EXPIRY = 900
+
+    /**
+     * 30 days in seconds
+     */
+    const val REFRESH_EXPIRY = 2592000
 }
 
 enum class DexCoverSize(val size: Int) {

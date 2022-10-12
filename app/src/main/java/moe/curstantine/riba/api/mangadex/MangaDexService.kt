@@ -47,6 +47,10 @@ class MangaDexService(database: RibaDatabase) {
             .addConverterFactory(MoshiConverterFactory.create(dexMoshi.build()))
             .build()
 
+        user = UserService(
+            retrofit.create(UserService.Companion.APIService::class.java),
+            UserService.Companion.Database(database)
+        )
         author = AuthorService(
             retrofit.create(AuthorService.Companion.APIService::class.java),
             AuthorService.Companion.Database(database)
@@ -59,10 +63,6 @@ class MangaDexService(database: RibaDatabase) {
         mdlist = MDListService(
             retrofit.create(MDListService.Companion.APIService::class.java),
             MDListService.Companion.Database(database)
-        )
-        user = UserService(
-            retrofit.create(UserService.Companion.APIService::class.java),
-            UserService.Companion.Database(database)
         )
     }
 }

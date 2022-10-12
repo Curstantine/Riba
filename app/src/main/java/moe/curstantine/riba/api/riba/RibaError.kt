@@ -10,8 +10,9 @@ interface RibaError {
         sealed class Impl(
             override val human: String,
             override var additional: String? = null,
-        ) : RibaError {
+        ) : RibaError, Throwable("$RibaError: $human ($additional)") {
             object ResultNotError : Impl("Result is not an error.")
+            object IsNotThrowable : Impl("Error is not a Throwable.")
         }
     }
 }
