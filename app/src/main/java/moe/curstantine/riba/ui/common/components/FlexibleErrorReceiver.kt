@@ -2,13 +2,17 @@ package moe.curstantine.riba.ui.common.components
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,22 +34,18 @@ fun FlexibleErrorReceiver(error: RibaError) {
 
     Column(
         modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(),
+            .fillMaxSize()
+            .horizontalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = error.human,
-            style = typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
+        Text(text = error.human, style = typography.bodyLarge)
 
         if (error.additional != null) {
             Text(
                 text = error.additional!!,
                 style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
-                textAlign = TextAlign.Center
             )
         }
 

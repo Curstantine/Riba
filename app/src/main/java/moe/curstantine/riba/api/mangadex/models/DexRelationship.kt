@@ -33,6 +33,7 @@ data class DexRelationshipImpl(
 /**
  * Content rating of a [DexManga]
  */
+@JsonClass(generateAdapter = false)
 enum class DexContentRating {
     @field:Json(name = "safe")
     Safe,

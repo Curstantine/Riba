@@ -32,12 +32,14 @@ android {
 
     buildTypes {
         getByName("debug") {
+            isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         getByName("release") {
+            isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
@@ -51,7 +53,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "16"
+        jvmTarget = JavaVersion.VERSION_16.toString()
     }
 
     buildFeatures {
@@ -68,6 +70,8 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    namespace = "moe.curstantine.riba"
 }
 
 dependencies {

@@ -1,8 +1,10 @@
 package moe.curstantine.riba.api.mangadex.services
 
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexMDList
 import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
@@ -16,15 +18,17 @@ import retrofit2.http.Query
 class MDListService(
     private val service: APIService,
     val database: Database
-) : RibaHttpService(service, database) {
-    private val DEFAULT_MDLIST_INCLUDES = listOf(
+) : MangaDexService.Companion.Service(service, database) {
+    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    private val defaultMDListIncludes = listOf(
         DexEntityType.Manga,
         DexEntityType.User
     )
 
     suspend fun get(
         id: String,
-        includes: List<DexEntityType> = DEFAULT_MDLIST_INCLUDES,
+        includes: List<DexEntityType> = defaultMDListIncludes,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
     ): RibaResult<RibaMangaList> = contextualInvoke {
@@ -33,8 +37,7 @@ class MDListService(
             if (localList != null) return@contextualInvoke localList
         }
 
-        val response = service.get(id, includes)
-        val riba = response.data.toRibaMangaList()
+        val riba = service.get(id, includes).data.toRibaMangaList()
         it.launch { database.insert(riba, forceInsert) }
 
         return@contextualInvoke riba
@@ -54,14 +57,14 @@ class MDListService(
             RibaHttpService.Companion.Database(database) {
             suspend fun get(id: String) = database.list().get(id)
 
-            suspend fun insert(list: RibaMangaList, force: Boolean = false) = coroutineScope {
+            suspend fun insert(list: RibaMangaList, force: Boolean = false) {
                 val oldList = database.list().get(list.id)
 
                 if (force.not() && oldList != null && oldList.version >= list.version) {
-                    return@coroutineScope
+                    return
                 }
 
-                launch { database.list().insert(list) }
+                database.list().insert(list)
             }
         }
     }

@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.api.mangadex.DexUtils
 
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexResult {
     @field:Json(name = "ok")
     Ok,
@@ -14,6 +15,7 @@ enum class DexResult {
 }
 
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexResponseType {
     @field:Json(name = "entity")
     Entity,
@@ -23,6 +25,7 @@ enum class DexResponseType {
 }
 
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexEntityType {
     @field:Json(name = "author")
     Author,

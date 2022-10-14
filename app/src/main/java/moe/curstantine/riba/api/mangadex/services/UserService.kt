@@ -6,10 +6,13 @@ import android.content.SharedPreferences.Editor
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.api.database.RibaDatabase
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
+import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexBaseResponse
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthBody
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthRefreshBody
@@ -25,7 +28,9 @@ import retrofit2.http.POST
 class UserService(
     private val service: APIService,
     private val database: Database,
-) : RibaHttpService(service, database) {
+) : MangaDexService.Companion.Service(service, database) {
+    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     suspend fun login(
         editor: Editor,
         username: String,

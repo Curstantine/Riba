@@ -1,44 +1,46 @@
 package moe.curstantine.riba.api.mangadex.models
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 typealias DexLinks = Map<DexLink, String>
 
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexLink {
-    @Json(name = "al")
+    @field:Json(name = "al")
     AniList,
 
-    @Json(name = "ap")
+    @field:Json(name = "ap")
     AnimePlanet,
 
-    @Json(name = "bw")
+    @field:Json(name = "bw")
     BookWalker,
 
-    @Json(name = "mu")
+    @field:Json(name = "mu")
     MangaUpdates,
 
-    @Json(name = "nu")
+    @field:Json(name = "nu")
     NovelUpdates,
 
-    @Json(name = "kt")
+    @field:Json(name = "kt")
     Kitsu,
 
-    @Json(name = "amz")
+    @field:Json(name = "amz")
     Amazon,
 
-    @Json(name = "ebj")
+    @field:Json(name = "ebj")
     EBookJapan,
 
-    @Json(name = "mal")
+    @field:Json(name = "mal")
     MyAnimeList,
 
-    @Json(name = "cdj")
+    @field:Json(name = "cdj")
     CdJapan,
 
-    @Json(name = "raw")
+    @field:Json(name = "raw")
     Raw,
 
-    @Json(name = "engtl")
+    @field:Json(name = "engtl")
     EnglishTranslation,
 }

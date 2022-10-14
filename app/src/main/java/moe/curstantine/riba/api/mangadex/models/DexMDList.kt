@@ -14,11 +14,12 @@ data class DexMDListAttributes(
     val version : Int,
 )
 
+@JsonClass(generateAdapter = false)
 enum class DexListVisibility {
-    @Json(name = "public")
+    @field:Json(name = "public")
     Public,
 
-    @Json(name = "private")
+    @field:Json(name = "private")
     Private;
 
     override fun toString(): String {

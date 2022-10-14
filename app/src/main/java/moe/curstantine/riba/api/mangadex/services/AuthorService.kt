@@ -1,9 +1,12 @@
 package moe.curstantine.riba.api.mangadex.services
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexAuthor
 import moe.curstantine.riba.api.mangadex.models.DexAuthorCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -14,27 +17,29 @@ import moe.curstantine.riba.api.riba.models.RibaAuthor
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import kotlin.coroutines.CoroutineContext
 
 class AuthorService(
     private val service: APIService,
     val database: Database
-) : RibaHttpService(service, database) {
+) : MangaDexService.Companion.Service(service, database) {
+    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     suspend fun get(
         id: String,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
-    ): RibaResult<RibaAuthor> =
-        contextualInvoke { scope ->
-            if (tryDatabase) {
-                val localAuthor = database.get(id)
-                if (localAuthor != null) return@contextualInvoke localAuthor
-            }
-
-            val response = service.get(id).data.toRibaAuthor()
-            scope.launch { database.insert(response, forceInsert) }
-
-            return@contextualInvoke response
+    ): RibaResult<RibaAuthor> = contextualInvoke { scope ->
+        if (tryDatabase) {
+            val localAuthor = database.get(id)
+            if (localAuthor != null) return@contextualInvoke localAuthor
         }
+
+        val response = service.get(id).data.toRibaAuthor()
+        scope.launch { database.insert(response, forceInsert) }
+
+        return@contextualInvoke response
+    }
 
     suspend fun getCollection(
         ids: List<String>? = null,
@@ -46,7 +51,7 @@ class AuthorService(
         val response = service.getCollection(ids, limit, offset, includes)
         val riba = response.data.map { it.toRibaAuthor() }
 
-        scope.launch { database.insertCollection(riba, forceInsert) }
+        scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
 
         return@contextualInvoke riba
     }
@@ -55,9 +60,11 @@ class AuthorService(
         ids: List<String>,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
-    ): RibaResult<List<RibaAuthor>> {
-        val idMap: MutableMap<String, RibaAuthor?> =
-            ids.associateBy({ it }, { null }).toMutableMap()
+    ): RibaResult<List<RibaAuthor>> = contextualInvoke {
+        val idMap: MutableMap<String, RibaAuthor?> = ids
+            .associateBy({ it }, { null })
+            .toMutableMap()
+
         if (tryDatabase) {
             val localArtist = database.getCollection(ids)
             idMap.putAll(localArtist.map { Pair(it.id, it) })
@@ -65,13 +72,11 @@ class AuthorService(
 
         val missingIds = idMap.filterValues { it == null }.keys.toList()
         if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert)
-
-            if (response is RibaResult.Error) return response
-            else response.map { it.forEach { artist -> idMap[artist.id] = artist } }
+            val response = getCollection(ids = missingIds, forceInsert = forceInsert).bubble()
+            response.forEach { artist -> idMap[artist.id] = artist }
         }
 
-        return RibaResult.Success(idMap.values.mapNotNull { it })
+        return@contextualInvoke idMap.values.mapNotNull { it }
     }
 
     companion object {
@@ -92,40 +97,42 @@ class AuthorService(
         class Database(private val database: RibaDatabase) :
             RibaHttpService.Companion.Database(database) {
             suspend fun get(id: String) = database.author().get(id)
+
             suspend fun getCollection(ids: List<String>) = database.author().get(ids)
 
-            suspend fun insert(author: RibaAuthor, force: Boolean = false) = coroutineScope {
+            suspend fun insert(author: RibaAuthor, force: Boolean = false) {
                 val oldAuthor = database.author().get(author.id)
 
-                // We don't want to insert authors with the same version.
                 if (force.not() && oldAuthor != null && oldAuthor.version >= author.version) {
-                    return@coroutineScope
+                    return
                 }
 
-                launch { database.author().insert(author) }
+                database.author().insert(author)
             }
 
-            suspend fun insertCollection(authors: List<RibaAuthor>, force: Boolean = false) =
-                coroutineScope {
-                    val authorJob = this.async { authors.associateBy { it.id } }
-                    val oldAuthorJob = this.async {
-                        getCollection(authors.map { it.id }).associateBy { it.id }
-                    }
+            suspend fun insertCollection(
+                context: CoroutineContext,
+                authors: List<RibaAuthor>,
+                force: Boolean = false
+            ) = withContext(context) {
+                val authorJob = this.async { authors.associateBy { it.id } }
+                val oldAuthorJob = this.async {
+                    getCollection(authors.map { it.id }).associateBy { it.id }
+                }
 
-                    val oldAuthorMap = oldAuthorJob.await()
-                    val authorMap = authorJob.await()
+                val oldAuthorMap = oldAuthorJob.await()
+                val authorMap = authorJob.await()
 
-                    for ((id, newThis) in authorMap) {
-                        val oldThis = oldAuthorMap[id]
+                for ((id, newThis) in authorMap) {
+                    val oldThis = oldAuthorMap[id]
 
-                        if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-                            continue
-                        } else {
-                            launch { database.author().insert(newThis) }
-                            continue
-                        }
+                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+                        continue
+                    } else {
+                        launch { database.author().insert(newThis) }
                     }
                 }
+            }
         }
     }
 }

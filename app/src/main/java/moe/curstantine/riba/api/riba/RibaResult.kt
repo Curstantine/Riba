@@ -18,7 +18,7 @@ sealed class RibaResult<out R> {
         is Success -> value
         is Error -> {
             if (error is Throwable) throw error
-            else throw RibaError.Companion.Impl.ResultNotError
+            else throw RibaError.Companion.Impl.IsNotThrowable
         }
     }
 

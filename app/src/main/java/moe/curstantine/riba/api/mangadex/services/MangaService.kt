@@ -1,10 +1,12 @@
 package moe.curstantine.riba.api.mangadex.services
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexCover
 import moe.curstantine.riba.api.mangadex.models.DexCoverCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -29,13 +31,16 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
+import kotlin.coroutines.CoroutineContext
 
 class MangaService(
     private val service: APIService,
     val database: Database,
     private val authorService: AuthorService,
-) : RibaHttpService(service, database) {
-    private val DEFAULT_MANGA_INCLUDES = listOf(
+) : MangaDexService.Companion.Service(service, database) {
+    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    private val defaultMangaIncludes = listOf(
         DexEntityType.Author,
         DexEntityType.Artist,
         DexEntityType.CoverArt,
@@ -43,7 +48,7 @@ class MangaService(
 
     suspend fun get(
         id: String,
-        includes: List<DexEntityType> = DEFAULT_MANGA_INCLUDES,
+        includes: List<DexEntityType> = defaultMangaIncludes,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
     ): RibaResult<RibaManga> = contextualInvoke { scope ->
@@ -61,13 +66,12 @@ class MangaService(
         return@contextualInvoke ribaManga
     }
 
-
     suspend fun getCollection(
         ids: List<String>? = null,
         limit: Int = 10,
         offset: Int? = null,
         sort: Pair<DexQueryOrderProperty, DexQueryOrderValue>? = null,
-        includes: List<DexEntityType> = DEFAULT_MANGA_INCLUDES,
+        includes: List<DexEntityType> = defaultMangaIncludes,
         forceInsert: Boolean = false,
     ): RibaResult<List<RibaManga>> = contextualInvoke { scope ->
         val response = service.getCollection(
@@ -79,7 +83,7 @@ class MangaService(
         )
 
         val riba = response.data.map { it.toRibaManga() }
-        scope.launch { database.insertCollection(riba, forceInsert) }
+        scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
         scope.launch { response.data.map { insertMangaMeta(it) } }
 
         return@contextualInvoke riba
@@ -89,7 +93,7 @@ class MangaService(
         ids: List<String>,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
-    ): RibaResult<List<RibaManga>> {
+    ): RibaResult<List<RibaManga>> = contextualInvoke {
         val idMap: MutableMap<String, RibaManga?> = ids.associateBy({ it }, { null }).toMutableMap()
         if (tryDatabase) {
             val localManga = database.getCollection(ids)
@@ -98,32 +102,31 @@ class MangaService(
 
         val missingIds = idMap.filterValues { it == null }.keys.toList()
         if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert)
-
-            if (response is RibaResult.Error) return response
-            else response.map { it.forEach { manga -> idMap[manga.id] = manga } }
+            val response = getCollection(ids = missingIds, forceInsert = forceInsert).bubble()
+            response.forEach { manga -> idMap[manga.id] = manga }
         }
 
-        return RibaResult.Success(idMap.values.mapNotNull { it })
+        return@contextualInvoke idMap.values.mapNotNull { it }
     }
 
-    private suspend fun insertMangaMeta(manga: DexMangaData) =
-        contextualInvoke(Dispatchers.Default) { scope ->
-            val ribaTags = manga.attributes.tags.map { it.toRibaTag() }
-            if (ribaTags.isNotEmpty()) scope.launch { database.insertTagCollection(ribaTags) }
-
-            val ribaAuthors = manga.relationships
-                .filter { it.type == DexEntityType.Artist || it.type == DexEntityType.Author }
-                .map { (it as DexRelatedAuthor).toRibaAuthor() }
-            if (ribaAuthors.isNotEmpty()) {
-                scope.launch { authorService.database.insertCollection(ribaAuthors) }
-            }
-
-            val ribaCover = manga.relationships
-                .firstOrNull { it.type == DexEntityType.CoverArt }
-                ?.let { (it as DexRelatedCover).toRibaCover(manga.id) }
-            if (ribaCover != null) scope.launch { database.insertCover(ribaCover) }
+    private suspend fun insertMangaMeta(manga: DexMangaData) = contextualInvoke { scope ->
+        val ribaTags = manga.attributes.tags.map { it.toRibaTag() }
+        if (ribaTags.isNotEmpty()) scope.launch {
+            database.insertTagCollection(scope.coroutineContext, ribaTags)
         }
+
+        val ribaAuthors = manga.relationships
+            .filter { it.type == DexEntityType.Artist || it.type == DexEntityType.Author }
+            .map { (it as DexRelatedAuthor).toRibaAuthor() }
+        if (ribaAuthors.isNotEmpty()) scope.launch {
+            authorService.database.insertCollection(scope.coroutineContext, ribaAuthors)
+        }
+
+        val ribaCover = manga.relationships
+            .firstOrNull { it.type == DexEntityType.CoverArt }
+            ?.let { (it as DexRelatedCover).toRibaCover(manga.id) }
+        if (ribaCover != null) scope.launch { database.insertCover(ribaCover) }
+    }
 
     /**
      * @param id UUID of the title
@@ -163,7 +166,9 @@ class MangaService(
 
             val response = service.getCover(id)
             val riba = response.data.toRibaCover()
-            it.launch { database.insertCover(riba, forceInsert) }
+            it.launch {
+                database.insertCover(riba, forceInsert)
+            }
 
             return@contextualInvoke riba
         }
@@ -178,7 +183,9 @@ class MangaService(
             val response = service.getCoverCollection(ids, manga, limit)
             val riba = response.data.map { it.toRibaCover() }
 
-            scope.launch { database.insertCoverCollection(riba, forceInsert) }
+            scope.launch {
+                database.insertCoverCollection(scope.coroutineContext, riba, forceInsert)
+            }
 
             return@contextualInvoke riba
         }
@@ -236,112 +243,118 @@ class MangaService(
             suspend fun getStatistic(id: String) = database.statistic().get(id)
             suspend fun getStatisticCollection(ids: List<String>) = database.statistic().get(ids)
 
-            suspend fun insert(manga: RibaManga, force: Boolean = false) = coroutineScope {
+            suspend fun insert(manga: RibaManga, force: Boolean = false) {
                 val oldManga = database.manga().get(manga.id)
 
                 if (force.not() && oldManga != null && oldManga.version >= manga.version) {
-                    return@coroutineScope
+                    return
                 }
 
-                launch { database.manga().insert(manga) }
+                database.manga().insert(manga)
             }
 
-            suspend fun insertCollection(manga: List<RibaManga>, force: Boolean = false) =
-                coroutineScope {
-                    val mangaJob = this.async { manga.associateBy { it.id } }
-                    val oldMangaJob = this.async {
-                        getCollection(manga.map { it.id }).associateBy { it.id }
-                    }
-
-                    val oldMangaMap = oldMangaJob.await()
-                    val mangaMap = mangaJob.await()
-
-                    for ((id, newThis) in mangaMap) {
-                        val oldThis = oldMangaMap[id]
-
-                        if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-                            continue
-                        } else {
-                            launch { database.manga().insert(newThis) }
-                            continue
-                        }
-                    }
+            suspend fun insertCollection(
+                context: CoroutineContext,
+                manga: List<RibaManga>,
+                force: Boolean = false
+            ) = withContext(context) {
+                val mangaJob = this.async { manga.associateBy { it.id } }
+                val oldMangaJob = this.async {
+                    getCollection(manga.map { it.id }).associateBy { it.id }
                 }
 
-            suspend fun insertCover(cover: RibaCover, force: Boolean = false) = coroutineScope {
+                val oldMangaMap = oldMangaJob.await()
+                val mangaMap = mangaJob.await()
+
+                for ((id, newThis) in mangaMap) {
+                    val oldThis = oldMangaMap[id]
+
+                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+                        continue
+                    } else {
+                        launch { database.manga().insert(newThis) }
+                    }
+                }
+            }
+
+            suspend fun insertCover(cover: RibaCover, force: Boolean = false) {
                 val oldCover = getCover(cover.id)
 
                 if (force.not() && oldCover != null && oldCover.version >= cover.version) {
-                    return@coroutineScope
+                    return
                 }
 
-                launch { database.cover().insert(cover) }
+                database.cover().insert(cover)
             }
 
-            suspend fun insertCoverCollection(covers: List<RibaCover>, force: Boolean = false) =
-                coroutineScope {
-                    val coverJob = this.async { covers.associateBy { it.id } }
-                    val oldCoverJob = this.async {
-                        getCoverCollection(covers.map { it.id }).associateBy { it.id }
-                    }
-
-                    val oldCoverMap = oldCoverJob.await()
-                    val coverMap = coverJob.await()
-
-                    for ((id, newThis) in coverMap) {
-                        val oldThis = oldCoverMap[id]
-
-                        if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-                            continue
-                        } else {
-                            launch { database.cover().insert(newThis) }
-                            continue
-                        }
-                    }
+            suspend fun insertCoverCollection(
+                context: CoroutineContext,
+                covers: List<RibaCover>,
+                force: Boolean = false
+            ) = withContext(context) {
+                val coverJob = this.async { covers.associateBy { it.id } }
+                val oldCoverJob = this.async {
+                    getCoverCollection(covers.map { it.id }).associateBy { it.id }
                 }
 
-            suspend fun insertTag(tag: RibaTag, force: Boolean = false) = coroutineScope {
+                val oldCoverMap = oldCoverJob.await()
+                val coverMap = coverJob.await()
+
+                for ((id, newThis) in coverMap) {
+                    val oldThis = oldCoverMap[id]
+
+                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+                        continue
+                    } else {
+                        launch { database.cover().insert(newThis) }
+                        continue
+                    }
+                }
+            }
+
+            suspend fun insertTag(tag: RibaTag, force: Boolean = false) {
                 val oldTag = getTag(tag.id)
 
                 // We don't want to insert tags with the same version.
                 if (force.not() && oldTag != null && oldTag.version >= tag.version) {
-                    return@coroutineScope
+                    return
                 }
 
-                launch { database.tag().insert(tag) }
+                database.tag().insert(tag)
             }
 
 
-            suspend fun insertTagCollection(tags: List<RibaTag>, force: Boolean = false) =
-                coroutineScope {
-                    val tagJob = this.async { tags.associateBy { it.id } }
-                    val oldTagJob = this.async {
-                        getTagCollection(tags.map { it.id }).associateBy { it.id }
-                    }
-
-                    val oldTagMap = oldTagJob.await()
-                    val tagMap = tagJob.await()
-
-                    for ((id, newThis) in tagMap) {
-                        val oldThis = oldTagMap[id]
-
-                        if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-                            continue
-                        } else {
-                            launch { database.tag().insert(newThis) }
-                            continue
-                        }
-                    }
+            suspend fun insertTagCollection(
+                context: CoroutineContext,
+                tags: List<RibaTag>,
+                force: Boolean = false
+            ) = withContext(context) {
+                val tagJob = this.async { tags.associateBy { it.id } }
+                val oldTagJob = this.async {
+                    getTagCollection(tags.map { it.id }).associateBy { it.id }
                 }
 
-            suspend fun insertStatistic(statistic: RibaStatistic) = coroutineScope {
-                launch { database.statistic().insert(statistic) }
+                val oldTagMap = oldTagJob.await()
+                val tagMap = tagJob.await()
+
+                for ((id, newThis) in tagMap) {
+                    val oldThis = oldTagMap[id]
+
+                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+                        continue
+                    } else {
+                        launch { database.tag().insert(newThis) }
+                    }
+                }
             }
+
+            suspend fun insertStatistic(statistic: RibaStatistic) =
+                database.statistic().insert(statistic)
+
 
             suspend fun insertStatisticCollection(statistics: List<RibaStatistic>) =
-                coroutineScope {
-                    launch { database.statistic().insert(statistics) }
-                }
+                database.statistic().insert(statistics)
+
         }
     }
 }

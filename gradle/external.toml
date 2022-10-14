@@ -9,12 +9,12 @@ markdown = "com.github.jeziellago:compose-markdown:0.3.0"
 
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi_version" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi_version" }
-moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi_version" }
+moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi_version" }
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
 retrofit_json = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit_version" }
 
 [bundles]
 moshi = ["moshi", "moshi-adapters"]
-ksps = ["moshi-kotlin"]
+ksps = ["moshi-codegen"]
 retrofit = ["retrofit", "retrofit_json"]

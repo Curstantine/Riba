@@ -1,7 +1,10 @@
 package moe.curstantine.riba.api.mangadex
 
+import android.util.Log
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.EnumConverter
 import moe.curstantine.riba.api.NormalizeMismatchType
 import moe.curstantine.riba.api.database.RibaDatabase
@@ -15,6 +18,8 @@ import moe.curstantine.riba.api.mangadex.services.AuthorService
 import moe.curstantine.riba.api.mangadex.services.MDListService
 import moe.curstantine.riba.api.mangadex.services.MangaService
 import moe.curstantine.riba.api.mangadex.services.UserService
+import moe.curstantine.riba.api.riba.RibaHttpService
+import moe.curstantine.riba.api.riba.RibaResult
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -64,5 +69,25 @@ class MangaDexService(database: RibaDatabase) {
             retrofit.create(MDListService.Companion.APIService::class.java),
             MDListService.Companion.Database(database)
         )
+    }
+
+    companion object {
+        abstract class Service(
+            service: Companion.APIService,
+            database: Companion.Database
+        ) : RibaHttpService(service, database) {
+            override suspend fun <T> contextualInvoke(call: suspend (it: CoroutineScope) -> T): RibaResult<T> {
+                return withContext(coroutineScope.coroutineContext) {
+                    try {
+                        RibaResult.Success(call.invoke(this))
+                    } catch (e: Throwable) {
+                        val error = DexError.tryHandle(e)
+                        Log.e(DexError.Companion.LogTag.DEBUG.toString(), error.stackTraceToString())
+
+                        RibaResult.Error(error)
+                    }
+                }
+            }
+        }
     }
 }

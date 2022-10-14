@@ -1,6 +1,5 @@
 package moe.curstantine.riba.api.mangadex
 
-import android.util.Log
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import moe.curstantine.riba.api.mangadex.DexError.Companion.tryHandle
@@ -21,38 +20,33 @@ import java.util.Locale
  */
 open class DexError(
     override val human: String,
-    override var additional: String?
-) : RibaError, Throwable("$DexError: $human ($additional)") {
-    fun setAdditional(additional: String?): DexError {
-        this.additional = additional
-        return this
-    }
-
+    override val additional: String? = null
+) : RibaError, Throwable(
+    "$human:${additional.orEmpty().let { if (it.isNotEmpty()) "\n$it" else it }}"
+) {
     companion object {
-        private val moshiAdapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
+        fun Unknown(additional: String?) =
+            DexError("Unknown error occurred while reaching MangaDex!", additional)
+
+        fun InvalidJSON(additional: String?) =
+            DexError("MangaDex returned an invalid JSON response!", additional)
+
+        fun DatabaseError(additional: String?) =
+            DexError("Came across an error while trying to access the database!", additional)
 
         object HTTP503 : DexError(
-            "MangaDex servers are down for maintenance!", "Status Code: 503"
-        )
-
-        object Unknown : DexError(
-            "Oof, came across an unknown error while trying to reach MangaDex!", null
-        )
-
-        object InvalidJSON : DexError(
-            "MangaDex returned an invalid JSON response!", null
-        )
-
-        object DatabaseError : DexError(
-            "Came across an error while trying to access the database!", null
+            "MangaDex servers are down for maintenance!",
+            "Status Code: 503"
         )
 
         object NotAuthenticated : DexError(
-            "User not authenticated!", "This action requires the user to be authenticated."
+            "User not authenticated!",
+            "This action requires the user to be authenticated."
         )
 
         object ReAuthenticationRequired : DexError(
-            "Re-authentication required!", "Both the session and refresh tokens are invalid."
+            "Re-authentication required!",
+            "Both the session and refresh tokens are invalid."
         )
 
         /**
@@ -62,19 +56,23 @@ open class DexError(
             RibaError.Companion.LogTag {
             MISSING("DexMissingContent"),
             RESTRICTED("DexRestrictedContent"),
+            DEBUG("DexDebug");
+
+            override fun toString(): String = tag
         }
 
         fun tryHandle(e: Throwable): DexError {
             return when (e) {
-                is HttpException -> fromHttpException(e)
-                is JsonDataException -> InvalidJSON.setAdditional(e.message)
-                is SQLException -> DatabaseError.setAdditional(e.message)
                 is DexError -> e
-                else -> Unknown.setAdditional(e.message)
+                is HttpException -> fromHttpException(e)
+                is JsonDataException -> InvalidJSON(e.message)
+                is SQLException -> DatabaseError(e.message)
+                else -> Unknown(e.stackTraceToString())
             }
         }
 
         private fun fromHttpException(e: HttpException): DexError {
+            val moshiAdapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
             val errorBody = e.response()?.errorBody()?.source()?.let { moshiAdapter.fromJson(it) }
 
             return if (errorBody?.errors?.isNotEmpty() == true) {
@@ -87,7 +85,7 @@ open class DexError(
             } else {
                 when (val code = e.code()) {
                     503 -> HTTP503
-                    else -> Unknown.setAdditional(code.toString())
+                    else -> Unknown("HTTP Code: $code")
                 }
             }
         }

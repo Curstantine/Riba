@@ -132,6 +132,7 @@ data class ShadowedDexStatisticsObject(
  * The type of relationship between two [DexManga]s.
  */
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexMangaRelationType {
     @field:Json(name = "monochrome")
     Monochrome,
@@ -189,6 +190,7 @@ enum class DexMangaRelationType {
  * Group types for tags in a Manga.
  */
 @Suppress("unused")
+@JsonClass(generateAdapter = false)
 enum class DexMangaTagGroup {
     @field:Json(name = "content")
     Content,
