@@ -10,21 +10,26 @@ typealias DexUserData = DexResponseData<DexUserAttributes>
 
 @JsonClass(generateAdapter = true)
 data class DexUserAttributes(
-    val name: String,
+    val username: String,
+    val roles: List<String>,
     val version: Int,
 )
 
 // TODO: Add avatars when they are supported by the MangaDex API
 fun DexUser.toRibaUser(): RibaUser = RibaUser(
     id = data.id,
-    username = data.attributes.name,
+    username = data.attributes.username,
+    roles = data.attributes.roles,
     avatar = null,
+    version = data.attributes.version,
 )
 
 fun DexUserData.toRibaUser(): RibaUser = RibaUser(
     id = id,
-    username = attributes.name,
+    username = attributes.username,
+    roles = attributes.roles,
     avatar = null,
+    version = attributes.version,
 )
 
 /**

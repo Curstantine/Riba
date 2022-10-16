@@ -1,4 +1,4 @@
-package moe.curstantine.riba.api.database.dao
+package moe.curstantine.riba.api.mangadex.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete

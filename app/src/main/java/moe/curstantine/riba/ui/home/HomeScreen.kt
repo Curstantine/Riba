@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Divider
@@ -60,7 +62,9 @@ fun HomeScreen(
     viewModel: HomeViewModel
 ) {
     Column(
-        modifier = Modifier.padding(bottom = paddingValues.value.calculateBottomPadding()),
+        modifier = Modifier
+            .padding(bottom = paddingValues.value.calculateBottomPadding())
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         HeaderRow(state, paddingValues)
@@ -159,7 +163,7 @@ private fun AccountDropDown(
         modifier = Modifier.width(150.dp),
         expanded = expanded.value,
         onDismissRequest = { expanded.value = false },
-        offset = DpOffset(x = (-100).dp, y = 0.dp),
+        offset = DpOffset(x = (-120).dp, y = 0.dp),
     ) {
         if (isSignedIn.value) {
             DropdownMenuItem(

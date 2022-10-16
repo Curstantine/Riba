@@ -3,7 +3,7 @@ package moe.curstantine.riba.api.mangadex.services
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexMDList
@@ -53,7 +53,7 @@ class MDListService(
             ): DexMDList
         }
 
-        class Database(private val database: RibaDatabase) :
+        class Database(private val database: DexDatabase) :
             RibaHttpService.Companion.Database(database) {
             suspend fun get(id: String) = database.list().get(id)
 

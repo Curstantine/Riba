@@ -9,4 +9,6 @@ data class RibaUser(
     @PrimaryKey val id: String,
     @ColumnInfo val username: String,
     @ColumnInfo val avatar: String?,
+    @ColumnInfo val roles: List<String>,
+    @ColumnInfo val version: Int,
 )

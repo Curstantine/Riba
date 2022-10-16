@@ -1,11 +1,10 @@
-package moe.curstantine.riba.api.database.dao
+package moe.curstantine.riba.api.mangadex.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.api.riba.models.RibaUser
 
 @Dao
@@ -14,7 +13,7 @@ interface UserDao {
     suspend fun get(id: String): RibaUser?
 
     @Query("SELECT * FROM users WHERE id IN (:ids)")
-    suspend fun get(ids: List<String>): List<RibaTag>
+    suspend fun get(ids: List<String>): List<RibaUser>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(list: RibaUser)

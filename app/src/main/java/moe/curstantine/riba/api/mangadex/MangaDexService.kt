@@ -1,13 +1,15 @@
 package moe.curstantine.riba.api.mangadex
 
+import android.content.Context
 import android.util.Log
+import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.EnumConverter
 import moe.curstantine.riba.api.NormalizeMismatchType
-import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
 import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
@@ -23,7 +25,11 @@ import moe.curstantine.riba.api.riba.RibaResult
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-class MangaDexService(database: RibaDatabase) {
+class MangaDexService(context: Context) {
+    private val database = Room
+        .databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
+        .build()
+
     val author: AuthorService
     val manga: MangaService
     val mdlist: MDListService
@@ -53,6 +59,7 @@ class MangaDexService(database: RibaDatabase) {
             .build()
 
         user = UserService(
+            context,
             retrofit.create(UserService.Companion.APIService::class.java),
             UserService.Companion.Database(database)
         )

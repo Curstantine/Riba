@@ -1,15 +1,16 @@
-package moe.curstantine.riba.api.database
+package moe.curstantine.riba.api.mangadex.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import moe.curstantine.riba.api.database.dao.AuthorDao
-import moe.curstantine.riba.api.database.dao.CoverDao
-import moe.curstantine.riba.api.database.dao.ListDao
-import moe.curstantine.riba.api.database.dao.MangaDao
-import moe.curstantine.riba.api.database.dao.MangaLinkDao
-import moe.curstantine.riba.api.database.dao.StatisticDao
-import moe.curstantine.riba.api.database.dao.TagDao
+import moe.curstantine.riba.api.mangadex.database.dao.AuthorDao
+import moe.curstantine.riba.api.mangadex.database.dao.CoverDao
+import moe.curstantine.riba.api.mangadex.database.dao.ListDao
+import moe.curstantine.riba.api.mangadex.database.dao.MangaDao
+import moe.curstantine.riba.api.mangadex.database.dao.MangaLinkDao
+import moe.curstantine.riba.api.mangadex.database.dao.StatisticDao
+import moe.curstantine.riba.api.mangadex.database.dao.TagDao
+import moe.curstantine.riba.api.mangadex.database.dao.UserDao
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaManga
@@ -17,6 +18,7 @@ import moe.curstantine.riba.api.riba.models.RibaMangaLink
 import moe.curstantine.riba.api.riba.models.RibaMangaList
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
+import moe.curstantine.riba.api.riba.models.RibaUser
 
 @Database(
     version = 1,
@@ -28,10 +30,11 @@ import moe.curstantine.riba.api.riba.models.RibaTag
         RibaMangaLink::class,
         RibaTag::class,
         RibaStatistic::class,
+        RibaUser::class,
     ],
 )
 @TypeConverters(Converters::class)
-abstract class RibaDatabase : RoomDatabase() {
+abstract class DexDatabase : RoomDatabase() {
     abstract fun author(): AuthorDao
     abstract fun cover(): CoverDao
     abstract fun list(): ListDao
@@ -39,4 +42,5 @@ abstract class RibaDatabase : RoomDatabase() {
     abstract fun mangaLink(): MangaLinkDao
     abstract fun tag(): TagDao
     abstract fun statistic(): StatisticDao
+    abstract fun user(): UserDao
 }

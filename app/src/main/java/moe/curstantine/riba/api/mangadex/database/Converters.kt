@@ -1,4 +1,4 @@
-package moe.curstantine.riba.api.database
+package moe.curstantine.riba.api.mangadex.database
 
 import androidx.room.TypeConverter
 import moe.curstantine.riba.api.mangadex.models.DexContentRating

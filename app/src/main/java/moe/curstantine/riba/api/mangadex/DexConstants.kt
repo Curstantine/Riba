@@ -5,6 +5,9 @@ object DexConstants {
     const val BASE_API = "https://api.mangadex.org"
     const val STATUS_PAGE = "https://status.mangadex.org"
 
+    const val USER_PREFERENCE = "MangaDex-User"
+    const val DATABASE_NAME = "Riba-MangaDex"
+
     /**
      * Covers should follow the `COVER_URL/manga-id/cover-filename
      *

@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.database.RibaDatabase
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexAuthor
 import moe.curstantine.riba.api.mangadex.models.DexAuthorCollection
@@ -94,7 +94,7 @@ class AuthorService(
             ): DexAuthorCollection
         }
 
-        class Database(private val database: RibaDatabase) :
+        class Database(private val database: DexDatabase) :
             RibaHttpService.Companion.Database(database) {
             suspend fun get(id: String) = database.author().get(id)
 
