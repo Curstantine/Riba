@@ -14,6 +14,8 @@
     <string name="no_author_artists">No Valid Authors/Artists</string>
     <string name="no_cover">Cover Not Available</string>
 
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
     <string name="back">Back</string>
     <string name="more">More</string>
     <string name="collapse">Collapse</string>
@@ -40,8 +42,12 @@
     <string name="show_more">Show More</string>
     <string name="show_less">Show Less</string>
 
+    <string name="status">Status</string>
     <string name="status_page">Status Page</string>
+    <string name="issues">Issues</string>
     <string name="create_issue">Create an issue</string>
 
+    <string name="hello_there">Hello there,</string>
+    <string name="anon">Anonymous</string>
     <string name="we_have_mental_issues">Only me?</string>
 </resources>

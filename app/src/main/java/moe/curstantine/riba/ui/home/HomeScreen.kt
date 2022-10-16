@@ -1,14 +1,37 @@
 package moe.curstantine.riba.ui.home
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,13 +42,16 @@ import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
 import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexConstants
-import moe.curstantine.riba.api.mangadex.models.DexEntityType
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.riba.RibaAPIService
+import moe.curstantine.riba.api.riba.RibaConstants
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
+import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.manga.MangaCardRow
+import moe.curstantine.riba.ui.theme.Rubik
 
 @Composable
 fun HomeScreen(
@@ -33,21 +59,151 @@ fun HomeScreen(
     paddingValues: State<PaddingValues>,
     viewModel: HomeViewModel
 ) {
-    Box(modifier = Modifier.padding(paddingValues.value)) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = Modifier.padding(bottom = paddingValues.value.calculateBottomPadding()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        HeaderRow(state, paddingValues)
 
-            MangaCardRow(
-                state.navigator,
-                viewModel.getSeasonal(),
-                stringResource(R.string.seasonal)
+        MangaCardRow(
+            state.navigator,
+            viewModel.getSeasonal(),
+            stringResource(R.string.seasonal)
+        )
+        MangaCardRow(
+            state.navigator,
+            viewModel.getRecent(),
+            stringResource(R.string.recently_added)
+        )
+    }
+}
+
+@Composable
+private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>) {
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
+    val username = stringResource(R.string.anon)
+    val rowColor = colorScheme.onBackground.copy(alpha = 0.5F)
+
+    val dropdownMenuExpanded = remember { mutableStateOf(false) }
+    val isSignedIn = remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 12.dp)
+            .padding(top = paddingValues.value.calculateTopPadding()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.hello_there),
+                style = typography.bodySmall.copy(
+                    fontFamily = Rubik,
+                    fontWeight = FontWeight.Light,
+                    color = rowColor.copy(alpha = 0.4F),
+                ),
             )
-            MangaCardRow(
-                state.navigator,
-                viewModel.getRecent(),
-                stringResource(R.string.recently_added)
+            Text(
+                text = username,
+                style = typography.titleLarge.copy(
+                    fontFamily = Rubik,
+                    fontWeight = FontWeight.SemiBold,
+                    color = rowColor.copy(alpha = 0.75F)
+                )
             )
         }
+
+        Box(contentAlignment = Alignment.Center) {
+            IconButton(onClick = { dropdownMenuExpanded.value = true }) {
+                Icon(
+                    tint = rowColor,
+                    imageVector = Icons.Rounded.Person,
+                    contentDescription = stringResource(R.string.settings)
+                )
+            }
+
+            AccountDropDown(dropdownMenuExpanded, isSignedIn) {
+                when (it) {
+                    is RibaRoute.Base.Settings -> {
+                        dropdownMenuExpanded.value = false
+                        state.navigator.navigateTo(it)
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
+
+}
+
+@Composable
+private fun AccountDropDown(
+    expanded: MutableState<Boolean>,
+    isSignedIn: State<Boolean>,
+    navigateTo: (RibaRoute) -> Unit = {},
+) {
+    val context = LocalContext.current
+
+    val statusIntent = remember {
+        Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE))
+    }
+
+    val issuesIntent = remember {
+        Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL))
+    }
+
+    DropdownMenu(
+        modifier = Modifier.width(150.dp),
+        expanded = expanded.value,
+        onDismissRequest = { expanded.value = false },
+        offset = DpOffset(x = (-100).dp, y = 0.dp),
+    ) {
+        if (isSignedIn.value) {
+            DropdownMenuItem(
+                onClick = { navigateTo(RibaRoute.Base.SignOut) },
+                text = { Text(text = stringResource(R.string.sign_out)) },
+            )
+        } else {
+            DropdownMenuItem(
+                onClick = { navigateTo(RibaRoute.Base.SignIn) },
+                text = { Text(text = stringResource(R.string.sign_in)) },
+            )
+        }
+
+        DropdownMenuItem(
+            onClick = { context.startActivity(statusIntent) },
+            text = { Text(text = stringResource(R.string.status)) },
+        )
+
+        DropdownMenuItem(
+            onClick = { context.startActivity(issuesIntent) },
+            text = { Text(text = stringResource(R.string.issues)) },
+        )
+
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+        DropdownMenuItem(
+            onClick = { navigateTo(RibaRoute.Base.Settings) },
+            text = { Text(text = stringResource(R.string.settings)) },
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun PreviewHeaderRow() {
+    HeaderRow(RibaHostState.createDummy(), remember { mutableStateOf(PaddingValues(0.dp)) })
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun PreviewAccountDropDown() {
+    AccountDropDown(
+        expanded = remember { mutableStateOf(true) },
+        isSignedIn = remember { mutableStateOf(false) })
 }
 
 class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
@@ -66,54 +222,54 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
         }
     }
 
-    private fun loadSeasonal() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val list = when (val list =
-                service.mangadex.mdlist.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
-                is RibaResult.Success -> list.unwrap()!!
-                is RibaResult.Error -> return@launch seasonal.postValue(list)
-            }
+    private fun loadSeasonal() = viewModelScope.launch(Dispatchers.IO) {
+        Log.i(DexLogTag.DEBUG.tag, "Loading seasonal list.")
 
-            val titles = when (val collection =
-                service.mangadex.manga.getStrictCollection(ids = list.titles)) {
-                is RibaResult.Success -> collection.unwrap()!!
-                is RibaResult.Error -> return@launch seasonal.postValue(collection)
-            }
+        val list = when (val list =
+            service.mangadex.mdlist.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
+            is RibaResult.Success -> list.unwrap()!!
+            is RibaResult.Error -> return@launch seasonal.postValue(list)
+        }
 
-            return@launch seasonal.postValue(RibaResult.Success(titles.map {
+        val titles = when (val collection =
+            service.mangadex.manga.getStrictCollection(ids = list.titles)) {
+            is RibaResult.Success -> collection.unwrap()!!
+            is RibaResult.Error -> return@launch seasonal.postValue(collection)
+        }
+
+        return@launch seasonal.postValue(RibaResult.Success(titles.map {
+            RibaFulFilledManga(
+                manga = it,
+                cover = it.coverId?.let { id -> service.mangadex.manga.getCover(id).unwrap() },
+                tags = null,
+                statistic = null,
+                authors = null,
+                artists = null,
+            )
+        }))
+
+    }
+
+    private fun loadRecent() = viewModelScope.launch(Dispatchers.IO) {
+        Log.i(DexLogTag.DEBUG.tag, "Loading recent list.")
+
+        val list = service.mangadex.manga.getCollection(
+            sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
+        ).map {
+            it.map { manga ->
                 RibaFulFilledManga(
-                    manga = it,
-                    cover = it.coverId?.let { id -> service.mangadex.manga.getCover(id).unwrap() },
+                    manga = manga,
+                    cover = manga.coverId?.let { id ->
+                        service.mangadex.manga.getCover(id).unwrap()
+                    },
                     tags = null,
                     statistic = null,
                     authors = null,
                     artists = null,
                 )
-            }))
-        }
-    }
-
-    private fun loadRecent() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val recentlyAddedList = service.mangadex.manga.getCollection(
-                includes = listOf(DexEntityType.CoverArt),
-                sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
-            ).map {
-                it.map { manga ->
-                    RibaFulFilledManga(
-                        manga = manga,
-                        cover = manga.coverId?.let { id ->
-                            service.mangadex.manga.getCover(id).unwrap()
-                        },
-                        tags = null,
-                        statistic = null,
-                        authors = null,
-                        artists = null,
-                    )
-                }
             }
-
-            return@launch recent.postValue(recentlyAddedList)
         }
+
+        return@launch recent.postValue(list)
     }
 }

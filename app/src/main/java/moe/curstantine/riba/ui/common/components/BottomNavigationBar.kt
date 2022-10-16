@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import moe.curstantine.riba.R
 import moe.curstantine.riba.nav.RibaNavigator
-import moe.curstantine.riba.nav.MangoRoute
+import moe.curstantine.riba.nav.RibaRoute
 
 @Composable
 fun MangoNavigationBar(ribaNavigator: RibaNavigator) {
@@ -30,24 +30,24 @@ fun MangoNavigationBar(ribaNavigator: RibaNavigator) {
 }
 
 sealed class MangoNavigationBarItem(
-    val route: MangoRoute,
+    val route: RibaRoute,
     val icon: @Composable () -> Unit,
     val label: @Composable () -> Unit,
 ) {
     object Home : MangoNavigationBarItem(
-        route = MangoRoute.Vanilla.Home,
+        route = RibaRoute.Vanilla.Home,
         icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
         label = { Text(stringResource(R.string.home)) },
     )
 
     object Library : MangoNavigationBarItem(
-        route = MangoRoute.Vanilla.Library,
+        route = RibaRoute.Vanilla.Library,
         icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
         label = { Text(stringResource(R.string.library)) },
     )
 
     object Search : MangoNavigationBarItem(
-        route = MangoRoute.Vanilla.Search,
+        route = RibaRoute.Vanilla.Search,
         icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
         label = { Text(stringResource(R.string.search)) },
     )

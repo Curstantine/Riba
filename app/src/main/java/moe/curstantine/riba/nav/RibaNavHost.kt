@@ -21,11 +21,11 @@ class RibaNavigator(val navController: NavHostController) {
         return navController.currentDestination?.route
     }
 
-    fun navigateTo(route: MangoRoute) {
+    fun navigateTo(route: RibaRoute) {
         this.navController.navigate(route.path)
     }
 
-    fun navigateTo(route: MangoRoute, vararg args: Pair<String, String>) {
+    fun navigateTo(route: RibaRoute, vararg args: Pair<String, String>) {
         val path = route.path.let {
             args.fold(it) { acc, pair ->
                 acc.replace("{${pair.first}}", pair.second)
@@ -44,12 +44,12 @@ class RibaNavigator(val navController: NavHostController) {
     }
 
     @Composable
-    fun currentRouteAsState(): State<MangoRoute> {
+    fun currentRouteAsState(): State<RibaRoute> {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val route = navBackStackEntry?.destination?.route
-            ?: MangoRoute.Vanilla.Home.path
+            ?: RibaRoute.Vanilla.Home.path
 
-        return remember(route) { mutableStateOf(MangoRoute.fromPath(route)) }
+        return remember(route) { mutableStateOf(RibaRoute.fromPath(route)) }
     }
 
     companion object {
@@ -71,8 +71,8 @@ fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
 
     NavHost(
         navController = state.navigator.navController,
-        startDestination = MangoRoute.Vanilla.route,
-        route = MangoRoute.route,
+        startDestination = RibaRoute.Vanilla.route,
+        route = RibaRoute.route,
     ) {
         vanillaGraph(state, paddingValue)
         baseGraph(state, paddingValue)

@@ -31,9 +31,12 @@ import moe.curstantine.riba.api.riba.RibaError
 
 @Composable
 fun FlexibleErrorReceiver(error: RibaError) {
+    val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    val localCtx = LocalContext.current
+
+    val issueIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL)) }
+    val statusIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }
 
     Column(
         modifier = Modifier
@@ -58,18 +61,12 @@ fun FlexibleErrorReceiver(error: RibaError) {
         Box(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             if (error is DexError) {
-                val dexStatusIntent = remember {
-                    Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE))
-                }
-                FilledTonalButton(onClick = { localCtx.startActivity(dexStatusIntent) }) {
+                FilledTonalButton(onClick = { context.startActivity(statusIntent) }) {
                     Text(stringResource(R.string.status_page))
                 }
             }
 
-            val issueIntent = remember {
-                Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL))
-            }
-            FilledTonalButton(onClick = { localCtx.startActivity(issueIntent) }) {
+            FilledTonalButton(onClick = { context.startActivity(issueIntent) }) {
                 Text(stringResource(R.string.create_issue))
             }
         }

@@ -21,7 +21,7 @@ import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
-import moe.curstantine.riba.nav.MangoRoute
+import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
@@ -76,7 +76,7 @@ fun MangaCardRow(
                     val fulfilledManga = mangaList.elementAt(index)
 
                     MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
-                        ribaNavigator.navigateTo(MangoRoute.Base.Manga, Pair("id", it.id))
+                        ribaNavigator.navigateTo(RibaRoute.Base.Manga, Pair("id", it.id))
                     })
                 }
             }
