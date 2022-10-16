@@ -14,6 +14,9 @@ sealed class RibaResult<out R> {
         is Error -> error
     }
 
+    /**
+     * Bubbles the error up if there is one.
+     */
     fun bubble(): R = when (this) {
         is Success -> value
         is Error -> {
@@ -27,9 +30,14 @@ sealed class RibaResult<out R> {
         is Error -> Error(error)
     }
 
-    // function that maps over the value of the result
-    inline fun <T> map(f: (R) -> T): RibaResult<T> = when (this) {
-        is Success -> Success(f(value))
+    /**
+     * Returns the result of [transform] function applied to the value of [Success] or the
+     * [RibaError] if this result is [Error].
+     *
+     * Similar to Rust's [Result::map](https://doc.rust-lang.org/std/result/enum.Result.html#method.map)
+     */
+    inline fun <T> map(transform: (R) -> T): RibaResult<T> = when (this) {
+        is Success -> Success(transform(value))
         is Error -> Error(error)
     }
 }

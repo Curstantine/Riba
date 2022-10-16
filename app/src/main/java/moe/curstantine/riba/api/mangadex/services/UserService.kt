@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import moe.curstantine.riba.api.database.RibaDatabase
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexBaseResponse
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthBody
@@ -63,7 +64,7 @@ class UserService(
         if (session == null) {
             val error = DexError.Companion.NotAuthenticated
             Log.e(
-                DexError.Companion.LogTag.RESTRICTED.tag,
+                DexLogTag.RESTRICTED.tag,
                 "Tried to get the session token, but it was null.",
                 error
             )
@@ -80,7 +81,7 @@ class UserService(
         if (refresh == null) {
             val error = DexError.Companion.NotAuthenticated
             Log.e(
-                DexError.Companion.LogTag.RESTRICTED.tag,
+                DexLogTag.RESTRICTED.tag,
                 "Tried to get the refresh token, but it was null.",
                 error
             )
@@ -100,7 +101,7 @@ class UserService(
         if (authTime == -1L) {
             val error = DexError.Companion.NotAuthenticated
             Log.e(
-                DexError.Companion.LogTag.RESTRICTED.tag,
+                DexLogTag.RESTRICTED.tag,
                 "Tried to get the auth time, but it was null.",
                 error
             )

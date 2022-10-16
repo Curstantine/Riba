@@ -24,6 +24,7 @@ open class DexError(
 ) : RibaError, Throwable(
     "$human:${additional.orEmpty().let { if (it.isNotEmpty()) "\n$it" else it }}"
 ) {
+    @Suppress("MemberVisibilityCanBePrivate", "FunctionName")
     companion object {
         fun Unknown(additional: String?) =
             DexError("Unknown error occurred while reaching MangaDex!", additional)
@@ -48,18 +49,6 @@ open class DexError(
             "Re-authentication required!",
             "Both the session and refresh tokens are invalid."
         )
-
-        /**
-         * Logger tags used to quickly locate the source of error from logcat.
-         */
-        enum class LogTag(val tag: String) :
-            RibaError.Companion.LogTag {
-            MISSING("DexMissingContent"),
-            RESTRICTED("DexRestrictedContent"),
-            DEBUG("DexDebug");
-
-            override fun toString(): String = tag
-        }
 
         fun tryHandle(e: Throwable): DexError {
             return when (e) {

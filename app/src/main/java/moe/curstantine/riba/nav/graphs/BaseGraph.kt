@@ -14,12 +14,15 @@ import moe.curstantine.riba.ui.manga.MangaDetailsViewModel
 fun NavGraphBuilder.baseGraph(state: RibaHostState, paddingValues: State<PaddingValues>) {
     navigation(startDestination = MangoRoute.Base.Manga.path, route = MangoRoute.Base.route) {
         composable(MangoRoute.Base.Manga.path) {
-            val mangaId = remember {
-                state.navigator.getArgument("id")
-                    ?: throw IllegalArgumentException("id parameter is missing!")
+            val viewModel = remember {
+                MangaDetailsViewModel(
+                    state.service,
+                    state.navigator.getArgument("id")
+                        ?: throw IllegalArgumentException("id parameter is missing!")
+                )
             }
 
-            MangaDetailScreen(state, MangaDetailsViewModel(state.service, mangaId))
+            MangaDetailScreen(state, viewModel)
         }
         composable(MangoRoute.Vanilla.Library.path) {
             throw NotImplementedError()

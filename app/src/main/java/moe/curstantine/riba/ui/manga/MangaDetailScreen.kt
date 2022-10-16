@@ -80,6 +80,7 @@ import moe.curstantine.riba.R
 import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.DexError
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
@@ -98,17 +99,17 @@ import kotlin.math.roundToInt
 fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val manga = viewModel.getDetails().observeAsState()
+    val manga by viewModel.getDetails().observeAsState()
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing),
         onRefresh = { viewModel.refresh() }
     ) {
-        if (manga.value == null || isRefreshing) FlexibleIndicator() else {
+        if (manga == null || isRefreshing) FlexibleIndicator() else {
             Scaffold(
                 topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
                 snackbarHost = { SnackbarHost(state.snackbarHost) },
-                content = { MangaDetailBody(state, scrollBehavior, it, manga.value!!) }
+                content = { MangaDetailBody(state, scrollBehavior, it, manga!!) }
             )
         }
     }
@@ -155,9 +156,9 @@ private fun MangaDetailHeader(
     val manga = details.manga.unwrap()!!
     val stats = details.statistic!!.unwrap()!!
 
-    val authors = details.authors!!.unwrap()!!.map { it.name!! }
-    val artists = details.artists!!.unwrap()!!.map { it.name!! }
-    val tags = details.tags!!.unwrap()!!.map { tag -> tag.name!! }
+    val authors = details.authors!!.unwrap()!!.map { it.name ?: "N/A" }
+    val artists = details.artists!!.unwrap()!!.map { it.name ?: "N/A" }
+    val tags = details.tags!!.unwrap()!!.map { tag -> tag.name ?: "N/A" }
     val artistsAndAuthors = remember {
         val it = authors + artists.filter { it !in authors }
         it.ifEmpty { null }
@@ -415,19 +416,22 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
 
     fun getDetails(): LiveData<RibaResultManga> = details
-
-
     private val details: MutableLiveData<RibaResultManga> by lazy {
         MutableLiveData<RibaResultManga>().also { loadDetails() }
     }
 
     private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
-        val localManga = when (val d =
-            service.mangadex.manga.get(mangaId, forceInsert = refresh, tryDatabase = !refresh)
-        ) {
-            is RibaResult.Success -> d.unwrap()!!
+        Log.i(
+            DexLogTag.DEBUG.tag,
+            "${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
+        )
+
+        val localManga = when (val mangaData = service.mangadex.manga.get(
+            mangaId, forceInsert = refresh, tryDatabase = !refresh
+        )) {
+            is RibaResult.Success -> mangaData.unwrap()!!
             is RibaResult.Error -> return@launch details
-                .postValue(RibaResultManga.fromNullables(d))
+                .postValue(RibaResultManga.fromNullables(mangaData))
         }
 
         val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
@@ -471,7 +475,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                     "Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
                 )
 
-                Log.e(DexError.Companion.LogTag.MISSING.tag, "Missing Tag ids", error)
+                Log.e(DexLogTag.MISSING.tag, "Missing Tag ids", error)
 
                 return@async RibaResult.Error(error)
             }
@@ -491,13 +495,12 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
         )
     }
 
-    fun refresh() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefreshing.emit(true)
-            loadDetails(true)
-            _isRefreshing.emit(false)
-        }
+    fun refresh() = viewModelScope.launch(Dispatchers.IO) {
+        _isRefreshing.emit(true)
+        loadDetails(true)
+        _isRefreshing.emit(false)
     }
+
 }
 
 @Composable

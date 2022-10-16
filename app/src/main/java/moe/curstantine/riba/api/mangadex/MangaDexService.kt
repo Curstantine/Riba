@@ -82,7 +82,7 @@ class MangaDexService(database: RibaDatabase) {
                         RibaResult.Success(call.invoke(this))
                     } catch (e: Throwable) {
                         val error = DexError.tryHandle(e)
-                        Log.e(DexError.Companion.LogTag.DEBUG.toString(), error.stackTraceToString())
+                        Log.e(DexLogTag.DEBUG.toString(), error.stackTraceToString())
 
                         RibaResult.Error(error)
                     }
