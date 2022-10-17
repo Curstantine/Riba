@@ -48,6 +48,7 @@
     <string name="create_issue">Create an issue</string>
 
     <string name="hello_there">Hello there,</string>
+    <string name="guest">Guest</string>
     <string name="anon">Anonymous</string>
     <string name="we_have_mental_issues">Only me?</string>
 </resources>

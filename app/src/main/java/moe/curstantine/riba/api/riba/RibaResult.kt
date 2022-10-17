@@ -4,25 +4,26 @@ sealed class RibaResult<out R> {
     data class Success<out T>(val value: T) : RibaResult<T>()
     data class Error(val error: RibaError) : RibaResult<Nothing>()
 
-    fun unwrap(): R? = when (this) {
-        is Success -> value
-        is Error -> null
-    }
-
-    fun unwrapError(): RibaError? = when (this) {
-        is Success -> null
-        is Error -> error
-    }
-
     /**
-     * Bubbles the error up if there is one.
+     * Tries to unwrap the result while throwing an error if this result is an error.
+     * @throws RibaError if the result is an error.
      */
-    fun bubble(): R = when (this) {
+    fun unwrap(): R = when (this) {
         is Success -> value
         is Error -> {
             if (error is Throwable) throw error
             else throw RibaError.Companion.Impl.IsNotThrowable
         }
+    }
+
+    fun unwrapOrNull(): R? = when (this) {
+        is Success -> value
+        is Error -> null
+    }
+
+    fun unwrapErrorOrNull(): RibaError? = when (this) {
+        is Success -> null
+        is Error -> error
     }
 
     fun asError(): Error = when (this) {

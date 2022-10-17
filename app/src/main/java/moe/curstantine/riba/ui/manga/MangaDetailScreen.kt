@@ -153,12 +153,12 @@ private fun MangaDetailHeader(
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
 
-    val manga = details.manga.unwrap()!!
-    val stats = details.statistic!!.unwrap()!!
+    val manga = details.manga.unwrapOrNull()!!
+    val stats = details.statistic!!.unwrapOrNull()!!
 
-    val authors = details.authors!!.unwrap()!!.map { it.name ?: "N/A" }
-    val artists = details.artists!!.unwrap()!!.map { it.name ?: "N/A" }
-    val tags = details.tags!!.unwrap()!!.map { tag -> tag.name ?: "N/A" }
+    val authors = details.authors!!.unwrapOrNull()!!.map { it.name ?: "N/A" }
+    val artists = details.artists!!.unwrapOrNull()!!.map { it.name ?: "N/A" }
+    val tags = details.tags!!.unwrapOrNull()!!.map { tag -> tag.name ?: "N/A" }
     val artistsAndAuthors = remember {
         val it = authors + artists.filter { it !in authors }
         it.ifEmpty { null }
@@ -187,7 +187,7 @@ private fun MangaDetailHeader(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             MangaCover(
-                details.cover?.unwrap(),
+                details.cover?.unwrapOrNull(),
                 maxHeight = 220.dp,
                 coverSize = DexCoverSize.Medium,
             )
@@ -429,7 +429,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
         val localManga = when (val mangaData = service.mangadex.manga.get(
             mangaId, forceInsert = refresh, tryDatabase = !refresh
         )) {
-            is RibaResult.Success -> mangaData.unwrap()!!
+            is RibaResult.Success -> mangaData.unwrapOrNull()!!
             is RibaResult.Error -> return@launch details
                 .postValue(RibaResultManga.fromNullables(mangaData))
         }

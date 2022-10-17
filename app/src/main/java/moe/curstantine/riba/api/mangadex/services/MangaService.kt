@@ -102,7 +102,7 @@ class MangaService(
 
         val missingIds = idMap.filterValues { it == null }.keys.toList()
         if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert).bubble()
+            val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
             response.forEach { manga -> idMap[manga.id] = manga }
         }
 

@@ -7,7 +7,7 @@ import moe.curstantine.riba.api.mangadex.database.DexDatabase
  * Abstract class for all services to inherit from.
  */
 abstract class RibaHttpService(service: APIService, database: Database) {
-    abstract val coroutineScope: CoroutineScope
+    protected abstract val coroutineScope: CoroutineScope
 
     abstract suspend fun <T> contextualInvoke(call: suspend (it: CoroutineScope) -> T): RibaResult<T>
 

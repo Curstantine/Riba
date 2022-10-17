@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
@@ -28,6 +31,7 @@ import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
+// TODO: Implement Guest/Anon
 class UserService(
     context: Context,
     private val service: APIService,
@@ -42,32 +46,29 @@ class UserService(
 
     private val editor: Editor = preferences.edit()
 
+    private val current: MutableLiveData<RibaResult<RibaUser>> = MutableLiveData()
+
     /**
-     * The current logged in user.
+     * Getter for the current user.
      *
-     * This is null by default, but will be populated after a successful [initialize] or a [login].
+     * @return Will contain
+     * - [RibaResult.Error] with [DexError.NotAuthenticated] if the user is not signed in.
+     * - [RibaResult.Error] with [DexError.ReAuthenticationRequired]
+     *   if the user is signed in, but will need a re-authentication due to expired tokens.
      */
-    var current: RibaResult<RibaUser>? = null
-        private set
+    fun getCurrent(): LiveData<RibaResult<RibaUser>> = current
 
     init {
         coroutineScope.launch {
-            val sessionToken = getSessionToken()
-            val refreshToken = getRefreshToken()
-            val authTime = getAuthTime()
-
-            if (sessionToken is RibaResult.Error ||
-                refreshToken is RibaResult.Error ||
-                authTime is RibaResult.Error
-            ) {
-                Log.e(DexLogTag.RESTRICTED.tag, "Failed to authenticate from older sessions.")
-                return@launch
+            try {
+                handleTokenExpiry(true)
+                current.postValue(getCurrentUserDetails())
+            } catch (e: DexError) {
+                current.postValue(RibaResult.Error(e))
+                Log.e(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
             }
-
-            handleTokenExpiry(true)
         }
     }
-
 
     suspend fun login(
         username: String,
@@ -75,8 +76,9 @@ class UserService(
     ): RibaResult<DexUserAuthResponse> = contextualInvoke {
         val response = service.login(DexUserAuthBody(username, password))
         it.launch {
-            setPreferences(response.token)
-            current = getCurrentUserDetails()
+            val details = getCurrentUserDetails()
+            current.postValue(details)
+            setPreferences(details.unwrap().id, response.token)
         }
 
         return@contextualInvoke response
@@ -84,103 +86,101 @@ class UserService(
 
     private suspend fun refresh(refreshToken: String): RibaResult<DexUserAuthResponse> =
         contextualInvoke {
-            val response = service.refresh(DexUserAuthRefreshBody(refreshToken))
-            it.launch { setPreferences(response.token) }
+            val userId = it.async { getUserId() }
+            val response = it.async { service.refresh(DexUserAuthRefreshBody(refreshToken)) }
+            it.launch { setPreferences(userId.await(), response.await().token) }
 
-            return@contextualInvoke response
+            return@contextualInvoke response.await()
         }
 
     suspend fun logout(): RibaResult<Unit> = contextualInvoke {
         handleTokenExpiry(true)
-        service.logout(getRefreshToken().bubble())
+        service.logout(getRefreshToken())
         editor.remove("token").remove("refreshToken").remove("tokenExpiry").apply()
+        current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
     }
 
-    private suspend fun getCurrentUserDetails(): RibaResult<RibaUser> = contextualInvoke {
-        val sessionToken = getSessionToken().bubble()
-        val response = service.getCurrentUserDetails(sessionToken)
-        val riba = response.data.toRibaUser()
+    private suspend fun getCurrentUserDetails(tryDatabase: Boolean = false): RibaResult<RibaUser> =
+        contextualInvoke {
+            if (tryDatabase) {
+                try {
+                    return@contextualInvoke database.get(getUserId())!!
+                } catch (e: Exception) {
+                    Log.e(
+                        DexLogTag.DEBUG.tag,
+                        "tryDatabase was true, but user was not in the database, continuing to fetch.",
+                        e
+                    )
+                }
+            }
 
-        it.launch { database.insert(riba) }
+            val response = service
+                .getCurrentUserDetails(getSessionToken())
+                .data.toRibaUser()
 
-        return@contextualInvoke riba
-    }
+            it.launch { database.insert(response) }
 
-    private fun getSessionToken(): RibaResult<String> {
-        val session = preferences.getString("session", null)
-
-        if (session == null) {
-            val error = DexError.Companion.NotAuthenticated
-            Log.e(
-                DexLogTag.RESTRICTED.tag,
-                "Tried to get the session token, but it was null.",
-                error
-            )
-
-            return RibaResult.Error(error)
+            return@contextualInvoke response
         }
 
-        return RibaResult.Success(session)
+    /**
+     * @throws DexError.NotAuthenticated if the user is not signed in.
+     */
+    private fun getUserId(): String {
+        return preferences.getString("userId", null) ?: throw DexError.Companion.NotAuthenticated
     }
 
-    private fun getRefreshToken(): RibaResult<String> {
-        val refresh = preferences.getString("refresh", null)
+    /**
+     * @throws DexError.NotAuthenticated if the user is not signed in.
+     */
+    private fun getSessionToken(): String {
+        return preferences.getString("session", null) ?: throw  DexError.Companion.NotAuthenticated
+    }
 
-        if (refresh == null) {
-            val error = DexError.Companion.NotAuthenticated
-            Log.e(
-                DexLogTag.RESTRICTED.tag,
-                "Tried to get the refresh token, but it was null.",
-                error
-            )
-
-            return RibaResult.Error(error)
-        }
-
-        return RibaResult.Success(refresh)
+    /**
+     * @throws DexError.NotAuthenticated if the user is not signed in.
+     */
+    private fun getRefreshToken(): String {
+        return preferences.getString("refresh", null) ?: throw DexError.Companion.NotAuthenticated
     }
 
     /**
      * Last time the token was refreshed in seconds.
+     *
+     * @throws DexError.NotAuthenticated if the user is not signed in.
      */
-    private fun getAuthTime(): RibaResult<Long> {
+    private fun getAuthTime(): Long {
         val authTime = preferences.getLong("authTime", -1L)
+        if (authTime == -1L) throw DexError.Companion.NotAuthenticated
 
-        if (authTime == -1L) {
-            val error = DexError.Companion.NotAuthenticated
-            Log.e(
-                DexLogTag.RESTRICTED.tag,
-                "Tried to get the auth time, but it was null.",
-                error
-            )
-
-            return RibaResult.Error(error)
-        }
-
-        return RibaResult.Success(authTime)
+        return authTime
     }
 
     /**
+     * Handles expired tokens intelligently.
+     *
      * @throws DexError.NotAuthenticated if the user is not logged in.
+     * @throws DexError.ReAuthenticationRequired if the user is logged in, but will need a re-authentication due to expired tokens.
      */
     private suspend fun handleTokenExpiry(trySession: Boolean = true) {
-        val timeElapsed = currentTimeSeconds() - getAuthTime().bubble()
+        val timeElapsed = currentTimeSeconds() - getAuthTime()
 
         if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
             throw DexError.Companion.ReAuthenticationRequired
         } else if (trySession && timeElapsed >= DexConstants.SESSION_EXPIRY) {
-            refresh(getRefreshToken().bubble())
+            refresh(getRefreshToken())
         }
     }
 
-    private fun setPreferences(tokens: DexUserAuthTokens) = editor
+    private fun setPreferences(userId: String, tokens: DexUserAuthTokens) = editor
+        .putString("user", userId)
         .putString("refresh", tokens.refresh)
         .putString("session", tokens.session)
         .putLong("authTime", currentTimeSeconds())
         .apply()
 
     companion object {
-        fun currentTimeSeconds(): Long = System.currentTimeMillis() / 1000L
+        private fun currentTimeSeconds(): Long = System.currentTimeMillis() / 1000L
 
         interface APIService : RibaHttpService.Companion.APIService {
             @POST("/auth/login")

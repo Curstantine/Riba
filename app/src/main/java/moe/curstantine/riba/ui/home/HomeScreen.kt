@@ -3,17 +3,20 @@ package moe.curstantine.riba.ui.home
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -22,9 +25,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -86,12 +92,13 @@ fun HomeScreen(
 private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>) {
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-
-    val username = stringResource(R.string.anon)
     val rowColor = colorScheme.onBackground.copy(alpha = 0.5F)
 
     val dropdownMenuExpanded = remember { mutableStateOf(false) }
-    val isSignedIn = remember { mutableStateOf(false) }
+
+    val user by state.service.mangadex.user.getCurrent().observeAsState()
+    val username = user?.unwrapOrNull()?.username ?: stringResource(R.string.anon)
+    val isSignedIn = user?.unwrapOrNull() != null
 
     Row(
         modifier = Modifier
@@ -99,7 +106,6 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
             .padding(all = 12.dp)
             .padding(top = paddingValues.value.calculateTopPadding()),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column {
             Text(
@@ -120,12 +126,27 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
             )
         }
 
+        Spacer(modifier = Modifier.weight(1F))
+
+        AnimatedVisibility(visible = !isSignedIn) {
+            TextButton(onClick = { }) {
+                Text(
+                    stringResource(R.string.sign_in),
+                    style = typography.labelLarge.copy(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75F)
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.padding(end = 4.dp))
+
         Box(contentAlignment = Alignment.Center) {
             IconButton(onClick = { dropdownMenuExpanded.value = true }) {
                 Icon(
                     tint = rowColor,
-                    imageVector = Icons.Rounded.Person,
-                    contentDescription = stringResource(R.string.settings)
+                    imageVector = if (!isSignedIn) Icons.Rounded.Person else Icons.Rounded.MoreVert,
+                    contentDescription = stringResource(R.string.more)
                 )
             }
 
@@ -146,7 +167,7 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
 @Composable
 private fun AccountDropDown(
     expanded: MutableState<Boolean>,
-    isSignedIn: State<Boolean>,
+    isSignedIn: Boolean,
     navigateTo: (RibaRoute) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -165,15 +186,10 @@ private fun AccountDropDown(
         onDismissRequest = { expanded.value = false },
         offset = DpOffset(x = (-120).dp, y = 0.dp),
     ) {
-        if (isSignedIn.value) {
+        if (isSignedIn) {
             DropdownMenuItem(
                 onClick = { navigateTo(RibaRoute.Base.SignOut) },
                 text = { Text(text = stringResource(R.string.sign_out)) },
-            )
-        } else {
-            DropdownMenuItem(
-                onClick = { navigateTo(RibaRoute.Base.SignIn) },
-                text = { Text(text = stringResource(R.string.sign_in)) },
             )
         }
 
@@ -207,7 +223,8 @@ private fun PreviewHeaderRow() {
 private fun PreviewAccountDropDown() {
     AccountDropDown(
         expanded = remember { mutableStateOf(true) },
-        isSignedIn = remember { mutableStateOf(false) })
+        isSignedIn = false
+    )
 }
 
 class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
@@ -231,20 +248,22 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
 
         val list = when (val list =
             service.mangadex.mdlist.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
-            is RibaResult.Success -> list.unwrap()!!
+            is RibaResult.Success -> list.unwrapOrNull()!!
             is RibaResult.Error -> return@launch seasonal.postValue(list)
         }
 
         val titles = when (val collection =
             service.mangadex.manga.getStrictCollection(ids = list.titles)) {
-            is RibaResult.Success -> collection.unwrap()!!
+            is RibaResult.Success -> collection.unwrapOrNull()!!
             is RibaResult.Error -> return@launch seasonal.postValue(collection)
         }
 
         return@launch seasonal.postValue(RibaResult.Success(titles.map {
             RibaFulFilledManga(
                 manga = it,
-                cover = it.coverId?.let { id -> service.mangadex.manga.getCover(id).unwrap() },
+                cover = it.coverId?.let { id ->
+                    service.mangadex.manga.getCover(id).unwrapOrNull()
+                },
                 tags = null,
                 statistic = null,
                 authors = null,
@@ -264,7 +283,7 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
                 RibaFulFilledManga(
                     manga = manga,
                     cover = manga.coverId?.let { id ->
-                        service.mangadex.manga.getCover(id).unwrap()
+                        service.mangadex.manga.getCover(id).unwrapOrNull()
                     },
                     tags = null,
                     statistic = null,
