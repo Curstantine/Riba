@@ -76,7 +76,7 @@ fun MangaCardRow(
                     val fulfilledManga = mangaList.elementAt(index)
 
                     MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
-                        ribaNavigator.navigateTo(RibaRoute.Base.Manga, Pair("id", it.id))
+                        ribaNavigator.navigateTo(RibaRoute.Manga, Pair("id", it.id))
                     })
                 }
             }

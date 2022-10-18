@@ -16,9 +16,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 class MDListService(
-    private val service: APIService,
-    val database: Database
-) : MangaDexService.Companion.Service(service, database) {
+    override val service: APIService,
+    override val database: Database
+) : MangaDexService.Companion.Service() {
     override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val defaultMDListIncludes = listOf(

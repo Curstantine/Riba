@@ -34,10 +34,10 @@ import retrofit2.http.QueryMap
 import kotlin.coroutines.CoroutineContext
 
 class MangaService(
-    private val service: APIService,
-    val database: Database,
+    override val service: APIService,
+    override val database: Database,
     private val authorService: AuthorService,
-) : MangaDexService.Companion.Service(service, database) {
+) : MangaDexService.Companion.Service() {
     override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val defaultMangaIncludes = listOf(

@@ -2,6 +2,8 @@ package moe.curstantine.riba
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.nav.RibaNavigator
 
@@ -12,10 +14,18 @@ data class RibaHostState(
 ) {
     companion object {
         @Composable
+        fun create() = RibaHostState(
+            RibaNavigator(rememberNavController()),
+            SnackbarHostState(),
+            RibaAPIService(LocalContext.current),
+        )
+
+
+        @Composable
         fun createDummy() = RibaHostState(
-            navigator = RibaNavigator.createDummy(),
-            snackbarHost = SnackbarHostState(),
-            service = RibaAPIService.createDummy(),
+            RibaNavigator.createDummy(),
+            SnackbarHostState(),
+            RibaAPIService.createDummy(),
         )
     }
 }

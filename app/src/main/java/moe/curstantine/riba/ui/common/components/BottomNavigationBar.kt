@@ -35,19 +35,19 @@ sealed class MangoNavigationBarItem(
     val label: @Composable () -> Unit,
 ) {
     object Home : MangoNavigationBarItem(
-        route = RibaRoute.Vanilla.Home,
+        route = RibaRoute.Home,
         icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
         label = { Text(stringResource(R.string.home)) },
     )
 
     object Library : MangoNavigationBarItem(
-        route = RibaRoute.Vanilla.Library,
+        route = RibaRoute.Library,
         icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
         label = { Text(stringResource(R.string.library)) },
     )
 
     object Search : MangoNavigationBarItem(
-        route = RibaRoute.Vanilla.Search,
+        route = RibaRoute.Search,
         icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
         label = { Text(stringResource(R.string.search)) },
     )

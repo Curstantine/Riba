@@ -150,25 +150,22 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
                 )
             }
 
-            AccountDropDown(dropdownMenuExpanded, isSignedIn) {
-                when (it) {
-                    is RibaRoute.Base.Settings -> {
-                        dropdownMenuExpanded.value = false
-                        state.navigator.navigateTo(it)
-                    }
-                    else -> {}
-                }
-            }
+            AccountDropDown(
+                expanded = dropdownMenuExpanded,
+                isSignedIn = isSignedIn,
+                onSignOut = {},
+                navigateTo = { state.navigator.navigateTo(it) }
+            )
         }
     }
-
 }
 
 @Composable
 private fun AccountDropDown(
     expanded: MutableState<Boolean>,
     isSignedIn: Boolean,
-    navigateTo: (RibaRoute) -> Unit = {},
+    onSignOut: () -> Unit,
+    navigateTo: (RibaRoute) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -188,7 +185,7 @@ private fun AccountDropDown(
     ) {
         if (isSignedIn) {
             DropdownMenuItem(
-                onClick = { navigateTo(RibaRoute.Base.SignOut) },
+                onClick = onSignOut,
                 text = { Text(text = stringResource(R.string.sign_out)) },
             )
         }
@@ -206,7 +203,7 @@ private fun AccountDropDown(
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
         DropdownMenuItem(
-            onClick = { navigateTo(RibaRoute.Base.Settings) },
+            onClick = { navigateTo(RibaRoute.Settings) },
             text = { Text(text = stringResource(R.string.settings)) },
         )
     }
@@ -223,7 +220,9 @@ private fun PreviewHeaderRow() {
 private fun PreviewAccountDropDown() {
     AccountDropDown(
         expanded = remember { mutableStateOf(true) },
-        isSignedIn = false
+        isSignedIn = false,
+        onSignOut = {},
+        navigateTo = {},
     )
 }
 

@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.MangaDexService
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexAuthor
 import moe.curstantine.riba.api.mangadex.models.DexAuthorCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -20,9 +20,9 @@ import retrofit2.http.Query
 import kotlin.coroutines.CoroutineContext
 
 class AuthorService(
-    private val service: APIService,
-    val database: Database
-) : MangaDexService.Companion.Service(service, database) {
+    override val service: APIService,
+    override val database: Database
+) : MangaDexService.Companion.Service() {
     override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     suspend fun get(

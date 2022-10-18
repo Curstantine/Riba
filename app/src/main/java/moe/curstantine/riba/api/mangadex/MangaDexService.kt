@@ -1,7 +1,6 @@
 package moe.curstantine.riba.api.mangadex
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
@@ -79,20 +78,19 @@ class MangaDexService(context: Context) {
     }
 
     companion object {
-        abstract class Service(
-            service: Companion.APIService,
-            database: Companion.Database
-        ) : RibaHttpService(service, database) {
-            override suspend fun <T> contextualInvoke(call: suspend (it: CoroutineScope) -> T): RibaResult<T> {
-                return withContext(coroutineScope.coroutineContext) {
-                    try {
-                        RibaResult.Success(call.invoke(this))
-                    } catch (e: Throwable) {
-                        val error = DexError.tryHandle(e)
-                        Log.e(DexLogTag.DEBUG.toString(), error.stackTraceToString())
-
-                        RibaResult.Error(error)
-                    }
+        /**
+         * Abstract class for MangaDex to inherit from.
+         *
+         * Implements [contextualInvoke] of [RibaHttpService] to handle [DexError]s
+         */
+        abstract class Service : RibaHttpService() {
+            override suspend fun <T> contextualInvoke(
+                call: suspend (it: CoroutineScope) -> T
+            ): RibaResult<T> = withContext(coroutineScope.coroutineContext) {
+                try {
+                    RibaResult.Success(call.invoke(this))
+                } catch (e: Throwable) {
+                    RibaResult.Error(DexError.tryHandle(e))
                 }
             }
         }

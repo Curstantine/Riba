@@ -34,9 +34,9 @@ import retrofit2.http.POST
 // TODO: Implement Guest/Anon
 class UserService(
     context: Context,
-    private val service: APIService,
-    private val database: Database,
-) : MangaDexService.Companion.Service(service, database) {
+    override val service: APIService,
+    override val database: Database,
+) : MangaDexService.Companion.Service() {
     override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val preferences: SharedPreferences = context.getSharedPreferences(
@@ -65,7 +65,7 @@ class UserService(
                 current.postValue(getCurrentUserDetails())
             } catch (e: DexError) {
                 current.postValue(RibaResult.Error(e))
-                Log.e(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
+                Log.w(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
             }
         }
     }
@@ -84,6 +84,13 @@ class UserService(
         return@contextualInvoke response
     }
 
+    suspend fun logout(): RibaResult<Unit> = contextualInvoke {
+        handleTokenExpiry(true)
+        service.logout(getRefreshToken())
+        editor.remove("token").remove("refreshToken").remove("tokenExpiry").apply()
+        current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
+    }
+
     private suspend fun refresh(refreshToken: String): RibaResult<DexUserAuthResponse> =
         contextualInvoke {
             val userId = it.async { getUserId() }
@@ -93,20 +100,13 @@ class UserService(
             return@contextualInvoke response.await()
         }
 
-    suspend fun logout(): RibaResult<Unit> = contextualInvoke {
-        handleTokenExpiry(true)
-        service.logout(getRefreshToken())
-        editor.remove("token").remove("refreshToken").remove("tokenExpiry").apply()
-        current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
-    }
-
     private suspend fun getCurrentUserDetails(tryDatabase: Boolean = false): RibaResult<RibaUser> =
         contextualInvoke {
             if (tryDatabase) {
                 try {
                     return@contextualInvoke database.get(getUserId())!!
                 } catch (e: Exception) {
-                    Log.e(
+                    Log.w(
                         DexLogTag.DEBUG.tag,
                         "tryDatabase was true, but user was not in the database, continuing to fetch.",
                         e

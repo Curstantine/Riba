@@ -1,80 +1,76 @@
 package moe.curstantine.riba.nav
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.NavHostController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import moe.curstantine.riba.RibaHostState
-import moe.curstantine.riba.nav.graphs.baseGraph
-import moe.curstantine.riba.nav.graphs.vanillaGraph
+import moe.curstantine.riba.ui.home.HomeScreen
+import moe.curstantine.riba.ui.home.HomeViewModel
+import moe.curstantine.riba.ui.library.LibraryScreen
+import moe.curstantine.riba.ui.manga.MangaDetailScreen
+import moe.curstantine.riba.ui.manga.MangaDetailsViewModel
+import moe.curstantine.riba.ui.search.SearchScreen
 
 
-class RibaNavigator(val navController: NavHostController) {
-    fun currentRoute(): String? {
-        return navController.currentDestination?.route
+@Composable
+fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
+    val paddingValue = remember(paddingValues) { mutableStateOf(paddingValues) }
+
+//    DisposableEffect(paddingValues) {
+//        paddingValue.value = paddingValues
+//        onDispose { }
+//    }
+
+    NavHost(
+        navController = state.navigator.navController,
+        startDestination = RibaRoute.vanillaRoute,
+        route = RibaRoute.route,
+    ) {
+        vanillaGraph(state, paddingValue)
+        baseGraph(state)
     }
+}
 
-    fun navigateTo(route: RibaRoute) {
-        this.navController.navigate(route.path)
-    }
-
-    fun navigateTo(route: RibaRoute, vararg args: Pair<String, String>) {
-        val path = route.path.let {
-            args.fold(it) { acc, pair ->
-                acc.replace("{${pair.first}}", pair.second)
+fun NavGraphBuilder.baseGraph(state: RibaHostState) {
+    navigation(startDestination = RibaRoute.Manga.path, route = RibaRoute.baseRoute) {
+        composable(RibaRoute.Manga.path) {
+            val viewModel = remember {
+                MangaDetailsViewModel(
+                    state.service,
+                    state.navigator.getArgument("id")
+                        ?: throw IllegalArgumentException("id parameter is missing!")
+                )
             }
+
+            MangaDetailScreen(state, viewModel)
         }
 
-        this.navController.navigate(path)
-    }
-
-    fun popBackStack() {
-        this.navController.popBackStack()
-    }
-
-    fun getArgument(key: String): String? {
-        return navController.currentBackStackEntry?.arguments?.getString(key)
-    }
-
-    @Composable
-    fun currentRouteAsState(): State<RibaRoute> {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val route = navBackStackEntry?.destination?.route
-            ?: RibaRoute.Vanilla.Home.path
-
-        return remember(route) { mutableStateOf(RibaRoute.fromPath(route)) }
-    }
-
-    companion object {
-        @Composable
-        fun createDummy(): RibaNavigator {
-            return RibaNavigator(rememberNavController())
+        composable(RibaRoute.Settings.path) {
+            Text("Settings")
         }
     }
 }
 
-@Composable
-fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
-    val paddingValue = remember { mutableStateOf(paddingValues) }
+fun NavGraphBuilder.vanillaGraph(state: RibaHostState, paddingValues: State<PaddingValues>) {
+    val homeViewModel = HomeViewModel(state.service)
 
-    DisposableEffect(paddingValues) {
-        paddingValue.value = paddingValues
-        onDispose { }
-    }
-
-    NavHost(
-        navController = state.navigator.navController,
-        startDestination = RibaRoute.Vanilla.route,
-        route = RibaRoute.route,
-    ) {
-        vanillaGraph(state, paddingValue)
-        baseGraph(state, paddingValue)
+    navigation(startDestination = RibaRoute.Home.path, route = RibaRoute.vanillaRoute) {
+        composable(RibaRoute.Home.path) {
+            HomeScreen(state, paddingValues, homeViewModel)
+        }
+        composable(RibaRoute.Library.path) {
+            LibraryScreen(state, paddingValues)
+        }
+        composable(RibaRoute.Search.path) {
+            SearchScreen(state, paddingValues)
+        }
     }
 }

@@ -10,14 +10,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
-import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.nav.RibaNavHost
-import moe.curstantine.riba.nav.RibaNavigator
-import moe.curstantine.riba.nav.RouteType
+import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.common.components.MangoNavigationBar
 import moe.curstantine.riba.ui.theme.RibaTheme
 
@@ -26,27 +22,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        val service = RibaAPIService(applicationContext)
-
         setContent {
-            val ribaHostState = RibaHostState(
-                RibaNavigator(rememberNavController()),
-                SnackbarHostState(),
-                service,
-            )
-
-            val currentRoute by ribaHostState.navigator.currentRouteAsState()
+            val state = RibaHostState.create()
+            val currentRoute by state.navigator.currentRouteAsState()
 
             RibaTheme {
                 Scaffold(
-                    snackbarHost = { SnackbarHost(ribaHostState.snackbarHost) },
-                    content = { RibaNavHost(ribaHostState, it) },
+                    snackbarHost = { SnackbarHost(state.snackbarHost) },
+                    content = { RibaNavHost(state, it) },
                     bottomBar = {
                         AnimatedVisibility(
-                            currentRoute.routeType == RouteType.Default,
+                            currentRoute.type == RibaRoute.Type.Default,
                             exit = fadeOut() + shrinkVertically(),
                             enter = fadeIn() + expandVertically(),
-                            content = { MangoNavigationBar(ribaHostState.navigator) }
+                            content = { MangoNavigationBar(state.navigator) }
                         )
                     },
                 )
