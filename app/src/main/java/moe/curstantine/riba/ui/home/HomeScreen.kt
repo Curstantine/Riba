@@ -145,7 +145,7 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
             IconButton(onClick = { dropdownMenuExpanded.value = true }) {
                 Icon(
                     tint = rowColor,
-                    imageVector = if (!isSignedIn) Icons.Rounded.Person else Icons.Rounded.MoreVert,
+                    imageVector = if (isSignedIn) Icons.Rounded.Person else Icons.Rounded.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
             }
