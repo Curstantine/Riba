@@ -5,6 +5,9 @@ object DexConstants {
     const val BASE_API = "https://api.mangadex.org"
     const val STATUS_PAGE = "https://status.mangadex.org"
 
+    const val FORGOT_PASSWORD = "$BASE_SITE/forgot"
+    const val CREATE_ACCOUNT = "$BASE_SITE/account/signup"
+
     const val USER_PREFERENCE = "MangaDex-User"
     const val DATABASE_NAME = "Riba-MangaDex"
 

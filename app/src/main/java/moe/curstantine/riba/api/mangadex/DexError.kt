@@ -1,9 +1,12 @@
 package moe.curstantine.riba.api.mangadex
 
 import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonEncodingException
 import com.squareup.moshi.Moshi
 import moe.curstantine.riba.api.mangadex.DexError.Companion.tryHandle
+import moe.curstantine.riba.api.mangadex.models.DexErrorAttributes
 import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
+import moe.curstantine.riba.api.mangadex.models.DexResult
 import moe.curstantine.riba.api.riba.RibaError
 import retrofit2.HttpException
 import java.sql.SQLException
@@ -62,7 +65,23 @@ open class DexError(
 
         private fun fromHttpException(e: HttpException): DexError {
             val moshiAdapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
-            val errorBody = e.response()?.errorBody()?.source()?.let { moshiAdapter.fromJson(it) }
+            val errorBody = e.response()?.errorBody()?.source()?.let {
+                try {
+                    moshiAdapter.fromJson(it)
+                } catch (e: JsonEncodingException) {
+                    DexErrorResponse(
+                        DexResult.Error,
+                        listOf(
+                            DexErrorAttributes(
+                                id = "",
+                                status = 418,
+                                title = it.readUtf8(),
+                                detail = e.message ?: "Unknown error occurred while parsing JSON!",
+                            )
+                        )
+                    )
+                }
+            }
 
             return if (errorBody?.errors?.isNotEmpty() == true) {
                 val err = errorBody.errors.elementAt(0)

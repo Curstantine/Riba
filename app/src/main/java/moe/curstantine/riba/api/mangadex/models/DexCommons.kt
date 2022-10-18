@@ -70,10 +70,14 @@ data class DexLocaleObject(
     val japaneseRomanized: String?,
 )
 
-
 interface DexBaseResponse {
     val result: DexResult
 }
+
+@JsonClass(generateAdapter = true)
+data class DexBaseResponseImpl(
+    override val result: DexResult,
+) : DexBaseResponse
 
 @JsonClass(generateAdapter = true)
 data class DexResponse<T>(
@@ -90,7 +94,7 @@ data class DexCollectionResponse<T>(
     val limit: Int,
     val offset: Int,
     val total: Int,
-): DexBaseResponse
+) : DexBaseResponse
 
 @JsonClass(generateAdapter = true)
 data class DexResponseData<T>(

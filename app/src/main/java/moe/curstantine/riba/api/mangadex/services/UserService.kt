@@ -8,14 +8,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.DexBaseResponse
+import moe.curstantine.riba.api.mangadex.models.DexBaseResponseImpl
 import moe.curstantine.riba.api.mangadex.models.DexUser
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthBody
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthRefreshBody
@@ -75,37 +74,55 @@ class UserService(
         password: String
     ): RibaResult<DexUserAuthResponse> = contextualInvoke {
         val response = service.login(DexUserAuthBody(username, password))
+        Log.d(DexLogTag.DEBUG.tag, "Login response: ${response.result}")
+
         it.launch {
-            val details = getCurrentUserDetails()
-            current.postValue(details)
+            val details = getCurrentUserDetails(sessionOverride = response.token.session)
             setPreferences(details.unwrap().id, response.token)
+            current.postValue(details)
         }
 
         return@contextualInvoke response
     }
 
-    suspend fun logout(): RibaResult<Unit> = contextualInvoke {
+    suspend fun logout(): RibaResult<DexBaseResponseImpl> = contextualInvoke {
         handleTokenExpiry(true)
-        service.logout(getRefreshToken())
-        editor.remove("token").remove("refreshToken").remove("tokenExpiry").apply()
-        current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
+        val response = service.logout(getSessionToken())
+        Log.d(DexLogTag.DEBUG.tag, "Logout response: ${response.result}")
+
+        it.launch {
+            removePreferences()
+            current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
+        }
+
+        return@contextualInvoke response
     }
 
     private suspend fun refresh(refreshToken: String): RibaResult<DexUserAuthResponse> =
         contextualInvoke {
-            val userId = it.async { getUserId() }
-            val response = it.async { service.refresh(DexUserAuthRefreshBody(refreshToken)) }
-            it.launch { setPreferences(userId.await(), response.await().token) }
+            val response = service.refresh(DexUserAuthRefreshBody(refreshToken))
+            Log.d(DexLogTag.DEBUG.tag, "Refresh response: ${response.result}")
 
-            return@contextualInvoke response.await()
+            it.launch {
+                setPreferences(getUserId(), response.token)
+                current.postValue(getCurrentUserDetails(tryDatabase = true))
+            }
+
+            return@contextualInvoke response
         }
 
-    private suspend fun getCurrentUserDetails(tryDatabase: Boolean = false): RibaResult<RibaUser> =
+    /**
+     * @param sessionOverride overrides the [getSessionToken] with the given token.
+     */
+    private suspend fun getCurrentUserDetails(
+        sessionOverride: String? = null,
+        tryDatabase: Boolean = false
+    ): RibaResult<RibaUser> =
         contextualInvoke {
             if (tryDatabase) {
                 try {
                     return@contextualInvoke database.get(getUserId())!!
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     Log.w(
                         DexLogTag.DEBUG.tag,
                         "tryDatabase was true, but user was not in the database, continuing to fetch.",
@@ -115,7 +132,7 @@ class UserService(
             }
 
             val response = service
-                .getCurrentUserDetails(getSessionToken())
+                .getCurrentUserDetails(sessionOverride ?: getSessionToken())
                 .data.toRibaUser()
 
             it.launch { database.insert(response) }
@@ -133,8 +150,10 @@ class UserService(
     /**
      * @throws DexError.NotAuthenticated if the user is not signed in.
      */
-    private fun getSessionToken(): String {
-        return preferences.getString("session", null) ?: throw  DexError.Companion.NotAuthenticated
+    private fun getSessionToken(prefixed: Boolean = true): String {
+        return preferences.getString("session", null)?.apply {
+            if (prefixed) return "Bearer $this"
+        } ?: throw  DexError.Companion.NotAuthenticated
     }
 
     /**
@@ -166,8 +185,12 @@ class UserService(
         val timeElapsed = currentTimeSeconds() - getAuthTime()
 
         if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
+            Log.d(DexLogTag.DEBUG.tag, "Refresh token expired, need to re-authenticate.")
+
             throw DexError.Companion.ReAuthenticationRequired
         } else if (trySession && timeElapsed >= DexConstants.SESSION_EXPIRY) {
+            Log.d(DexLogTag.DEBUG.tag, "Session token expired, refreshing.")
+
             refresh(getRefreshToken())
         }
     }
@@ -177,6 +200,13 @@ class UserService(
         .putString("refresh", tokens.refresh)
         .putString("session", tokens.session)
         .putLong("authTime", currentTimeSeconds())
+        .apply()
+
+    private fun removePreferences() = editor
+        .remove("user")
+        .remove("refresh")
+        .remove("session")
+        .remove("authTime")
         .apply()
 
     companion object {
@@ -192,11 +222,10 @@ class UserService(
             suspend fun refresh(@Body body: DexUserAuthRefreshBody): DexUserAuthResponse
 
             @POST("/auth/logout")
-            suspend fun logout(@Header("Authorization") token: String): DexBaseResponse
+            suspend fun logout(@Header("Authorization") token: String): DexBaseResponseImpl
 
             @GET("/user/me")
             suspend fun getCurrentUserDetails(@Header("Authorization") token: String): DexUser
-
         }
 
         class Database(private val database: DexDatabase) :

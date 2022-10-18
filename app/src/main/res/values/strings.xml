@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Riba</string>
+    <string name="mangadex">MangaDex</string>
 
+    <string name="authentication">Authentication</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="library">Library</string>
@@ -15,19 +17,28 @@
     <string name="no_cover">Cover Not Available</string>
 
     <string name="sign_in">Sign In</string>
+    <string name="sign_in_to">Sign In to %s</string>
+    <string name="signed_in_to">Successfully signed into %s!</string>
+
     <string name="sign_out">Sign Out</string>
+    <string name="sign_out_from">Sign Out of %s</string>
+    <string name="signed_out_of">Successfully signed out of %s!</string>
+
+    <string name="forgot_password">Forgot Password</string>
+    <string name="create_account">Create Account</string>
+
     <string name="back">Back</string>
     <string name="more">More</string>
     <string name="collapse">Collapse</string>
     <string name="expand">Expand</string>
     <string name="share">Share</string>
+    <string name="_continue">Continue</string>
     <string name="add_to_library">Add to Library</string>
     <string name="start_reading">Start Reading</string>
     <string name="continue_from_chapter">Continue from %s</string>
     <string name="copied_to_clipboard">Copied %s to clipboard</string>
 
     <string name="trackers">Trackers</string>
-
     <string name="content_rating">Content Rating</string>
     <string name="authors">Authors</string>
     <string name="artists">Artists</string>
@@ -39,6 +50,7 @@
     <string name="theme">Theme</string>
 
     <string name="not_available">N/A</string>
+    <string name="cancel">Cancel</string>
     <string name="show_more">Show More</string>
     <string name="show_less">Show Less</string>
 
@@ -50,5 +62,11 @@
     <string name="hello_there">Hello there,</string>
     <string name="guest">Guest</string>
     <string name="anon">Anonymous</string>
-    <string name="we_have_mental_issues">Only me?</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+
+    <string name="mangadex_sign_in_requirement">
+        It\'s not required to sign-in to a MangaDex account,
+        but most features will be disabled without it.
+    </string>
 </resources>

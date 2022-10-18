@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Divider
@@ -33,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +47,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
@@ -58,6 +61,7 @@ import moe.curstantine.riba.api.riba.RibaConstants
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.nav.RibaRoute
+import moe.curstantine.riba.ui.common.dialogs.AuthDialog
 import moe.curstantine.riba.ui.manga.MangaCardRow
 import moe.curstantine.riba.ui.theme.Rubik
 
@@ -73,7 +77,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        HeaderRow(state, paddingValues)
+        HeaderRow(state, viewModel.viewModelScope, paddingValues)
 
         MangaCardRow(
             state.navigator,
@@ -89,16 +93,24 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>) {
-    val colorScheme = MaterialTheme.colorScheme
+private fun HeaderRow(
+    state: RibaHostState,
+    coroutineScope: CoroutineScope,
+    paddingValues: State<PaddingValues>
+) {
     val typography = MaterialTheme.typography
+    val colorScheme = MaterialTheme.colorScheme
     val rowColor = colorScheme.onBackground.copy(alpha = 0.5F)
-
-    val dropdownMenuExpanded = remember { mutableStateOf(false) }
+    val signOutMessage = stringResource(R.string.signed_out_of, stringResource(R.string.mangadex))
 
     val user by state.service.mangadex.user.getCurrent().observeAsState()
-    val username = user?.unwrapOrNull()?.username ?: stringResource(R.string.anon)
+    val username = user?.unwrapOrNull()?.username ?: stringResource(R.string.guest)
     val isSignedIn = user?.unwrapOrNull() != null
+
+    val showAuthModal = remember { mutableStateOf(false) }
+    val dropdownMenuExpanded = remember { mutableStateOf(false) }
+
+    AuthDialog(state, showAuthModal)
 
     Row(
         modifier = Modifier
@@ -129,7 +141,7 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
         Spacer(modifier = Modifier.weight(1F))
 
         AnimatedVisibility(visible = !isSignedIn) {
-            TextButton(onClick = { }) {
+            TextButton(onClick = { showAuthModal.value = true }) {
                 Text(
                     stringResource(R.string.sign_in),
                     style = typography.labelLarge.copy(
@@ -139,34 +151,49 @@ private fun HeaderRow(state: RibaHostState, paddingValues: State<PaddingValues>)
             }
         }
 
+        AnimatedVisibility(visible = isSignedIn) {
+            IconButton(
+                content = {
+                    Icon(
+                        Icons.Rounded.Logout,
+                        tint = rowColor,
+                        contentDescription = stringResource(R.string.sign_out)
+                    )
+                },
+                onClick = {
+                    coroutineScope.launch {
+                        val resp = state.service.mangadex.user.logout()
+
+                        state.snackbarHost.showSnackbar(
+                            if (resp is RibaResult.Error) resp.error.human
+                            else signOutMessage
+                        )
+                    }
+                }
+            )
+        }
+
         Spacer(modifier = Modifier.padding(end = 4.dp))
 
         Box(contentAlignment = Alignment.Center) {
             IconButton(onClick = { dropdownMenuExpanded.value = true }) {
                 Icon(
+                    if (isSignedIn) Icons.Rounded.Person else Icons.Rounded.MoreVert,
                     tint = rowColor,
-                    imageVector = if (isSignedIn) Icons.Rounded.Person else Icons.Rounded.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
             }
 
             AccountDropDown(
                 expanded = dropdownMenuExpanded,
-                isSignedIn = isSignedIn,
-                onSignOut = {},
-                navigateTo = { state.navigator.navigateTo(it) }
+                navigateTo = { coroutineScope.launch { state.navigator.navigateTo(it) } },
             )
         }
     }
 }
 
 @Composable
-private fun AccountDropDown(
-    expanded: MutableState<Boolean>,
-    isSignedIn: Boolean,
-    onSignOut: () -> Unit,
-    navigateTo: (RibaRoute) -> Unit,
-) {
+private fun AccountDropDown(expanded: MutableState<Boolean>, navigateTo: (RibaRoute) -> Unit) {
     val context = LocalContext.current
 
     val statusIntent = remember {
@@ -183,13 +210,6 @@ private fun AccountDropDown(
         onDismissRequest = { expanded.value = false },
         offset = DpOffset(x = (-120).dp, y = 0.dp),
     ) {
-        if (isSignedIn) {
-            DropdownMenuItem(
-                onClick = onSignOut,
-                text = { Text(text = stringResource(R.string.sign_out)) },
-            )
-        }
-
         DropdownMenuItem(
             onClick = { context.startActivity(statusIntent) },
             text = { Text(text = stringResource(R.string.status)) },
@@ -212,7 +232,10 @@ private fun AccountDropDown(
 @Composable
 @Preview(showBackground = true)
 private fun PreviewHeaderRow() {
-    HeaderRow(RibaHostState.createDummy(), remember { mutableStateOf(PaddingValues(0.dp)) })
+    HeaderRow(
+        RibaHostState.createDummy(),
+        rememberCoroutineScope(),
+        remember { mutableStateOf(PaddingValues(0.dp)) })
 }
 
 @Composable
@@ -220,8 +243,6 @@ private fun PreviewHeaderRow() {
 private fun PreviewAccountDropDown() {
     AccountDropDown(
         expanded = remember { mutableStateOf(true) },
-        isSignedIn = false,
-        onSignOut = {},
         navigateTo = {},
     )
 }
