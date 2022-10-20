@@ -2,7 +2,6 @@ package moe.curstantine.riba.api.mangadex.services
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.SharedPreferences.Editor
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -43,8 +42,6 @@ class UserService(
         Context.MODE_PRIVATE
     )
 
-    private val editor: Editor = preferences.edit()
-
     private val current: MutableLiveData<RibaResult<RibaUser>> = MutableLiveData()
 
     /**
@@ -60,7 +57,7 @@ class UserService(
     init {
         coroutineScope.launch {
             try {
-                handleTokenExpiry(true)
+                handleTokenExpiry()
                 current.postValue(getCurrentUserDetails())
             } catch (e: DexError) {
                 current.postValue(RibaResult.Error(e))
@@ -86,7 +83,7 @@ class UserService(
     }
 
     suspend fun logout(): RibaResult<DexBaseResponseImpl> = contextualInvoke {
-        handleTokenExpiry(true)
+        handleTokenExpiry()
         val response = service.logout(getSessionToken())
         Log.d(DexLogTag.DEBUG.tag, "Logout response: ${response.result}")
 
@@ -144,7 +141,7 @@ class UserService(
      * @throws DexError.NotAuthenticated if the user is not signed in.
      */
     private fun getUserId(): String {
-        return preferences.getString("userId", null) ?: throw DexError.Companion.NotAuthenticated
+        return preferences.getString("user", null) ?: throw DexError.Companion.NotAuthenticated
     }
 
     /**
@@ -181,28 +178,28 @@ class UserService(
      * @throws DexError.NotAuthenticated if the user is not logged in.
      * @throws DexError.ReAuthenticationRequired if the user is logged in, but will need a re-authentication due to expired tokens.
      */
-    private suspend fun handleTokenExpiry(trySession: Boolean = true) {
+    private suspend fun handleTokenExpiry() {
         val timeElapsed = currentTimeSeconds() - getAuthTime()
 
         if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
             Log.d(DexLogTag.DEBUG.tag, "Refresh token expired, need to re-authenticate.")
 
             throw DexError.Companion.ReAuthenticationRequired
-        } else if (trySession && timeElapsed >= DexConstants.SESSION_EXPIRY) {
+        } else if (timeElapsed >= DexConstants.SESSION_EXPIRY) {
             Log.d(DexLogTag.DEBUG.tag, "Session token expired, refreshing.")
 
             refresh(getRefreshToken())
         }
     }
 
-    private fun setPreferences(userId: String, tokens: DexUserAuthTokens) = editor
+    private fun setPreferences(userId: String, tokens: DexUserAuthTokens) = preferences.edit()
         .putString("user", userId)
         .putString("refresh", tokens.refresh)
         .putString("session", tokens.session)
         .putLong("authTime", currentTimeSeconds())
         .apply()
 
-    private fun removePreferences() = editor
+    private fun removePreferences() = preferences.edit()
         .remove("user")
         .remove("refresh")
         .remove("session")

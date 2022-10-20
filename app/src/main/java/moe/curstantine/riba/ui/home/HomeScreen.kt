@@ -173,8 +173,6 @@ private fun HeaderRow(
             )
         }
 
-        Spacer(modifier = Modifier.padding(end = 4.dp))
-
         Box(contentAlignment = Alignment.Center) {
             IconButton(onClick = { dropdownMenuExpanded.value = true }) {
                 Icon(
