@@ -23,14 +23,6 @@ data class DexMangaAttributes(
 )
 
 fun DexMangaData.toRibaManga(): RibaManga {
-    val altTitles = attributes.altTitles
-        .filter { it.english != null || it.japanese != null || it.japaneseRomanized != null }
-        .mapNotNull { it.english ?: it.japanese ?: it.japaneseRomanized }
-
-    val description = attributes.description.let {
-        it.english ?: it.japanese ?: it.japaneseRomanized
-    }
-
     var coverId: String? = null
     val artistIds = mutableListOf<String>()
     val authorIds = mutableListOf<String>()
@@ -40,17 +32,15 @@ fun DexMangaData.toRibaManga(): RibaManga {
             DexEntityType.Artist -> artistIds.add(relationship.id)
             DexEntityType.Author -> authorIds.add(relationship.id)
             DexEntityType.CoverArt -> coverId = relationship.id
-            else -> {}
+            else -> continue
         }
     }
 
     return RibaManga(
         id = id,
-        title = attributes.title.english
-            ?: attributes.title.japanese
-            ?: attributes.title.japaneseRomanized,
-        altTitles = altTitles,
-        description = description,
+        title = attributes.title,
+        altTitles = attributes.altTitles,
+        description = attributes.description,
         artistIds = artistIds,
         authorIds = authorIds,
         coverId = coverId,
@@ -204,13 +194,5 @@ enum class DexMangaTagGroup {
     @field:Json(name = "format")
     Format;
 
-    override fun toString(): String = DexUtils.toNormalizedString(name)
-    fun toTitleCase(): String = DexUtils.toTitleCase(name)
-
-    companion object {
-        fun fromString(string: String): DexMangaTagGroup {
-            return values().find { it.toString() == string }
-                ?: throw IllegalArgumentException("Invalid tag group: $string")
-        }
-    }
+    override fun toString(): String = DexUtils.toTitleCase(name)
 }

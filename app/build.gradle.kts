@@ -99,6 +99,7 @@ tasks {
         kotlinOptions.freeCompilerArgs += listOf(
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
         )
     }
 }

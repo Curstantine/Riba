@@ -3,8 +3,8 @@ package moe.curstantine.riba.api.mangadex.services
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.MangaDexService
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexMDList
 import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
@@ -31,14 +31,14 @@ class MDListService(
         includes: List<DexEntityType> = defaultMDListIncludes,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
-    ): RibaResult<RibaMangaList> = contextualInvoke {
+    ): RibaResult<RibaMangaList> = contextualInvoke { scope ->
         if (tryDatabase) {
             val localList = database.get(id)
             if (localList != null) return@contextualInvoke localList
         }
 
-        val riba = service.get(id, includes).data.toRibaMangaList()
-        it.launch { database.insert(riba, forceInsert) }
+        val riba = service.get(id, includes.map { it.toDexEnum() }).data.toRibaMangaList()
+        scope.launch { database.insert(riba, forceInsert) }
 
         return@contextualInvoke riba
     }
@@ -49,7 +49,7 @@ class MDListService(
             @GET("/list/{id}")
             suspend fun get(
                 @Path("id") id: String,
-                @Query("includes[]") includes: List<DexEntityType>?
+                @Query("includes[]") includes: List<String>?
             ): DexMDList
         }
 

@@ -15,6 +15,32 @@ data class DexUserAttributes(
     val version: Int,
 )
 
+@JsonClass(generateAdapter = true)
+data class DexRelatedUser(
+    override val id: String,
+    override val type: DexEntityType,
+    val attributes: DexUserAttributes?,
+) : DexRelationship {
+    /**
+     * Convert this [DexRelatedUser] to a [RibaUser].
+     *
+     * @throws IllegalStateException if [attributes] is null.
+     */
+    fun toRibaUser(): RibaUser {
+        if (attributes == null) {
+            throw IllegalStateException("Attributes cannot be null trying to convert to a ${RibaUser::class.simpleName}")
+        }
+
+        return RibaUser(
+            id = id,
+            avatar = null,
+            username = attributes.username,
+            roles = attributes.roles,
+            version = attributes.version,
+        )
+    }
+}
+
 // TODO: Add avatars when they are supported by the MangaDex API
 fun DexUser.toRibaUser(): RibaUser = RibaUser(
     id = data.id,

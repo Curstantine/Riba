@@ -17,12 +17,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import moe.curstantine.riba.R
+import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
-import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.nav.RibaNavigator
+import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 
@@ -36,7 +37,7 @@ fun MangaCard(manga: RibaManga, cover: RibaCover?, onClick: (RibaManga) -> Unit)
     ) {
         MangaCover(cover, onClick = { onClick(manga) })
         Text(
-            text = manga.title ?: stringResource(R.string.no_title),
+            text = manga.title?.get(DexLocale.English) ?: stringResource(R.string.no_title),
             maxLines = 2,
             style = MaterialTheme.typography.bodySmall,
             overflow = TextOverflow.Ellipsis

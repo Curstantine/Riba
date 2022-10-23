@@ -1,6 +1,5 @@
 package moe.curstantine.riba.api.mangadex.models
 
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.api.riba.models.RibaMangaList
 
@@ -11,34 +10,8 @@ typealias DexMDListData = DexResponseData<DexMDListAttributes>
 data class DexMDListAttributes(
     val name: String,
     val visibility: DexListVisibility,
-    val version : Int,
+    val version: Int,
 )
-
-@JsonClass(generateAdapter = false)
-enum class DexListVisibility {
-    @field:Json(name = "public")
-    Public,
-
-    @field:Json(name = "private")
-    Private;
-
-    override fun toString(): String {
-        return when (this) {
-            Public -> "public"
-            Private -> "private"
-        }
-    }
-
-    companion object {
-        fun fromString(string: String): DexListVisibility {
-            return when (string) {
-                "public" -> Public
-                "private" -> Private
-                else -> throw IllegalArgumentException("Unknown visibility: $string")
-            }
-        }
-    }
-}
 
 fun DexMDListData.toRibaMangaList() = RibaMangaList(
     id = id,

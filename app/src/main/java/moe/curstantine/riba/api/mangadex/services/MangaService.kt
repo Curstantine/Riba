@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.MangaDexService
+import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexCover
 import moe.curstantine.riba.api.mangadex.models.DexCoverCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -57,11 +57,11 @@ class MangaService(
             if (localManga != null) return@contextualInvoke localManga
         }
 
-        val response = service.get(id, includes)
+        val response = service.get(id, includes.map { it.toDexEnum() })
         val ribaManga = response.data.toRibaManga()
 
         scope.launch { database.insert(ribaManga, forceInsert) }
-        scope.launch { insertMangaMeta(response.data) }
+        scope.launch { insertMangaMeta(coroutineContext, response.data) }
 
         return@contextualInvoke ribaManga
     }
@@ -78,13 +78,13 @@ class MangaService(
             ids = ids,
             limit = limit,
             offset = offset,
-            includes = includes,
-            sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: mapOf()
+            includes = includes.map { it.toDexEnum() },
+            sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
         )
 
         val riba = response.data.map { it.toRibaManga() }
-        scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
-        scope.launch { response.data.map { insertMangaMeta(it) } }
+        scope.launch { database.insertCollection(coroutineContext, riba, forceInsert) }
+        scope.launch { response.data.map { insertMangaMeta(coroutineContext, it) } }
 
         return@contextualInvoke riba
     }
@@ -94,7 +94,8 @@ class MangaService(
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
     ): RibaResult<List<RibaManga>> = contextualInvoke {
-        val idMap: MutableMap<String, RibaManga?> = ids.associateBy({ it }, { null }).toMutableMap()
+        val idMap = ids.associateBy({ it }, { null }).toMutableMap<String, RibaManga?>()
+
         if (tryDatabase) {
             val localManga = database.getCollection(ids)
             idMap.putAll(localManga.map { Pair(it.id, it) })
@@ -109,24 +110,28 @@ class MangaService(
         return@contextualInvoke idMap.values.mapNotNull { it }
     }
 
-    private suspend fun insertMangaMeta(manga: DexMangaData) = contextualInvoke { scope ->
-        val ribaTags = manga.attributes.tags.map { it.toRibaTag() }
-        if (ribaTags.isNotEmpty()) scope.launch {
-            database.insertTagCollection(scope.coroutineContext, ribaTags)
-        }
+    private suspend fun insertMangaMeta(context: CoroutineContext, manga: DexMangaData) =
+        withContext(context) {
+            launch {
+                val ribaTags = manga.attributes.tags.map { it.toRibaTag() }
+                database.insertTagCollection(coroutineContext, ribaTags)
+            }
 
-        val ribaAuthors = manga.relationships
-            .filter { it.type == DexEntityType.Artist || it.type == DexEntityType.Author }
-            .map { (it as DexRelatedAuthor).toRibaAuthor() }
-        if (ribaAuthors.isNotEmpty()) scope.launch {
-            authorService.database.insertCollection(scope.coroutineContext, ribaAuthors)
-        }
+            launch {
+                val ribaAuthors = manga.relationships
+                    .filter { it.type == DexEntityType.Artist || it.type == DexEntityType.Author }
+                    .map { (it as DexRelatedAuthor).toRibaAuthor() }
+                authorService.database.insertCollection(coroutineContext, ribaAuthors)
+            }
 
-        val ribaCover = manga.relationships
-            .firstOrNull { it.type == DexEntityType.CoverArt }
-            ?.let { (it as DexRelatedCover).toRibaCover(manga.id) }
-        if (ribaCover != null) scope.launch { database.insertCover(ribaCover) }
-    }
+            launch {
+                val ribaCover = manga.relationships
+                    .firstOrNull { it.type == DexEntityType.CoverArt }
+                    ?.let { (it as DexRelatedCover).toRibaCover(manga.id) }
+
+                if (ribaCover != null) database.insertCover(ribaCover)
+            }
+        }
 
     /**
      * @param id UUID of the title
@@ -196,7 +201,7 @@ class MangaService(
             @GET("/manga/{id}")
             suspend fun get(
                 @Path("id") id: String,
-                @Query("includes[]") includes: List<DexEntityType>?
+                @Query("includes[]") includes: List<String>?
             ): DexManga
 
             @GET("/manga")
@@ -204,8 +209,8 @@ class MangaService(
                 @Query("ids[]") ids: List<String>?,
                 @Query("limit") limit: Int?,
                 @Query("offset") offset: Int?,
-                @Query("includes[]") includes: List<DexEntityType>?,
-                @QueryMap sort: Map<String, DexQueryOrderValue>?,
+                @Query("includes[]") includes: List<String>?,
+                @QueryMap sort: Map<String, DexQueryOrderValue>,
             ): DexMangaCollection
 
             @GET("/statistics/manga/{id}")

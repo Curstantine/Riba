@@ -17,7 +17,7 @@ data class DexTagAttributes(
 
 fun DexTagData.toRibaTag() = RibaTag(
     id = id,
-    name = attributes.name.let { it.english ?: it.japaneseRomanized ?: it.japanese },
+    name = attributes.name,
     group = attributes.group,
     version = attributes.version,
 )

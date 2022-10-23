@@ -1,10 +1,13 @@
-package moe.curstantine.riba.api
+package moe.curstantine.riba.api.adapters.moshi
 
-import com.squareup.moshi.*
-import moe.curstantine.riba.api.mangadex.models.DexLocaleObject
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.Moshi
 import java.lang.reflect.Type
 
-class NormalizeMismatchType<T> private constructor(
+class NormalizeMismatchType<T>(
     private val delegate: JsonAdapter<T>,
     private val default: T
 ) : JsonAdapter<T>() {
@@ -27,7 +30,7 @@ class NormalizeMismatchType<T> private constructor(
     }
 
     companion object {
-        private fun <T> new(requestedType: Class<T>, defaultValue: T): Factory {
+         fun <T> new(requestedType: Type, defaultValue: T): Factory {
             return object : Factory {
                 override fun create(
                     type: Type,
@@ -40,12 +43,5 @@ class NormalizeMismatchType<T> private constructor(
                 }
             }
         }
-
-        val mismatches: List<Factory> = listOf(
-            new(
-                DexLocaleObject::class.java,
-                DexLocaleObject(null, null, null)
-            )
-        )
     }
 }

@@ -82,6 +82,7 @@ import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
+import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
@@ -153,18 +154,28 @@ private fun MangaDetailHeader(
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
 
-    val manga = details.manga.unwrapOrNull()!!
-    val stats = details.statistic!!.unwrapOrNull()!!
+    val notAvailable = stringResource(R.string.not_available)
+    val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
 
-    val authors = details.authors!!.unwrapOrNull()!!.map { it.name ?: "N/A" }
-    val artists = details.artists!!.unwrapOrNull()!!.map { it.name ?: "N/A" }
-    val tags = details.tags!!.unwrapOrNull()!!.map { tag -> tag.name ?: "N/A" }
-    val artistsAndAuthors = remember {
-        val it = authors + artists.filter { it !in authors }
-        it.ifEmpty { null }
+    val manga = remember { details.manga.unwrap() }
+    val stats = remember { details.statistic?.unwrapOrNull() }
+
+    val tags = remember {
+        details.tags
+            ?.unwrapOrNull()
+            ?.map { it.name?.get(DexLocale.English) ?: "N/A" } ?: emptyList()
     }
 
-    val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+    val authors = remember {
+        details.authors?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
+    }
+    val artists = remember {
+        details.artists?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
+    }
+    val artistsAndAuthors = remember {
+        (authors + artists.filter { it !in authors }).ifEmpty { null }
+    }
+
     val isDetailsExpanded = remember { mutableStateOf(false) }
     var isInLibrary by remember { mutableStateOf(false) }
     var hasTrackers by remember { mutableStateOf(false) }
@@ -198,7 +209,8 @@ private fun MangaDetailHeader(
             ) {
                 Column(Modifier.padding(bottom = 16.dp)) {
                     Text(
-                        text = manga.title ?: stringResource(R.string.no_title),
+                        text = manga.title?.get(DexLocale.English)
+                            ?: stringResource(R.string.no_title),
                         style = typography.headlineSmall.copy(
                             fontWeight = FontWeight.Bold,
                             fontFamily = Rubik
@@ -229,11 +241,13 @@ private fun MangaDetailHeader(
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
-                            style = textStyle,
-                            color = colorScheme.primary
-                        )
+                        if (stats != null) {
+                            Text(
+                                text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
+                                style = textStyle,
+                                color = colorScheme.primary
+                            )
+                        }
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -244,11 +258,13 @@ private fun MangaDetailHeader(
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = stats.follows.toString(),
-                            style = textStyle,
-                            color = mutedOnBackground
-                        )
+                        if (stats != null) {
+                            Text(
+                                text = stats.follows.toString(),
+                                style = textStyle,
+                                color = mutedOnBackground
+                            )
+                        }
                     }
 
                     // TODO: Add total views
@@ -325,36 +341,54 @@ private fun MangaDetailHeader(
                     DetailChipRow(artists, stringResource(R.string.artists), halfRowWidth)
                 }
 
-                DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
+                if (tags.size <= 5) {
+                    DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
+                }
             }
         }
 
-        if (manga.description != null) {
-            Column {
-                // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-                AnimatedVisibility(isDetailsExpanded.value) {
+        // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
+        AnimatedVisibility(isDetailsExpanded.value) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                if (tags.size > 5) {
+                    BoxWithConstraints(Modifier.padding(top = 14.dp)) {
+                        DetailChipRow(tags, stringResource(R.string.tags), this.maxWidth)
+                    }
+                }
+
+                if (manga.description != null) {
+                    Text(
+                        text = stringResource(R.string.description),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+                            fontFamily = Rubik,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+
                     MarkdownText(
-                        markdown = manga.description,
+                        markdown = manga.description[DexLocale.English] ?: "",
                         style = typography.bodyMedium.copy(
                             fontFamily = Nunito,
                             color = colorScheme.onBackground.copy(alpha = 0.75F)
                         )
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                FilledTonalButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { isDetailsExpanded.value = !isDetailsExpanded.value },
-                    content = {
-                        Text(
-                            text = if (isDetailsExpanded.value) stringResource(R.string.show_less)
-                            else stringResource(R.string.show_more)
-                        )
-                    }
-                )
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FilledTonalButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { isDetailsExpanded.value = !isDetailsExpanded.value },
+            content = {
+                Text(
+                    text = if (isDetailsExpanded.value) stringResource(R.string.show_less)
+                    else stringResource(R.string.show_more)
+                )
+            }
+        )
     }
 }
 
@@ -469,13 +503,13 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
         val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
             val resolve = service.mangadex.manga.database.getTagCollection(localManga.tagIds)
 
-            if (resolve.isEmpty() || resolve.size != localManga.tagIds.size) {
+            if (resolve.size != localManga.tagIds.size) {
                 val error = DexError(
                     "Failed to resolve tags",
                     "Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
                 )
 
-                Log.e(DexLogTag.MISSING.tag, "Missing Tag ids", error)
+                Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
 
                 return@async RibaResult.Error(error)
             }

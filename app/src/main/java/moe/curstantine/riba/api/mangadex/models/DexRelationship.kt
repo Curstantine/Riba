@@ -29,30 +29,3 @@ data class DexRelationshipImpl(
     override val id: String,
     override val type: DexEntityType
 ) : DexRelationship
-
-/**
- * Content rating of a [DexManga]
- */
-@JsonClass(generateAdapter = false)
-enum class DexContentRating {
-    @field:Json(name = "safe")
-    Safe,
-
-    @field:Json(name = "suggestive")
-    Suggestive,
-
-    @field:Json(name = "erotica")
-    Erotica,
-
-    @field:Json(name = "pornographic")
-    Pornographic;
-
-    fun toTitleCase(): String = DexUtils.toTitleCase(name)
-    override fun toString(): String = DexUtils.toNormalizedString(name)
-
-    companion object {
-        fun fromString(string: String): DexMangaTagGroup? {
-            return DexMangaTagGroup.values().find { it.toString() == string }
-        }
-    }
-}

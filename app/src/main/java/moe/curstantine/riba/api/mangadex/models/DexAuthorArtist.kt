@@ -31,7 +31,7 @@ data class DexRelatedAuthor(
     fun toRibaAuthor(): RibaAuthor = RibaAuthor(
         id = id,
         name = attributes?.name,
-        description = attributes?.biography?.english,
+        description = attributes?.biography,
         version = attributes?.version ?: -1,
     )
 }
@@ -39,7 +39,7 @@ data class DexRelatedAuthor(
 fun DexAuthorData.toRibaAuthor(): RibaAuthor = RibaAuthor(
     id = id,
     name = attributes.name,
-    description = attributes.biography.english,
+    description = attributes.biography,
     version = attributes.version,
 )
 

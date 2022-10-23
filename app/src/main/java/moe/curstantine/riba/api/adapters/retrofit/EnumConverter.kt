@@ -1,4 +1,4 @@
-package moe.curstantine.riba.api
+package moe.curstantine.riba.api.adapters.retrofit
 
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -19,7 +19,8 @@ class EnumConverter : Converter.Factory() {
         return if (type is Class<*> && type.isEnum) {
             Converter { enum ->
                 try {
-                    enum.javaClass.getField(enum.name)
+                    enum.javaClass
+                        .getField(enum.name)
                         .getAnnotation(EnumValue::class.java)?.value
                 } catch (exception: Exception) {
                     null

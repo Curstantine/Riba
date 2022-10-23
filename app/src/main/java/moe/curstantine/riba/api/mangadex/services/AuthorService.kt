@@ -48,7 +48,7 @@ class AuthorService(
         includes: List<DexEntityType>? = null,
         forceInsert: Boolean = false,
     ): RibaResult<List<RibaAuthor>> = contextualInvoke { scope ->
-        val response = service.getCollection(ids, limit, offset, includes)
+        val response = service.getCollection(ids, limit, offset, includes?.map { it.toDexEnum() })
         val riba = response.data.map { it.toRibaAuthor() }
 
         scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
@@ -90,7 +90,7 @@ class AuthorService(
                 @Query("ids[]") ids: List<String>?,
                 @Query("limit") limit: Int?,
                 @Query("offset") offset: Int?,
-                @Query("includes[]") includes: List<DexEntityType>?,
+                @Query("includes[]") includes: List<String>?,
             ): DexAuthorCollection
         }
 

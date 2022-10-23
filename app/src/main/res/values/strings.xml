@@ -15,6 +15,7 @@
     <string name="no_title">No Title</string>
     <string name="no_author_artists">No Valid Authors/Artists</string>
     <string name="no_cover">Cover Not Available</string>
+    <string name="cover_error">Could not load the cover</string>
 
     <string name="sign_in">Sign In</string>
     <string name="sign_in_to">Sign In to %s</string>
@@ -48,6 +49,7 @@
     <string name="tags">Tags</string>
     <string name="genre">Genre</string>
     <string name="theme">Theme</string>
+    <string name="description">Description</string>
 
     <string name="not_available">N/A</string>
     <string name="cancel">Cancel</string>

@@ -1,7 +1,9 @@
 package moe.curstantine.riba.api.mangadex.models
 
+import android.util.Log
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
 
 @Suppress("unused")
@@ -52,23 +54,89 @@ enum class DexEntityType {
     Manga,
 
     @field:Json(name = "scanlation_group")
-    ScanlationGroup;
+    ScanlationGroup,
 
-    override fun toString(): String = DexUtils.toNormalizedString(name)
-    fun toTitleCase(): String = DexUtils.toTitleCase(name)
+    /**
+     * Member of a group.
+     *
+     * This is only available in [DexGroup] relationships.
+     */
+    @field:Json(name = "member")
+    Member,
+
+    /**
+     * Leader of a group.
+     *
+     * This is only available in [DexGroup] relationships.
+     */
+    @field:Json(name = "leader")
+    Leader;
+
+    override fun toString(): String = DexUtils.toTitleCase(name)
+    fun toDexEnum(): String = DexUtils.toNormalizedString(name)
 }
 
-@JsonClass(generateAdapter = true)
-data class DexLocaleObject(
+@JsonClass(generateAdapter = false)
+enum class DexLocale {
     @field:Json(name = "en")
-    val english: String?,
+    English,
 
     @field:Json(name = "ja")
-    val japanese: String?,
+    Japanese,
 
     @field:Json(name = "ja-ro")
-    val japaneseRomanized: String?,
-)
+    JapaneseRomanized,
+
+    @field:Json(name = "zh")
+    SimplifiedChinese,
+
+    @field:Json(name = "zh-hk")
+    TraditionalChinese,
+
+    @field:Json(name = "zh-ro")
+    ChineseRomanized,
+
+    @field:Json(name = "ko")
+    Korean,
+
+    @field:Json(name = "ko-ro")
+    KoreanRomanized,
+
+    @field:Json(name = "private_not_impl")
+    NotImplemented;
+
+    override fun toString(): String = DexUtils.toTitleCase(name)
+}
+
+@JsonClass(generateAdapter = false)
+enum class DexListVisibility {
+    @field:Json(name = "public")
+    Public,
+
+    @field:Json(name = "private")
+    Private;
+
+    override fun toString(): String = DexUtils.toTitleCase(name)
+}
+
+@JsonClass(generateAdapter = false)
+enum class DexContentRating {
+    @field:Json(name = "safe")
+    Safe,
+
+    @field:Json(name = "suggestive")
+    Suggestive,
+
+    @field:Json(name = "erotica")
+    Erotica,
+
+    @field:Json(name = "pornographic")
+    Pornographic;
+
+    override fun toString(): String = DexUtils.toTitleCase(name)
+}
+
+typealias DexLocaleObject = Map<DexLocale, String?>
 
 interface DexBaseResponse {
     val result: DexResult
