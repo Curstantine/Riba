@@ -163,7 +163,7 @@ private fun MangaDetailHeader(
     val tags = remember {
         details.tags
             ?.unwrapOrNull()
-            ?.map { it.name?.get(DexLocale.English) ?: "N/A" } ?: emptyList()
+            ?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
     }
 
     val authors = remember {
@@ -176,7 +176,11 @@ private fun MangaDetailHeader(
         (authors + artists.filter { it !in authors }).ifEmpty { null }
     }
 
-    val isDetailsExpanded = remember { mutableStateOf(false) }
+    val isMoreEnabled = manga.description != null
+        && manga.description[DexLocale.English] != null
+        || tags.size > 5
+
+    var isDetailsExpanded by remember { mutableStateOf(false) }
     var isInLibrary by remember { mutableStateOf(false) }
     var hasTrackers by remember { mutableStateOf(false) }
 
@@ -347,17 +351,21 @@ private fun MangaDetailHeader(
             }
         }
 
-        // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-        AnimatedVisibility(isDetailsExpanded.value) {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+
+        AnimatedVisibility(isDetailsExpanded) {
+            Column {
                 if (tags.size > 5) {
                     BoxWithConstraints(Modifier.padding(top = 14.dp)) {
                         DetailChipRow(tags, stringResource(R.string.tags), this.maxWidth)
                     }
                 }
 
-                if (manga.description != null) {
+                // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
+                if (manga.description != null && manga.description[DexLocale.English] != null) {
+                    Spacer(Modifier.padding(top = 14.dp))
+
                     Text(
+                        modifier = Modifier.padding(bottom = 4.dp),
                         text = stringResource(R.string.description),
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
@@ -367,7 +375,7 @@ private fun MangaDetailHeader(
                     )
 
                     MarkdownText(
-                        markdown = manga.description[DexLocale.English] ?: "",
+                        markdown = manga.description[DexLocale.English]!!,
                         style = typography.bodyMedium.copy(
                             fontFamily = Nunito,
                             color = colorScheme.onBackground.copy(alpha = 0.75F)
@@ -377,24 +385,27 @@ private fun MangaDetailHeader(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        if (isMoreEnabled) {
+            Spacer(modifier = Modifier.height(8.dp))
 
-        FilledTonalButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { isDetailsExpanded.value = !isDetailsExpanded.value },
-            content = {
-                Text(
-                    text = if (isDetailsExpanded.value) stringResource(R.string.show_less)
-                    else stringResource(R.string.show_more)
-                )
-            }
-        )
+            FilledTonalButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { isDetailsExpanded = !isDetailsExpanded },
+                content = {
+                    Text(
+                        text = if (isDetailsExpanded) stringResource(R.string.show_less)
+                        else stringResource(R.string.show_more)
+                    )
+                }
+            )
+        }
     }
 }
 
 @Composable
-private fun DetailChipRow(values: List<String>, label: String, width: Dp) {
-    Column(Modifier.widthIn(max = width)) {
+private fun DetailChipRow(values: List<String>, label: String, width: Dp) =
+    if (values.isEmpty()) Unit
+    else Column(Modifier.widthIn(max = width)) {
         Text(
             text = label,
             style = MaterialTheme.typography.titleSmall.copy(
@@ -414,8 +425,8 @@ private fun DetailChipRow(values: List<String>, label: String, width: Dp) {
                 }
             }
         )
+
     }
-}
 
 @Composable
 private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) =

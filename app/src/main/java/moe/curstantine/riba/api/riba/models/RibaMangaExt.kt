@@ -40,7 +40,7 @@ class RibaResultManga(
             RibaResult.Success(RibaCover.getDefault()),
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
-            RibaResult.Success(listOf(RibaTag.getDefault())),
+            RibaResult.Success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
             RibaResult.Success(RibaStatistic.getDefault()),
         )
     }
