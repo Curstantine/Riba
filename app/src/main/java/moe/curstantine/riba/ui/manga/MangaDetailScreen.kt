@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Book
@@ -31,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedIconToggleButton
@@ -86,6 +89,7 @@ import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
+import moe.curstantine.riba.api.riba.models.RibaChapter
 import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaResultManga
 import moe.curstantine.riba.api.riba.models.RibaStatistic
@@ -93,6 +97,7 @@ import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Nunito
+import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
 import kotlin.math.roundToInt
 
@@ -123,22 +128,36 @@ private fun MangaDetailBody(
     paddingValues: PaddingValues,
     details: RibaResultManga
 ) {
-    LazyColumn(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        val list = (0..75).map { it.toString() }
+    val chapters = remember { details.chapters }
 
+    LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
         item { MangaDetailHeader(state, paddingValues, details) }
 
-        items(list.size) {
-            Text(
-                text = list[it],
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
+        if (chapters is RibaResult.Error) {
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.error)
+                        .heightIn(42.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = chapters.error.human,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onError,
+                    )
+                }
+            }
+        }
+
+        if (chapters is RibaResult.Success) {
+            items(chapters.value) { chapter ->
+                ListItem(
+                    headlineText = { Text(text = chapter.id) },
+                )
+            }
         }
     }
 }
@@ -495,6 +514,23 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
             )
         }
 
+        val chapters: Deferred<RibaResult<List<RibaChapter>>> = async(Dispatchers.IO) {
+            val response = service.mangadex.chapter.getStrictCollectionForManga(
+                mangaId = mangaId,
+                forceInsert = refresh,
+            )
+
+            if (response is RibaResult.Error) {
+                Log.e(
+                    DexLogTag.DEBUG.tag,
+                    "Error while fetching chapters for $mangaId",
+                    response.error as Throwable
+                )
+            }
+
+            return@async response
+        }
+
         val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
             service.mangadex.manga.getStatistic(mangaId)
         }
@@ -535,7 +571,8 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                 authors = authors.await(),
                 cover = cover.await(),
                 tags = tags.await(),
-                statistic = statistic.await()
+                statistic = statistic.await(),
+                chapters = chapters.await()
             )
         )
     }
@@ -554,8 +591,10 @@ private fun DetailBodyPreview() {
     val state = RibaHostState.createDummy()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(
-        topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-        content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
-    )
+    RibaTheme {
+        Scaffold(
+            topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+            content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
+        )
+    }
 }

@@ -1,5 +1,6 @@
 package moe.curstantine.riba.api.riba.models
 
+import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.riba.RibaResult
 
 /**
@@ -12,6 +13,7 @@ class RibaResultManga(
     val artists: RibaResult<List<RibaAuthor>>?,
     val tags: RibaResult<List<RibaTag>>?,
     val statistic: RibaResult<RibaStatistic>?,
+    val chapters: RibaResult<List<RibaChapter>>?,
 ) {
     companion object {
         /**
@@ -24,6 +26,7 @@ class RibaResultManga(
             artists: RibaResult<List<RibaAuthor>>? = null,
             tags: RibaResult<List<RibaTag>>? = null,
             statistic: RibaResult<RibaStatistic>? = null,
+            chapters: RibaResult<List<RibaChapter>>? = null,
         ): RibaResultManga {
             return RibaResultManga(
                 manga,
@@ -32,6 +35,7 @@ class RibaResultManga(
                 artists,
                 tags,
                 statistic,
+                chapters,
             )
         }
 
@@ -42,6 +46,8 @@ class RibaResultManga(
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
             RibaResult.Success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
             RibaResult.Success(RibaStatistic.getDefault()),
+            RibaResult.Success(listOf(RibaChapter.getDefault(), RibaChapter.getDefault())),
+//            RibaResult.Error(DexError.Companion.HTTP503),
         )
     }
 }
@@ -56,15 +62,37 @@ class RibaFulFilledManga(
     val artists: List<RibaAuthor>?,
     val tags: List<RibaTag>?,
     val statistic: RibaStatistic?,
+    val chapters: List<RibaChapter>?,
 ) {
     companion object {
+        fun fromNullables(
+            manga: RibaManga,
+            cover: RibaCover? = null,
+            authors: List<RibaAuthor>? = null,
+            artists: List<RibaAuthor>? = null,
+            tags: List<RibaTag>? = null,
+            statistic: RibaStatistic? = null,
+            chapters: List<RibaChapter>? = null,
+        ): RibaFulFilledManga {
+            return RibaFulFilledManga(
+                manga,
+                cover,
+                authors,
+                artists,
+                tags,
+                statistic,
+                chapters,
+            )
+        }
+
         fun getDefault(): RibaFulFilledManga = RibaFulFilledManga(
             RibaManga.getDefault(),
             RibaCover.getDefault(),
             listOf(RibaAuthor.getDefault()),
             listOf(RibaAuthor.getDefault()),
-            listOf(RibaTag.getDefault()),
+            listOf(RibaTag.getDefault(), RibaTag.getDefault()),
             RibaStatistic.getDefault(),
+            listOf(RibaChapter.getDefault(), RibaChapter.getDefault()),
         )
     }
 }

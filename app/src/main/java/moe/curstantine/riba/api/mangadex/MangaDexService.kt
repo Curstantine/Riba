@@ -91,6 +91,7 @@ class MangaDexService(context: Context) {
             .add(MapMismatchArrayAdapter())
             .add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
             .add(
+                // @formatter:off
                 PolymorphicJsonAdapterFactory.of(DexRelationship::class.java, "type")
                     .withSubtype(DexRelatedManga::class.java, DexEntityType.Manga.toDexEnum())
                     .withSubtype(DexRelatedCover::class.java, DexEntityType.CoverArt.toDexEnum())
@@ -99,16 +100,10 @@ class MangaDexService(context: Context) {
                     .withSubtype(DexRelatedUser::class.java, DexEntityType.User.toDexEnum())
                     .withSubtype(DexRelatedUser::class.java, DexEntityType.Leader.toDexEnum())
                     .withSubtype(DexRelatedUser::class.java, DexEntityType.Member.toDexEnum())
-                    .withSubtype(
-                        DexRelatedGroup::class.java,
-                        DexEntityType.ScanlationGroup.toString()
-                    )
+                    .withSubtype(DexRelatedGroup::class.java, DexEntityType.ScanlationGroup.toDexEnum())
                     .withSubtype(DexRelationshipImpl::class.java, DexEntityType.Chapter.toDexEnum())
                     .withSubtype(DexRelationshipImpl::class.java, DexEntityType.Tag.toDexEnum())
-                    .withSubtype(
-                        DexRelationshipImpl::class.java,
-                        DexEntityType.CustomList.toString()
-                    )
+                    .withSubtype(DexRelationshipImpl::class.java, DexEntityType.CustomList.toDexEnum())
             )
             .build()
 

@@ -88,6 +88,21 @@ class ChapterService(
         return@contextualInvoke idMap.values.mapNotNull { it }
     }
 
+    suspend fun getStrictCollectionForManga(
+        mangaId: String,
+        forceInsert: Boolean = false,
+        tryDatabase: Boolean = true,
+    ): RibaResult<List<RibaChapter>> = contextualInvoke {
+        if (tryDatabase) {
+            val localChapter = database.getCollectionForManga(mangaId)
+            if (localChapter.isNotEmpty()) {
+                return@contextualInvoke localChapter
+            }
+        }
+
+        return@contextualInvoke getCollection(mangaId = mangaId, forceInsert = forceInsert).unwrap()
+    }
+
     private suspend fun insertChapterMeta(context: CoroutineContext, chapter: DexChapterData) =
         withContext(context) {
             launch {
@@ -112,7 +127,7 @@ class ChapterService(
         interface APIService : RibaHttpService.Companion.APIService {
             @GET("/chapter")
             suspend fun getCollection(
-                @Path("mangaId") mangaId: String?,
+                @Query("manga") mangaId: String?,
                 @Query("ids[]") ids: List<String>?,
                 @Query("limit") limit: Int?,
                 @Query("offset") offset: Int?,

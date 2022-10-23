@@ -277,15 +277,11 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
         }
 
         return@launch seasonal.postValue(RibaResult.Success(titles.map {
-            RibaFulFilledManga(
+            RibaFulFilledManga.fromNullables(
                 manga = it,
                 cover = it.coverId?.let { id ->
                     service.mangadex.manga.getCover(id).unwrapOrNull()
                 },
-                tags = null,
-                statistic = null,
-                authors = null,
-                artists = null,
             )
         }))
 
@@ -298,15 +294,11 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
             sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
         ).map {
             it.map { manga ->
-                RibaFulFilledManga(
+                RibaFulFilledManga.fromNullables(
                     manga = manga,
                     cover = manga.coverId?.let { id ->
                         service.mangadex.manga.getCover(id).unwrapOrNull()
                     },
-                    tags = null,
-                    statistic = null,
-                    authors = null,
-                    artists = null,
                 )
             }
         }

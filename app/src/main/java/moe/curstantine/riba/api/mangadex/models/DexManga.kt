@@ -3,7 +3,6 @@ package moe.curstantine.riba.api.mangadex.models
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.api.mangadex.DexUtils
-import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
 import moe.curstantine.riba.api.riba.models.RibaManga
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 
@@ -47,20 +46,6 @@ fun DexMangaData.toRibaManga(): RibaManga {
         version = attributes.version,
         tagIds = attributes.tags.map { it.id },
         contentRating = attributes.contentRating,
-    )
-}
-
-fun DexMangaData.toFulfilledRibaManga(): RibaFulFilledManga {
-    return RibaFulFilledManga(
-        manga = this.toRibaManga(),
-        artists = this.relationships.filter { it.type == DexEntityType.Artist }
-            .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
-        authors = this.relationships.filter { it.type == DexEntityType.Author }
-            .map { (it as DexRelatedAuthor).toRibaAuthor() }.let { it.ifEmpty { null } },
-        cover = this.relationships.firstOrNull { it.type == DexEntityType.CoverArt }
-            ?.let { (it as DexRelatedCover).toRibaCover(this.id) },
-        tags = this.attributes.tags.map { it.toRibaTag() },
-        statistic = null,
     )
 }
 

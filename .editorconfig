@@ -8,3 +8,4 @@ indent_style = space
 insert_final_newline = false
 max_line_length = 100
 tab_width = 4
+ij_formatter_tags_enabled = true
