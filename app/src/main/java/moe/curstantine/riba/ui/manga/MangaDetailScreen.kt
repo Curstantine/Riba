@@ -2,6 +2,7 @@ package moe.curstantine.riba.ui.manga
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,7 +58,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -133,32 +136,29 @@ private fun MangaDetailBody(
     LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
         item { MangaDetailHeader(state, paddingValues, details) }
 
-        if (chapters is RibaResult.Error) {
-            item {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.error)
-                        .heightIn(42.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = chapters.error.human,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onError,
-                    )
+        item {
+            AnimatedVisibility(visible = chapters is RibaResult.Error) {
+                if (chapters is RibaResult.Error) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.error)
+                            .heightIn(42.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = chapters.error.human,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onError,
+                        )
+                    }
                 }
             }
         }
 
         if (chapters is RibaResult.Success) {
-            items(chapters.value) { fulfilledChapter ->
-                ListItem(
-                    headlineText = { Text(text = fulfilledChapter.chapter.title) },
-                    supportingText = { Text(text = fulfilledChapter.groups.joinToString(", ")) }
-                )
-            }
+            items(chapters.value) { ChapterItem(it) }
         }
     }
 }
@@ -420,6 +420,42 @@ private fun MangaDetailHeader(
             )
         }
     }
+}
+
+@Composable
+private fun ChapterItem(chap: RibaFulfilledChapter) {
+    val which = remember {
+        if (chap.chapter.chapter != null) R.string.chapter_x
+        else R.string.oneshot
+    }
+
+    val chapterNumber = remember {
+        if (chap.chapter.chapter != null) chap.chapter.chapter.toString() else ""
+    }
+
+    val groupNames = remember { chap.groups.map { it.name } }
+
+
+    ListItem(
+        leadingContent = {
+            val languageFlagId = remember { chap.chapter.language.getFlagId() }
+
+            if (languageFlagId != null) {
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        modifier = Modifier.size(24.dp),
+                        contentScale = ContentScale.FillWidth,
+                        painter = painterResource(id = languageFlagId),
+                        contentDescription = chap.chapter.language.toString(),
+                    )
+                }
+            }
+        },
+        headlineText = {
+            Text(text = stringResource(which, chapterNumber) + " - ${chap.chapter.title}")
+        },
+        supportingText = { Text(text = groupNames.joinToString(", ")) }
+    )
 }
 
 @Composable

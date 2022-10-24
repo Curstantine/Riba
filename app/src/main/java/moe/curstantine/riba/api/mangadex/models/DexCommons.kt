@@ -1,9 +1,8 @@
 package moe.curstantine.riba.api.mangadex.models
 
-import android.util.Log
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import moe.curstantine.riba.api.mangadex.DexLogTag
+import moe.curstantine.riba.R
 import moe.curstantine.riba.api.mangadex.DexUtils
 
 @Suppress("unused")
@@ -106,6 +105,20 @@ enum class DexLocale {
     NotImplemented;
 
     override fun toString(): String = DexUtils.toTitleCase(name)
+
+    /**
+     * @return Flag asset ID or null if the locale doesn't have a flag.
+     */
+    fun getFlagId(): Int? {
+        return when (this) {
+            English -> R.drawable.uk_flag
+            Japanese -> R.drawable.jp_flag
+            Korean -> R.drawable.kr_flag
+            SimplifiedChinese -> R.drawable.cn_flag
+            TraditionalChinese -> R.drawable.hk_flag
+            else -> null
+        }
+    }
 }
 
 @JsonClass(generateAdapter = false)

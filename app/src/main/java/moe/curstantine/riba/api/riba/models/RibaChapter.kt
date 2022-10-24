@@ -96,7 +96,7 @@ data class RibaChapter(
             uploader = "9c33607-9180-4ba6-b85c-e4b5faee7192",
             volume = "1",
             chapter = "2.4a",
-            title = "Chapter 2",
+            title = "MD Docs JavaScript code example test",
             language = DexLocale.English,
             externalUrl = null,
             publishAt = LocalDateTime.now(),

@@ -46,7 +46,14 @@ class RibaResultManga(
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
             RibaResult.Success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
             RibaResult.Success(RibaStatistic.getDefault()),
-            RibaResult.Success(listOf(RibaFulfilledChapter.getDefault())),
+            RibaResult.Success(
+                listOf(
+                    RibaFulfilledChapter.getDefault(),
+                    RibaFulfilledChapter.getDefault(),
+                    RibaFulfilledChapter.getDefault(),
+                    RibaFulfilledChapter.getDefault()
+                )
+            ),
 //            RibaResult.Error(DexError.Companion.HTTP503),
         )
     }
