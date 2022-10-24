@@ -29,4 +29,24 @@ data class RibaGroup(
      * UUIDs of the users that are part of this group.
      */
     @ColumnInfo val members: List<String>?,
-)
+) {
+    companion object {
+        fun getDefault() = RibaGroup(
+            id = "a408e049-2d88-429f-8c03-f0cc8ab2325c",
+            name = "Baumkuchen Scans",
+            description = "Looking for JP translators  \nContact Tracreed#0975 for more information.",
+            discord = null,
+            twitter = null,
+            website = null,
+            official = false,
+            focusedLanguages = listOf(DexLocale.English),
+            createdAt = LocalDateTime.now(),
+            version = 0,
+            leader = "29290c4d-440c-41fc-8c62-7b96c691df8c",
+            members = listOf(
+                "29290c4d-440c-41fc-8c62-7b96c691df8c",
+                "c36ab005-6329-4fe1-8517-099d7e134515"
+            ),
+        )
+    }
+}

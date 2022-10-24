@@ -7,7 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
@@ -19,6 +21,7 @@ import moe.curstantine.riba.api.mangadex.models.DexUserAuthBody
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthRefreshBody
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthResponse
 import moe.curstantine.riba.api.mangadex.models.DexUserAuthTokens
+import moe.curstantine.riba.api.mangadex.models.DexUserCollection
 import moe.curstantine.riba.api.mangadex.models.toRibaUser
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
@@ -28,6 +31,8 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
+import kotlin.coroutines.CoroutineContext
 
 // TODO: Implement Guest/Anon
 class UserService(
@@ -114,28 +119,27 @@ class UserService(
     private suspend fun getCurrentUserDetails(
         sessionOverride: String? = null,
         tryDatabase: Boolean = false
-    ): RibaResult<RibaUser> =
-        contextualInvoke {
-            if (tryDatabase) {
-                try {
-                    return@contextualInvoke database.get(getUserId())!!
-                } catch (e: Throwable) {
-                    Log.w(
-                        DexLogTag.DEBUG.tag,
-                        "tryDatabase was true, but user was not in the database, continuing to fetch.",
-                        e
-                    )
-                }
+    ): RibaResult<RibaUser> = contextualInvoke {
+        if (tryDatabase) {
+            try {
+                return@contextualInvoke database.get(getUserId())!!
+            } catch (e: Throwable) {
+                Log.w(
+                    DexLogTag.DEBUG.tag,
+                    "tryDatabase was true, but user was not in the database, continuing to fetch.",
+                    e
+                )
             }
-
-            val response = service
-                .getCurrentUserDetails(sessionOverride ?: getSessionToken())
-                .data.toRibaUser()
-
-            it.launch { database.insert(response) }
-
-            return@contextualInvoke response
         }
+
+        val response = service
+            .getCurrentUserDetails(sessionOverride ?: getSessionToken())
+            .data.toRibaUser()
+
+        it.launch { database.insert(response) }
+
+        return@contextualInvoke response
+    }
 
     /**
      * @throws DexError.NotAuthenticated if the user is not signed in.
@@ -183,11 +187,9 @@ class UserService(
 
         if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
             Log.d(DexLogTag.DEBUG.tag, "Refresh token expired, need to re-authenticate.")
-
             throw DexError.Companion.ReAuthenticationRequired
         } else if (timeElapsed >= DexConstants.SESSION_EXPIRY) {
             Log.d(DexLogTag.DEBUG.tag, "Session token expired, refreshing.")
-
             refresh(getRefreshToken())
         }
     }
@@ -206,6 +208,30 @@ class UserService(
         .remove("authTime")
         .apply()
 
+    /**
+     * NOTE: This method needs authentication.
+     */
+    suspend fun getCollection(
+        ids: List<String>? = null,
+        username: String? = null,
+        limit: Int? = null,
+        offset: Int? = null,
+    ): RibaResult<List<RibaUser>> = contextualInvoke { scope ->
+        handleTokenExpiry()
+        val response = service.getCollection(
+            token = getSessionToken(),
+            ids = ids,
+            username = username,
+            limit = limit,
+            offset = offset
+        )
+
+        val riba = response.data.map { it.toRibaUser() }
+        scope.launch { database.insertCollection(coroutineContext, riba) }
+
+        return@contextualInvoke riba
+    }
+
     companion object {
         private fun currentTimeSeconds(): Long = System.currentTimeMillis() / 1000L
 
@@ -223,11 +249,21 @@ class UserService(
 
             @GET("/user/me")
             suspend fun getCurrentUserDetails(@Header("Authorization") token: String): DexUser
+
+            @GET("/user")
+            suspend fun getCollection(
+                @Header("Authorization") token: String,
+                @Query("ids[]") ids: List<String>?,
+                @Query("username") username: String?,
+                @Query("limit") limit: Int?,
+                @Query("offset") offset: Int?,
+            ): DexUserCollection
         }
 
         class Database(private val database: DexDatabase) :
             RibaHttpService.Companion.Database(database) {
             suspend fun get(id: String): RibaUser? = database.user().get(id)
+            suspend fun getCollection(ids: List<String>): List<RibaUser> = database.user().get(ids)
 
             suspend fun insert(user: RibaUser, force: Boolean = false) {
                 val oldUser = get(user.id)
@@ -237,6 +273,30 @@ class UserService(
                 }
 
                 database.user().insert(user)
+            }
+
+            suspend fun insertCollection(
+                context: CoroutineContext,
+                users: List<RibaUser>,
+                force: Boolean = false
+            ) = withContext(context) {
+                val userJob = this.async { users.associateBy { it.id } }
+                val oldUserJob = this.async {
+                    getCollection(users.map { it.id }).associateBy { it.id }
+                }
+
+                val oldUserMap = oldUserJob.await()
+                val userMap = userJob.await()
+
+                for ((id, newThis) in userMap) {
+                    val oldThis = oldUserMap[id]
+
+                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+                        continue
+                    } else {
+                        launch { database.user().insert(newThis) }
+                    }
+                }
             }
         }
     }

@@ -39,6 +39,9 @@
     <string name="continue_from_chapter">Continue from %s</string>
     <string name="copied_to_clipboard">Copied %s to clipboard</string>
 
+    <string name="chapter_x">Chapter %i</string>
+    <string name="volume_x_chapter_x">Vol %i, Chapter %p</string>
+
     <string name="trackers">Trackers</string>
     <string name="content_rating">Content Rating</string>
     <string name="authors">Authors</string>

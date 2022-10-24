@@ -63,7 +63,8 @@ class MangaDexService(context: Context) {
 
         group = GroupService(
             retrofit.create(GroupService.Companion.APIService::class.java),
-            GroupService.Companion.Database(database)
+            GroupService.Companion.Database(database),
+            user,
         )
 
         chapter = ChapterService(

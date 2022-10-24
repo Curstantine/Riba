@@ -1,10 +1,13 @@
 package moe.curstantine.riba.api.mangadex.services
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.curstantine.riba.api.mangadex.DexError
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexChapterCollection
@@ -19,8 +22,10 @@ import moe.curstantine.riba.api.mangadex.models.toRibaChapter
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaChapter
+import moe.curstantine.riba.api.riba.models.RibaFulfilledChapter
+import moe.curstantine.riba.api.riba.models.RibaGroup
+import moe.curstantine.riba.api.riba.models.RibaUser
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 import kotlin.coroutines.CoroutineContext
@@ -38,6 +43,9 @@ class ChapterService(
         DexEntityType.ScanlationGroup,
     )
 
+    /**
+     * @return A Map with Manga ID as its key and a value with [RibaFulfilledChapter]
+     */
     suspend fun getCollection(
         mangaId: String? = null,
         ids: List<String>? = null,
@@ -48,7 +56,7 @@ class ChapterService(
         translatedLanguage: List<DexLocale>? = null,
         sort: Pair<DexChapterQueryOrderProperty, DexQueryOrderValue>? = null,
         forceInsert: Boolean = false,
-    ) = contextualInvoke { scope ->
+    ): RibaResult<Map<String, RibaFulfilledChapter>> = contextualInvoke { scope ->
         val response = service.getCollection(
             mangaId = mangaId,
             ids = ids,
@@ -60,67 +68,137 @@ class ChapterService(
             sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
         )
 
-        val riba = response.data.map { it.toRibaChapter() }
-        scope.launch { database.insertCollection(coroutineContext, riba, forceInsert) }
-        scope.launch { response.data.map { insertChapterMeta(coroutineContext, it) } }
+        val map = mutableMapOf<String, RibaFulfilledChapter>()
 
-        return@contextualInvoke riba
+        for (chapter in response.data) {
+            val riba = chapter.toRibaChapter()
+            val meta = insertChapterMeta(scope.coroutineContext, chapter)
+            val manga = chapter.relationships.first { it.type == DexEntityType.Manga }
+
+            map[manga.id] = RibaFulfilledChapter(
+                riba,
+                uploader = meta.first,
+                groups = meta.second
+            )
+        }
+
+        scope.launch {
+            database.insertCollection(
+                context = coroutineContext,
+                chapters = map.values.map { it.chapter },
+                force = forceInsert
+            )
+        }
+
+        return@contextualInvoke map
     }
 
+    /**
+     * Enables you to fetch from the database at the cost of sorting and such.
+     *
+     * @return A [Map] with Chapter ID as its key and a value with [RibaFulfilledChapter]
+     */
     suspend fun getStrictCollection(
         ids: List<String>,
         forceInsert: Boolean = false,
         tryDatabase: Boolean = true,
-    ): RibaResult<List<RibaChapter>> = contextualInvoke {
-        val idMap = ids.associateBy({ it }, { null }).toMutableMap<String, RibaChapter?>()
+    ): RibaResult<Map<String, RibaFulfilledChapter>> = contextualInvoke {
+        val map = ids.associateBy({ it }, { null }).toMutableMap<String, RibaFulfilledChapter?>()
 
-        if (tryDatabase) {
-            val localChapter = database.getCollection(ids)
-            idMap.putAll(localChapter.map { Pair(it.id, it) })
+        if (tryDatabase) for (chapter in database.getCollection(ids)) {
+            val groups = groupService.database.getCollection(chapter.groups)
+            val uploader = userService.database.get(chapter.uploader)
+
+            if (groups.size == chapter.groups.size || uploader == null) {
+                Log.i(
+                    DexLogTag.MISSING.tag,
+                    "Groups were $groups, where expected value was ${chapter.groups}; uploader was $uploader, where expected value was ${chapter.uploader}",
+                    DexError.Companion.MissingChapterData
+                )
+                continue
+            }
+
+            map[chapter.id] = RibaFulfilledChapter(
+                chapter,
+                groups,
+                uploader,
+            )
         }
 
-        val missingIds = idMap.filterValues { it == null }.keys.toList()
+        val missingIds = map.filterValues { it == null }.keys.toList()
         if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
-            response.forEach { manga -> idMap[manga.id] = manga }
+            val response = getCollection(ids = missingIds, forceInsert = forceInsert)
+                .unwrap()
+
+            response.values.forEach { map[it.chapter.manga] = it }
         }
 
-        return@contextualInvoke idMap.values.mapNotNull { it }
+        return@contextualInvoke map.filterValues { it != null }.mapValues { it.value!! }
     }
 
-    suspend fun getStrictCollectionForManga(
-        mangaId: String,
-        forceInsert: Boolean = false,
-        tryDatabase: Boolean = true,
-    ): RibaResult<List<RibaChapter>> = contextualInvoke {
-        if (tryDatabase) {
-            val localChapter = database.getCollectionForManga(mangaId)
-            if (localChapter.isNotEmpty()) {
-                return@contextualInvoke localChapter
+    /**
+     * Due to the high cardinality of chapter lists,
+     * this function *will* not fetch from the server,
+     * but return data already available in the database.
+     *
+     * Use [getCollection]'s mangaId param to get the freshest chapters.
+     */
+    suspend fun getStrictCollectionForManga(mangaId: String): RibaResult<List<RibaFulfilledChapter>> =
+        contextualInvoke {
+            val list = mutableListOf<RibaFulfilledChapter>()
+
+            for (chapter in database.getCollectionForManga(mangaId)) {
+                val groups = groupService.database.getCollection(chapter.groups)
+                val uploader = userService.database.get(chapter.uploader)
+
+                if (groups.size == chapter.groups.size || uploader == null) {
+                    val error = DexError.Companion.MissingChapterData
+                    Log.i(
+                        DexLogTag.MISSING.tag,
+                        "Groups were $groups, where expected value was ${chapter.groups}; uploader was $uploader, where expected value was ${chapter.uploader}",
+                        error
+                    )
+                    throw error
+                }
+
+                list.add(
+                    RibaFulfilledChapter(
+                        chapter,
+                        groups,
+                        uploader,
+                    )
+                )
             }
+
+            return@contextualInvoke list
         }
 
-        return@contextualInvoke getCollection(mangaId = mangaId, forceInsert = forceInsert).unwrap()
+    private suspend fun insertChapterMeta(
+        context: CoroutineContext,
+        chapter: DexChapterData
+    ): Pair<RibaUser, List<RibaGroup>> = withContext(context) {
+        val uploader = async {
+            val user = chapter.relationships
+                .first { it.type == DexEntityType.User }
+                .let { (it as DexRelatedUser).toRibaUser() }
+
+            launch { userService.database.insert(user) }
+
+            return@async user
+        }
+
+        val groups = async {
+            val groups = chapter.relationships
+                .filter { it.type == DexEntityType.ScanlationGroup }
+                .map { (it as DexRelatedGroup).toRibaGroup() }
+
+            launch { groupService.database.insertCollection(coroutineContext, groups) }
+
+            return@async groups
+        }
+
+        return@withContext Pair(uploader.await(), groups.await())
     }
-
-    private suspend fun insertChapterMeta(context: CoroutineContext, chapter: DexChapterData) =
-        withContext(context) {
-            launch {
-                val user = chapter.relationships
-                    .first { it.type == DexEntityType.User }
-                    .let { (it as DexRelatedUser).toRibaUser() }
-
-                userService.database.insert(user)
-            }
-
-            launch {
-                val groups = chapter.relationships
-                    .filter { it.type == DexEntityType.ScanlationGroup }
-                    .map { (it as DexRelatedGroup).toRibaGroup() }
-
-                groupService.database.insertCollection(coroutineContext, groups)
-            }
-        }
 
     companion object {
         @JvmSuppressWildcards

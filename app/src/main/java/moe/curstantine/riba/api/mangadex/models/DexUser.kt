@@ -11,6 +11,7 @@ typealias DexUserData = DexResponseData<DexUserAttributes>
 @JsonClass(generateAdapter = true)
 data class DexUserAttributes(
     val username: String,
+    // TODO: Enum with all the roles
     val roles: List<String>,
     val version: Int,
 )

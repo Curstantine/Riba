@@ -11,4 +11,14 @@ data class RibaUser(
     @ColumnInfo val avatar: String?,
     @ColumnInfo val roles: List<String>,
     @ColumnInfo val version: Int,
-)
+) {
+    companion object {
+        fun getDefault() = RibaUser(
+            id = "c36ab005-6329-4fe1-8517-099d7e134515",
+            username = "Curstantine",
+            avatar = null,
+            roles = listOf("ROLE_MEMBER", "ROLE_GROUP_MEMBER"),
+            version = 0,
+        )
+    }
+}

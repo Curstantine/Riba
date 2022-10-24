@@ -53,6 +53,11 @@ open class DexError(
             "Both the session and refresh tokens are invalid."
         )
 
+        object MissingChapterData: DexError(
+            "Failed to retrieve chapter data!",
+            "Expected groups and uploader to be an exact match with chapter, but failed."
+        )
+
         fun tryHandle(e: Throwable): DexError {
             return when (e) {
                 is DexError -> e

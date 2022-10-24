@@ -13,7 +13,7 @@ class RibaResultManga(
     val artists: RibaResult<List<RibaAuthor>>?,
     val tags: RibaResult<List<RibaTag>>?,
     val statistic: RibaResult<RibaStatistic>?,
-    val chapters: RibaResult<List<RibaChapter>>?,
+    val chapters: RibaResult<List<RibaFulfilledChapter>>?,
 ) {
     companion object {
         /**
@@ -26,7 +26,7 @@ class RibaResultManga(
             artists: RibaResult<List<RibaAuthor>>? = null,
             tags: RibaResult<List<RibaTag>>? = null,
             statistic: RibaResult<RibaStatistic>? = null,
-            chapters: RibaResult<List<RibaChapter>>? = null,
+            chapters: RibaResult<List<RibaFulfilledChapter>>? = null,
         ): RibaResultManga {
             return RibaResultManga(
                 manga,
@@ -46,7 +46,7 @@ class RibaResultManga(
             RibaResult.Success(listOf(RibaAuthor.getDefault())),
             RibaResult.Success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
             RibaResult.Success(RibaStatistic.getDefault()),
-            RibaResult.Success(listOf(RibaChapter.getDefault(), RibaChapter.getDefault())),
+            RibaResult.Success(listOf(RibaFulfilledChapter.getDefault())),
 //            RibaResult.Error(DexError.Companion.HTTP503),
         )
     }

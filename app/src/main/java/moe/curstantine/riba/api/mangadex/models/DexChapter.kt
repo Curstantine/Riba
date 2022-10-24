@@ -17,7 +17,7 @@ typealias DexChapterData = DexResponseData<DexChapterAttributes>
 data class DexChapterAttributes(
     val volume: String?,
     val chapter: String?,
-    val title: String?,
+    val title: String,
     val translatedLanguage: DexLocale,
     val externalUrl: String?,
 

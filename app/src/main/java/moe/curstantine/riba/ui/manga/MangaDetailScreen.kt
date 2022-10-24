@@ -89,8 +89,8 @@ import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
-import moe.curstantine.riba.api.riba.models.RibaChapter
 import moe.curstantine.riba.api.riba.models.RibaCover
+import moe.curstantine.riba.api.riba.models.RibaFulfilledChapter
 import moe.curstantine.riba.api.riba.models.RibaResultManga
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
@@ -153,9 +153,10 @@ private fun MangaDetailBody(
         }
 
         if (chapters is RibaResult.Success) {
-            items(chapters.value) { chapter ->
+            items(chapters.value) { fulfilledChapter ->
                 ListItem(
-                    headlineText = { Text(text = chapter.id) },
+                    headlineText = { Text(text = fulfilledChapter.chapter.title) },
+                    supportingText = { Text(text = fulfilledChapter.groups.joinToString(", ")) }
                 )
             }
         }
@@ -514,8 +515,8 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
             )
         }
 
-        val chapters: Deferred<RibaResult<List<RibaChapter>>> = async(Dispatchers.IO) {
-            val response = service.mangadex.chapter.getStrictCollectionForManga(
+        val chapters: Deferred<RibaResult<List<RibaFulfilledChapter>>> = async(Dispatchers.IO) {
+            val response = service.mangadex.chapter.getCollection(
                 mangaId = mangaId,
                 forceInsert = refresh,
             )
@@ -528,7 +529,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                 )
             }
 
-            return@async response
+            return@async response.map { it.values.toList() }
         }
 
         val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
@@ -572,7 +573,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                 cover = cover.await(),
                 tags = tags.await(),
                 statistic = statistic.await(),
-                chapters = chapters.await()
+                chapters = chapters.await(),
             )
         )
     }

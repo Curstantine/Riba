@@ -84,7 +84,7 @@ class MangaService(
 
         val riba = response.data.map { it.toRibaManga() }
         scope.launch { database.insertCollection(coroutineContext, riba, forceInsert) }
-        scope.launch { response.data.map { insertMangaMeta(coroutineContext, it) } }
+        scope.launch { response.data.forEach { insertMangaMeta(coroutineContext, it) } }
 
         return@contextualInvoke riba
     }
