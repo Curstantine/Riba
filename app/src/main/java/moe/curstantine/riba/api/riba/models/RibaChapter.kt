@@ -47,7 +47,7 @@ data class RibaChapter(
     /**
      * Title of this chapter, usually in the language of the manga.
      */
-    @ColumnInfo val title: String,
+    @ColumnInfo val title: String?,
 
     /**
      * Language used in this chapter.

@@ -56,7 +56,7 @@ class ChapterService(
         translatedLanguage: List<DexLocale>? = null,
         sort: Pair<DexChapterQueryOrderProperty, DexQueryOrderValue>? = null,
         forceInsert: Boolean = false,
-    ): RibaResult<Map<String, RibaFulfilledChapter>> = contextualInvoke { scope ->
+    ): RibaResult<Map<String, List<RibaFulfilledChapter>>> = contextualInvoke { scope ->
         val response = service.getCollection(
             mangaId = mangaId,
             ids = ids,
@@ -68,26 +68,32 @@ class ChapterService(
             sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
         )
 
-        val map = mutableMapOf<String, RibaFulfilledChapter>()
+        val map = mutableMapOf<String, MutableList<RibaFulfilledChapter>>()
 
         for (chapter in response.data) {
             val riba = chapter.toRibaChapter()
             val meta = insertChapterMeta(scope.coroutineContext, chapter)
             val manga = chapter.relationships.first { it.type == DexEntityType.Manga }
 
-            map[manga.id] = RibaFulfilledChapter(
-                riba,
-                uploader = meta.first,
-                groups = meta.second
+            if (map[manga.id] == null) map[manga.id] = mutableListOf()
+
+            map[manga.id]?.add(
+                RibaFulfilledChapter(
+                    riba,
+                    uploader = meta.first,
+                    groups = meta.second
+                )
             )
         }
 
         scope.launch {
-            database.insertCollection(
-                context = coroutineContext,
-                chapters = map.values.map { it.chapter },
-                force = forceInsert
-            )
+            map.values.forEach { mangaChapters ->
+                database.insertCollection(
+                    context = coroutineContext,
+                    chapters = mangaChapters.map { it.chapter },
+                    force = forceInsert
+                )
+            }
         }
 
         return@contextualInvoke map
@@ -130,7 +136,9 @@ class ChapterService(
             val response = getCollection(ids = missingIds, forceInsert = forceInsert)
                 .unwrap()
 
-            response.values.forEach { map[it.chapter.manga] = it }
+            for (chapter in response.values.flatten()) {
+                map[chapter.chapter.id] = chapter
+            }
         }
 
         return@contextualInvoke map.filterValues { it != null }.mapValues { it.value!! }

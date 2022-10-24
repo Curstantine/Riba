@@ -565,7 +565,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                 )
             }
 
-            return@async response.map { it.values.toList() }
+            return@async response.map { it.values.flatten() }
         }
 
         val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
