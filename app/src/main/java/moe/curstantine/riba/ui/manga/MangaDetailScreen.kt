@@ -198,9 +198,11 @@ private fun MangaDetailHeader(
         (authors + artists.filter { it !in authors }).ifEmpty { null }
     }
 
-    val isMoreEnabled = manga.description != null
-        && manga.description[DexLocale.English] != null
-        || tags.size > 5
+    val isMoreEnabled = remember {
+        manga.description != null
+            && manga.description[DexLocale.English] != null
+            || tags.size > 5
+    }
 
     var isDetailsExpanded by remember { mutableStateOf(false) }
     var isInLibrary by remember { mutableStateOf(false) }
