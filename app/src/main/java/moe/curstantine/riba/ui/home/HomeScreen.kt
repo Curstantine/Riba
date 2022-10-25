@@ -291,6 +291,7 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
         Log.i(DexLogTag.DEBUG.tag, "Loading recent list.")
 
         val list = service.mangadex.manga.getCollection(
+            limit = 25,
             sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
         ).map {
             it.map { manga ->

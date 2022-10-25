@@ -22,6 +22,7 @@ import moe.curstantine.riba.api.mangadex.models.toRibaChapter
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaChapter
+import moe.curstantine.riba.api.riba.models.RibaCollection
 import moe.curstantine.riba.api.riba.models.RibaFulfilledChapter
 import moe.curstantine.riba.api.riba.models.RibaGroup
 import moe.curstantine.riba.api.riba.models.RibaUser
@@ -49,55 +50,61 @@ class ChapterService(
     suspend fun getCollection(
         mangaId: String? = null,
         ids: List<String>? = null,
-        limit: Int = 50,
+        limit: Int = 10,
         offset: Int? = null,
         includes: List<DexEntityType> = defaultChapterIncludes,
         originalLanguage: List<DexLocale>? = null,
         translatedLanguage: List<DexLocale>? = null,
         sort: Pair<DexChapterQueryOrderProperty, DexQueryOrderValue>? = null,
         forceInsert: Boolean = false,
-    ): RibaResult<Map<String, List<RibaFulfilledChapter>>> = contextualInvoke { scope ->
-        val response = service.getCollection(
-            mangaId = mangaId,
-            ids = ids,
-            limit = limit,
-            offset = offset,
-            includes = includes.map { it.toDexEnum() },
-            originalLanguage = originalLanguage,
-            translatedLanguage = translatedLanguage,
-            sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
-        )
-
-        val map = mutableMapOf<String, MutableList<RibaFulfilledChapter>>()
-
-        for (chapter in response.data) {
-            val riba = chapter.toRibaChapter()
-            val meta = insertChapterMeta(scope.coroutineContext, chapter)
-            val manga = chapter.relationships.first { it.type == DexEntityType.Manga }
-
-            if (map[manga.id] == null) map[manga.id] = mutableListOf()
-
-            map[manga.id]?.add(
-                RibaFulfilledChapter(
-                    riba,
-                    uploader = meta.first,
-                    groups = meta.second
-                )
+    ): RibaResult<RibaCollection<Map<String, List<RibaFulfilledChapter>>>> =
+        contextualInvoke { scope ->
+            val response = service.getCollection(
+                mangaId = mangaId,
+                ids = ids,
+                limit = limit,
+                offset = offset,
+                includes = includes.map { it.toDexEnum() },
+                originalLanguage = originalLanguage,
+                translatedLanguage = translatedLanguage,
+                sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
             )
-        }
 
-        scope.launch {
-            map.values.forEach { mangaChapters ->
-                database.insertCollection(
-                    context = coroutineContext,
-                    chapters = mangaChapters.map { it.chapter },
-                    force = forceInsert
+            val map = mutableMapOf<String, MutableList<RibaFulfilledChapter>>()
+
+            for (chapter in response.data) {
+                val riba = chapter.toRibaChapter()
+                val meta = insertChapterMeta(scope.coroutineContext, chapter)
+                val manga = chapter.relationships.first { it.type == DexEntityType.Manga }
+
+                if (map[manga.id] == null) map[manga.id] = mutableListOf()
+
+                map[manga.id]?.add(
+                    RibaFulfilledChapter(
+                        riba,
+                        uploader = meta.first,
+                        groups = meta.second
+                    )
                 )
             }
-        }
 
-        return@contextualInvoke map
-    }
+            scope.launch {
+                map.values.forEach { mangaChapters ->
+                    database.insertCollection(
+                        context = coroutineContext,
+                        chapters = mangaChapters.map { it.chapter },
+                        force = forceInsert
+                    )
+                }
+            }
+
+            return@contextualInvoke RibaCollection(
+                data = map,
+                limit = response.limit,
+                offset = response.offset,
+                total = response.total,
+            )
+        }
 
     /**
      * Enables you to fetch from the database at the cost of sorting and such.
@@ -136,7 +143,7 @@ class ChapterService(
             val response = getCollection(ids = missingIds, forceInsert = forceInsert)
                 .unwrap()
 
-            for (chapter in response.values.flatten()) {
+            for (chapter in response.data.values.flatten()) {
                 map[chapter.chapter.id] = chapter
             }
         }
@@ -145,11 +152,11 @@ class ChapterService(
     }
 
     /**
-     * Due to the high cardinality of chapter lists,
-     * this function *will* not fetch from the server,
+     * Due to the high cardinality of chapters,
+     * this method **will** not fetch from the server,
      * but return data already available in the database.
      *
-     * Use [getCollection]'s mangaId param to get the freshest chapters.
+     * @see getCollection
      */
     suspend fun getStrictCollectionForManga(mangaId: String): RibaResult<List<RibaFulfilledChapter>> =
         contextualInvoke {

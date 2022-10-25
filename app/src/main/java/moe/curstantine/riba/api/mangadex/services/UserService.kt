@@ -214,7 +214,7 @@ class UserService(
     suspend fun getCollection(
         ids: List<String>? = null,
         username: String? = null,
-        limit: Int? = null,
+        limit: Int? = 10,
         offset: Int? = null,
     ): RibaResult<List<RibaUser>> = contextualInvoke { scope ->
         handleTokenExpiry()

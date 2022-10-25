@@ -103,8 +103,13 @@ class MangaService(
 
         val missingIds = idMap.filterValues { it == null }.keys.toList()
         if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
-            response.forEach { manga -> idMap[manga.id] = manga }
+            val response = getCollection(
+                ids = missingIds,
+                limit = missingIds.size,
+                forceInsert = forceInsert
+            )
+
+            response.unwrap().forEach { manga -> idMap[manga.id] = manga }
         }
 
         return@contextualInvoke idMap.values.mapNotNull { it }

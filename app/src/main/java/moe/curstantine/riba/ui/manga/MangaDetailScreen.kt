@@ -88,7 +88,9 @@ import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
+import moe.curstantine.riba.api.mangadex.models.DexChapterQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexLocale
+import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
@@ -425,34 +427,43 @@ private fun MangaDetailHeader(
 @Composable
 private fun ChapterItem(chap: RibaFulfilledChapter) {
     val which = remember {
-        if (chap.chapter.chapter != null) R.string.chapter_x
-        else R.string.oneshot
+        if (chap.chapter.chapter != null) {
+            if (chap.chapter.title.isNullOrEmpty()) R.string.chapter_x
+            else R.string.ch_x
+        } else R.string.oneshot
     }
 
-    val chapterNumber = remember {
-        if (chap.chapter.chapter != null) chap.chapter.chapter.toString() else ""
+    val chapterName = remember {
+        if (chap.chapter.chapter != null) {
+            if (!chap.chapter.title.isNullOrBlank()) "${chap.chapter.chapter} - ${chap.chapter.title}"
+            else chap.chapter.chapter.toString()
+        } else ""
     }
 
     val groupNames = remember { chap.groups.map { it.name } }
-
 
     ListItem(
         leadingContent = {
             val languageFlagId = remember { chap.chapter.language.getFlagId() }
 
-            if (languageFlagId != null) {
-                Box(contentAlignment = Alignment.Center) {
+            Box(contentAlignment = Alignment.Center) {
+                if (languageFlagId != null) {
                     Image(
                         modifier = Modifier.size(24.dp),
                         contentScale = ContentScale.FillWidth,
                         painter = painterResource(id = languageFlagId),
                         contentDescription = chap.chapter.language.toString(),
                     )
+                } else {
+                    Text(
+                        text = chap.chapter.language.toString(),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         },
         headlineText = {
-            Text(text = stringResource(which, chapterNumber) + " - ${chap.chapter.title}")
+            Text(text = stringResource(which, chapterName))
         },
         supportingText = { Text(text = groupNames.joinToString(", ")) }
     )
@@ -513,6 +524,10 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
 
 class MangaDetailsViewModel(private val service: RibaAPIService, private val mangaId: String) :
     ViewModel() {
+    // TODO: Add pagination and filtering.
+    val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
+    private val offset = MutableStateFlow(0)
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
 
@@ -555,6 +570,10 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
             val response = service.mangadex.chapter.getCollection(
                 mangaId = mangaId,
                 forceInsert = refresh,
+                sort = Pair(DexChapterQueryOrderProperty.Chapter, DexQueryOrderValue.Descending),
+                limit = 50,
+                translatedLanguage = translatedLanguages.value,
+                offset = offset.value,
             )
 
             if (response is RibaResult.Error) {
@@ -563,9 +582,16 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                     "Error while fetching chapters for $mangaId",
                     response.error as Throwable
                 )
+            } else if (response is RibaResult.Success) {
+                val size = response.value.data.values.size
+                val total = response.value.total
+
+                if (size < total) {
+                    offset.value += size
+                }
             }
 
-            return@async response.map { it.values.flatten() }
+            return@async response.map { it.data.values.flatten() }
         }
 
         val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {

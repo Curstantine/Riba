@@ -31,7 +31,7 @@ class GroupService(
     suspend fun getCollection(
         ids: List<String>? = null,
         name: String? = null,
-        limit: Int? = null,
+        limit: Int? = 10,
         offset: Int? = null,
         includes: List<DexEntityType>? = defaultGroupIncludes,
         forceInsert: Boolean = false,

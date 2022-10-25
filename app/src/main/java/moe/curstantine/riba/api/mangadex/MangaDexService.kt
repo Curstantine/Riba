@@ -10,6 +10,7 @@ import moe.curstantine.riba.api.adapters.moshi.LocalDateTimeConverter
 import moe.curstantine.riba.api.adapters.moshi.MapMismatchArrayAdapter
 import moe.curstantine.riba.api.adapters.moshi.NormalizeMismatchType
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
+import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.DexLocale
@@ -28,6 +29,7 @@ import moe.curstantine.riba.api.mangadex.services.MangaService
 import moe.curstantine.riba.api.mangadex.services.UserService
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -44,7 +46,12 @@ class MangaDexService(context: Context) {
     val user: UserService
 
     init {
+        val okhttp = OkHttpClient.Builder()
+            .addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
+            .build()
+
         val retrofit = Retrofit.Builder()
+            .client(okhttp)
             .baseUrl(DexConstants.BASE_API)
             .addConverterFactory(EnumConverter())
             .addConverterFactory(MoshiConverterFactory.create(dexMoshi))

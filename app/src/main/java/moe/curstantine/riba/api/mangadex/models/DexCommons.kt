@@ -3,6 +3,7 @@ package moe.curstantine.riba.api.mangadex.models
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.R
+import moe.curstantine.riba.api.adapters.retrofit.EnumValue
 import moe.curstantine.riba.api.mangadex.DexUtils
 
 @Suppress("unused")
@@ -77,29 +78,89 @@ enum class DexEntityType {
 
 @JsonClass(generateAdapter = false)
 enum class DexLocale {
+    @EnumValue("en")
     @field:Json(name = "en")
     English,
 
+    @EnumValue("ja")
     @field:Json(name = "ja")
     Japanese,
 
+    @EnumValue("ja-ro")
     @field:Json(name = "ja-ro")
     JapaneseRomanized,
 
+    @EnumValue("zh")
     @field:Json(name = "zh")
     SimplifiedChinese,
 
+    @EnumValue("zh-hk")
     @field:Json(name = "zh-hk")
     TraditionalChinese,
 
+    @EnumValue("zh-ro")
     @field:Json(name = "zh-ro")
     ChineseRomanized,
 
+    @EnumValue("ko")
     @field:Json(name = "ko")
     Korean,
 
+    @EnumValue("ko-ro")
     @field:Json(name = "ko-ro")
     KoreanRomanized,
+
+    @EnumValue("se")
+    @field:Json(name = "se")
+    Swedish,
+
+    @EnumValue("fi")
+    @field:Json(name = "fi")
+    Finnish,
+
+    @EnumValue("fr")
+    @field:Json(name = "fr")
+    French,
+
+    @EnumValue("de")
+    @field:Json(name = "de")
+    German,
+
+    @EnumValue("it")
+    @field:Json(name = "it")
+    Italian,
+
+    @EnumValue("es")
+    @field:Json(name = "es")
+    Spanish,
+
+    @EnumValue("pt")
+    @field:Json(name = "pt")
+    Portuguese,
+
+    @EnumValue("ru")
+    @field:Json(name = "ru")
+    Russian,
+
+    @EnumValue("vi")
+    @field:Json(name = "vi")
+    Vietnamese,
+
+    @EnumValue("ar")
+    @field:Json(name = "ar")
+    Arabic,
+
+    @EnumValue("tr")
+    @field:Json(name = "tr")
+    Turkish,
+
+    @EnumValue("id")
+    @field:Json(name = "id")
+    Indonesian,
+
+    @EnumValue("ms")
+    @field:Json(name = "ms")
+    Malay,
 
     @field:Json(name = "private_not_impl")
     NotImplemented;
@@ -111,11 +172,24 @@ enum class DexLocale {
      */
     fun getFlagId(): Int? {
         return when (this) {
-            English -> R.drawable.uk_flag
-            Japanese -> R.drawable.jp_flag
-            Korean -> R.drawable.kr_flag
-            SimplifiedChinese -> R.drawable.cn_flag
-            TraditionalChinese -> R.drawable.hk_flag
+            English -> R.drawable.flag_uk
+            Japanese -> R.drawable.flag_jp
+            Korean -> R.drawable.flag_kr
+            SimplifiedChinese -> R.drawable.flag_cn
+            TraditionalChinese -> R.drawable.flag_hk
+            Finnish -> R.drawable.flag_fi
+            French -> R.drawable.flag_fr
+            German -> R.drawable.flag_de
+            Indonesian -> R.drawable.flag_id
+            Italian -> R.drawable.flag_it
+            Malay -> R.drawable.flag_ms
+            Portuguese -> R.drawable.flag_pt
+            Russian -> R.drawable.flag_ru
+            Arabic -> R.drawable.flag_sa
+            Swedish -> R.drawable.flag_se
+            Turkish -> R.drawable.flag_tr
+            Vietnamese -> R.drawable.flag_vn
+            Spanish -> R.drawable.flag_esp
             else -> null
         }
     }

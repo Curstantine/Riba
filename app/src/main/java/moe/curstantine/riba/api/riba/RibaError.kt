@@ -5,7 +5,9 @@ interface RibaError {
     val additional: String?
 
     companion object {
-        interface LogTag
+        interface LogTag {
+            val tag: String
+        }
 
         sealed class Impl(
             override val human: String,
