@@ -3,18 +3,20 @@ package moe.curstantine.riba.ui.common.dialogs
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,9 +26,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -34,6 +38,8 @@ import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -98,6 +104,9 @@ private fun AuthDialogContent(
     username: MutableState<String>,
     password: MutableState<String>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
     val context = LocalContext.current
     val autofillContext = LocalAutofill.current
     val autofillTree = LocalAutofillTree.current
@@ -128,19 +137,45 @@ private fun AuthDialogContent(
         modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-//        AnimatedVisibility(error.value != null) {
-//            OutlinedCard() {
-//
-//            }
-//        }
+        AnimatedVisibility(error.value != null) {
+            Column(
+                modifier = Modifier
+                    .height(92.dp)
+                    .fillMaxWidth()
+                    .clip(shape = CardDefaults.shape)
+                    .background(colorScheme.error),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (error.value != null) {
+                    Text(
+                        text = error.value!!.human,
+                        style = typography.titleSmall.copy(color = colorScheme.onError),
+                        textAlign = TextAlign.Center
+                    )
 
-        Text(
-            modifier = Modifier.padding(bottom = 2.dp),
-            text = stringResource(R.string.mangadex_sign_in_requirement),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75F)
-            )
-        )
+                    Text(
+                        text = error.value!!.additional ?: "",
+                        style = typography.bodySmall.copy(
+                            color = colorScheme.onError.copy(alpha = 0.75F)
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+        AnimatedVisibility(error.value == null) {
+            Box(modifier = Modifier.height(92.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    modifier = Modifier.padding(bottom = 2.dp),
+                    text = stringResource(R.string.mangadex_sign_in_requirement),
+                    style = typography.bodyMedium.copy(
+                        color = colorScheme.onSurface.copy(alpha = 0.75F)
+                    )
+                )
+            }
+        }
 
         Box(
             Modifier.onGloballyPositioned { usernameAutofillNode.boundingBox = it.boundsInWindow() }
@@ -175,19 +210,26 @@ private fun AuthDialogContent(
         }
 
         // TODO: Someday fix this godawful layout.
-        Column(
-            Modifier
-                .padding(top = 18.dp)
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            FilledTonalButton(
-                modifier = Modifier.fillMaxWidth(),
+            ClickableText(
+                style = typography.labelMedium.copy(color = colorScheme.secondary),
                 onClick = { coroutineScope.launch { context.startActivity(forgotPasswordIntent) } },
-                content = { Text(stringResource(R.string.forgot_password)) })
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
+                text = AnnotatedString(stringResource(R.string.forgot_password))
+            )
+            Text(
+                stringResource(R.string.or),
+                style = typography.labelMedium.copy(color = colorScheme.secondary.copy(alpha = 0.35F))
+            )
+            ClickableText(
+                style = typography.labelMedium.copy(color = colorScheme.secondary),
                 onClick = { coroutineScope.launch { context.startActivity(createAccountIntent) } },
-                content = { Text(stringResource(R.string.create_account)) })
+                text = AnnotatedString(stringResource(R.string.create_account))
+            )
         }
     }
 }

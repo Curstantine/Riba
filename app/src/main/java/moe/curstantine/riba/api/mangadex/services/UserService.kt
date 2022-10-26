@@ -47,25 +47,19 @@ class UserService(
         Context.MODE_PRIVATE
     )
 
-    private val current: MutableLiveData<RibaResult<RibaUser>> = MutableLiveData()
+    private val currentUser = MutableLiveData<RibaUser?>(null)
 
     /**
      * Getter for the current user.
-     *
-     * @return Will contain
-     * - [RibaResult.Error] with [DexError.NotAuthenticated] if the user is not signed in.
-     * - [RibaResult.Error] with [DexError.ReAuthenticationRequired]
-     *   if the user is signed in, but will need a re-authentication due to expired tokens.
      */
-    fun getCurrent(): LiveData<RibaResult<RibaUser>> = current
+    fun getCurrentUser(): LiveData<RibaUser?> = currentUser
 
     init {
         coroutineScope.launch {
             try {
                 handleTokenExpiry()
-                current.postValue(getCurrentUserDetails())
+                currentUser.postValue(getCurrentUserDetails().unwrap())
             } catch (e: DexError) {
-                current.postValue(RibaResult.Error(e))
                 Log.w(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
             }
         }
@@ -76,12 +70,11 @@ class UserService(
         password: String
     ): RibaResult<DexUserAuthResponse> = contextualInvoke {
         val response = service.login(DexUserAuthBody(username, password))
-        Log.d(DexLogTag.DEBUG.tag, "Login response: ${response.result}")
 
         it.launch {
-            val details = getCurrentUserDetails(sessionOverride = response.token.session)
-            setPreferences(details.unwrap().id, response.token)
-            current.postValue(details)
+            val details = getCurrentUserDetails(sessionOverride = response.token.session).unwrap()
+            setPreferences(details.id, response.token)
+            currentUser.postValue(details)
         }
 
         return@contextualInvoke response
@@ -94,7 +87,7 @@ class UserService(
 
         it.launch {
             removePreferences()
-            current.postValue(RibaResult.Error(DexError.Companion.NotAuthenticated))
+            currentUser.postValue(null)
         }
 
         return@contextualInvoke response
@@ -103,11 +96,10 @@ class UserService(
     private suspend fun refresh(refreshToken: String): RibaResult<DexUserAuthResponse> =
         contextualInvoke {
             val response = service.refresh(DexUserAuthRefreshBody(refreshToken))
-            Log.d(DexLogTag.DEBUG.tag, "Refresh response: ${response.result}")
 
             it.launch {
                 setPreferences(getUserId(), response.token)
-                current.postValue(getCurrentUserDetails(tryDatabase = true))
+                currentUser.postValue(getCurrentUserDetails(tryDatabase = true).unwrap())
             }
 
             return@contextualInvoke response
@@ -121,13 +113,12 @@ class UserService(
         tryDatabase: Boolean = false
     ): RibaResult<RibaUser> = contextualInvoke {
         if (tryDatabase) {
-            try {
-                return@contextualInvoke database.get(getUserId())!!
-            } catch (e: Throwable) {
+            val local = database.get(getUserId())
+
+            if (local != null) return@contextualInvoke local else {
                 Log.w(
                     DexLogTag.DEBUG.tag,
                     "tryDatabase was true, but user was not in the database, continuing to fetch.",
-                    e
                 )
             }
         }
@@ -152,9 +143,9 @@ class UserService(
      * @throws DexError.NotAuthenticated if the user is not signed in.
      */
     private fun getSessionToken(prefixed: Boolean = true): String {
-        return preferences.getString("session", null)?.apply {
-            if (prefixed) return "Bearer $this"
-        } ?: throw  DexError.Companion.NotAuthenticated
+        return preferences.getString("session", null)
+            ?.apply { if (prefixed) return "Bearer $this" }
+            ?: throw  DexError.Companion.NotAuthenticated
     }
 
     /**

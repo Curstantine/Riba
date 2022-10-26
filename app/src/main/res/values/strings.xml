@@ -33,6 +33,7 @@
     <string name="collapse">Collapse</string>
     <string name="expand">Expand</string>
     <string name="share">Share</string>
+    <string name="filter">Filter</string>
     <string name="_continue">Continue</string>
     <string name="add_to_library">Add to Library</string>
     <string name="start_reading">Start Reading</string>
@@ -71,6 +72,8 @@
     <string name="anon">Anonymous</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+
+    <string name="or">or</string>
 
     <string name="mangadex_sign_in_requirement">
         It\'s not required to sign-in to a MangaDex account,

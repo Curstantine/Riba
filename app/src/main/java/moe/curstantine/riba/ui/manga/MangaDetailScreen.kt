@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkAdd
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Star
@@ -159,6 +160,28 @@ private fun MangaDetailBody(
             }
         }
 
+        item {
+            AnimatedVisibility(visible = chapters is RibaResult.Success) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(Modifier.weight(1F))
+
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            imageVector = Icons.Rounded.FilterList,
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = stringResource(R.string.filter)
+                        )
+                    }
+                }
+            }
+        }
+
         if (chapters is RibaResult.Success) {
             items(chapters.value) { ChapterItem(it) }
         }
@@ -181,6 +204,7 @@ private fun MangaDetailHeader(
 
     val manga = remember { details.manga.unwrap() }
     val stats = remember { details.statistic?.unwrapOrNull() }
+    val currentUser by hostState.service.mangadex.user.getCurrentUser().observeAsState()
 
     val tags = remember {
         details.tags
@@ -319,16 +343,18 @@ private fun MangaDetailHeader(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
 
-            OutlinedIconToggleButton(
-                checked = isInLibrary,
-                onCheckedChange = { isInLibrary = it },
-                content = {
-                    Icon(
-                        Icons.Rounded.BookmarkAdd,
-                        contentDescription = stringResource(R.string.add_to_library)
-                    )
-                }
-            )
+            if (currentUser != null) {
+                OutlinedIconToggleButton(
+                    checked = isInLibrary,
+                    onCheckedChange = { isInLibrary = it },
+                    content = {
+                        Icon(
+                            Icons.Rounded.BookmarkAdd,
+                            contentDescription = stringResource(R.string.add_to_library)
+                        )
+                    }
+                )
+            }
 
             OutlinedIconToggleButton(
                 checked = hasTrackers,

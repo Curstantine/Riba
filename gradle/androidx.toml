@@ -1,5 +1,5 @@
 [versions]
-agp_version = "7.3.0"
+agp_version = "7.3.1"
 
 [libraries]
 core = "androidx.core:core-ktx:1.7.0"

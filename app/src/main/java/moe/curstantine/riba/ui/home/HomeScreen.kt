@@ -103,9 +103,9 @@ private fun HeaderRow(
     val rowColor = colorScheme.onBackground.copy(alpha = 0.5F)
     val signOutMessage = stringResource(R.string.signed_out_of, stringResource(R.string.mangadex))
 
-    val user by state.service.mangadex.user.getCurrent().observeAsState()
-    val username = user?.unwrapOrNull()?.username ?: stringResource(R.string.guest)
-    val isSignedIn = user?.unwrapOrNull() != null
+    val user by state.service.mangadex.user.getCurrentUser().observeAsState()
+    val isSignedIn = user != null
+    val username = if (isSignedIn) user!!.username else stringResource(R.string.guest)
 
     val showAuthModal = remember { mutableStateOf(false) }
     val dropdownMenuExpanded = remember { mutableStateOf(false) }
