@@ -12,8 +12,13 @@ enum class DexResult {
     @field:Json(name = "ok")
     Ok,
 
+    @field:Json(name = "ko")
+    Ko,
+
     @field:Json(name = "error")
-    Error
+    Error;
+
+    override fun toString() = DexUtils.toNormalizedString(name)
 }
 
 @Suppress("unused")

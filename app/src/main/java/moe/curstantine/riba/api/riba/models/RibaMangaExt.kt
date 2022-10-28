@@ -1,6 +1,5 @@
 package moe.curstantine.riba.api.riba.models
 
-import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.riba.RibaResult
 
 /**
@@ -14,6 +13,7 @@ class RibaResultManga(
     val tags: RibaResult<List<RibaTag>>?,
     val statistic: RibaResult<RibaStatistic>?,
     val chapters: RibaResult<List<RibaFulfilledChapter>>?,
+    val isFollowing: RibaResult<Boolean>?,
 ) {
     companion object {
         /**
@@ -27,6 +27,7 @@ class RibaResultManga(
             tags: RibaResult<List<RibaTag>>? = null,
             statistic: RibaResult<RibaStatistic>? = null,
             chapters: RibaResult<List<RibaFulfilledChapter>>? = null,
+            isFollowing: RibaResult<Boolean>? = null,
         ): RibaResultManga {
             return RibaResultManga(
                 manga,
@@ -36,6 +37,7 @@ class RibaResultManga(
                 tags,
                 statistic,
                 chapters,
+                isFollowing
             )
         }
 
@@ -54,7 +56,7 @@ class RibaResultManga(
                     RibaFulfilledChapter.getDefault()
                 )
             ),
-//            RibaResult.Error(DexError.Companion.HTTP503),
+            RibaResult.Success(true)
         )
     }
 }

@@ -5,8 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
+import moe.curstantine.riba.api.mangadex.models.DexBaseResponseImpl
 import moe.curstantine.riba.api.mangadex.models.DexCover
 import moe.curstantine.riba.api.mangadex.models.DexCoverCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
@@ -18,6 +20,7 @@ import moe.curstantine.riba.api.mangadex.models.DexQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
 import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
+import moe.curstantine.riba.api.mangadex.models.DexResult
 import moe.curstantine.riba.api.mangadex.models.toRibaCover
 import moe.curstantine.riba.api.mangadex.models.toRibaManga
 import moe.curstantine.riba.api.mangadex.models.toRibaTag
@@ -27,7 +30,12 @@ import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaManga
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
+import moe.curstantine.riba.api.riba.models.RibaUserFollow
+import retrofit2.HttpException
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
@@ -37,6 +45,7 @@ class MangaService(
     override val service: APIService,
     override val database: Database,
     private val authorService: AuthorService,
+    private val userService: UserService,
 ) : MangaDexService.Companion.Service() {
     override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -200,6 +209,66 @@ class MangaService(
             return@contextualInvoke riba
         }
 
+    /**
+     * **Requires Authentication**
+     *
+     * MangaDex returns "ko" for errors that are not technically errors lol.
+     *
+     * Like in this case,
+     * when you try to find the follow status of a title that a user has not followed,
+     * it'll return 404 with [DexResult.Ko]
+     */
+    suspend fun checkFollowStatus(
+        mangaId: String,
+        tryDatabase: Boolean = true
+    ): RibaResult<Boolean> = contextualInvoke {
+        if (tryDatabase) {
+            val localFollow = database.getFollow(mangaId)
+            if (localFollow != null) {
+                return@contextualInvoke localFollow.followedUsers.contains(userService.getUserId())
+            }
+        }
+
+        userService.handleTokenExpiry()
+
+        try {
+            service.isFollowing(userService.getSessionToken(true), mangaId)
+        } catch (e: HttpException) {
+            val errorBodyIsError = e.response()?.errorBody()?.string()?.let {
+                it.contains(DexResult.Ko.toString()) || it.contains(DexResult.Error.toString())
+            }
+
+            if (e.code() == 404 && errorBodyIsError == true) return@contextualInvoke false
+            else throw DexError.fromHttpException(e)
+        }
+
+        return@contextualInvoke true
+    }
+
+    /**
+     * **Requires Authentication**
+     */
+    suspend fun follow(mangaId: String): RibaResult<Unit> = contextualInvoke {
+        userService.handleTokenExpiry()
+        service.follow(userService.getSessionToken(true), mangaId)
+
+        it.launch {
+            database.insertFollow(mangaId, userService.getUserId(), true)
+        }
+    }
+
+    /**
+     * **Requires Authentication**
+     */
+    suspend fun unfollow(mangaId: String): RibaResult<Unit> = contextualInvoke {
+        userService.handleTokenExpiry()
+        service.unfollow(userService.getSessionToken(true), mangaId)
+
+        it.launch {
+            database.insertFollow(mangaId, userService.getUserId(), false)
+        }
+    }
+
     companion object {
         @JvmSuppressWildcards
         interface APIService : RibaHttpService.Companion.APIService {
@@ -237,6 +306,24 @@ class MangaService(
                 @Query("manga[]") manga: List<String>?,
                 @Query("limit") limit: Int?,
             ): DexCoverCollection
+
+            @GET("/user/follows/manga/{id}")
+            suspend fun isFollowing(
+                @Header("Authorization") token: String,
+                @Path("id") id: String,
+            ): DexBaseResponseImpl
+
+            @POST("/manga/{id}/follow")
+            suspend fun follow(
+                @Header("Authorization") token: String,
+                @Path("id") id: String
+            ): DexBaseResponseImpl
+
+            @DELETE("/manga/{id}/follow")
+            suspend fun unfollow(
+                @Header("Authorization") token: String,
+                @Path("id") id: String
+            ): DexBaseResponseImpl
         }
 
         class Database(private val database: DexDatabase) :
@@ -252,6 +339,22 @@ class MangaService(
 
             suspend fun getStatistic(id: String) = database.statistic().get(id)
             suspend fun getStatisticCollection(ids: List<String>) = database.statistic().get(ids)
+
+            suspend fun getFollow(id: String) = database.follows().get(id)
+            suspend fun insertFollow(mangaId: String, userId: String, isFollowing: Boolean) {
+                val old = getFollow(mangaId)
+                val follow = RibaUserFollow(
+                    mangaId = mangaId,
+                    followedUsers = if (isFollowing) {
+                        old?.followedUsers.orEmpty().let { if (userId in it) it else it + userId }
+                    } else {
+                        old?.followedUsers.orEmpty().let { if (userId !in it) it else it - userId }
+                    }
+                )
+
+                database.follows().insert(follow)
+            }
+
 
             suspend fun insert(manga: RibaManga, force: Boolean = false) {
                 val oldManga = database.manga().get(manga.id)

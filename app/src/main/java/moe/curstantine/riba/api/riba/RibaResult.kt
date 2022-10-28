@@ -21,14 +21,17 @@ sealed class RibaResult<out R> {
         is Error -> null
     }
 
-    fun unwrapErrorOrNull(): RibaError? = when (this) {
-        is Success -> null
+    /**
+     * @throws [RibaError.Companion.Impl.ResultNotError] if the result is not an error.
+     */
+    fun unwrapError(): RibaError = when (this) {
+        is Success -> throw RibaError.Companion.Impl.ResultNotError
         is Error -> error
     }
 
-    fun asError(): Error = when (this) {
-        is Success -> Error(RibaError.Companion.Impl.ResultNotError)
-        is Error -> Error(error)
+    fun unwrapErrorOrNull(): RibaError? = when (this) {
+        is Success -> null
+        is Error -> error
     }
 
     /**

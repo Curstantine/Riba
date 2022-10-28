@@ -84,7 +84,8 @@ class MangaDexService(context: Context) {
         manga = MangaService(
             retrofit.create(MangaService.Companion.APIService::class.java),
             MangaService.Companion.Database(database),
-            author
+            author,
+            user,
         )
 
         mdlist = MDListService(

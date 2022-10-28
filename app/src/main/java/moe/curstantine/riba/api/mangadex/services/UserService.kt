@@ -135,14 +135,14 @@ class UserService(
     /**
      * @throws DexError.NotAuthenticated if the user is not signed in.
      */
-    private fun getUserId(): String {
+    fun getUserId(): String {
         return preferences.getString("user", null) ?: throw DexError.Companion.NotAuthenticated
     }
 
     /**
      * @throws DexError.NotAuthenticated if the user is not signed in.
      */
-    private fun getSessionToken(prefixed: Boolean = true): String {
+    fun getSessionToken(prefixed: Boolean = true): String {
         return preferences.getString("session", null)
             ?.apply { if (prefixed) return "Bearer $this" }
             ?: throw  DexError.Companion.NotAuthenticated
@@ -173,7 +173,7 @@ class UserService(
      * @throws DexError.NotAuthenticated if the user is not logged in.
      * @throws DexError.ReAuthenticationRequired if the user is logged in, but will need a re-authentication due to expired tokens.
      */
-    private suspend fun handleTokenExpiry() {
+    suspend fun handleTokenExpiry() {
         val timeElapsed = currentTimeSeconds() - getAuthTime()
 
         if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {

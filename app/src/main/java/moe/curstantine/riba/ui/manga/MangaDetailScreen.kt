@@ -229,7 +229,7 @@ private fun MangaDetailHeader(
     }
 
     var isDetailsExpanded by remember { mutableStateOf(false) }
-    var isInLibrary by remember { mutableStateOf(false) }
+    var isFollowed by remember { mutableStateOf(details.isFollowing?.unwrapOrNull() ?: false) }
     var hasTrackers by remember { mutableStateOf(false) }
 
     val shareMessage = stringResource(
@@ -273,66 +273,63 @@ private fun MangaDetailHeader(
                             ?: stringResource(R.string.no_author_artists),
                         style = typography.labelMedium.copy(color = mutedOnBackground)
                     )
-
                 }
 
-                FlowRow(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    mainAxisSpacing = 12.dp,
-                ) {
-                    val textStyle = typography.labelLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontFamily = Rubik
-                    )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            tint = colorScheme.primary,
-                            imageVector = Icons.Rounded.Star,
-                            contentDescription = "Rating",
-                            modifier = Modifier.size(22.dp)
+                if (stats != null) {
+                    FlowRow(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        mainAxisSpacing = 12.dp,
+                    ) {
+                        val textStyle = typography.labelLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = Rubik
                         )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        if (stats != null) {
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                tint = colorScheme.primary,
+                                imageVector = Icons.Rounded.Star,
+                                contentDescription = "Rating",
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
                                 style = textStyle,
                                 color = colorScheme.primary
                             )
                         }
-                    }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            tint = mutedOnBackground,
-                            imageVector = Icons.Rounded.Bookmark,
-                            contentDescription = "Follows",
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        if (stats != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                tint = mutedOnBackground,
+                                imageVector = Icons.Rounded.Bookmark,
+                                contentDescription = "Follows",
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = stats.follows.toString(),
                                 style = textStyle,
                                 color = mutedOnBackground
                             )
                         }
-                    }
 
-                    // TODO: Add total views
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            tint = mutedOnBackground.copy(alpha = 0.35F),
-                            imageVector = Icons.Rounded.Visibility,
-                            contentDescription = "Views",
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = stringResource(R.string.not_available),
-                            style = textStyle,
-                            color = mutedOnBackground.copy(alpha = 0.35F)
-                        )
+                        // TODO: Add total views
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                tint = mutedOnBackground.copy(alpha = 0.35F),
+                                imageVector = Icons.Rounded.Visibility,
+                                contentDescription = "Views",
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = stringResource(R.string.not_available),
+                                style = textStyle,
+                                color = mutedOnBackground.copy(alpha = 0.35F)
+                            )
+                        }
                     }
                 }
             }
@@ -342,11 +339,24 @@ private fun MangaDetailHeader(
             modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
             if (currentUser != null) {
                 OutlinedIconToggleButton(
-                    checked = isInLibrary,
-                    onCheckedChange = { isInLibrary = it },
+                    checked = isFollowed,
+                    onCheckedChange = {
+                        coroutineScope.launch {
+                            val res = hostState.service.mangadex.manga.let {
+                                if (!isFollowed) it.follow(manga.id)
+                                else it.unfollow(manga.id)
+                            }
+
+                            when (res) {
+                                is RibaResult.Success -> isFollowed = !isFollowed
+                                is RibaResult.Error -> {
+                                    hostState.snackbarHost.showSnackbar(res.error.human)
+                                }
+                            }
+                        }
+                    },
                     content = {
                         Icon(
                             Icons.Rounded.BookmarkAdd,
@@ -553,7 +563,7 @@ private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBar
 class MangaDetailsViewModel(private val service: RibaAPIService, private val mangaId: String) :
     ViewModel() {
     // TODO: Add pagination and filtering.
-    val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
+    private val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
     private val offset = MutableStateFlow(0)
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -655,6 +665,10 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
             return@async RibaResult.Success(resolve)
         }
 
+        val isFollowing: Deferred<RibaResult<Boolean>> = async(Dispatchers.IO) {
+            return@async service.mangadex.manga.checkFollowStatus(mangaId, refresh)
+        }
+
         details.postValue(
             RibaResultManga(
                 manga = RibaResult.Success(localManga),
@@ -664,16 +678,17 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
                 tags = tags.await(),
                 statistic = statistic.await(),
                 chapters = chapters.await(),
+                isFollowing = isFollowing.await()
             )
         )
     }
+
 
     fun refresh() = viewModelScope.launch(Dispatchers.IO) {
         _isRefreshing.emit(true)
         loadDetails(true)
         _isRefreshing.emit(false)
     }
-
 }
 
 @Composable

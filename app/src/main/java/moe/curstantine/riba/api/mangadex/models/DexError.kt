@@ -13,5 +13,5 @@ data class DexErrorAttributes(
     val id: String,
     val status: Int,
     val title: String,
-    val detail: String,
+    val detail: String?,
 )

@@ -13,6 +13,7 @@ import moe.curstantine.riba.api.mangadex.database.dao.MangaLinkDao
 import moe.curstantine.riba.api.mangadex.database.dao.StatisticDao
 import moe.curstantine.riba.api.mangadex.database.dao.TagDao
 import moe.curstantine.riba.api.mangadex.database.dao.UserDao
+import moe.curstantine.riba.api.mangadex.database.dao.UserFollowDao
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import moe.curstantine.riba.api.riba.models.RibaChapter
 import moe.curstantine.riba.api.riba.models.RibaCover
@@ -23,6 +24,7 @@ import moe.curstantine.riba.api.riba.models.RibaMangaList
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 import moe.curstantine.riba.api.riba.models.RibaTag
 import moe.curstantine.riba.api.riba.models.RibaUser
+import moe.curstantine.riba.api.riba.models.RibaUserFollow
 
 @Database(
     version = 1,
@@ -37,6 +39,7 @@ import moe.curstantine.riba.api.riba.models.RibaUser
         RibaUser::class,
         RibaChapter::class,
         RibaGroup::class,
+        RibaUserFollow::class,
     ],
 )
 @TypeConverters(Converters::class)
@@ -51,4 +54,5 @@ abstract class DexDatabase : RoomDatabase() {
     abstract fun user(): UserDao
     abstract fun chapter(): ChapterDao
     abstract fun group(): GroupDao
+    abstract fun follows(): UserFollowDao
 }

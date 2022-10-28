@@ -1,8 +1,7 @@
 package moe.curstantine.riba.api.mangadex
 
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.JsonEncodingException
-import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import moe.curstantine.riba.api.mangadex.DexError.Companion.tryHandle
 import moe.curstantine.riba.api.mangadex.models.DexErrorAttributes
 import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
@@ -53,7 +52,7 @@ open class DexError(
             "Both the session and refresh tokens are invalid."
         )
 
-        object MissingChapterData: DexError(
+        object MissingChapterData : DexError(
             "Failed to retrieve chapter data!",
             "Expected groups and uploader to be an exact match with chapter, but failed."
         )
@@ -68,23 +67,19 @@ open class DexError(
             }
         }
 
-        private fun fromHttpException(e: HttpException): DexError {
-            val moshiAdapter = Moshi.Builder().build().adapter(DexErrorResponse::class.java)
+        fun fromHttpException(e: HttpException): DexError {
             val errorBody = e.response()?.errorBody()?.source()?.let {
                 try {
-                    moshiAdapter.fromJson(it)
-                } catch (e: JsonEncodingException) {
-                    DexErrorResponse(
-                        DexResult.Error,
-                        listOf(
-                            DexErrorAttributes(
-                                id = "",
-                                status = 418,
-                                title = it.readUtf8(),
-                                detail = e.message ?: "Unknown error occurred while parsing JSON!",
-                            )
-                        )
+                    MangaDexService.dexMoshi.adapter<DexErrorResponse>().fromJson(it)
+                } catch (e: Throwable) {
+                    val error = DexErrorAttributes(
+                        id = "",
+                        status = 418,
+                        title = it.readUtf8(),
+                        detail = e.message,
                     )
+
+                    DexErrorResponse(DexResult.Error, listOf(error))
                 }
             }
 
