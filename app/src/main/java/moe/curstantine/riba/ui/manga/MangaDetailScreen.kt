@@ -109,598 +109,596 @@ import kotlin.math.roundToInt
 
 @Composable
 fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val manga by viewModel.getDetails().observeAsState()
+	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val isRefreshing by viewModel.isRefreshing.collectAsState()
+	val manga by viewModel.getDetails().observeAsState()
 
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = { viewModel.refresh() }
-    ) {
-        if (manga == null || isRefreshing) FlexibleIndicator() else {
-            Scaffold(
-                topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-                snackbarHost = { SnackbarHost(state.snackbarHost) },
-                content = { MangaDetailBody(state, scrollBehavior, it, manga!!) }
-            )
-        }
-    }
+	SwipeRefresh(
+		state = rememberSwipeRefreshState(isRefreshing),
+		onRefresh = { viewModel.refresh() }
+	) {
+		if (manga == null || isRefreshing) FlexibleIndicator() else {
+			Scaffold(
+				topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+				snackbarHost = { SnackbarHost(state.snackbarHost) },
+				content = { MangaDetailBody(state, scrollBehavior, it, manga!!) }
+			)
+		}
+	}
 }
 
 @Composable
 private fun MangaDetailBody(
-    state: RibaHostState,
-    scrollBehavior: TopAppBarScrollBehavior,
-    paddingValues: PaddingValues,
-    details: RibaResultManga
+	state: RibaHostState,
+	scrollBehavior: TopAppBarScrollBehavior,
+	paddingValues: PaddingValues,
+	details: RibaResultManga
 ) {
-    val chapters = remember { details.chapters }
+	val chapters = remember { details.chapters }
 
-    LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
-        item { MangaDetailHeader(state, paddingValues, details) }
+	LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
+		item { MangaDetailHeader(state, paddingValues, details) }
 
-        item {
-            AnimatedVisibility(visible = chapters is RibaResult.Error) {
-                if (chapters is RibaResult.Error) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.error)
-                            .heightIn(42.dp)
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = chapters.error.human,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onError,
-                        )
-                    }
-                }
-            }
-        }
+		item {
+			AnimatedVisibility(visible = chapters is RibaResult.Error) {
+				if (chapters is RibaResult.Error) {
+					Box(
+						contentAlignment = Alignment.Center,
+						modifier = Modifier
+							.background(MaterialTheme.colorScheme.error)
+							.heightIn(42.dp)
+							.fillMaxWidth()
+							.padding(horizontal = 16.dp, vertical = 4.dp)
+					) {
+						Text(
+							text = chapters.error.human,
+							style = MaterialTheme.typography.bodyMedium,
+							color = MaterialTheme.colorScheme.onError,
+						)
+					}
+				}
+			}
+		}
 
-        item {
-            AnimatedVisibility(visible = chapters is RibaResult.Success) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(Modifier.weight(1F))
+		item {
+			AnimatedVisibility(visible = chapters is RibaResult.Success) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.height(64.dp)
+						.padding(horizontal = 16.dp),
+					verticalAlignment = Alignment.CenterVertically
+				) {
+					Spacer(Modifier.weight(1F))
 
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Rounded.FilterList,
-                            tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = stringResource(R.string.filter)
-                        )
-                    }
-                }
-            }
-        }
+					IconButton(onClick = { /*TODO*/ }) {
+						Icon(
+							imageVector = Icons.Rounded.FilterList,
+							tint = MaterialTheme.colorScheme.primary,
+							contentDescription = stringResource(R.string.filter)
+						)
+					}
+				}
+			}
+		}
 
-        if (chapters is RibaResult.Success) {
-            items(chapters.value) { ChapterItem(it) }
-        }
-    }
+		if (chapters is RibaResult.Success) {
+			items(chapters.value) { ChapterItem(it) }
+		}
+	}
 }
 
 @Composable
 private fun MangaDetailHeader(
-    hostState: RibaHostState,
-    paddingValues: PaddingValues,
-    details: RibaResultManga
+	hostState: RibaHostState,
+	paddingValues: PaddingValues,
+	details: RibaResultManga
 ) {
-    val typography = MaterialTheme.typography
-    val colorScheme = MaterialTheme.colorScheme
-    val clipboardManager = LocalClipboardManager.current
-    val coroutineScope = rememberCoroutineScope()
+	val typography = MaterialTheme.typography
+	val colorScheme = MaterialTheme.colorScheme
+	val clipboardManager = LocalClipboardManager.current
+	val coroutineScope = rememberCoroutineScope()
 
-    val notAvailable = stringResource(R.string.not_available)
-    val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+	val notAvailable = stringResource(R.string.not_available)
+	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
 
-    val manga = remember { details.manga.unwrap() }
-    val stats = remember { details.statistic?.unwrapOrNull() }
-    val currentUser by hostState.service.mangadex.user.getCurrentUser().observeAsState()
+	val manga = remember { details.manga.unwrap() }
+	val stats = remember { details.statistic?.unwrapOrNull() }
+	val currentUser by hostState.service.mangadex.user.getCurrentUser().observeAsState()
 
-    val tags = remember {
-        details.tags
-            ?.unwrapOrNull()
-            ?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
-    }
+	val tags = remember {
+		details.tags
+			?.unwrapOrNull()
+			?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
+	}
 
-    val authors = remember {
-        details.authors?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
-    }
-    val artists = remember {
-        details.artists?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
-    }
-    val artistsAndAuthors = remember {
-        (authors + artists.filter { it !in authors }).ifEmpty { null }
-    }
+	val authors = remember {
+		details.authors?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
+	}
+	val artists = remember {
+		details.artists?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
+	}
+	val artistsAndAuthors = remember {
+		(authors + artists.filter { it !in authors }).ifEmpty { null }
+	}
 
-    val isMoreEnabled = remember {
-        manga.description != null
-            && manga.description[DexLocale.English] != null
-            || tags.size > 5
-    }
+	val isMoreEnabled = remember {
+		manga.description != null
+			&& manga.description[DexLocale.English] != null
+			|| tags.size > 5
+	}
 
-    var isDetailsExpanded by remember { mutableStateOf(false) }
-    var isFollowed by remember { mutableStateOf(details.isFollowing?.unwrapOrNull() ?: false) }
-    var hasTrackers by remember { mutableStateOf(false) }
+	var isDetailsExpanded by remember { mutableStateOf(false) }
+	var isFollowed by remember { mutableStateOf(details.isFollowing?.unwrapOrNull() ?: false) }
+	var hasTrackers by remember { mutableStateOf(false) }
 
-    val shareMessage = stringResource(
-        R.string.copied_to_clipboard,
-        stringResource(R.string.link).lowercase()
-    )
+	val shareMessage = stringResource(
+		R.string.copied_to_clipboard,
+		stringResource(R.string.link).lowercase()
+	)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colorScheme.surfaceColorAtElevation(2.dp))
-            .padding(paddingValues)
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier.heightIn(220.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            MangaCover(
-                details.cover?.unwrapOrNull(),
-                maxHeight = 220.dp,
-                coverSize = DexCoverSize.Medium,
-            )
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.background(colorScheme.surfaceColorAtElevation(2.dp))
+			.padding(paddingValues)
+			.padding(horizontal = 16.dp)
+			.padding(bottom = 16.dp)
+	) {
+		Row(
+			modifier = Modifier.heightIn(220.dp),
+			horizontalArrangement = Arrangement.spacedBy(16.dp)
+		) {
+			MangaCover(
+				details.cover?.unwrapOrNull(),
+				maxHeight = 220.dp,
+				coverSize = DexCoverSize.Medium,
+			)
 
-            Column(
-                modifier = Modifier.heightIn(220.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(Modifier.padding(bottom = 16.dp)) {
-                    Text(
-                        text = manga.title?.get(DexLocale.English)
-                            ?: stringResource(R.string.no_title),
-                        style = typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = Rubik
-                        )
-                    )
-                    Text(
-                        text = artistsAndAuthors?.joinToString(", ")
-                            ?: stringResource(R.string.no_author_artists),
-                        style = typography.labelMedium.copy(color = mutedOnBackground)
-                    )
-                }
+			Column(
+				modifier = Modifier.heightIn(220.dp),
+				verticalArrangement = Arrangement.SpaceBetween,
+			) {
+				Column(Modifier.padding(bottom = 16.dp)) {
+					Text(
+						text = manga.title?.get(DexLocale.English)
+							?: stringResource(R.string.no_title),
+						style = typography.headlineSmall.copy(
+							fontWeight = FontWeight.Bold,
+							fontFamily = Rubik
+						)
+					)
+					Text(
+						text = artistsAndAuthors?.joinToString(", ")
+							?: stringResource(R.string.no_author_artists),
+						style = typography.labelMedium.copy(color = mutedOnBackground)
+					)
+				}
 
-                if (stats != null) {
-                    FlowRow(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        mainAxisSpacing = 12.dp,
-                    ) {
-                        val textStyle = typography.labelLarge.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = Rubik
-                        )
+				if (stats != null) {
+					FlowRow(
+						modifier = Modifier.padding(bottom = 8.dp),
+						mainAxisSpacing = 12.dp,
+					) {
+						val textStyle = typography.labelLarge.copy(
+							fontWeight = FontWeight.Medium,
+							fontFamily = Rubik
+						)
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                tint = colorScheme.primary,
-                                imageVector = Icons.Rounded.Star,
-                                contentDescription = "Rating",
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
-                                style = textStyle,
-                                color = colorScheme.primary
-                            )
-                        }
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Icon(
+								tint = colorScheme.primary,
+								imageVector = Icons.Rounded.Star,
+								contentDescription = "Rating",
+								modifier = Modifier.size(22.dp)
+							)
+							Spacer(modifier = Modifier.width(2.dp))
+							Text(
+								text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
+								style = textStyle,
+								color = colorScheme.primary
+							)
+						}
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                tint = mutedOnBackground,
-                                imageVector = Icons.Rounded.Bookmark,
-                                contentDescription = "Follows",
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = stats.follows.toString(),
-                                style = textStyle,
-                                color = mutedOnBackground
-                            )
-                        }
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Icon(
+								tint = mutedOnBackground,
+								imageVector = Icons.Rounded.Bookmark,
+								contentDescription = "Follows",
+								modifier = Modifier.size(22.dp)
+							)
+							Spacer(modifier = Modifier.width(2.dp))
+							Text(
+								text = stats.follows.toString(),
+								style = textStyle,
+								color = mutedOnBackground
+							)
+						}
 
-                        // TODO: Add total views
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                tint = mutedOnBackground.copy(alpha = 0.35F),
-                                imageVector = Icons.Rounded.Visibility,
-                                contentDescription = "Views",
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = stringResource(R.string.not_available),
-                                style = textStyle,
-                                color = mutedOnBackground.copy(alpha = 0.35F)
-                            )
-                        }
-                    }
-                }
-            }
-        }
+						// TODO: Add total views
+						Row(verticalAlignment = Alignment.CenterVertically) {
+							Icon(
+								tint = mutedOnBackground.copy(alpha = 0.35F),
+								imageVector = Icons.Rounded.Visibility,
+								contentDescription = "Views",
+								modifier = Modifier.size(22.dp)
+							)
+							Spacer(modifier = Modifier.width(2.dp))
+							Text(
+								text = stringResource(R.string.not_available),
+								style = textStyle,
+								color = mutedOnBackground.copy(alpha = 0.35F)
+							)
+						}
+					}
+				}
+			}
+		}
 
-        Row(
-            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            if (currentUser != null) {
-                OutlinedIconToggleButton(
-                    checked = isFollowed,
-                    onCheckedChange = {
-                        coroutineScope.launch {
-                            val res = hostState.service.mangadex.manga.let {
-                                if (!isFollowed) it.follow(manga.id)
-                                else it.unfollow(manga.id)
-                            }
+		Row(
+			modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
+			horizontalArrangement = Arrangement.spacedBy(4.dp)
+		) {
+			if (currentUser != null) {
+				OutlinedIconToggleButton(
+					checked = isFollowed,
+					onCheckedChange = {
+						coroutineScope.launch {
+							val res = hostState.service.mangadex.manga.let {
+								if (!isFollowed) it.follow(manga.id)
+								else it.unfollow(manga.id)
+							}
 
-                            when (res) {
-                                is RibaResult.Success -> isFollowed = !isFollowed
-                                is RibaResult.Error -> {
-                                    hostState.snackbarHost.showSnackbar(res.error.human)
-                                }
-                            }
-                        }
-                    },
-                    content = {
-                        Icon(
-                            Icons.Rounded.BookmarkAdd,
-                            contentDescription = stringResource(R.string.add_to_library)
-                        )
-                    }
-                )
-            }
+							when (res) {
+								is RibaResult.Success -> isFollowed = !isFollowed
+								is RibaResult.Error -> {
+									hostState.snackbarHost.showSnackbar(res.error.human)
+								}
+							}
+						}
+					},
+					content = {
+						Icon(
+							Icons.Rounded.BookmarkAdd,
+							contentDescription = stringResource(R.string.add_to_library)
+						)
+					}
+				)
+			}
 
-            OutlinedIconToggleButton(
-                checked = hasTrackers,
-                onCheckedChange = { hasTrackers = it },
-                content = {
-                    Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
-                }
-            )
+			OutlinedIconToggleButton(
+				checked = hasTrackers,
+				onCheckedChange = { hasTrackers = it },
+				content = {
+					Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
+				}
+			)
 
-            OutlinedIconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(manga.id)))
-                        hostState.snackbarHost.showSnackbar(message = shareMessage)
-                    }
-                },
-                content = {
-                    Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
-                }
-            )
+			OutlinedIconButton(
+				onClick = {
+					coroutineScope.launch {
+						clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(manga.id)))
+						hostState.snackbarHost.showSnackbar(message = shareMessage)
+					}
+				},
+				content = {
+					Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+				}
+			)
 
-            Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    Icons.Rounded.Book,
-                    contentDescription = stringResource(R.string.start_reading)
-                )
-                Text(text = stringResource(R.string.start_reading))
-            }
-        }
+			Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+				Icon(
+					Icons.Rounded.Book,
+					contentDescription = stringResource(R.string.start_reading)
+				)
+				Text(text = stringResource(R.string.start_reading))
+			}
+		}
 
-        BoxWithConstraints {
-            val constraints = this
-            val halfRowWidth = remember { maxWidth / 2 }
+		BoxWithConstraints {
+			val constraints = this
 
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    DetailChipRow(authors, stringResource(R.string.authors), halfRowWidth)
-                    DetailChipRow(artists, stringResource(R.string.artists), halfRowWidth)
-                }
+			Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+				FlowRow(mainAxisSpacing = 16.dp, crossAxisSpacing = 16.dp) {
+					DetailChipRow(authors, stringResource(R.string.authors),  constraints.maxWidth)
+					DetailChipRow(artists, stringResource(R.string.artists),  constraints.maxWidth)
+				}
 
-                if (tags.size <= 5) {
-                    DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
-                }
-            }
-        }
+				if (tags.size <= 5) {
+					DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
+				}
+			}
+		}
 
 
-        AnimatedVisibility(isDetailsExpanded) {
-            Column {
-                if (tags.size > 5) {
-                    BoxWithConstraints(Modifier.padding(top = 14.dp)) {
-                        DetailChipRow(tags, stringResource(R.string.tags), this.maxWidth)
-                    }
-                }
+		AnimatedVisibility(isDetailsExpanded) {
+			Column {
+				if (tags.size > 5) {
+					BoxWithConstraints(Modifier.padding(top = 14.dp)) {
+						DetailChipRow(tags, stringResource(R.string.tags), this.maxWidth)
+					}
+				}
 
-                // TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-                if (manga.description != null && manga.description[DexLocale.English] != null) {
-                    Spacer(Modifier.padding(top = 14.dp))
+				// TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
+				if (manga.description != null && manga.description[DexLocale.English] != null) {
+					Spacer(Modifier.padding(top = 14.dp))
 
-                    Text(
-                        modifier = Modifier.padding(bottom = 4.dp),
-                        text = stringResource(R.string.description),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
-                            fontFamily = Rubik,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
+					Text(
+						modifier = Modifier.padding(bottom = 4.dp),
+						text = stringResource(R.string.description),
+						style = MaterialTheme.typography.titleSmall.copy(
+							color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+							fontFamily = Rubik,
+							fontWeight = FontWeight.Medium
+						)
+					)
 
-                    MarkdownText(
-                        markdown = manga.description[DexLocale.English]!!,
-                        style = typography.bodyMedium.copy(
-                            fontFamily = Nunito,
-                            color = colorScheme.onBackground.copy(alpha = 0.75F)
-                        )
-                    )
-                }
-            }
-        }
+					MarkdownText(
+						markdown = manga.description[DexLocale.English]!!,
+						style = typography.bodyMedium.copy(
+							fontFamily = Nunito,
+							color = colorScheme.onBackground.copy(alpha = 0.75F)
+						)
+					)
+				}
+			}
+		}
 
-        if (isMoreEnabled) {
-            Spacer(modifier = Modifier.height(8.dp))
+		if (isMoreEnabled) {
+			Spacer(modifier = Modifier.height(8.dp))
 
-            FilledTonalButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { isDetailsExpanded = !isDetailsExpanded },
-                content = {
-                    Text(
-                        text = if (isDetailsExpanded) stringResource(R.string.show_less)
-                        else stringResource(R.string.show_more)
-                    )
-                }
-            )
-        }
-    }
+			FilledTonalButton(
+				modifier = Modifier.fillMaxWidth(),
+				onClick = { isDetailsExpanded = !isDetailsExpanded },
+				content = {
+					Text(
+						text = if (isDetailsExpanded) stringResource(R.string.show_less)
+						else stringResource(R.string.show_more)
+					)
+				}
+			)
+		}
+	}
 }
 
 @Composable
 private fun ChapterItem(chap: RibaFulfilledChapter) {
-    val which = remember {
-        if (chap.chapter.chapter != null) {
-            if (chap.chapter.title.isNullOrEmpty()) R.string.chapter_x
-            else R.string.ch_x
-        } else R.string.oneshot
-    }
+	val which = remember {
+		if (chap.chapter.chapter != null) {
+			if (chap.chapter.title.isNullOrEmpty()) R.string.chapter_x
+			else R.string.ch_x
+		} else R.string.oneshot
+	}
 
-    val chapterName = remember {
-        if (chap.chapter.chapter != null) {
-            if (!chap.chapter.title.isNullOrBlank()) "${chap.chapter.chapter} - ${chap.chapter.title}"
-            else chap.chapter.chapter.toString()
-        } else ""
-    }
+	val chapterName = remember {
+		if (chap.chapter.chapter != null) {
+			if (!chap.chapter.title.isNullOrBlank()) "${chap.chapter.chapter} - ${chap.chapter.title}"
+			else chap.chapter.chapter.toString()
+		} else ""
+	}
 
-    val groupNames = remember { chap.groups.map { it.name } }
+	val groupNames = remember { chap.groups.map { it.name } }
 
-    ListItem(
-        leadingContent = {
-            val languageFlagId = remember { chap.chapter.language.getFlagId() }
+	ListItem(
+		leadingContent = {
+			val languageFlagId = remember { chap.chapter.language.getFlagId() }
 
-            Box(contentAlignment = Alignment.Center) {
-                if (languageFlagId != null) {
-                    Image(
-                        modifier = Modifier.size(24.dp),
-                        contentScale = ContentScale.FillWidth,
-                        painter = painterResource(id = languageFlagId),
-                        contentDescription = chap.chapter.language.toString(),
-                    )
-                } else {
-                    Text(
-                        text = chap.chapter.language.toString(),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        headlineText = {
-            Text(text = stringResource(which, chapterName))
-        },
-        supportingText = { Text(text = groupNames.joinToString(", ")) }
-    )
+			Box(contentAlignment = Alignment.Center) {
+				if (languageFlagId != null) {
+					Image(
+						modifier = Modifier.size(24.dp),
+						contentScale = ContentScale.FillWidth,
+						painter = painterResource(id = languageFlagId),
+						contentDescription = chap.chapter.language.toString(),
+					)
+				} else {
+					Text(
+						text = chap.chapter.language.toString(),
+						style = MaterialTheme.typography.bodySmall
+					)
+				}
+			}
+		},
+		headlineText = {
+			Text(text = stringResource(which, chapterName))
+		},
+		supportingText = { Text(text = groupNames.joinToString(", ")) }
+	)
 }
 
 @Composable
 private fun DetailChipRow(values: List<String>, label: String, width: Dp) =
-    if (values.isEmpty()) Unit
-    else Column(Modifier.widthIn(max = width)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
-                fontFamily = Rubik,
-                fontWeight = FontWeight.Medium
-            )
-        )
+	if (values.isEmpty()) Unit
+	else Column(Modifier.widthIn(max = width)) {
+		Text(
+			text = label,
+			style = MaterialTheme.typography.titleSmall.copy(
+				color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+				fontFamily = Rubik,
+				fontWeight = FontWeight.Medium
+			)
+		)
 
-        FlowRow(
-            mainAxisSpacing = 8.dp,
-            content = {
-                values.map {
-                    SuggestionChip(
-                        onClick = {},
-                        label = { Text(it, maxLines = 1) })
-                }
-            }
-        )
-
-    }
+		FlowRow(
+			mainAxisSpacing = 8.dp,
+			content = {
+				values.map {
+					SuggestionChip(
+						onClick = {},
+						label = { Text(it, maxLines = 1) })
+				}
+			}
+		)
+	}
 
 @Composable
 private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) =
-    TopAppBar(
-        title = {},
-        scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            scrolledContainerColor = Color.Transparent,
-            containerColor = Color.Transparent,
-            titleContentColor = Color.Transparent
-        ),
-        actions = {
-            IconButton(
-                onClick = { ribaNavigator.popBackStack() },
-                content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
-            )
+	TopAppBar(
+		title = {},
+		scrollBehavior = scrollBehavior,
+		colors = TopAppBarDefaults.smallTopAppBarColors(
+			scrolledContainerColor = Color.Transparent,
+			containerColor = Color.Transparent,
+			titleContentColor = Color.Transparent
+		),
+		actions = {
+			IconButton(
+				onClick = { ribaNavigator.popBackStack() },
+				content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
+			)
 
-            Spacer(Modifier.weight(1F))
+			Spacer(Modifier.weight(1F))
 
-            // TODO: Handle more
-            IconButton(
-                onClick = { },
-                content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) }
-            )
-        }
-    )
+			// TODO: Handle more
+			IconButton(
+				onClick = { },
+				content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) }
+			)
+		}
+	)
 
 
 class MangaDetailsViewModel(private val service: RibaAPIService, private val mangaId: String) :
-    ViewModel() {
-    // TODO: Add pagination and filtering.
-    private val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
-    private val offset = MutableStateFlow(0)
+	ViewModel() {
+	// TODO: Add pagination and filtering.
+	private val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
+	private val offset = MutableStateFlow(0)
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
+	private val _isRefreshing = MutableStateFlow(false)
+	val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
 
-    fun getDetails(): LiveData<RibaResultManga> = details
-    private val details: MutableLiveData<RibaResultManga> by lazy {
-        MutableLiveData<RibaResultManga>().also { loadDetails() }
-    }
+	fun getDetails(): LiveData<RibaResultManga> = details
+	private val details: MutableLiveData<RibaResultManga> by lazy {
+		MutableLiveData<RibaResultManga>().also { loadDetails() }
+	}
 
-    private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
-        Log.i(
-            DexLogTag.DEBUG.tag,
-            "${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
-        )
+	private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
+		Log.i(
+			DexLogTag.DEBUG.tag,
+			"${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
+		)
 
-        val localManga = when (val mangaData = service.mangadex.manga.get(
-            mangaId, forceInsert = refresh, tryDatabase = !refresh
-        )) {
-            is RibaResult.Success -> mangaData.unwrapOrNull()!!
-            is RibaResult.Error -> return@launch details
-                .postValue(RibaResultManga.fromNullables(mangaData))
-        }
+		val localManga = when (val mangaData = service.mangadex.manga.get(
+			mangaId, forceInsert = refresh, tryDatabase = !refresh
+		)) {
+			is RibaResult.Success -> mangaData.unwrapOrNull()!!
+			is RibaResult.Error -> return@launch details
+				.postValue(RibaResultManga.fromNullables(mangaData))
+		}
 
-        val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-            service.mangadex.author.getStrictCollection(
-                localManga.artistIds,
-                forceInsert = refresh,
-                tryDatabase = !refresh
-            )
-        }
+		val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
+			service.mangadex.author.getStrictCollection(
+				localManga.artistIds,
+				forceInsert = refresh,
+				tryDatabase = !refresh
+			)
+		}
 
-        val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-            service.mangadex.author.getStrictCollection(
-                localManga.authorIds,
-                forceInsert = refresh,
-                tryDatabase = !refresh,
-            )
-        }
+		val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
+			service.mangadex.author.getStrictCollection(
+				localManga.authorIds,
+				forceInsert = refresh,
+				tryDatabase = !refresh,
+			)
+		}
 
-        val chapters: Deferred<RibaResult<List<RibaFulfilledChapter>>> = async(Dispatchers.IO) {
-            val response = service.mangadex.chapter.getCollection(
-                mangaId = mangaId,
-                forceInsert = refresh,
-                sort = Pair(DexChapterQueryOrderProperty.Chapter, DexQueryOrderValue.Descending),
-                limit = 50,
-                translatedLanguage = translatedLanguages.value,
-                offset = offset.value,
-            )
+		val chapters: Deferred<RibaResult<List<RibaFulfilledChapter>>> = async(Dispatchers.IO) {
+			val response = service.mangadex.chapter.getCollection(
+				mangaId = mangaId,
+				forceInsert = refresh,
+				sort = Pair(DexChapterQueryOrderProperty.Chapter, DexQueryOrderValue.Descending),
+				limit = 50,
+				translatedLanguage = translatedLanguages.value,
+				offset = offset.value,
+			)
 
-            if (response is RibaResult.Error) {
-                Log.e(
-                    DexLogTag.DEBUG.tag,
-                    "Error while fetching chapters for $mangaId",
-                    response.error as Throwable
-                )
-            } else if (response is RibaResult.Success) {
-                val size = response.value.data.values.size
-                val total = response.value.total
+			if (response is RibaResult.Error) {
+				Log.e(
+					DexLogTag.DEBUG.tag,
+					"Error while fetching chapters for $mangaId",
+					response.error as Throwable
+				)
+			} else if (response is RibaResult.Success) {
+				val size = response.value.data.values.size
+				val total = response.value.total
 
-                if (size < total) {
-                    offset.value += size
-                }
-            }
+				if (size < total) {
+					offset.value += size
+				}
+			}
 
-            return@async response.map { it.data.values.flatten() }
-        }
+			return@async response.map { it.data.values.flatten() }
+		}
 
-        val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
-            service.mangadex.manga.getStatistic(mangaId)
-        }
+		val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
+			service.mangadex.manga.getStatistic(mangaId)
+		}
 
-        val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
-            if (localManga.coverId == null) {
-                return@async RibaResult.Success(null)
-            }
+		val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
+			if (localManga.coverId == null) {
+				return@async RibaResult.Success(null)
+			}
 
-            return@async service.mangadex.manga.getCover(
-                localManga.coverId,
-                forceInsert = refresh,
-                tryDatabase = !refresh,
-            )
-        }
+			return@async service.mangadex.manga.getCover(
+				localManga.coverId,
+				forceInsert = refresh,
+				tryDatabase = !refresh,
+			)
+		}
 
-        val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
-            val resolve = service.mangadex.manga.database.getTagCollection(localManga.tagIds)
+		val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
+			val resolve = service.mangadex.manga.database.getTagCollection(localManga.tagIds)
 
-            if (resolve.size != localManga.tagIds.size) {
-                val error = DexError(
-                    "Failed to resolve tags",
-                    "Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
-                )
+			if (resolve.size != localManga.tagIds.size) {
+				val error = DexError(
+					"Failed to resolve tags",
+					"Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
+				)
 
-                Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
+				Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
 
-                return@async RibaResult.Error(error)
-            }
+				return@async RibaResult.Error(error)
+			}
 
-            return@async RibaResult.Success(resolve)
-        }
+			return@async RibaResult.Success(resolve)
+		}
 
-        val isFollowing: Deferred<RibaResult<Boolean>> = async(Dispatchers.IO) {
-            return@async service.mangadex.manga.checkFollowStatus(mangaId, refresh)
-        }
+		val isFollowing: Deferred<RibaResult<Boolean>> = async(Dispatchers.IO) {
+			return@async service.mangadex.manga.checkFollowStatus(mangaId, refresh)
+		}
 
-        details.postValue(
-            RibaResultManga(
-                manga = RibaResult.Success(localManga),
-                artists = artists.await(),
-                authors = authors.await(),
-                cover = cover.await(),
-                tags = tags.await(),
-                statistic = statistic.await(),
-                chapters = chapters.await(),
-                isFollowing = isFollowing.await()
-            )
-        )
-    }
+		details.postValue(
+			RibaResultManga(
+				manga = RibaResult.Success(localManga),
+				artists = artists.await(),
+				authors = authors.await(),
+				cover = cover.await(),
+				tags = tags.await(),
+				statistic = statistic.await(),
+				chapters = chapters.await(),
+				isFollowing = isFollowing.await()
+			)
+		)
+	}
 
 
-    fun refresh() = viewModelScope.launch(Dispatchers.IO) {
-        _isRefreshing.emit(true)
-        loadDetails(true)
-        _isRefreshing.emit(false)
-    }
+	fun refresh() = viewModelScope.launch(Dispatchers.IO) {
+		_isRefreshing.emit(true)
+		loadDetails(true)
+		_isRefreshing.emit(false)
+	}
 }
 
 @Composable
 @Preview(showBackground = true)
 private fun DetailBodyPreview() {
-    val state = RibaHostState.createDummy()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val state = RibaHostState.createDummy()
+	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    RibaTheme {
-        Scaffold(
-            topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-            content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
-        )
-    }
+	RibaTheme {
+		Scaffold(
+			topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+			content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
+		)
+	}
 }
