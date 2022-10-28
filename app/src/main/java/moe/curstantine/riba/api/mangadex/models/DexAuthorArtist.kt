@@ -17,29 +17,29 @@ typealias DexAuthorData = DexResponseData<DexAuthorAttributes>
  */
 @JsonClass(generateAdapter = true)
 data class DexAuthorAttributes(
-    val name: String,
-    val biography: DexLocaleObject,
-    val version: Int,
+	val name: String,
+	val biography: DexLocaleObject,
+	val version: Int,
 )
 
 @JsonClass(generateAdapter = true)
 data class DexRelatedAuthor(
-    override val id: String,
-    override val type: DexEntityType,
-    val attributes: DexAuthorAttributes?
+	override val id: String,
+	override val type: DexEntityType,
+	val attributes: DexAuthorAttributes?
 ) : DexRelationship {
-    fun toRibaAuthor(): RibaAuthor = RibaAuthor(
-        id = id,
-        name = attributes?.name,
-        description = attributes?.biography,
-        version = attributes?.version ?: -1,
-    )
+	fun toRibaAuthor(): RibaAuthor = RibaAuthor(
+		id = id,
+		name = attributes?.name,
+		description = attributes?.biography,
+		version = attributes?.version ?: -1,
+	)
 }
 
 fun DexAuthorData.toRibaAuthor(): RibaAuthor = RibaAuthor(
-    id = id,
-    name = attributes.name,
-    description = attributes.biography,
-    version = attributes.version,
+	id = id,
+	name = attributes.name,
+	description = attributes.biography,
+	version = attributes.version,
 )
 

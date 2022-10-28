@@ -31,44 +31,44 @@ import moe.curstantine.riba.api.riba.RibaError
 
 @Composable
 fun FlexibleErrorReceiver(error: RibaError) {
-    val context = LocalContext.current
-    val colorScheme = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
+	val context = LocalContext.current
+	val colorScheme = MaterialTheme.colorScheme
+	val typography = MaterialTheme.typography
 
-    val issueIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL)) }
-    val statusIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }
+	val issueIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL)) }
+	val statusIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = error.human,
-            style = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-        )
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.verticalScroll(rememberScrollState()),
+		verticalArrangement = Arrangement.Center,
+		horizontalAlignment = Alignment.CenterHorizontally
+	) {
+		Text(
+			text = error.human,
+			style = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+		)
 
-        if (error.additional != null) {
-            Text(
-                text = error.additional!!,
-                style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
-                textAlign = TextAlign.Center
-            )
-        }
+		if (error.additional != null) {
+			Text(
+				text = error.additional!!,
+				style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
+				textAlign = TextAlign.Center
+			)
+		}
 
-        Box(Modifier.height(16.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            if (error is DexError) {
-                FilledTonalButton(onClick = { context.startActivity(statusIntent) }) {
-                    Text(stringResource(R.string.status_page))
-                }
-            }
+		Box(Modifier.height(16.dp))
+		Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+			if (error is DexError) {
+				FilledTonalButton(onClick = { context.startActivity(statusIntent) }) {
+					Text(stringResource(R.string.status_page))
+				}
+			}
 
-            FilledTonalButton(onClick = { context.startActivity(issueIntent) }) {
-                Text(stringResource(R.string.create_issue))
-            }
-        }
-    }
+			FilledTonalButton(onClick = { context.startActivity(issueIntent) }) {
+				Text(stringResource(R.string.create_issue))
+			}
+		}
+	}
 }

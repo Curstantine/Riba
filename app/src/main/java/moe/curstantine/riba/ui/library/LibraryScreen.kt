@@ -11,7 +11,7 @@ import moe.curstantine.riba.RibaHostState
 
 @Composable
 fun LibraryScreen(state: RibaHostState, paddingValues: State<PaddingValues>) {
-    Column(Modifier.padding(paddingValues.value)) {
-        Text("Library")
-    }
+	Column(Modifier.padding(paddingValues.value)) {
+		Text("Library")
+	}
 }

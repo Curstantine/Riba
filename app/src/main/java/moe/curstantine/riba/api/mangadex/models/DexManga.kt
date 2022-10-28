@@ -13,40 +13,40 @@ typealias DexMangaData = DexResponseData<DexMangaAttributes>
 
 @JsonClass(generateAdapter = true)
 data class DexMangaAttributes(
-    val title: DexLocaleObject,
-    val altTitles: List<DexLocaleObject>,
-    val description: DexLocaleObject,
-    val contentRating: DexContentRating,
-    val tags: List<DexTagData>,
-    val version: Int,
+	val title: DexLocaleObject,
+	val altTitles: List<DexLocaleObject>,
+	val description: DexLocaleObject,
+	val contentRating: DexContentRating,
+	val tags: List<DexTagData>,
+	val version: Int,
 )
 
 fun DexMangaData.toRibaManga(): RibaManga {
-    var coverId: String? = null
-    val artistIds = mutableListOf<String>()
-    val authorIds = mutableListOf<String>()
+	var coverId: String? = null
+	val artistIds = mutableListOf<String>()
+	val authorIds = mutableListOf<String>()
 
-    for (relationship in relationships) {
-        when (relationship.type) {
-            DexEntityType.Artist -> artistIds.add(relationship.id)
-            DexEntityType.Author -> authorIds.add(relationship.id)
-            DexEntityType.CoverArt -> coverId = relationship.id
-            else -> continue
-        }
-    }
+	for (relationship in relationships) {
+		when (relationship.type) {
+			DexEntityType.Artist -> artistIds.add(relationship.id)
+			DexEntityType.Author -> authorIds.add(relationship.id)
+			DexEntityType.CoverArt -> coverId = relationship.id
+			else -> continue
+		}
+	}
 
-    return RibaManga(
-        id = id,
-        title = attributes.title,
-        altTitles = attributes.altTitles,
-        description = attributes.description,
-        artistIds = artistIds,
-        authorIds = authorIds,
-        coverId = coverId,
-        version = attributes.version,
-        tagIds = attributes.tags.map { it.id },
-        contentRating = attributes.contentRating,
-    )
+	return RibaManga(
+		id = id,
+		title = attributes.title,
+		altTitles = attributes.altTitles,
+		description = attributes.description,
+		artistIds = artistIds,
+		authorIds = authorIds,
+		coverId = coverId,
+		version = attributes.version,
+		tagIds = attributes.tags.map { it.id },
+		contentRating = attributes.contentRating,
+	)
 }
 
 /**
@@ -61,9 +61,9 @@ fun DexMangaData.toRibaManga(): RibaManga {
  */
 @JsonClass(generateAdapter = true)
 data class DexRelatedManga(
-    override val id: String,
-    override val type: DexEntityType,
-    val related: DexMangaRelationType?,
+	override val id: String,
+	override val type: DexEntityType,
+	val related: DexMangaRelationType?,
 ) : DexRelationship
 
 /**
@@ -73,12 +73,12 @@ data class DexRelatedManga(
  */
 @JsonClass(generateAdapter = true)
 data class DexMangaStatistics(
-    override val result: DexResult,
-    val statistics: Map<String, DexMangaStatistic>
+	override val result: DexResult,
+	val statistics: Map<String, DexMangaStatistic>
 ) : DexBaseResponse {
-    fun toRibaStatisticCollection(): Map<String, RibaStatistic> {
-        return this.statistics.mapValues { it.value.toRibaStatistic(it.key) }
-    }
+	fun toRibaStatisticCollection(): Map<String, RibaStatistic> {
+		return this.statistics.mapValues { it.value.toRibaStatistic(it.key) }
+	}
 }
 
 /**
@@ -88,19 +88,19 @@ data class DexMangaStatistics(
  */
 @JsonClass(generateAdapter = true)
 data class DexMangaStatistic(
-    val follows: Int,
-    val rating: ShadowedDexStatisticsObject,
+	val follows: Int,
+	val rating: ShadowedDexStatisticsObject,
 ) {
-    fun toRibaStatistic(id: String): RibaStatistic = RibaStatistic(
-        id = id,
-        follows = follows,
-        bayesian = rating.bayesian,
-    )
+	fun toRibaStatistic(id: String): RibaStatistic = RibaStatistic(
+		id = id,
+		follows = follows,
+		bayesian = rating.bayesian,
+	)
 }
 
 @JsonClass(generateAdapter = true)
 data class ShadowedDexStatisticsObject(
-    val bayesian: Float,
+	val bayesian: Float,
 )
 
 /**
@@ -109,56 +109,56 @@ data class ShadowedDexStatisticsObject(
 @Suppress("unused")
 @JsonClass(generateAdapter = false)
 enum class DexMangaRelationType {
-    @field:Json(name = "monochrome")
-    Monochrome,
+	@field:Json(name = "monochrome")
+	Monochrome,
 
-    @field:Json(name = "colored")
-    Colored,
+	@field:Json(name = "colored")
+	Colored,
 
-    @field:Json(name = "preserialization")
-    Preserialization,
+	@field:Json(name = "preserialization")
+	Preserialization,
 
-    @field:Json(name = "serialization")
-    Serialization,
+	@field:Json(name = "serialization")
+	Serialization,
 
-    @field:Json(name = "prequel")
-    Prequel,
+	@field:Json(name = "prequel")
+	Prequel,
 
-    @field:Json(name = "sequel")
-    Sequel,
+	@field:Json(name = "sequel")
+	Sequel,
 
-    @field:Json(name = "main_story")
-    MainStory,
+	@field:Json(name = "main_story")
+	MainStory,
 
-    @field:Json(name = "side_story")
-    SideStory,
+	@field:Json(name = "side_story")
+	SideStory,
 
-    @field:Json(name = "adapted_from")
-    AdaptedFrom,
+	@field:Json(name = "adapted_from")
+	AdaptedFrom,
 
-    @field:Json(name = "spin_off")
-    SpinOff,
+	@field:Json(name = "spin_off")
+	SpinOff,
 
-    @field:Json(name = "based_on")
-    BasedOn,
+	@field:Json(name = "based_on")
+	BasedOn,
 
-    @field:Json(name = "doujinshi")
-    Doujinshi,
+	@field:Json(name = "doujinshi")
+	Doujinshi,
 
-    @field:Json(name = "same_franchise")
-    SameFranchise,
+	@field:Json(name = "same_franchise")
+	SameFranchise,
 
-    @field:Json(name = "shared_universe")
-    SharedUniverse,
+	@field:Json(name = "shared_universe")
+	SharedUniverse,
 
-    @field:Json(name = "alternate_story")
-    AlternateStory,
+	@field:Json(name = "alternate_story")
+	AlternateStory,
 
-    @field:Json(name = "alternate_version")
-    AlternateVersion;
+	@field:Json(name = "alternate_version")
+	AlternateVersion;
 
-    override fun toString(): String = DexUtils.toNormalizedString(name)
-    fun toTitleCase(): String = DexUtils.toTitleCase(name)
+	override fun toString(): String = DexUtils.toNormalizedString(name)
+	fun toTitleCase(): String = DexUtils.toTitleCase(name)
 }
 
 /**
@@ -167,17 +167,17 @@ enum class DexMangaRelationType {
 @Suppress("unused")
 @JsonClass(generateAdapter = false)
 enum class DexMangaTagGroup {
-    @field:Json(name = "content")
-    Content,
+	@field:Json(name = "content")
+	Content,
 
-    @field:Json(name = "genre")
-    Genre,
+	@field:Json(name = "genre")
+	Genre,
 
-    @field:Json(name = "theme")
-    Theme,
+	@field:Json(name = "theme")
+	Theme,
 
-    @field:Json(name = "format")
-    Format;
+	@field:Json(name = "format")
+	Format;
 
-    override fun toString(): String = DexUtils.toTitleCase(name)
+	override fun toString(): String = DexUtils.toTitleCase(name)
 }

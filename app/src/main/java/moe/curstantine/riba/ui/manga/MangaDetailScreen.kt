@@ -400,8 +400,8 @@ private fun MangaDetailHeader(
 
 			Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 				FlowRow(mainAxisSpacing = 16.dp, crossAxisSpacing = 16.dp) {
-					DetailChipRow(authors, stringResource(R.string.authors),  constraints.maxWidth)
-					DetailChipRow(artists, stringResource(R.string.artists),  constraints.maxWidth)
+					DetailChipRow(authors, stringResource(R.string.authors), constraints.maxWidth)
+					DetailChipRow(artists, stringResource(R.string.artists), constraints.maxWidth)
 				}
 
 				if (tags.size <= 5) {

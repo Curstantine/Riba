@@ -16,56 +16,56 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 class MDListService(
-    override val service: APIService,
-    override val database: Database
+	override val service: APIService,
+	override val database: Database
 ) : MangaDexService.Companion.Service() {
-    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+	override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    private val defaultMDListIncludes = listOf(
-        DexEntityType.Manga,
-        DexEntityType.User
-    )
+	private val defaultMDListIncludes = listOf(
+		DexEntityType.Manga,
+		DexEntityType.User
+	)
 
-    suspend fun get(
-        id: String,
-        includes: List<DexEntityType> = defaultMDListIncludes,
-        forceInsert: Boolean = false,
-        tryDatabase: Boolean = true,
-    ): RibaResult<RibaMangaList> = contextualInvoke { scope ->
-        if (tryDatabase) {
-            val localList = database.get(id)
-            if (localList != null) return@contextualInvoke localList
-        }
+	suspend fun get(
+		id: String,
+		includes: List<DexEntityType> = defaultMDListIncludes,
+		forceInsert: Boolean = false,
+		tryDatabase: Boolean = true,
+	): RibaResult<RibaMangaList> = contextualInvoke { scope ->
+		if (tryDatabase) {
+			val localList = database.get(id)
+			if (localList != null) return@contextualInvoke localList
+		}
 
-        val riba = service.get(id, includes.map { it.toDexEnum() }).data.toRibaMangaList()
-        scope.launch { database.insert(riba, forceInsert) }
+		val riba = service.get(id, includes.map { it.toDexEnum() }).data.toRibaMangaList()
+		scope.launch { database.insert(riba, forceInsert) }
 
-        return@contextualInvoke riba
-    }
+		return@contextualInvoke riba
+	}
 
-    companion object {
-        @JvmSuppressWildcards
-        interface APIService : RibaHttpService.Companion.APIService {
-            @GET("/list/{id}")
-            suspend fun get(
-                @Path("id") id: String,
-                @Query("includes[]") includes: List<String>?
-            ): DexMDList
-        }
+	companion object {
+		@JvmSuppressWildcards
+		interface APIService : RibaHttpService.Companion.APIService {
+			@GET("/list/{id}")
+			suspend fun get(
+				@Path("id") id: String,
+				@Query("includes[]") includes: List<String>?
+			): DexMDList
+		}
 
-        class Database(private val database: DexDatabase) :
-            RibaHttpService.Companion.Database(database) {
-            suspend fun get(id: String) = database.list().get(id)
+		class Database(private val database: DexDatabase) :
+			RibaHttpService.Companion.Database(database) {
+			suspend fun get(id: String) = database.list().get(id)
 
-            suspend fun insert(list: RibaMangaList, force: Boolean = false) {
-                val oldList = database.list().get(list.id)
+			suspend fun insert(list: RibaMangaList, force: Boolean = false) {
+				val oldList = database.list().get(list.id)
 
-                if (force.not() && oldList != null && oldList.version >= list.version) {
-                    return
-                }
+				if (force.not() && oldList != null && oldList.version >= list.version) {
+					return
+				}
 
-                database.list().insert(list)
-            }
-        }
-    }
+				database.list().insert(list)
+			}
+		}
+	}
 }

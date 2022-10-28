@@ -10,14 +10,14 @@ typealias DexTagData = DexResponseData<DexTagAttributes>
 
 @JsonClass(generateAdapter = true)
 data class DexTagAttributes(
-    val name: DexLocaleObject,
-    val group: DexMangaTagGroup,
-    val version: Int,
+	val name: DexLocaleObject,
+	val group: DexMangaTagGroup,
+	val version: Int,
 )
 
 fun DexTagData.toRibaTag() = RibaTag(
-    id = id,
-    name = attributes.name,
-    group = attributes.group,
-    version = attributes.version,
+	id = id,
+	name = attributes.name,
+	group = attributes.group,
+	version = attributes.version,
 )

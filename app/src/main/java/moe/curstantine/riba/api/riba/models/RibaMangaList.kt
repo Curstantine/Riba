@@ -11,10 +11,10 @@ import moe.curstantine.riba.api.mangadex.models.DexListVisibility
  */
 @Entity(tableName = "lists")
 data class RibaMangaList(
-    @PrimaryKey val id: String,
-    @ColumnInfo val name: String,
-    @ColumnInfo val visibility: DexListVisibility,
-    @ColumnInfo val titles: List<String>,
-    @ColumnInfo val userId: String,
-    @ColumnInfo val version: Int,
+	@PrimaryKey val id: String,
+	@ColumnInfo val name: String,
+	@ColumnInfo val visibility: DexListVisibility,
+	@ColumnInfo val titles: List<String>,
+	@ColumnInfo val userId: String,
+	@ColumnInfo val version: Int,
 )

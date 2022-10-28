@@ -14,8 +14,8 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = "manga_links")
 data class RibaMangaLink(
-    @PrimaryKey val mangaId: String,
-    @ColumnInfo val al: String?,
-    @ColumnInfo val mal: String?,
-    @ColumnInfo val kt: String?,
+	@PrimaryKey val mangaId: String,
+	@ColumnInfo val al: String?,
+	@ColumnInfo val mal: String?,
+	@ColumnInfo val kt: String?,
 )

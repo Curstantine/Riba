@@ -11,8 +11,8 @@ package moe.curstantine.riba.api.riba.models
  * @property offset Offset of the response provided to the server.
  */
 data class RibaCollection<T>(
-    val total: Int,
-    val limit: Int,
-    val offset: Int,
-    val data: T
+	val total: Int,
+	val limit: Int,
+	val offset: Int,
+	val data: T
 )

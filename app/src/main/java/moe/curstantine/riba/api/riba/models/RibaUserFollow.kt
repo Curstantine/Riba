@@ -13,13 +13,13 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = "user_follows")
 data class RibaUserFollow(
-    @PrimaryKey val mangaId: String,
-    @ColumnInfo val followedUsers: List<String>,
+	@PrimaryKey val mangaId: String,
+	@ColumnInfo val followedUsers: List<String>,
 ) {
-    companion object {
-        fun getDefault(): RibaUserFollow = RibaUserFollow(
-            "00000000-0000-0000-0000-000000000000",
-            listOf("00000000-0000-0000-0000-000000000000")
-        )
-    }
+	companion object {
+		fun getDefault(): RibaUserFollow = RibaUserFollow(
+			"00000000-0000-0000-0000-000000000000",
+			listOf("00000000-0000-0000-0000-000000000000")
+		)
+	}
 }

@@ -1,8 +1,6 @@
 package moe.curstantine.riba.api.mangadex.models
 
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import moe.curstantine.riba.api.mangadex.DexUtils
 
 /**
  * Basic relationship returned by MangaDex.
@@ -15,8 +13,8 @@ import moe.curstantine.riba.api.mangadex.DexUtils
  * @property type The type of the related entity.
  */
 interface DexRelationship {
-    val id: String
-    val type: DexEntityType
+	val id: String
+	val type: DexEntityType
 }
 
 /**
@@ -26,6 +24,6 @@ interface DexRelationship {
  */
 @JsonClass(generateAdapter = true)
 data class DexRelationshipImpl(
-    override val id: String,
-    override val type: DexEntityType
+	override val id: String,
+	override val type: DexEntityType
 ) : DexRelationship

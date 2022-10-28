@@ -9,28 +9,28 @@ import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.nav.RibaNavigator
 
 data class RibaHostState(
-    val navigator: RibaNavigator,
-    val snackbarHost: SnackbarHostState,
-    val service: RibaAPIService,
+	val navigator: RibaNavigator,
+	val snackbarHost: SnackbarHostState,
+	val service: RibaAPIService,
 ) {
-    companion object {
-        @Composable
-        fun create(): RibaHostState {
-            val context = LocalContext.current
+	companion object {
+		@Composable
+		fun create(): RibaHostState {
+			val context = LocalContext.current
 
-            return RibaHostState(
-                RibaNavigator(rememberNavController()),
-                remember { SnackbarHostState() },
-                remember { RibaAPIService(context) },
-            )
-        }
+			return RibaHostState(
+				RibaNavigator(rememberNavController()),
+				remember { SnackbarHostState() },
+				remember { RibaAPIService(context) },
+			)
+		}
 
 
-        @Composable
-        fun createDummy() = RibaHostState(
-            RibaNavigator.createDummy(),
-            SnackbarHostState(),
-            RibaAPIService.createDummy(),
-        )
-    }
+		@Composable
+		fun createDummy() = RibaHostState(
+			RibaNavigator.createDummy(),
+			SnackbarHostState(),
+			RibaAPIService.createDummy(),
+		)
+	}
 }

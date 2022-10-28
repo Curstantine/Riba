@@ -12,17 +12,17 @@ import moe.curstantine.riba.api.mangadex.models.DexLocaleObject
  */
 @Entity(tableName = "authors")
 data class RibaAuthor(
-    @PrimaryKey val id: String,
-    @ColumnInfo val name: String?,
-    @ColumnInfo val description: DexLocaleObject?,
-    @ColumnInfo val version: Int,
+	@PrimaryKey val id: String,
+	@ColumnInfo val name: String?,
+	@ColumnInfo val description: DexLocaleObject?,
+	@ColumnInfo val version: Int,
 ) {
-    companion object {
-        fun getDefault() = RibaAuthor(
-            "fc343004-569b-4750-aba0-05ab35efc17c",
-            "Hologfx",
-            mapOf(Pair(DexLocale.English, "Hologfx")),
-            0
-        )
-    }
+	companion object {
+		fun getDefault() = RibaAuthor(
+			"fc343004-569b-4750-aba0-05ab35efc17c",
+			"Hologfx",
+			mapOf(Pair(DexLocale.English, "Hologfx")),
+			0
+		)
+	}
 }

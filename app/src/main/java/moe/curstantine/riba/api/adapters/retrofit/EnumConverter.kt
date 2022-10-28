@@ -11,23 +11,23 @@ import java.lang.reflect.Type
 annotation class EnumValue(val value: String)
 
 class EnumConverter : Converter.Factory() {
-    override fun stringConverter(
-        type: Type,
-        annotations: Array<Annotation>,
-        retrofit: Retrofit
-    ): Converter<Enum<*>, String>? {
-        return if (type is Class<*> && type.isEnum) {
-            Converter { enum ->
-                try {
-                    enum.javaClass
-                        .getField(enum.name)
-                        .getAnnotation(EnumValue::class.java)?.value
-                } catch (exception: Exception) {
-                    null
-                } ?: enum.toString()
-            }
-        } else {
-            null
-        }
-    }
+	override fun stringConverter(
+		type: Type,
+		annotations: Array<Annotation>,
+		retrofit: Retrofit
+	): Converter<Enum<*>, String>? {
+		return if (type is Class<*> && type.isEnum) {
+			Converter { enum ->
+				try {
+					enum.javaClass
+						.getField(enum.name)
+						.getAnnotation(EnumValue::class.java)?.value
+				} catch (exception: Exception) {
+					null
+				} ?: enum.toString()
+			}
+		} else {
+			null
+		}
+	}
 }

@@ -10,53 +10,53 @@ typealias DexUserData = DexResponseData<DexUserAttributes>
 
 @JsonClass(generateAdapter = true)
 data class DexUserAttributes(
-    val username: String,
-    // TODO: Enum with all the roles
-    val roles: List<String>,
-    val version: Int,
+	val username: String,
+	// TODO: Enum with all the roles
+	val roles: List<String>,
+	val version: Int,
 )
 
 @JsonClass(generateAdapter = true)
 data class DexRelatedUser(
-    override val id: String,
-    override val type: DexEntityType,
-    val attributes: DexUserAttributes?,
+	override val id: String,
+	override val type: DexEntityType,
+	val attributes: DexUserAttributes?,
 ) : DexRelationship {
-    /**
-     * Convert this [DexRelatedUser] to a [RibaUser].
-     *
-     * @throws IllegalStateException if [attributes] is null.
-     */
-    fun toRibaUser(): RibaUser {
-        if (attributes == null) {
-            throw IllegalStateException("Attributes cannot be null trying to convert to a ${RibaUser::class.simpleName}")
-        }
+	/**
+	 * Convert this [DexRelatedUser] to a [RibaUser].
+	 *
+	 * @throws IllegalStateException if [attributes] is null.
+	 */
+	fun toRibaUser(): RibaUser {
+		if (attributes == null) {
+			throw IllegalStateException("Attributes cannot be null trying to convert to a ${RibaUser::class.simpleName}")
+		}
 
-        return RibaUser(
-            id = id,
-            avatar = null,
-            username = attributes.username,
-            roles = attributes.roles,
-            version = attributes.version,
-        )
-    }
+		return RibaUser(
+			id = id,
+			avatar = null,
+			username = attributes.username,
+			roles = attributes.roles,
+			version = attributes.version,
+		)
+	}
 }
 
 // TODO: Add avatars when they are supported by the MangaDex API
 fun DexUser.toRibaUser(): RibaUser = RibaUser(
-    id = data.id,
-    username = data.attributes.username,
-    roles = data.attributes.roles,
-    avatar = null,
-    version = data.attributes.version,
+	id = data.id,
+	username = data.attributes.username,
+	roles = data.attributes.roles,
+	avatar = null,
+	version = data.attributes.version,
 )
 
 fun DexUserData.toRibaUser(): RibaUser = RibaUser(
-    id = id,
-    username = attributes.username,
-    roles = attributes.roles,
-    avatar = null,
-    version = attributes.version,
+	id = id,
+	username = attributes.username,
+	roles = attributes.roles,
+	avatar = null,
+	version = attributes.version,
 )
 
 /**
@@ -64,8 +64,8 @@ fun DexUserData.toRibaUser(): RibaUser = RibaUser(
  */
 @JsonClass(generateAdapter = true)
 data class DexUserAuthBody(
-    val username: String,
-    val password: String,
+	val username: String,
+	val password: String,
 )
 
 /**
@@ -75,7 +75,7 @@ data class DexUserAuthBody(
  */
 @JsonClass(generateAdapter = true)
 data class DexUserAuthRefreshBody(
-    val token: String,
+	val token: String,
 )
 
 /**
@@ -83,8 +83,8 @@ data class DexUserAuthRefreshBody(
  */
 @JsonClass(generateAdapter = true)
 data class DexUserAuthResponse(
-    override val result: DexResult,
-    val token: DexUserAuthTokens,
+	override val result: DexResult,
+	val token: DexUserAuthTokens,
 ) : DexBaseResponse
 
 /**
@@ -96,6 +96,6 @@ data class DexUserAuthResponse(
  */
 @JsonClass(generateAdapter = true)
 data class DexUserAuthTokens(
-    val session: String,
-    val refresh: String,
+	val session: String,
+	val refresh: String,
 )

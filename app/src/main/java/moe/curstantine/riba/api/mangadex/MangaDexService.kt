@@ -34,73 +34,73 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MangaDexService(context: Context) {
-    private val database = Room
-        .databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
-        .build()
+	private val database = Room
+		.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
+		.build()
 
-    val author: AuthorService
-    val chapter: ChapterService
-    val group: GroupService
-    val manga: MangaService
-    val mdlist: MDListService
-    val user: UserService
+	val author: AuthorService
+	val chapter: ChapterService
+	val group: GroupService
+	val manga: MangaService
+	val mdlist: MDListService
+	val user: UserService
 
-    init {
-        val okhttp = OkHttpClient.Builder()
-            .addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
-            .build()
+	init {
+		val okhttp = OkHttpClient.Builder()
+			.addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
+			.build()
 
-        val retrofit = Retrofit.Builder()
-            .client(okhttp)
-            .baseUrl(DexConstants.BASE_API)
-            .addConverterFactory(EnumConverter())
-            .addConverterFactory(MoshiConverterFactory.create(dexMoshi))
-            .build()
+		val retrofit = Retrofit.Builder()
+			.client(okhttp)
+			.baseUrl(DexConstants.BASE_API)
+			.addConverterFactory(EnumConverter())
+			.addConverterFactory(MoshiConverterFactory.create(dexMoshi))
+			.build()
 
-        user = UserService(
-            context,
-            retrofit.create(UserService.Companion.APIService::class.java),
-            UserService.Companion.Database(database)
-        )
+		user = UserService(
+			context,
+			retrofit.create(UserService.Companion.APIService::class.java),
+			UserService.Companion.Database(database)
+		)
 
-        author = AuthorService(
-            retrofit.create(AuthorService.Companion.APIService::class.java),
-            AuthorService.Companion.Database(database)
-        )
+		author = AuthorService(
+			retrofit.create(AuthorService.Companion.APIService::class.java),
+			AuthorService.Companion.Database(database)
+		)
 
-        group = GroupService(
-            retrofit.create(GroupService.Companion.APIService::class.java),
-            GroupService.Companion.Database(database),
-            user,
-        )
+		group = GroupService(
+			retrofit.create(GroupService.Companion.APIService::class.java),
+			GroupService.Companion.Database(database),
+			user,
+		)
 
-        chapter = ChapterService(
-            retrofit.create(ChapterService.Companion.APIService::class.java),
-            ChapterService.Companion.Database(database),
-            user,
-            group
-        )
+		chapter = ChapterService(
+			retrofit.create(ChapterService.Companion.APIService::class.java),
+			ChapterService.Companion.Database(database),
+			user,
+			group
+		)
 
-        manga = MangaService(
-            retrofit.create(MangaService.Companion.APIService::class.java),
-            MangaService.Companion.Database(database),
-            author,
-            user,
-        )
+		manga = MangaService(
+			retrofit.create(MangaService.Companion.APIService::class.java),
+			MangaService.Companion.Database(database),
+			author,
+			user,
+		)
 
-        mdlist = MDListService(
-            retrofit.create(MDListService.Companion.APIService::class.java),
-            MDListService.Companion.Database(database)
-        )
-    }
+		mdlist = MDListService(
+			retrofit.create(MDListService.Companion.APIService::class.java),
+			MDListService.Companion.Database(database)
+		)
+	}
 
-    companion object {
-        val dexMoshi: Moshi = Moshi.Builder()
-            .add(LocalDateTimeConverter())
-            .add(MapMismatchArrayAdapter())
-            .add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
-            .add(
-                // @formatter:off
+	companion object {
+		val dexMoshi: Moshi = Moshi.Builder()
+			.add(LocalDateTimeConverter())
+			.add(MapMismatchArrayAdapter())
+			.add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
+			.add(
+				// @formatter:off
                 PolymorphicJsonAdapterFactory.of(DexRelationship::class.java, "type")
                     .withSubtype(DexRelatedManga::class.java, DexEntityType.Manga.toDexEnum())
                     .withSubtype(DexRelatedCover::class.java, DexEntityType.CoverArt.toDexEnum())

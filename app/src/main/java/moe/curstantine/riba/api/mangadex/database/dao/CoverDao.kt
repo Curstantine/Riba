@@ -5,18 +5,18 @@ import moe.curstantine.riba.api.riba.models.RibaCover
 
 @Dao
 interface CoverDao {
-    @Query("SELECT * FROM covers WHERE id = :id")
-    suspend fun get(id: String): RibaCover?
+	@Query("SELECT * FROM covers WHERE id = :id")
+	suspend fun get(id: String): RibaCover?
 
-    @Query("SELECT * FROM covers WHERE id IN (:ids)")
-    suspend fun get(ids: List<String>): List<RibaCover>
+	@Query("SELECT * FROM covers WHERE id IN (:ids)")
+	suspend fun get(ids: List<String>): List<RibaCover>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(list: RibaCover)
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	suspend fun insert(list: RibaCover)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(lists: List<RibaCover>)
+	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	suspend fun insert(lists: List<RibaCover>)
 
-    @Delete
-    suspend fun delete(list: RibaCover)
+	@Delete
+	suspend fun delete(list: RibaCover)
 }

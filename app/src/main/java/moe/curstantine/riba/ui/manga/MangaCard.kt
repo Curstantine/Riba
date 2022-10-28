@@ -29,58 +29,58 @@ import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 
 @Composable
 fun MangaCard(manga: RibaManga, cover: RibaCover?, onClick: (RibaManga) -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .width(120.dp)
-            .height(250.dp),
-    ) {
-        MangaCover(cover, onClick = { onClick(manga) })
-        Text(
-            text = manga.title?.get(DexLocale.English) ?: stringResource(R.string.no_title),
-            maxLines = 2,
-            style = MaterialTheme.typography.bodySmall,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
+	Column(
+		verticalArrangement = Arrangement.spacedBy(4.dp),
+		modifier = Modifier
+			.width(120.dp)
+			.height(250.dp),
+	) {
+		MangaCover(cover, onClick = { onClick(manga) })
+		Text(
+			text = manga.title?.get(DexLocale.English) ?: stringResource(R.string.no_title),
+			maxLines = 2,
+			style = MaterialTheme.typography.bodySmall,
+			overflow = TextOverflow.Ellipsis
+		)
+	}
 }
 
 @Composable
 fun MangaCardRow(
-    ribaNavigator: RibaNavigator,
-    data: LiveData<RibaResult<List<RibaFulFilledManga>>>,
-    title: String
+	ribaNavigator: RibaNavigator,
+	data: LiveData<RibaResult<List<RibaFulFilledManga>>>,
+	title: String
 ) {
-    val result by data.observeAsState()
+	val result by data.observeAsState()
 
-    Column(
-        Modifier
-            .padding(horizontal = 12.dp)
-            .height(250.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
+	Column(
+		Modifier
+			.padding(horizontal = 12.dp)
+			.height(250.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp)
+	) {
+		Text(title, style = MaterialTheme.typography.titleMedium)
 
-        if (result == null) {
-            FlexibleIndicator(height = 250.dp)
-        }
+		if (result == null) {
+			FlexibleIndicator(height = 250.dp)
+		}
 
-        if (result is RibaResult.Error) {
-            FlexibleErrorReceiver((result as RibaResult.Error).error)
-        }
+		if (result is RibaResult.Error) {
+			FlexibleErrorReceiver((result as RibaResult.Error).error)
+		}
 
-        if (result is RibaResult.Success) {
-            val mangaList = (result as RibaResult.Success).value
+		if (result is RibaResult.Success) {
+			val mangaList = (result as RibaResult.Success).value
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(mangaList.size) { index ->
-                    val fulfilledManga = mangaList.elementAt(index)
+			LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+				items(mangaList.size) { index ->
+					val fulfilledManga = mangaList.elementAt(index)
 
-                    MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
-                        ribaNavigator.navigateTo(RibaRoute.Manga, Pair("id", it.id))
-                    })
-                }
-            }
-        }
-    }
+					MangaCard(fulfilledManga.manga, fulfilledManga.cover, onClick = {
+						ribaNavigator.navigateTo(RibaRoute.Manga, Pair("id", it.id))
+					})
+				}
+			}
+		}
+	}
 }

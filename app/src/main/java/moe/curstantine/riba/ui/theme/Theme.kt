@@ -21,36 +21,36 @@ private val LightColorScheme = lightColorScheme()
 
 @Composable
 fun RibaTheme(
-    systemUiController: SystemUiController = rememberSystemUiController(),
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+	systemUiController: SystemUiController = rememberSystemUiController(),
+	darkTheme: Boolean = isSystemInDarkTheme(),
+	dynamicColor: Boolean = true,
+	content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+	val colorScheme = when {
+		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+			val context = LocalContext.current
+			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+		}
+		darkTheme -> DarkColorScheme
+		else -> LightColorScheme
+	}
 
-    val view = LocalView.current
+	val view = LocalView.current
 
-    if (!view.isInEditMode) {
-        DisposableEffect(systemUiController, darkTheme.not()) {
-            systemUiController.setSystemBarsColor(
-                color = Color.Transparent,
-                darkIcons = darkTheme.not(),
-            )
+	if (!view.isInEditMode) {
+		DisposableEffect(systemUiController, darkTheme.not()) {
+			systemUiController.setSystemBarsColor(
+				color = Color.Transparent,
+				darkIcons = darkTheme.not(),
+			)
 
-            onDispose {}
-        }
-    }
+			onDispose {}
+		}
+	}
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+	MaterialTheme(
+		colorScheme = colorScheme,
+		typography = Typography,
+		content = content
+	)
 }

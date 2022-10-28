@@ -20,119 +20,119 @@ import retrofit2.http.Query
 import kotlin.coroutines.CoroutineContext
 
 class AuthorService(
-    override val service: APIService,
-    override val database: Database
+	override val service: APIService,
+	override val database: Database
 ) : MangaDexService.Companion.Service() {
-    override val coroutineScope = CoroutineScope(Dispatchers.IO)
+	override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    suspend fun get(
-        id: String,
-        forceInsert: Boolean = false,
-        tryDatabase: Boolean = true,
-    ): RibaResult<RibaAuthor> = contextualInvoke { scope ->
-        if (tryDatabase) {
-            val localAuthor = database.get(id)
-            if (localAuthor != null) return@contextualInvoke localAuthor
-        }
+	suspend fun get(
+		id: String,
+		forceInsert: Boolean = false,
+		tryDatabase: Boolean = true,
+	): RibaResult<RibaAuthor> = contextualInvoke { scope ->
+		if (tryDatabase) {
+			val localAuthor = database.get(id)
+			if (localAuthor != null) return@contextualInvoke localAuthor
+		}
 
-        val response = service.get(id).data.toRibaAuthor()
-        scope.launch { database.insert(response, forceInsert) }
+		val response = service.get(id).data.toRibaAuthor()
+		scope.launch { database.insert(response, forceInsert) }
 
-        return@contextualInvoke response
-    }
+		return@contextualInvoke response
+	}
 
-    suspend fun getCollection(
-        ids: List<String>? = null,
-        limit: Int = 10,
-        offset: Int? = null,
-        includes: List<DexEntityType>? = null,
-        forceInsert: Boolean = false,
-    ): RibaResult<List<RibaAuthor>> = contextualInvoke { scope ->
-        val response = service.getCollection(ids, limit, offset, includes?.map { it.toDexEnum() })
-        val riba = response.data.map { it.toRibaAuthor() }
+	suspend fun getCollection(
+		ids: List<String>? = null,
+		limit: Int = 10,
+		offset: Int? = null,
+		includes: List<DexEntityType>? = null,
+		forceInsert: Boolean = false,
+	): RibaResult<List<RibaAuthor>> = contextualInvoke { scope ->
+		val response = service.getCollection(ids, limit, offset, includes?.map { it.toDexEnum() })
+		val riba = response.data.map { it.toRibaAuthor() }
 
-        scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
+		scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
 
-        return@contextualInvoke riba
-    }
+		return@contextualInvoke riba
+	}
 
-    suspend fun getStrictCollection(
-        ids: List<String>,
-        forceInsert: Boolean = false,
-        tryDatabase: Boolean = true,
-    ): RibaResult<List<RibaAuthor>> = contextualInvoke {
-        val idMap: MutableMap<String, RibaAuthor?> = ids
-            .associateBy({ it }, { null })
-            .toMutableMap()
+	suspend fun getStrictCollection(
+		ids: List<String>,
+		forceInsert: Boolean = false,
+		tryDatabase: Boolean = true,
+	): RibaResult<List<RibaAuthor>> = contextualInvoke {
+		val idMap: MutableMap<String, RibaAuthor?> = ids
+			.associateBy({ it }, { null })
+			.toMutableMap()
 
-        if (tryDatabase) {
-            val localArtist = database.getCollection(ids)
-            idMap.putAll(localArtist.map { Pair(it.id, it) })
-        }
+		if (tryDatabase) {
+			val localArtist = database.getCollection(ids)
+			idMap.putAll(localArtist.map { Pair(it.id, it) })
+		}
 
-        val missingIds = idMap.filterValues { it == null }.keys.toList()
-        if (missingIds.isNotEmpty()) {
-            val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
-            response.forEach { artist -> idMap[artist.id] = artist }
-        }
+		val missingIds = idMap.filterValues { it == null }.keys.toList()
+		if (missingIds.isNotEmpty()) {
+			val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
+			response.forEach { artist -> idMap[artist.id] = artist }
+		}
 
-        return@contextualInvoke idMap.values.mapNotNull { it }
-    }
+		return@contextualInvoke idMap.values.mapNotNull { it }
+	}
 
-    companion object {
-        @JvmSuppressWildcards
-        interface APIService : RibaHttpService.Companion.APIService {
-            @GET("/author/{id}")
-            suspend fun get(@Path("id") id: String): DexAuthor
+	companion object {
+		@JvmSuppressWildcards
+		interface APIService : RibaHttpService.Companion.APIService {
+			@GET("/author/{id}")
+			suspend fun get(@Path("id") id: String): DexAuthor
 
-            @GET("/author")
-            suspend fun getCollection(
-                @Query("ids[]") ids: List<String>?,
-                @Query("limit") limit: Int?,
-                @Query("offset") offset: Int?,
-                @Query("includes[]") includes: List<String>?,
-            ): DexAuthorCollection
-        }
+			@GET("/author")
+			suspend fun getCollection(
+				@Query("ids[]") ids: List<String>?,
+				@Query("limit") limit: Int?,
+				@Query("offset") offset: Int?,
+				@Query("includes[]") includes: List<String>?,
+			): DexAuthorCollection
+		}
 
-        class Database(private val database: DexDatabase) :
-            RibaHttpService.Companion.Database(database) {
-            suspend fun get(id: String) = database.author().get(id)
+		class Database(private val database: DexDatabase) :
+			RibaHttpService.Companion.Database(database) {
+			suspend fun get(id: String) = database.author().get(id)
 
-            suspend fun getCollection(ids: List<String>) = database.author().get(ids)
+			suspend fun getCollection(ids: List<String>) = database.author().get(ids)
 
-            suspend fun insert(author: RibaAuthor, force: Boolean = false) {
-                val oldAuthor = database.author().get(author.id)
+			suspend fun insert(author: RibaAuthor, force: Boolean = false) {
+				val oldAuthor = database.author().get(author.id)
 
-                if (force.not() && oldAuthor != null && oldAuthor.version >= author.version) {
-                    return
-                }
+				if (force.not() && oldAuthor != null && oldAuthor.version >= author.version) {
+					return
+				}
 
-                database.author().insert(author)
-            }
+				database.author().insert(author)
+			}
 
-            suspend fun insertCollection(
-                context: CoroutineContext,
-                authors: List<RibaAuthor>,
-                force: Boolean = false
-            ) = withContext(context) {
-                val authorJob = this.async { authors.associateBy { it.id } }
-                val oldAuthorJob = this.async {
-                    getCollection(authors.map { it.id }).associateBy { it.id }
-                }
+			suspend fun insertCollection(
+				context: CoroutineContext,
+				authors: List<RibaAuthor>,
+				force: Boolean = false
+			) = withContext(context) {
+				val authorJob = this.async { authors.associateBy { it.id } }
+				val oldAuthorJob = this.async {
+					getCollection(authors.map { it.id }).associateBy { it.id }
+				}
 
-                val oldAuthorMap = oldAuthorJob.await()
-                val authorMap = authorJob.await()
+				val oldAuthorMap = oldAuthorJob.await()
+				val authorMap = authorJob.await()
 
-                for ((id, newThis) in authorMap) {
-                    val oldThis = oldAuthorMap[id]
+				for ((id, newThis) in authorMap) {
+					val oldThis = oldAuthorMap[id]
 
-                    if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-                        continue
-                    } else {
-                        launch { database.author().insert(newThis) }
-                    }
-                }
-            }
-        }
-    }
+					if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
+						continue
+					} else {
+						launch { database.author().insert(newThis) }
+					}
+				}
+			}
+		}
+	}
 }

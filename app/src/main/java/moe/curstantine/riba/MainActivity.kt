@@ -18,30 +18,30 @@ import moe.curstantine.riba.ui.common.components.MangoNavigationBar
 import moe.curstantine.riba.ui.theme.RibaTheme
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        setContent {
-            val state = RibaHostState.create()
-            val currentRoute by state.navigator.currentRouteAsState()
+		setContent {
+			val state = RibaHostState.create()
+			val currentRoute by state.navigator.currentRouteAsState()
 
-            RibaTheme {
-                Scaffold(
-                    snackbarHost = { SnackbarHost(state.snackbarHost) },
-                    content = { RibaNavHost(state, it) },
-                    bottomBar = {
-                        AnimatedVisibility(
-                            currentRoute.type == RibaRoute.Type.Default,
-                            exit = fadeOut() + shrinkVertically(),
-                            enter = fadeIn() + expandVertically(),
-                            content = { MangoNavigationBar(state.navigator) }
-                        )
-                    },
-                )
-            }
-        }
-    }
+			RibaTheme {
+				Scaffold(
+					snackbarHost = { SnackbarHost(state.snackbarHost) },
+					content = { RibaNavHost(state, it) },
+					bottomBar = {
+						AnimatedVisibility(
+							currentRoute.type == RibaRoute.Type.Default,
+							exit = fadeOut() + shrinkVertically(),
+							enter = fadeIn() + expandVertically(),
+							content = { MangoNavigationBar(state.navigator) }
+						)
+					},
+				)
+			}
+		}
+	}
 }
 
 

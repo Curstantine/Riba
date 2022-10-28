@@ -11,7 +11,7 @@ import moe.curstantine.riba.RibaHostState
 
 @Composable
 fun SearchScreen(state: RibaHostState, paddingValues: State<PaddingValues>) {
-    Column(Modifier.padding(paddingValues.value)) {
-        Text("Search")
-    }
+	Column(Modifier.padding(paddingValues.value)) {
+		Text("Search")
+	}
 }

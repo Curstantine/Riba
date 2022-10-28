@@ -16,45 +16,45 @@ import moe.curstantine.riba.nav.RibaRoute
 
 @Composable
 fun MangoNavigationBar(ribaNavigator: RibaNavigator) {
-    NavigationBar {
+	NavigationBar {
 
-        for (item in MangoNavigationBarItem.values()) {
-            NavigationBarItem(
-                icon = item.icon,
-                label = item.label,
-                selected = ribaNavigator.currentRoute() == item.route.path,
-                onClick = { ribaNavigator.navigateTo(item.route) },
-            )
-        }
-    }
+		for (item in MangoNavigationBarItem.values()) {
+			NavigationBarItem(
+				icon = item.icon,
+				label = item.label,
+				selected = ribaNavigator.currentRoute() == item.route.path,
+				onClick = { ribaNavigator.navigateTo(item.route) },
+			)
+		}
+	}
 }
 
 sealed class MangoNavigationBarItem(
-    val route: RibaRoute,
-    val icon: @Composable () -> Unit,
-    val label: @Composable () -> Unit,
+	val route: RibaRoute,
+	val icon: @Composable () -> Unit,
+	val label: @Composable () -> Unit,
 ) {
-    object Home : MangoNavigationBarItem(
-        route = RibaRoute.Home,
-        icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
-        label = { Text(stringResource(R.string.home)) },
-    )
+	object Home : MangoNavigationBarItem(
+		route = RibaRoute.Home,
+		icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
+		label = { Text(stringResource(R.string.home)) },
+	)
 
-    object Library : MangoNavigationBarItem(
-        route = RibaRoute.Library,
-        icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
-        label = { Text(stringResource(R.string.library)) },
-    )
+	object Library : MangoNavigationBarItem(
+		route = RibaRoute.Library,
+		icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
+		label = { Text(stringResource(R.string.library)) },
+	)
 
-    object Search : MangoNavigationBarItem(
-        route = RibaRoute.Search,
-        icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
-        label = { Text(stringResource(R.string.search)) },
-    )
+	object Search : MangoNavigationBarItem(
+		route = RibaRoute.Search,
+		icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
+		label = { Text(stringResource(R.string.search)) },
+	)
 
-    companion object {
-        fun values(): List<MangoNavigationBarItem> {
-            return listOf(Home, Library, Search)
-        }
-    }
+	companion object {
+		fun values(): List<MangoNavigationBarItem> {
+			return listOf(Home, Library, Search)
+		}
+	}
 }
