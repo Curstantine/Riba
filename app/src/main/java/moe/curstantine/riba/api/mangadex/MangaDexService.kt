@@ -9,18 +9,11 @@ import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.adapters.moshi.LocalDateTimeConverter
 import moe.curstantine.riba.api.adapters.moshi.MapMismatchArrayAdapter
 import moe.curstantine.riba.api.adapters.moshi.NormalizeMismatchType
+import moe.curstantine.riba.api.adapters.moshi.NormalizeDexLegacyUserRoles
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
 import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.DexEntityType
-import moe.curstantine.riba.api.mangadex.models.DexLocale
-import moe.curstantine.riba.api.mangadex.models.DexRelatedAuthor
-import moe.curstantine.riba.api.mangadex.models.DexRelatedCover
-import moe.curstantine.riba.api.mangadex.models.DexRelatedGroup
-import moe.curstantine.riba.api.mangadex.models.DexRelatedManga
-import moe.curstantine.riba.api.mangadex.models.DexRelatedUser
-import moe.curstantine.riba.api.mangadex.models.DexRelationship
-import moe.curstantine.riba.api.mangadex.models.DexRelationshipImpl
+import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.mangadex.services.AuthorService
 import moe.curstantine.riba.api.mangadex.services.ChapterService
 import moe.curstantine.riba.api.mangadex.services.GroupService
@@ -90,7 +83,8 @@ class MangaDexService(context: Context) {
 
 		mdlist = MDListService(
 			retrofit.create(MDListService.Companion.APIService::class.java),
-			MDListService.Companion.Database(database)
+			MDListService.Companion.Database(database),
+			user,
 		)
 	}
 
@@ -98,6 +92,7 @@ class MangaDexService(context: Context) {
 		val dexMoshi: Moshi = Moshi.Builder()
 			.add(LocalDateTimeConverter())
 			.add(MapMismatchArrayAdapter())
+			.add(NormalizeDexLegacyUserRoles.new())
 			.add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
 			.add(
 				// @formatter:off

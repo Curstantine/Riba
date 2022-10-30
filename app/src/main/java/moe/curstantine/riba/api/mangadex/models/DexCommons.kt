@@ -31,11 +31,8 @@ enum class DexResponseType {
 
 @JsonClass(generateAdapter = false)
 enum class DexUserRole {
-	/**
-	 * Unverified user.
-	 */
-	@field:Json(name = "ROLE_USER")
-	User,
+	@field:Json(name = "ROLE_UNVERIFIED")
+	Unverified,
 
 	/**
 	 * Normal user, this role is given to all users by default.
@@ -117,6 +114,25 @@ enum class DexUserRole {
 	Administrator;
 
 	override fun toString(): String = DexUtils.toTitleCase(name)
+
+	/**
+	 * @return [Json.name] of this enum value.
+	 * @throws NullPointerException  if the given annotation class is null
+	 * @throws IllegalArgumentException  if this doesn't have a [Json] annotation.
+	 */
+	fun toDexEnum(): String = this.declaringClass.getField(this.name)
+		.getAnnotation(Json::class.java)?.name ?: throw IllegalStateException("No Json annotation found for $this")
+
+
+	companion object {
+		/**
+		 * @throws IllegalArgumentException  if the given [name] is not a valid [Json.name] value.
+		 */
+		fun fromDexEnum(name: String): DexUserRole {
+			return DexUserRole::class.java.enumConstants?.firstOrNull { it.toDexEnum() == name }
+				?: throw IllegalArgumentException("No DexUserRole enum value with name $name")
+		}
+	}
 }
 
 
