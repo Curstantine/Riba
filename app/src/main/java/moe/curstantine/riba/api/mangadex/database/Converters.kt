@@ -3,11 +3,7 @@ package moe.curstantine.riba.api.mangadex.database
 import androidx.room.TypeConverter
 import com.squareup.moshi.adapter
 import moe.curstantine.riba.api.mangadex.MangaDexService
-import moe.curstantine.riba.api.mangadex.models.DexContentRating
-import moe.curstantine.riba.api.mangadex.models.DexListVisibility
-import moe.curstantine.riba.api.mangadex.models.DexLocale
-import moe.curstantine.riba.api.mangadex.models.DexLocaleObject
-import moe.curstantine.riba.api.mangadex.models.DexMangaTagGroup
+import moe.curstantine.riba.api.mangadex.models.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -25,6 +21,8 @@ class Converters {
 		private val dexLocaleObjectAdapter = MangaDexService.dexMoshi.adapter<DexLocaleObject>()
 		private val dexLocaleObjectListAdapter =
 			MangaDexService.dexMoshi.adapter<List<DexLocaleObject>>()
+
+		private val dexUserRoleListAdapter = MangaDexService.dexMoshi.adapter<List<DexUserRole>>()
 	}
 
 	@TypeConverter
@@ -84,4 +82,12 @@ class Converters {
 	@TypeConverter
 	fun fromDexLocaleObjectList(list: List<DexLocaleObject>): String =
 		dexLocaleObjectListAdapter.toJson(list)
+
+	@TypeConverter
+	fun toDexUserRoleList(string: String): List<DexUserRole> =
+		dexUserRoleListAdapter.fromJson(string)!!
+
+	@TypeConverter
+	fun fromDexUserRoleList(list: List<DexUserRole>): String =
+		dexUserRoleListAdapter.toJson(list)
 }

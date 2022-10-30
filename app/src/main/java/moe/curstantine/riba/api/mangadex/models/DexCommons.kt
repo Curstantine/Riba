@@ -6,7 +6,6 @@ import moe.curstantine.riba.R
 import moe.curstantine.riba.api.adapters.retrofit.EnumValue
 import moe.curstantine.riba.api.mangadex.DexUtils
 
-@Suppress("unused")
 @JsonClass(generateAdapter = false)
 enum class DexResult {
 	@field:Json(name = "ok")
@@ -21,7 +20,6 @@ enum class DexResult {
 	override fun toString() = DexUtils.toNormalizedString(name)
 }
 
-@Suppress("unused")
 @JsonClass(generateAdapter = false)
 enum class DexResponseType {
 	@field:Json(name = "entity")
@@ -31,7 +29,97 @@ enum class DexResponseType {
 	Collection
 }
 
-@Suppress("unused")
+@JsonClass(generateAdapter = false)
+enum class DexUserRole {
+	/**
+	 * Unverified user.
+	 */
+	@field:Json(name = "ROLE_USER")
+	User,
+
+	/**
+	 * Normal user, this role is given to all users by default.
+	 */
+	@field:Json(name = "ROLE_MEMBER")
+	Member,
+
+	/**
+	 * A group member, this role is given to any user who is in a scanlation group.
+	 *
+	 * Permissions are same as a normal [Member], but they can upload chapters under the group they are in
+	 * regardless of whether it's locked or not.
+	 */
+	@field:Json(name = "ROLE_GROUP_MEMBER")
+	GroupMember,
+
+	/**
+	 * Users who support the site by hosting their MD@H instance,
+	 * these users don't have any special permissions compared to [Member]s.
+	 */
+	@field:Json(name = "ROLE_MD_AT_HOME")
+	MdAtHome,
+
+	/**
+	 * A Contributor. As the name implies, someone who contributes to the site.
+	 *
+	 * These users can perform these actions without moderator approval.
+	 * - Create/Edit chapters
+	 * - Create/Edit titles
+	 */
+	@field:Json(name = "ROLE_CONTRIBUTOR")
+	Contributor,
+
+	/**
+	 * A group leader, this role is given to any user who is the leader of a scanlation group.
+	 *
+	 * These users can perform these actions without moderator approval.
+	 * - Create/Edit chapters
+	 * - Create/Edit titles
+	 * - Change group meta
+	 * - Invite users to the group
+	 */
+	@field:Json(name = "ROLE_GROUP_LEADER")
+	GroupLeader,
+
+	/**
+	 * User with elevated permissions, this role is given to users with 500 or more uploads.
+	 *
+	 * Permissions are same as [Contributor].
+	 */
+	@field:Json(name = "ROLE_POWER_UPLOADER")
+	PowerUploader,
+
+	/**
+	 * MangaDex staff, don't really know why this exists.
+	 *
+	 * Every user with [PublicRelation], [Designer], [ForumModerator],
+	 * [GlobalModerator], [Developer] [Administrator] in their role list have this role.
+	 */
+	@field:Json(name = "ROLE_STAFF")
+	Staff,
+
+	@field:Json(name = "ROLE_PUBLIC_RELATION")
+	PublicRelation,
+
+	@field:Json(name = "ROLE_DESIGNER")
+	Designer,
+
+	@field:Json(name = "ROLE_FORUM_MODERATOR")
+	ForumModerator,
+
+	@field:Json(name = "ROLE_GLOBAL_MODERATOR")
+	GlobalModerator,
+
+	@field:Json(name = "ROLE_DEVELOPER")
+	Developer,
+
+	@field:Json(name = "ROLE_ADMIN")
+	Administrator;
+
+	override fun toString(): String = DexUtils.toTitleCase(name)
+}
+
+
 @JsonClass(generateAdapter = false)
 enum class DexEntityType {
 	@field:Json(name = "author")
@@ -78,7 +166,14 @@ enum class DexEntityType {
 	Leader;
 
 	override fun toString(): String = DexUtils.toTitleCase(name)
-	fun toDexEnum(): String = DexUtils.toNormalizedString(name)
+
+	/**
+	 * @return [Json.name] of this enum value.
+	 * @throws NullPointerException  if the given annotation class is null
+	 * @throws IllegalArgumentException  if this doesn't have a [Json] annotation.
+	 */
+	fun toDexEnum(): String = this.declaringClass.getField(this.name)
+		.getAnnotation(Json::class.java)?.name ?: throw IllegalStateException("No Json annotation found for $this")
 }
 
 @JsonClass(generateAdapter = false)

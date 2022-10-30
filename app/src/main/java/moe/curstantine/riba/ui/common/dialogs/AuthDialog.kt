@@ -209,7 +209,6 @@ private fun AuthDialogContent(
 			)
 		}
 
-		// TODO: Someday fix this godawful layout.
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -220,10 +219,6 @@ private fun AuthDialogContent(
 				style = typography.labelMedium.copy(color = colorScheme.secondary),
 				onClick = { coroutineScope.launch { context.startActivity(forgotPasswordIntent) } },
 				text = AnnotatedString(stringResource(R.string.forgot_password))
-			)
-			Text(
-				stringResource(R.string.or),
-				style = typography.labelMedium.copy(color = colorScheme.secondary.copy(alpha = 0.35F))
 			)
 			ClickableText(
 				style = typography.labelMedium.copy(color = colorScheme.secondary),
