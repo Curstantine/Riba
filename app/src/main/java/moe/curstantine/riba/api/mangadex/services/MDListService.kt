@@ -3,28 +3,26 @@ package moe.curstantine.riba.api.mangadex.services
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.DexEntityType
-import moe.curstantine.riba.api.mangadex.models.DexMDList
-import moe.curstantine.riba.api.mangadex.models.toRibaMangaList
+import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaMangaList
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import kotlin.coroutines.CoroutineContext
 
 class MDListService(
 	override val service: APIService,
-	override val database: Database
+	override val database: Database,
+	private val userService: UserService,
 ) : MangaDexService.Companion.Service() {
 	override val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-	private val defaultMDListIncludes = listOf(
-		DexEntityType.Manga,
-		DexEntityType.User
-	)
+	private val defaultMDListIncludes = listOf(DexEntityType.User)
 
 	suspend fun get(
 		id: String,
@@ -37,10 +35,23 @@ class MDListService(
 			if (localList != null) return@contextualInvoke localList
 		}
 
-		val riba = service.get(id, includes.map { it.toDexEnum() }).data.toRibaMangaList()
+		val response = service.get(id, includes.map { it.toDexEnum() })
+		val riba = response.data.toRibaMangaList()
+
 		scope.launch { database.insert(riba, forceInsert) }
+		scope.launch { insertMeta(coroutineContext, response.data) }
 
 		return@contextualInvoke riba
+	}
+
+	private suspend fun insertMeta(context: CoroutineContext, list: DexMDListData) = withContext(context) {
+		launch {
+			val uploader = list.relationships
+				.first { it.type == DexEntityType.User }
+				.let { it as DexRelatedUser }
+
+			userService.database.insert(uploader.toRibaUser())
+		}
 	}
 
 	companion object {
