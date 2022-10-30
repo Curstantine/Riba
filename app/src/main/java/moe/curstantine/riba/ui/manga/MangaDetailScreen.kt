@@ -97,13 +97,18 @@ import kotlin.math.roundToInt
 fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val isRefreshing by viewModel.isRefreshing.collectAsState()
+
 	val manga by viewModel.manga.collectAsState()
+	val statistic by viewModel.statistic.collectAsState()
+	val cover by viewModel.statistic.collectAsState()
+
+	val isLoading = remember(manga, statistic) { manga == null && statistic == null && cover == null }
 
 	SwipeRefresh(
 		state = rememberSwipeRefreshState(isRefreshing),
 		onRefresh = { viewModel.refresh() }
 	) {
-		if (manga == null || isRefreshing) FlexibleIndicator() else {
+		if (isLoading || isRefreshing) FlexibleIndicator() else {
 			Scaffold(
 				topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
 				snackbarHost = { SnackbarHost(state.snackbarHost) },
