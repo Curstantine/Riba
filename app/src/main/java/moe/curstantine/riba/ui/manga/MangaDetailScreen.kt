@@ -4,33 +4,11 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Book
-import androidx.compose.material.icons.rounded.Bookmark
-import androidx.compose.material.icons.rounded.BookmarkAdd
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.Sync
-import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -74,6 +52,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
 import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexCoverSize
@@ -91,6 +70,7 @@ import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
+import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -126,6 +106,7 @@ private fun MangaDetailBody(
 	viewModel: MangaDetailsViewModel,
 ) {
 	val chapters by viewModel.chapters.collectAsState()
+	var chapterListEndReached by remember { mutableStateOf(false) }
 
 	LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
 		item { MangaDetailHeader(state, paddingValues, viewModel) }
@@ -151,8 +132,8 @@ private fun MangaDetailBody(
 			}
 		}
 
-		item {
-			AnimatedVisibility(visible = chapters is RibaResult.Success) {
+		if (chapters is RibaResult.Success) {
+			item {
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
@@ -171,17 +152,21 @@ private fun MangaDetailBody(
 					}
 				}
 			}
-		}
 
-		if (chapters is RibaResult.Success) {
+
+
 			items((chapters as RibaResult.Success<List<RibaFulfilledChapter>>).value) {
 				ChapterItem(it)
 			}
-		}
 
-		item {
-			LaunchedEffect(true) {
-				Log.d(DexLogTag.DEBUG.tag, "Bottom hit")
+			if ((chapters as RibaResult.Success<List<RibaFulfilledChapter>>).value.isNotEmpty()) {
+				item {
+					LaunchedEffect(true) {
+						if (!chapterListEndReached) {
+							chapterListEndReached = viewModel.startPagination()
+						}
+					}
+				}
 			}
 		}
 	}
@@ -568,7 +553,13 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 	ViewModel() {
 	// TODO: Add pagination and filtering.
 	private val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
-	private val offset = MutableStateFlow(0)
+
+	/**
+	 * Offset shouldstart from 0, to collection limit.
+	 *
+	 * Null is used when there are no more chapters to fetch.
+	 */
+	private val offset = MutableStateFlow<Int?>(0)
 
 	private val _isRefreshing = MutableStateFlow(false)
 	val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
@@ -668,42 +659,61 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 			}
 		}
 
-		launch {
-			val response = service.mangadex.chapter.getCollection(
-				mangaId = mangaId,
-				forceInsert = refresh,
-				sort = Pair(DexChapterQueryOrderProperty.Chapter, DexQueryOrderValue.Descending),
-				limit = 50,
-				translatedLanguage = translatedLanguages.value,
-				offset = offset.value,
-			)
+		launch { handleChapterLoad(refresh) }
+	}
 
-			_chapters.emit(response.map { it.data.values.flatten() })
+	private suspend fun handleChapterLoad(refresh: Boolean) = withContext(coroutineContext) {
+		val response = service.mangadex.chapter.getCollection(
+			mangaId = mangaId,
+			forceInsert = refresh,
+			sort = Pair(DexChapterQueryOrderProperty.Chapter, DexQueryOrderValue.Descending),
+			limit = 50,
+			translatedLanguage = translatedLanguages.value,
+			offset = offset.value,
+		)
 
-			if (response is RibaResult.Error) {
-				Log.e(
-					DexLogTag.DEBUG.tag,
-					"Error while fetching chapters for $mangaId",
-					response.error as Throwable
-				)
-			} else if (response is RibaResult.Success) {
-				val size = response.value.data.values.size
-				val total = response.value.total
-
-				if (size < total) {
-					offset.value += size
-				}
+		val flattened: RibaResult<List<RibaFulfilledChapter>> = response
+			.map { it.data[mangaId]!! }
+			.map {
+				if (_chapters.value is RibaResult.Success) {
+					it + (_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value
+				} else it
 			}
+
+		_chapters.emit(flattened)
+
+		if (response is RibaResult.Success) {
+			val size = response.value.data[mangaId]!!.size
+			val total = response.value.total
+
+			if (size < total) offset.value = offset.value?.plus(size) else offset.value = null
+		} else {
+			Log.e(
+				DexLogTag.DEBUG.tag,
+				"Error while fetching chapters for $mangaId",
+				response.unwrapError() as Throwable
+			)
 		}
 	}
 
-	fun loadPaginatedChapters(offset: Int) {
-		this.offset.value = offset
-		loadDetails()
+	/**
+	 * Returns true if the end is reached.
+	 */
+	fun startPagination(): Boolean {
+		if (offset.value == null) {
+			Log.i(DexLogTag.DEBUG.tag, "End of pagination reached.")
+			return true
+		}
+
+		Log.i(DexLogTag.DEBUG.tag, "Starting pagination for $mangaId, on offset: ${offset.value}")
+		viewModelScope.launch { handleChapterLoad(false) }
+
+		return false
 	}
 
 	fun refresh() = viewModelScope.launch(Dispatchers.IO) {
 		_isRefreshing.emit(true)
+		offset.emit(0)
 		loadDetails(true).run { _isRefreshing.emit(false) }
 	}
 
@@ -712,7 +722,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 			private val service: RibaAPIService,
 			private val mangaId: String,
 		) : ViewModelProvider.Factory {
-			fun <T : ViewModel?> create(modelClass: Class<T>): MangaDetailsViewModel {
+			fun create(): MangaDetailsViewModel {
 				return MangaDetailsViewModel(service, mangaId)
 			}
 		}
