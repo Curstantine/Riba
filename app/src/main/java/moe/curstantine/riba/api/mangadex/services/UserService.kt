@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.mangadex.DexConstants
@@ -47,18 +49,14 @@ class UserService(
 		Context.MODE_PRIVATE
 	)
 
-	private val currentUser = MutableLiveData<RibaUser?>(null)
-
-	/**
-	 * Getter for the current user.
-	 */
-	fun getCurrentUser(): LiveData<RibaUser?> = currentUser
+	private val _currentUser = MutableStateFlow<RibaUser?>(null)
+	val currentUser: StateFlow<RibaUser?> = _currentUser.asStateFlow()
 
 	init {
 		coroutineScope.launch {
 			try {
 				handleTokenExpiry()
-				currentUser.postValue(getCurrentUserDetails().unwrap())
+				_currentUser.emit(getCurrentUserDetails().unwrap())
 			} catch (e: DexError) {
 				Log.w(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
 			}
@@ -74,7 +72,7 @@ class UserService(
 		it.launch {
 			val details = getCurrentUserDetails(sessionOverride = response.token.session).unwrap()
 			setPreferences(details.id, response.token)
-			currentUser.postValue(details)
+			_currentUser.emit(details)
 		}
 
 		return@contextualInvoke response
@@ -87,7 +85,7 @@ class UserService(
 
 		it.launch {
 			removePreferences()
-			currentUser.postValue(null)
+			_currentUser.emit(null)
 		}
 
 		return@contextualInvoke response
@@ -99,7 +97,7 @@ class UserService(
 
 			it.launch {
 				setPreferences(getUserId(), response.token)
-				currentUser.postValue(getCurrentUserDetails(tryDatabase = true).unwrap())
+				_currentUser.emit(getCurrentUserDetails(tryDatabase = true).unwrap())
 			}
 
 			return@contextualInvoke response

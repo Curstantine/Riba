@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 							currentRoute.type == RibaRoute.Type.Default,
 							exit = fadeOut() + shrinkVertically(),
 							enter = fadeIn() + expandVertically(),
-							content = { MangoNavigationBar(state.navigator) }
+							content = { MangoNavigationBar(state) }
 						)
 					},
 				)

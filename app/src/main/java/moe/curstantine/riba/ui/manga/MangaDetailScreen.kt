@@ -47,14 +47,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,17 +61,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,12 +85,7 @@ import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaResult
-import moe.curstantine.riba.api.riba.models.RibaAuthor
-import moe.curstantine.riba.api.riba.models.RibaCover
-import moe.curstantine.riba.api.riba.models.RibaFulfilledChapter
-import moe.curstantine.riba.api.riba.models.RibaResultManga
-import moe.curstantine.riba.api.riba.models.RibaStatistic
-import moe.curstantine.riba.api.riba.models.RibaTag
+import moe.curstantine.riba.api.riba.models.*
 import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Nunito
@@ -111,7 +97,7 @@ import kotlin.math.roundToInt
 fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val isRefreshing by viewModel.isRefreshing.collectAsState()
-	val manga by viewModel.getDetails().observeAsState()
+	val manga by viewModel.manga.collectAsState()
 
 	SwipeRefresh(
 		state = rememberSwipeRefreshState(isRefreshing),
@@ -121,7 +107,7 @@ fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 			Scaffold(
 				topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
 				snackbarHost = { SnackbarHost(state.snackbarHost) },
-				content = { MangaDetailBody(state, scrollBehavior, it, manga!!) }
+				content = { MangaDetailBody(state, scrollBehavior, it, viewModel) }
 			)
 		}
 	}
@@ -132,12 +118,12 @@ private fun MangaDetailBody(
 	state: RibaHostState,
 	scrollBehavior: TopAppBarScrollBehavior,
 	paddingValues: PaddingValues,
-	details: RibaResultManga
+	viewModel: MangaDetailsViewModel,
 ) {
-	val chapters = remember { details.chapters }
+	val chapters by viewModel.chapters.collectAsState()
 
 	LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
-		item { MangaDetailHeader(state, paddingValues, details) }
+		item { MangaDetailHeader(state, paddingValues, viewModel) }
 
 		item {
 			AnimatedVisibility(visible = chapters is RibaResult.Error) {
@@ -151,7 +137,7 @@ private fun MangaDetailBody(
 							.padding(horizontal = 16.dp, vertical = 4.dp)
 					) {
 						Text(
-							text = chapters.error.human,
+							text = (chapters as RibaResult.Error).error.human,
 							style = MaterialTheme.typography.bodyMedium,
 							color = MaterialTheme.colorScheme.onError,
 						)
@@ -183,7 +169,15 @@ private fun MangaDetailBody(
 		}
 
 		if (chapters is RibaResult.Success) {
-			items(chapters.value) { ChapterItem(it) }
+			items((chapters as RibaResult.Success<List<RibaFulfilledChapter>>).value) {
+				ChapterItem(it)
+			}
+		}
+
+		item {
+			LaunchedEffect(true) {
+				Log.d(DexLogTag.DEBUG.tag, "Bottom hit")
+			}
 		}
 	}
 }
@@ -192,50 +186,56 @@ private fun MangaDetailBody(
 private fun MangaDetailHeader(
 	hostState: RibaHostState,
 	paddingValues: PaddingValues,
-	details: RibaResultManga
+	viewModel: MangaDetailsViewModel,
 ) {
 	val typography = MaterialTheme.typography
 	val colorScheme = MaterialTheme.colorScheme
+	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+
 	val clipboardManager = LocalClipboardManager.current
 	val coroutineScope = rememberCoroutineScope()
 
 	val notAvailable = stringResource(R.string.not_available)
-	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+	val shareMessage = stringResource(R.string.copied_to_clipboard, stringResource(R.string.link).lowercase())
 
-	val manga = remember { details.manga.unwrap() }
-	val stats = remember { details.statistic?.unwrapOrNull() }
-	val currentUser by hostState.service.mangadex.user.getCurrentUser().observeAsState()
+	val currentUser by hostState.service.mangadex.user.currentUser.collectAsState()
+	val manga by viewModel.manga.collectAsState()
+	val stats by viewModel.statistic.collectAsState()
+	val followed by viewModel.followed.collectAsState()
+	val authors by viewModel.authors.collectAsState()
+	val artists by viewModel.artists.collectAsState()
+	val cover by viewModel.cover.collectAsState()
+	val tags by viewModel.tags.collectAsState()
 
-	val tags = remember {
-		details.tags
-			?.unwrapOrNull()
-			?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
+	val localizedAuthors = remember(authors) {
+		authors?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
 	}
 
-	val authors = remember {
-		details.authors?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
-	}
-	val artists = remember {
-		details.artists?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
-	}
-	val artistsAndAuthors = remember {
-		(authors + artists.filter { it !in authors }).ifEmpty { null }
+	val localizedArtists = remember(artists) {
+		artists?.unwrapOrNull()?.map { it.name ?: notAvailable } ?: emptyList()
 	}
 
-	val isMoreEnabled = remember {
-		manga.description != null
-			&& manga.description[DexLocale.English] != null
-			|| tags.size > 5
+	val localizedTags = remember(tags) {
+		tags?.unwrapOrNull()?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
+	}
+
+	val artistAuthors = remember(localizedAuthors, localizedArtists) {
+		val filteredArtists = localizedArtists.filter { it !in localizedAuthors }
+		(localizedAuthors + filteredArtists).ifEmpty { null }
+	}
+
+	val isMoreEnabled = remember(manga) {
+		if (manga == null || manga is RibaResult.Error) false else {
+			val privateMango = manga!!.unwrap()
+			val privateTags = tags?.unwrapOrNull()
+
+			(privateMango.description != null && privateMango.description[DexLocale.English] != null)
+				|| (privateTags != null && privateTags.size > 5)
+		}
 	}
 
 	var isDetailsExpanded by remember { mutableStateOf(false) }
-	var isFollowed by remember { mutableStateOf(details.isFollowing?.unwrapOrNull() ?: false) }
 	var hasTrackers by remember { mutableStateOf(false) }
-
-	val shareMessage = stringResource(
-		R.string.copied_to_clipboard,
-		stringResource(R.string.link).lowercase()
-	)
 
 	Column(
 		modifier = Modifier
@@ -245,12 +245,14 @@ private fun MangaDetailHeader(
 			.padding(horizontal = 16.dp)
 			.padding(bottom = 16.dp)
 	) {
+		val privateManga = remember(manga) { manga!!.unwrap() }
+
 		Row(
 			modifier = Modifier.heightIn(220.dp),
 			horizontalArrangement = Arrangement.spacedBy(16.dp)
 		) {
 			MangaCover(
-				details.cover?.unwrapOrNull(),
+				cover?.unwrapOrNull(),
 				maxHeight = 220.dp,
 				coverSize = DexCoverSize.Medium,
 			)
@@ -261,21 +263,18 @@ private fun MangaDetailHeader(
 			) {
 				Column(Modifier.padding(bottom = 16.dp)) {
 					Text(
-						text = manga.title?.get(DexLocale.English)
-							?: stringResource(R.string.no_title),
-						style = typography.headlineSmall.copy(
-							fontWeight = FontWeight.Bold,
-							fontFamily = Rubik
-						)
+						text = privateManga.title?.get(DexLocale.English) ?: notAvailable,
+						style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontFamily = Rubik)
 					)
 					Text(
-						text = artistsAndAuthors?.joinToString(", ")
-							?: stringResource(R.string.no_author_artists),
+						text = artistAuthors?.joinToString(", ") ?: stringResource(R.string.no_author_artists),
 						style = typography.labelMedium.copy(color = mutedOnBackground)
 					)
 				}
 
 				if (stats != null) {
+					val privateStats = remember { stats!!.unwrap() }
+
 					FlowRow(
 						modifier = Modifier.padding(bottom = 8.dp),
 						mainAxisSpacing = 12.dp,
@@ -294,7 +293,7 @@ private fun MangaDetailHeader(
 							)
 							Spacer(modifier = Modifier.width(2.dp))
 							Text(
-								text = ((stats.bayesian * 100.0).roundToInt() / 100.0).toString(),
+								text = ((privateStats.bayesian * 100.0).roundToInt() / 100.0).toString(),
 								style = textStyle,
 								color = colorScheme.primary
 							)
@@ -309,7 +308,7 @@ private fun MangaDetailHeader(
 							)
 							Spacer(modifier = Modifier.width(2.dp))
 							Text(
-								text = stats.follows.toString(),
+								text = privateStats.follows.toString(),
 								style = textStyle,
 								color = mutedOnBackground
 							)
@@ -339,18 +338,20 @@ private fun MangaDetailHeader(
 			modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
 			horizontalArrangement = Arrangement.spacedBy(4.dp)
 		) {
-			if (currentUser != null) {
+			val privateFollowed = remember(followed) { followed?.unwrapOrNull() }
+
+			if (currentUser != null && privateFollowed != null) {
 				OutlinedIconToggleButton(
-					checked = isFollowed,
+					checked = privateFollowed,
 					onCheckedChange = {
 						coroutineScope.launch {
 							val res = hostState.service.mangadex.manga.let {
-								if (!isFollowed) it.follow(manga.id)
-								else it.unfollow(manga.id)
+								if (!privateFollowed) it.follow(privateManga.id)
+								else it.unfollow(privateManga.id)
 							}
 
 							when (res) {
-								is RibaResult.Success -> isFollowed = !isFollowed
+								is RibaResult.Success -> viewModel.followed.emit(RibaResult.Success(!privateFollowed))
 								is RibaResult.Error -> {
 									hostState.snackbarHost.showSnackbar(res.error.human)
 								}
@@ -377,7 +378,7 @@ private fun MangaDetailHeader(
 			OutlinedIconButton(
 				onClick = {
 					coroutineScope.launch {
-						clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(manga.id)))
+						clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(privateManga.id)))
 						hostState.snackbarHost.showSnackbar(message = shareMessage)
 					}
 				},
@@ -400,12 +401,12 @@ private fun MangaDetailHeader(
 
 			Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 				FlowRow(mainAxisSpacing = 16.dp, crossAxisSpacing = 16.dp) {
-					DetailChipRow(authors, stringResource(R.string.authors), constraints.maxWidth)
-					DetailChipRow(artists, stringResource(R.string.artists), constraints.maxWidth)
+					DetailChipRow(localizedAuthors, stringResource(R.string.authors), constraints.maxWidth)
+					DetailChipRow(localizedArtists, stringResource(R.string.artists), constraints.maxWidth)
 				}
 
-				if (tags.size <= 5) {
-					DetailChipRow(tags, stringResource(R.string.tags), constraints.maxWidth)
+				if (localizedTags.size <= 5) {
+					DetailChipRow(localizedTags, stringResource(R.string.tags), constraints.maxWidth)
 				}
 			}
 		}
@@ -413,14 +414,14 @@ private fun MangaDetailHeader(
 
 		AnimatedVisibility(isDetailsExpanded) {
 			Column {
-				if (tags.size > 5) {
+				if (localizedTags.size > 5) {
 					BoxWithConstraints(Modifier.padding(top = 14.dp)) {
-						DetailChipRow(tags, stringResource(R.string.tags), this.maxWidth)
+						DetailChipRow(localizedTags, stringResource(R.string.tags), this.maxWidth)
 					}
 				}
 
 				// TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-				if (manga.description != null && manga.description[DexLocale.English] != null) {
+				if (privateManga.description != null && privateManga.description[DexLocale.English] != null) {
 					Spacer(Modifier.padding(top = 14.dp))
 
 					Text(
@@ -434,7 +435,7 @@ private fun MangaDetailHeader(
 					)
 
 					MarkdownText(
-						markdown = manga.description[DexLocale.English]!!,
+						markdown = privateManga.description[DexLocale.English]!!,
 						style = typography.bodyMedium.copy(
 							fontFamily = Nunito,
 							color = colorScheme.onBackground.copy(alpha = 0.75F)
@@ -567,9 +568,31 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 	private val _isRefreshing = MutableStateFlow(false)
 	val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
 
-	fun getDetails(): LiveData<RibaResultManga> = details
-	private val details: MutableLiveData<RibaResultManga> by lazy {
-		MutableLiveData<RibaResultManga>().also { loadDetails() }
+	val followed = MutableStateFlow<RibaResult<Boolean>?>(null)
+
+	private val _manga = MutableStateFlow<RibaResult<RibaManga>?>(null)
+	val manga: StateFlow<RibaResult<RibaManga>?> get() = _manga.asStateFlow()
+
+	private val _statistic = MutableStateFlow<RibaResult<RibaStatistic>?>(null)
+	val statistic: StateFlow<RibaResult<RibaStatistic>?> get() = _statistic.asStateFlow()
+
+	private val _cover = MutableStateFlow<RibaResult<RibaCover>?>(null)
+	val cover: StateFlow<RibaResult<RibaCover>?> get() = _cover.asStateFlow()
+
+	private val _authors = MutableStateFlow<RibaResult<List<RibaAuthor>>?>(null)
+	val authors: StateFlow<RibaResult<List<RibaAuthor>>?> get() = _authors.asStateFlow()
+
+	private val _artists = MutableStateFlow<RibaResult<List<RibaAuthor>>?>(null)
+	val artists: StateFlow<RibaResult<List<RibaAuthor>>?> get() = _artists.asStateFlow()
+
+	private val _tags = MutableStateFlow<RibaResult<List<RibaTag>>?>(null)
+	val tags: StateFlow<RibaResult<List<RibaTag>>?> get() = _tags.asStateFlow()
+
+	private val _chapters = MutableStateFlow<RibaResult<List<RibaFulfilledChapter>>?>(null)
+	val chapters: StateFlow<RibaResult<List<RibaFulfilledChapter>>?> get() = _chapters.asStateFlow()
+
+	init {
+		loadDetails()
 	}
 
 	private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
@@ -578,31 +601,69 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 			"${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
 		)
 
-		val localManga = when (val mangaData = service.mangadex.manga.get(
-			mangaId, forceInsert = refresh, tryDatabase = !refresh
-		)) {
-			is RibaResult.Success -> mangaData.unwrapOrNull()!!
-			is RibaResult.Error -> return@launch details
-				.postValue(RibaResultManga.fromNullables(mangaData))
+		val localManga = service.mangadex.manga
+			.get(mangaId, forceInsert = refresh, tryDatabase = !refresh)
+			.also { _manga.emit(it) }
+			.let { if (it is RibaResult.Success) it.value else return@launch }
+
+		launch {
+			followed.emit(service.mangadex.manga.checkFollowStatus(mangaId, refresh))
 		}
 
-		val artists: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-			service.mangadex.author.getStrictCollection(
-				localManga.artistIds,
-				forceInsert = refresh,
-				tryDatabase = !refresh
+		launch {
+			_statistic.emit(service.mangadex.manga.getStatistic(mangaId))
+		}
+
+		launch {
+			_artists.emit(
+				service.mangadex.author.getStrictCollection(
+					localManga.artistIds,
+					forceInsert = refresh,
+					tryDatabase = !refresh
+				)
 			)
 		}
 
-		val authors: Deferred<RibaResult<List<RibaAuthor>>> = async(Dispatchers.IO) {
-			service.mangadex.author.getStrictCollection(
-				localManga.authorIds,
-				forceInsert = refresh,
-				tryDatabase = !refresh,
+		launch {
+			_authors.emit(
+				service.mangadex.author.getStrictCollection(
+					localManga.authorIds,
+					forceInsert = refresh,
+					tryDatabase = !refresh,
+				)
 			)
 		}
 
-		val chapters: Deferred<RibaResult<List<RibaFulfilledChapter>>> = async(Dispatchers.IO) {
+		launch {
+			if (localManga.coverId != null) {
+				_cover.emit(
+					service.mangadex.manga.getCover(
+						localManga.coverId,
+						forceInsert = refresh,
+						tryDatabase = !refresh,
+					)
+				)
+			}
+		}
+
+		launch {
+			val resolve = service.mangadex.manga.database.getTagCollection(localManga.tagIds)
+
+			if (resolve.size != localManga.tagIds.size) {
+				val error = DexError(
+					"Failed to resolve tags",
+					"Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
+				)
+
+				Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
+
+				_tags.emit(RibaResult.Error(error))
+			} else {
+				_tags.emit(RibaResult.Success(resolve))
+			}
+		}
+
+		launch {
 			val response = service.mangadex.chapter.getCollection(
 				mangaId = mangaId,
 				forceInsert = refresh,
@@ -611,6 +672,8 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 				translatedLanguage = translatedLanguages.value,
 				offset = offset.value,
 			)
+
+			_chapters.emit(response.map { it.data.values.flatten() })
 
 			if (response is RibaResult.Error) {
 				Log.e(
@@ -626,66 +689,28 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 					offset.value += size
 				}
 			}
-
-			return@async response.map { it.data.values.flatten() }
 		}
-
-		val statistic: Deferred<RibaResult<RibaStatistic>> = async(Dispatchers.IO) {
-			service.mangadex.manga.getStatistic(mangaId)
-		}
-
-		val cover: Deferred<RibaResult<RibaCover?>> = async(Dispatchers.IO) {
-			if (localManga.coverId == null) {
-				return@async RibaResult.Success(null)
-			}
-
-			return@async service.mangadex.manga.getCover(
-				localManga.coverId,
-				forceInsert = refresh,
-				tryDatabase = !refresh,
-			)
-		}
-
-		val tags: Deferred<RibaResult<List<RibaTag>>> = async(Dispatchers.IO) {
-			val resolve = service.mangadex.manga.database.getTagCollection(localManga.tagIds)
-
-			if (resolve.size != localManga.tagIds.size) {
-				val error = DexError(
-					"Failed to resolve tags",
-					"Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
-				)
-
-				Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
-
-				return@async RibaResult.Error(error)
-			}
-
-			return@async RibaResult.Success(resolve)
-		}
-
-		val isFollowing: Deferred<RibaResult<Boolean>> = async(Dispatchers.IO) {
-			return@async service.mangadex.manga.checkFollowStatus(mangaId, refresh)
-		}
-
-		details.postValue(
-			RibaResultManga(
-				manga = RibaResult.Success(localManga),
-				artists = artists.await(),
-				authors = authors.await(),
-				cover = cover.await(),
-				tags = tags.await(),
-				statistic = statistic.await(),
-				chapters = chapters.await(),
-				isFollowing = isFollowing.await()
-			)
-		)
 	}
 
+	fun loadPaginatedChapters(offset: Int) {
+		this.offset.value = offset
+		loadDetails()
+	}
 
 	fun refresh() = viewModelScope.launch(Dispatchers.IO) {
 		_isRefreshing.emit(true)
-		loadDetails(true)
-		_isRefreshing.emit(false)
+		loadDetails(true).run { _isRefreshing.emit(false) }
+	}
+
+	companion object {
+		class Factory(
+			private val service: RibaAPIService,
+			private val mangaId: String,
+		) : ViewModelProvider.Factory {
+			fun <T : ViewModel?> create(modelClass: Class<T>): MangaDetailsViewModel {
+				return MangaDetailsViewModel(service, mangaId)
+			}
+		}
 	}
 }
 
@@ -698,7 +723,19 @@ private fun DetailBodyPreview() {
 	RibaTheme {
 		Scaffold(
 			topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-			content = { MangaDetailBody(state, scrollBehavior, it, RibaResultManga.getDefault()) }
+			content = {
+				MangaDetailBody(
+					state,
+					scrollBehavior,
+					it,
+					viewModel(
+						factory = MangaDetailsViewModel.Companion.Factory(
+							state.service,
+							RibaManga.getDefault().id
+						)
+					)
+				)
+			}
 		)
 	}
 }
