@@ -1,10 +1,42 @@
 # Riba
 
-Lightweight Android client for [MangaDex](https://mangadex.org/) that aims to be 
-1:1 with the API/website (except for anything that requires recaptcha).
+Lightweight Android client for [MangaDex](https://mangadex.org/) that aims to be a full replacement for the official
+website.
 
-# Pitfalls
+Requires Android 8.0 or newer.
 
-- API 26 (Oreo) and up only.
+## Features
 
-- Less animations.
+- [ ] Home page:
+	- [x] Seasonal titles.
+	- [x] Recently added titles.
+	- [ ] Latest updates.
+
+- [ ] Manga details page:
+	- [x] General title details.
+	- [x] Mutating the follow feed.
+	- [x] Chapters list.
+	- [ ] Related titles.
+	- [ ] Link to artists, authors and tags.
+	- [ ] Trackers.
+
+- [ ] Reader:
+	- [ ] Handling basic images.
+	- [ ] Chapter based comments.
+
+- [ ] Library page:
+	- [ ] Followed titles.
+	- [ ] MDLists.
+
+- [ ] User Profile:
+	- [x] Authentication.
+	- [ ] Viewing, editing details of the logged in user.
+
+## License
+
+This project is licensed under [ICCLEIYSIUYA](./LICENSE.md).
+
+## Disclaimer
+
+This app is in no way affiliated with [MangaDex](https://mangadex.org),
+it uses data that's publicly available on the [MangaDex API](https://api.mangadex.org).
