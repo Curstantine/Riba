@@ -2,8 +2,8 @@
 agp_version = "7.3.1"
 
 [libraries]
-core = "androidx.core:core-ktx:1.7.0"
-lifecycle_runtime = 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+core = "androidx.core:core-ktx:1.9.0"
+lifecycle_runtime = 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
 
 [plugins]
 application = { id = "com.android.application", version.ref = "agp_version" }
