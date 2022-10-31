@@ -56,7 +56,7 @@ class UserService(
 		coroutineScope.launch {
 			try {
 				handleTokenExpiry()
-				_currentUser.emit(getCurrentUserDetails().unwrap())
+				_currentUser.emit(getCurrentUserDetails(tryDatabase = true).unwrap())
 			} catch (e: DexError) {
 				Log.w(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
 			}
@@ -143,7 +143,7 @@ class UserService(
 	fun getSessionToken(prefixed: Boolean = true): String {
 		return preferences.getString("session", null)
 			?.apply { if (prefixed) return "Bearer $this" }
-			?: throw  DexError.Companion.NotAuthenticated
+			?: throw DexError.Companion.NotAuthenticated
 	}
 
 	/**
