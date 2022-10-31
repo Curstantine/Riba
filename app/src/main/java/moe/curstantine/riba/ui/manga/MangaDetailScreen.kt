@@ -673,7 +673,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 		)
 
 		val flattened: RibaResult<List<RibaFulfilledChapter>> = response
-			.map { it.data[mangaId]!! }
+			.map { it.data[mangaId] ?: emptyList() }
 			.map {
 				if (_chapters.value is RibaResult.Success) {
 					it + (_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value
@@ -683,10 +683,11 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 		_chapters.emit(flattened)
 
 		if (response is RibaResult.Success) {
-			val size = response.value.data[mangaId]!!.size
+			val size = response.value.data[mangaId]?.size
 			val total = response.value.total
 
-			if (size < total) offset.value = offset.value?.plus(size) else offset.value = null
+			if (size != null && size < total) offset.value = offset.value?.plus(size)
+			else offset.value = null
 		} else {
 			Log.e(
 				DexLogTag.DEBUG.tag,
