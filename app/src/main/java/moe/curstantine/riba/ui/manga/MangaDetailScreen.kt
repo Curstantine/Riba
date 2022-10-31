@@ -9,22 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.OutlinedIconToggleButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,7 +55,7 @@ import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
-import kotlin.coroutines.coroutineContext
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 @Composable
@@ -84,16 +69,11 @@ fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 
 	val isLoading = remember(manga, statistic) { manga == null && statistic == null && cover == null }
 
-	SwipeRefresh(
-		state = rememberSwipeRefreshState(isRefreshing),
-		onRefresh = { viewModel.refresh() }
-	) {
+	SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing), onRefresh = { viewModel.refresh() }) {
 		if (isLoading || isRefreshing) FlexibleIndicator() else {
-			Scaffold(
-				topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+			Scaffold(topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
 				snackbarHost = { SnackbarHost(state.snackbarHost) },
-				content = { MangaDetailBody(state, scrollBehavior, it, viewModel) }
-			)
+				content = { MangaDetailBody(state, scrollBehavior, it, viewModel) })
 		}
 	}
 }
@@ -106,6 +86,7 @@ private fun MangaDetailBody(
 	viewModel: MangaDetailsViewModel,
 ) {
 	val chapters by viewModel.chapters.collectAsState()
+	val areChaptersLoading by viewModel.areChaptersLoading.collectAsState()
 	var chapterListEndReached by remember { mutableStateOf(false) }
 
 	LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
@@ -153,8 +134,6 @@ private fun MangaDetailBody(
 				}
 			}
 
-
-
 			items((chapters as RibaResult.Success<List<RibaFulfilledChapter>>).value) {
 				ChapterItem(it)
 			}
@@ -167,6 +146,12 @@ private fun MangaDetailBody(
 						}
 					}
 				}
+			}
+		}
+
+		item {
+			AnimatedVisibility(areChaptersLoading) {
+				LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
 			}
 		}
 	}
@@ -183,7 +168,6 @@ private fun MangaDetailHeader(
 	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
 
 	val clipboardManager = LocalClipboardManager.current
-	val coroutineScope = rememberCoroutineScope()
 
 	val notAvailable = stringResource(R.string.not_available)
 	val shareMessage = stringResource(R.string.copied_to_clipboard, stringResource(R.string.link).lowercase())
@@ -219,8 +203,7 @@ private fun MangaDetailHeader(
 			val privateMango = manga!!.unwrap()
 			val privateTags = tags?.unwrapOrNull()
 
-			(privateMango.description != null && privateMango.description[DexLocale.English] != null)
-				|| (privateTags != null && privateTags.size > 5)
+			(privateMango.description != null && privateMango.description[DexLocale.English] != null) || (privateTags != null && privateTags.size > 5)
 		}
 	}
 
@@ -238,8 +221,7 @@ private fun MangaDetailHeader(
 		val privateManga = remember(manga) { manga!!.unwrap() }
 
 		Row(
-			modifier = Modifier.heightIn(220.dp),
-			horizontalArrangement = Arrangement.spacedBy(16.dp)
+			modifier = Modifier.heightIn(220.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)
 		) {
 			MangaCover(
 				cover?.unwrapOrNull(),
@@ -270,8 +252,7 @@ private fun MangaDetailHeader(
 						mainAxisSpacing = 12.dp,
 					) {
 						val textStyle = typography.labelLarge.copy(
-							fontWeight = FontWeight.Medium,
-							fontFamily = Rubik
+							fontWeight = FontWeight.Medium, fontFamily = Rubik
 						)
 
 						Row(verticalAlignment = Alignment.CenterVertically) {
@@ -298,9 +279,7 @@ private fun MangaDetailHeader(
 							)
 							Spacer(modifier = Modifier.width(2.dp))
 							Text(
-								text = privateStats.follows.toString(),
-								style = textStyle,
-								color = mutedOnBackground
+								text = privateStats.follows.toString(), style = textStyle, color = mutedOnBackground
 							)
 						}
 
@@ -325,62 +304,48 @@ private fun MangaDetailHeader(
 		}
 
 		Row(
-			modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
-			horizontalArrangement = Arrangement.spacedBy(4.dp)
+			modifier = Modifier.padding(top = 16.dp, bottom = 24.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)
 		) {
 			val privateFollowed = remember(followed) { followed?.unwrapOrNull() }
 
 			if (currentUser != null && privateFollowed != null) {
-				OutlinedIconToggleButton(
-					checked = privateFollowed,
-					onCheckedChange = {
-						coroutineScope.launch {
-							val res = hostState.service.mangadex.manga.let {
-								if (!privateFollowed) it.follow(privateManga.id)
-								else it.unfollow(privateManga.id)
-							}
+				OutlinedIconToggleButton(checked = privateFollowed, onCheckedChange = {
+					viewModel.viewModelScope.launch {
+						val res = hostState.service.mangadex.manga.let {
+							if (!privateFollowed) it.follow(privateManga.id)
+							else it.unfollow(privateManga.id)
+						}
 
-							when (res) {
-								is RibaResult.Success -> viewModel.followed.emit(RibaResult.Success(!privateFollowed))
-								is RibaResult.Error -> {
-									hostState.snackbarHost.showSnackbar(res.error.human)
-								}
+						when (res) {
+							is RibaResult.Success -> viewModel.followed.emit(RibaResult.Success(!privateFollowed))
+							is RibaResult.Error -> {
+								hostState.snackbarHost.showSnackbar(res.error.human)
 							}
 						}
-					},
-					content = {
-						Icon(
-							Icons.Rounded.BookmarkAdd,
-							contentDescription = stringResource(R.string.add_to_library)
-						)
 					}
-				)
+				}, content = {
+					Icon(
+						Icons.Rounded.BookmarkAdd, contentDescription = stringResource(R.string.add_to_library)
+					)
+				})
 			}
 
-			OutlinedIconToggleButton(
-				checked = hasTrackers,
-				onCheckedChange = { hasTrackers = it },
-				content = {
-					Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
-				}
-			)
+			OutlinedIconToggleButton(checked = hasTrackers, onCheckedChange = { hasTrackers = it }, content = {
+				Icon(Icons.Rounded.Sync, contentDescription = stringResource(R.string.trackers))
+			})
 
-			OutlinedIconButton(
-				onClick = {
-					coroutineScope.launch {
-						clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(privateManga.id)))
-						hostState.snackbarHost.showSnackbar(message = shareMessage)
-					}
-				},
-				content = {
-					Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+			OutlinedIconButton(onClick = {
+				viewModel.viewModelScope.launch {
+					clipboardManager.setText(AnnotatedString(DexUtils.getMangaUrl(privateManga.id)))
+					hostState.snackbarHost.showSnackbar(message = shareMessage)
 				}
-			)
+			}, content = {
+				Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+			})
 
 			Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
 				Icon(
-					Icons.Rounded.Book,
-					contentDescription = stringResource(R.string.start_reading)
+					Icons.Rounded.Book, contentDescription = stringResource(R.string.start_reading)
 				)
 				Text(text = stringResource(R.string.start_reading))
 			}
@@ -425,10 +390,8 @@ private fun MangaDetailHeader(
 					)
 
 					MarkdownText(
-						markdown = privateManga.description[DexLocale.English]!!,
-						style = typography.bodyMedium.copy(
-							fontFamily = Nunito,
-							color = colorScheme.onBackground.copy(alpha = 0.75F)
+						markdown = privateManga.description[DexLocale.English]!!, style = typography.bodyMedium.copy(
+							fontFamily = Nunito, color = colorScheme.onBackground.copy(alpha = 0.75F)
 						)
 					)
 				}
@@ -438,16 +401,14 @@ private fun MangaDetailHeader(
 		if (isMoreEnabled) {
 			Spacer(modifier = Modifier.height(8.dp))
 
-			FilledTonalButton(
-				modifier = Modifier.fillMaxWidth(),
+			FilledTonalButton(modifier = Modifier.fillMaxWidth(),
 				onClick = { isDetailsExpanded = !isDetailsExpanded },
 				content = {
 					Text(
 						text = if (isDetailsExpanded) stringResource(R.string.show_less)
 						else stringResource(R.string.show_more)
 					)
-				}
-			)
+				})
 		}
 	}
 }
@@ -470,92 +431,75 @@ private fun ChapterItem(chap: RibaFulfilledChapter) {
 
 	val groupNames = remember { chap.groups.map { it.name } }
 
-	ListItem(
-		leadingContent = {
-			val languageFlagId = remember { chap.chapter.language.getFlagId() }
+	ListItem(leadingContent = {
+		val languageFlagId = remember { chap.chapter.language.getFlagId() }
 
-			Box(contentAlignment = Alignment.Center) {
-				if (languageFlagId != null) {
-					Image(
-						modifier = Modifier.size(24.dp),
-						contentScale = ContentScale.FillWidth,
-						painter = painterResource(id = languageFlagId),
-						contentDescription = chap.chapter.language.toString(),
-					)
-				} else {
-					Text(
-						text = chap.chapter.language.toString(),
-						style = MaterialTheme.typography.bodySmall
-					)
-				}
+		Box(contentAlignment = Alignment.Center) {
+			if (languageFlagId != null) {
+				Image(
+					modifier = Modifier.size(24.dp),
+					contentScale = ContentScale.FillWidth,
+					painter = painterResource(id = languageFlagId),
+					contentDescription = chap.chapter.language.toString(),
+				)
+			} else {
+				Text(
+					text = chap.chapter.language.toString(), style = MaterialTheme.typography.bodySmall
+				)
 			}
-		},
-		headlineText = {
-			Text(text = stringResource(which, chapterName))
-		},
-		supportingText = { Text(text = groupNames.joinToString(", ")) }
-	)
+		}
+	}, headlineText = {
+		Text(text = stringResource(which, chapterName))
+	}, supportingText = { Text(text = groupNames.joinToString(", ")) })
 }
 
 @Composable
-private fun DetailChipRow(values: List<String>, label: String, width: Dp) =
-	if (values.isEmpty()) Unit
-	else Column(Modifier.widthIn(max = width)) {
-		Text(
-			text = label,
-			style = MaterialTheme.typography.titleSmall.copy(
-				color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
-				fontFamily = Rubik,
-				fontWeight = FontWeight.Medium
-			)
+private fun DetailChipRow(values: List<String>, label: String, width: Dp) = if (values.isEmpty()) Unit
+else Column(Modifier.widthIn(max = width)) {
+	Text(
+		text = label, style = MaterialTheme.typography.titleSmall.copy(
+			color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+			fontFamily = Rubik,
+			fontWeight = FontWeight.Medium
 		)
+	)
 
-		FlowRow(
-			mainAxisSpacing = 8.dp,
-			content = {
-				values.map {
-					SuggestionChip(
-						onClick = {},
-						label = { Text(it, maxLines = 1) })
-				}
-			}
-		)
-	}
+	FlowRow(mainAxisSpacing = 8.dp, content = {
+		values.map {
+			SuggestionChip(onClick = {}, label = { Text(it, maxLines = 1) })
+		}
+	})
+}
 
 @Composable
 private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) =
-	TopAppBar(
-		title = {},
-		scrollBehavior = scrollBehavior,
-		colors = TopAppBarDefaults.smallTopAppBarColors(
-			scrolledContainerColor = Color.Transparent,
-			containerColor = Color.Transparent,
-			titleContentColor = Color.Transparent
-		),
-		actions = {
-			IconButton(
-				onClick = { ribaNavigator.popBackStack() },
-				content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
-			)
+	TopAppBar(title = {}, scrollBehavior = scrollBehavior, colors = TopAppBarDefaults.smallTopAppBarColors(
+		scrolledContainerColor = Color.Transparent,
+		containerColor = Color.Transparent,
+		titleContentColor = Color.Transparent
+	), actions = {
+		IconButton(
+			onClick = { ribaNavigator.popBackStack() },
+			content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
+		)
 
-			Spacer(Modifier.weight(1F))
+		Spacer(Modifier.weight(1F))
 
-			// TODO: Handle more
-			IconButton(
-				onClick = { },
-				content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) }
-			)
-		}
-	)
+		// TODO: Handle more
+		IconButton(onClick = { }, content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) })
+	})
 
 
-class MangaDetailsViewModel(private val service: RibaAPIService, private val mangaId: String) :
-	ViewModel() {
+class MangaDetailsViewModel(
+	private val service: RibaAPIService,
+	private val mangaId: String,
+	private val isDummy: Boolean = false,
+) : ViewModel() {
 	// TODO: Add pagination and filtering.
 	private val translatedLanguages = MutableStateFlow(listOf(DexLocale.English))
 
 	/**
-	 * Offset shouldstart from 0, to collection limit.
+	 * Offset should start from 0, to collection limit.
 	 *
 	 * Null is used when there are no more chapters to fetch.
 	 */
@@ -563,6 +507,9 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 
 	private val _isRefreshing = MutableStateFlow(false)
 	val isRefreshing: StateFlow<Boolean> get() = _isRefreshing.asStateFlow()
+
+	private val _areChaptersLoading = MutableStateFlow(false)
+	val areChaptersLoading: StateFlow<Boolean> get() = _areChaptersLoading.asStateFlow()
 
 	val followed = MutableStateFlow<RibaResult<Boolean>?>(null)
 
@@ -588,19 +535,27 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 	val chapters: StateFlow<RibaResult<List<RibaFulfilledChapter>>?> get() = _chapters.asStateFlow()
 
 	init {
-		loadDetails()
+		if (!isDummy) {
+			loadDetails()
+		} else {
+			_manga.value = RibaResult.Success(RibaManga.getDefault())
+			_statistic.value = RibaResult.Success(RibaStatistic.getDefault())
+			_cover.value = RibaResult.Success(RibaCover.getDefault())
+			_authors.value = RibaResult.Success(listOf(RibaAuthor.getDefault()))
+			_artists.value = RibaResult.Success(listOf(RibaAuthor.getDefault()))
+			_tags.value = RibaResult.Success(listOf(RibaTag.getDefault()))
+			_chapters.value = RibaResult.Success(listOf(RibaFulfilledChapter.getDefault()))
+		}
 	}
 
 	private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
 		Log.i(
-			DexLogTag.DEBUG.tag,
-			"${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
+			DexLogTag.DEBUG.tag, "${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
 		)
 
-		val localManga = service.mangadex.manga
-			.get(mangaId, forceInsert = refresh, tryDatabase = !refresh)
-			.also { _manga.emit(it) }
-			.let { if (it is RibaResult.Success) it.value else return@launch }
+		val localManga =
+			service.mangadex.manga.get(mangaId, forceInsert = refresh, tryDatabase = !refresh).also { _manga.emit(it) }
+				.let { if (it is RibaResult.Success) it.value else return@launch }
 
 		launch {
 			followed.emit(service.mangadex.manga.checkFollowStatus(mangaId, refresh))
@@ -613,9 +568,7 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 		launch {
 			_artists.emit(
 				service.mangadex.author.getStrictCollection(
-					localManga.artistIds,
-					forceInsert = refresh,
-					tryDatabase = !refresh
+					localManga.artistIds, forceInsert = refresh, tryDatabase = !refresh
 				)
 			)
 		}
@@ -647,11 +600,8 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 
 			if (resolve.size != localManga.tagIds.size) {
 				val error = DexError(
-					"Failed to resolve tags",
-					"Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
+					"Failed to resolve tags", "Expected ${localManga.tagIds.size} tags, but got only ${resolve.size}"
 				)
-
-				Log.w(DexLogTag.MISSING.tag, "Missing Tag ids", error)
 
 				_tags.emit(RibaResult.Error(error))
 			} else {
@@ -659,10 +609,12 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 			}
 		}
 
-		launch { handleChapterLoad(refresh) }
+		launch { handleChapterLoad(coroutineContext, refresh) }
 	}
 
-	private suspend fun handleChapterLoad(refresh: Boolean) = withContext(coroutineContext) {
+	private suspend fun handleChapterLoad(context: CoroutineContext, refresh: Boolean) = withContext(context) {
+		_areChaptersLoading.emit(true)
+
 		val response = service.mangadex.chapter.getCollection(
 			mangaId = mangaId,
 			forceInsert = refresh,
@@ -672,44 +624,70 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 			offset = offset.value,
 		)
 
-		val flattened: RibaResult<List<RibaFulfilledChapter>> = response
-			.map { it.data[mangaId] ?: emptyList() }
-			.map {
-				if (_chapters.value is RibaResult.Success) {
-					it + (_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value
-				} else it
+		launch {
+			if (response is RibaResult.Success) {
+				val size = response.value.data[mangaId]?.size
+				val total = response.value.total
+
+				if (size != null && size < total) offset.value = offset.value?.plus(size)
+				else offset.value = null
 			}
+		}
+
+		val flattened: RibaResult<List<RibaFulfilledChapter>> = response.map { it.data[mangaId] ?: emptyList() }.map {
+			if (_chapters.value is RibaResult.Success) {
+				(_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value + it
+			} else it
+		}
 
 		_chapters.emit(flattened)
+		_areChaptersLoading.emit(false)
+	}
 
-		if (response is RibaResult.Success) {
-			val size = response.value.data[mangaId]?.size
-			val total = response.value.total
+	private suspend fun handleDummyChapterLoad(context: CoroutineContext) = withContext(context) {
+		_areChaptersLoading.emit(true)
 
-			if (size != null && size < total) offset.value = offset.value?.plus(size)
-			else offset.value = null
-		} else {
-			Log.e(
-				DexLogTag.DEBUG.tag,
-				"Error while fetching chapters for $mangaId",
-				response.unwrapError() as Throwable
-			)
+		val chapters = mutableListOf<RibaFulfilledChapter>()
+		for (i in 0..50) {
+			chapters.add(RibaFulfilledChapter.getDefault())
 		}
+
+		Thread.sleep(10000)
+
+		_chapters.emit(
+			if (_chapters.value is RibaResult.Success) {
+				RibaResult.Success(
+					(_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value + chapters
+				)
+			} else RibaResult.Success(chapters)
+		)
+
+		launch {
+			if (_chapters.value is RibaResult.Success) {
+				val size = (_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value.size
+				val total = 100
+
+				if (size < total) offset.value = offset.value?.plus(size)
+				else offset.value = null
+			}
+		}
+
+		_areChaptersLoading.emit(false)
 	}
 
 	/**
 	 * Returns true if the end is reached.
 	 */
 	fun startPagination(): Boolean {
-		if (offset.value == null) {
-			Log.i(DexLogTag.DEBUG.tag, "End of pagination reached.")
-			return true
+		if (offset.value == null) return true
+
+		return if (!isDummy) {
+			viewModelScope.launch(Dispatchers.IO) { handleChapterLoad(coroutineContext, false) }
+			false
+		} else {
+			viewModelScope.launch(Dispatchers.IO) { handleDummyChapterLoad(coroutineContext) }
+			false
 		}
-
-		Log.i(DexLogTag.DEBUG.tag, "Starting pagination for $mangaId, on offset: ${offset.value}")
-		viewModelScope.launch { handleChapterLoad(false) }
-
-		return false
 	}
 
 	fun refresh() = viewModelScope.launch(Dispatchers.IO) {
@@ -719,12 +697,10 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 	}
 
 	companion object {
-		class Factory(
-			private val service: RibaAPIService,
-			private val mangaId: String,
-		) : ViewModelProvider.Factory {
-			fun create(): MangaDetailsViewModel {
-				return MangaDetailsViewModel(service, mangaId)
+		fun Factory(service: RibaAPIService, mangaId: String, isDummy: Boolean) = object : ViewModelProvider.Factory {
+			@Suppress("UNCHECKED_CAST")
+			override fun <T : ViewModel> create(modelClass: Class<T>): T {
+				return MangaDetailsViewModel(service, mangaId, isDummy) as T
 			}
 		}
 	}
@@ -732,26 +708,15 @@ class MangaDetailsViewModel(private val service: RibaAPIService, private val man
 
 @Composable
 @Preview(showBackground = true)
-private fun DetailBodyPreview() {
+private fun DetailScreenPreview() {
 	val state = RibaHostState.createDummy()
-	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
 	RibaTheme {
-		Scaffold(
-			topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
-			content = {
-				MangaDetailBody(
-					state,
-					scrollBehavior,
-					it,
-					viewModel(
-						factory = MangaDetailsViewModel.Companion.Factory(
-							state.service,
-							RibaManga.getDefault().id
-						)
-					)
-				)
-			}
+		MangaDetailScreen(
+			state,
+			viewModel(
+				factory = MangaDetailsViewModel.Factory(state.service, RibaManga.getDefault().id, true)
+			)
 		)
 	}
 }
