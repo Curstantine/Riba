@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="launcher_background_color">@android:color/system_neutral1_800</color>
-    <color name="launcher_foreground_color_1">@android:color/system_accent1_100</color>
-    <color name="launcher_foreground_color_2">@android:color/system_accent1_200</color>
-    <color name="launcher_foreground_color_3">@android:color/system_accent1_600</color>
-</resources>
