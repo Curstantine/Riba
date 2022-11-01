@@ -72,8 +72,8 @@ class AuthorService(
 
 		val missingIds = idMap.filterValues { it == null }.keys.toList()
 		if (missingIds.isNotEmpty()) {
-			val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
-			response.forEach { artist -> idMap[artist.id] = artist }
+			val response = getCollection(ids = missingIds, limit = missingIds.size, forceInsert = forceInsert)
+			response.unwrap().forEach { artist -> idMap[artist.id] = artist }
 		}
 
 		return@contextualInvoke idMap.values.mapNotNull { it }

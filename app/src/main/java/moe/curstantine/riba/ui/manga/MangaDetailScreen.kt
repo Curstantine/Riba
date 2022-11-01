@@ -204,9 +204,11 @@ private fun MangaDetailHeader(
 	}
 
 	val localizedDescription = remember(manga) {
-		manga?.unwrapOrNull()?.description?.let {
-			DexUtils.getPreferredLocalizedValue(preferredLanguages, it)
-		}
+		val localManga = manga?.unwrapOrNull()
+
+		localManga?.description?.runCatching {
+			DexUtils.getPreferredLocalizedValue(preferredLanguages, localManga.description)
+		}?.getOrNull()
 	}
 
 	val isMoreEnabled = remember(manga, tags) {
@@ -583,21 +585,17 @@ class MangaDetailsViewModel(
 		}
 
 		launch {
-			_artists.emit(
-				service.mangadex.author.getStrictCollection(
-					localManga.artistIds, forceInsert = refresh, tryDatabase = !refresh
-				)
+			val response = service.mangadex.author.getStrictCollection(
+				localManga.artistIds + localManga.authorIds.filter { it !in localManga.artistIds },
+				forceInsert = refresh,
+				tryDatabase = !refresh
 			)
-		}
 
-		launch {
-			_authors.emit(
-				service.mangadex.author.getStrictCollection(
-					localManga.authorIds,
-					forceInsert = refresh,
-					tryDatabase = !refresh,
-				)
-			)
+			val artistResolve = response.map { item -> item.filter { it.id in localManga.artistIds } }
+			val authorResolve = response.map { item -> item.filter { it.id in localManga.authorIds } }
+
+			_artists.emit(artistResolve)
+			_authors.emit(authorResolve)
 		}
 
 		launch {
@@ -669,6 +667,8 @@ class MangaDetailsViewModel(
 			chapters.add(RibaFulfilledChapter.getDefault())
 		}
 
+		// Since we can check whether it blocks the main or not like this.
+		@Suppress("BlockingMethodInNonBlockingContext")
 		Thread.sleep(10000)
 
 		_chapters.emit(
