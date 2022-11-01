@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.R
-import moe.curstantine.riba.RibaHostState
+import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.nav.RibaRoute
 
 @Composable

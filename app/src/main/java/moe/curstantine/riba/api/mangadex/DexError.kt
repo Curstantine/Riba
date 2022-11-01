@@ -1,7 +1,6 @@
 package moe.curstantine.riba.api.mangadex
 
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.adapter
 import moe.curstantine.riba.api.mangadex.DexError.Companion.tryHandle
 import moe.curstantine.riba.api.mangadex.models.DexErrorAttributes
 import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
@@ -9,7 +8,7 @@ import moe.curstantine.riba.api.mangadex.models.DexResult
 import moe.curstantine.riba.api.riba.RibaError
 import retrofit2.HttpException
 import java.sql.SQLException
-import java.util.Locale
+import java.util.*
 
 /**
  * [RibaError] implementation for [MangaDexService] errors.
@@ -70,7 +69,7 @@ open class DexError(
 		fun fromHttpException(e: HttpException): DexError {
 			val errorBody = e.response()?.errorBody()?.source()?.let {
 				try {
-					MangaDexService.dexMoshi.adapter<DexErrorResponse>().fromJson(it)
+					MangaDexService.Serde.Adapters.errorResponseAdapter.fromJson(it)
 				} catch (e: Throwable) {
 					val error = DexErrorAttributes(
 						id = "",

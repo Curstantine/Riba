@@ -159,20 +159,6 @@ class MangaService(
 		return@contextualInvoke riba
 	}
 
-
-	/**
-	 * @param ids List of UUIDs of the titles
-	 */
-	suspend fun getStatisticCollection(ids: List<String>): RibaResult<Map<String, RibaStatistic>> =
-		contextualInvoke {
-			val response = service.getStatisticCollection(ids)
-			val riba = response.toRibaStatisticCollection()
-
-			it.launch { database.insertStatisticCollection(riba.values.toList()) }
-
-			return@contextualInvoke riba
-		}
-
 	suspend fun getCover(
 		id: String,
 		forceInsert: Boolean = false,
@@ -293,11 +279,6 @@ class MangaService(
 				@Path("id") id: String,
 			): DexMangaStatistics
 
-			@GET("/statistics/manga")
-			suspend fun getStatisticCollection(
-				@Query("manga[]") ids: List<String>,
-			): DexMangaStatistics
-
 			@GET("/cover/{id}")
 			suspend fun getCover(@Path("id") id: String): DexCover
 
@@ -339,7 +320,6 @@ class MangaService(
 			suspend fun getTagCollection(ids: List<String>) = database.tag().get(ids)
 
 			suspend fun getStatistic(id: String) = database.statistic().get(id)
-			suspend fun getStatisticCollection(ids: List<String>) = database.statistic().get(ids)
 
 			suspend fun getFollow(id: String) = database.follows().get(id)
 			suspend fun insertFollow(mangaId: String, userId: String, isFollowing: Boolean) {
@@ -426,18 +406,6 @@ class MangaService(
 				}
 			}
 
-			suspend fun insertTag(tag: RibaTag, force: Boolean = false) {
-				val oldTag = getTag(tag.id)
-
-				// We don't want to insert tags with the same version.
-				if (force.not() && oldTag != null && oldTag.version >= tag.version) {
-					return
-				}
-
-				database.tag().insert(tag)
-			}
-
-
 			suspend fun insertTagCollection(
 				context: CoroutineContext,
 				tags: List<RibaTag>,
@@ -464,11 +432,6 @@ class MangaService(
 
 			suspend fun insertStatistic(statistic: RibaStatistic) =
 				database.statistic().insert(statistic)
-
-
-			suspend fun insertStatisticCollection(statistics: List<RibaStatistic>) =
-				database.statistic().insert(statistics)
-
 		}
 	}
 }

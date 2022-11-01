@@ -3,23 +3,19 @@ package moe.curstantine.riba.api.mangadex
 import android.content.Context
 import androidx.room.Room
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.adapters.moshi.LocalDateTimeConverter
 import moe.curstantine.riba.api.adapters.moshi.MapMismatchArrayAdapter
-import moe.curstantine.riba.api.adapters.moshi.NormalizeMismatchType
 import moe.curstantine.riba.api.adapters.moshi.NormalizeDexLegacyUserRoles
+import moe.curstantine.riba.api.adapters.moshi.NormalizeMismatchType
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
 import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.*
-import moe.curstantine.riba.api.mangadex.services.AuthorService
-import moe.curstantine.riba.api.mangadex.services.ChapterService
-import moe.curstantine.riba.api.mangadex.services.GroupService
-import moe.curstantine.riba.api.mangadex.services.MDListService
-import moe.curstantine.riba.api.mangadex.services.MangaService
-import moe.curstantine.riba.api.mangadex.services.UserService
+import moe.curstantine.riba.api.mangadex.services.*
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
 import okhttp3.OkHttpClient
@@ -27,18 +23,18 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MangaDexService(context: Context) {
-	private val database = Room
-		.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
-		.build()
-
 	val author: AuthorService
 	val chapter: ChapterService
 	val group: GroupService
 	val manga: MangaService
-	val mdlist: MDListService
+	val mdList: MDListService
 	val user: UserService
 
 	init {
+		val database = Room
+			.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
+			.build()
+
 		val okhttp = OkHttpClient.Builder()
 			.addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
 			.build()
@@ -47,7 +43,7 @@ class MangaDexService(context: Context) {
 			.client(okhttp)
 			.baseUrl(DexConstants.BASE_API)
 			.addConverterFactory(EnumConverter())
-			.addConverterFactory(MoshiConverterFactory.create(dexMoshi))
+			.addConverterFactory(MoshiConverterFactory.create(Serde.moshi))
 			.build()
 
 		user = UserService(
@@ -81,36 +77,56 @@ class MangaDexService(context: Context) {
 			user,
 		)
 
-		mdlist = MDListService(
+		mdList = MDListService(
 			retrofit.create(MDListService.Companion.APIService::class.java),
 			MDListService.Companion.Database(database),
 			user,
 		)
 	}
 
-	companion object {
-		val dexMoshi: Moshi = Moshi.Builder()
+	object Serde {
+		val moshi: Moshi = Moshi.Builder()
 			.add(LocalDateTimeConverter())
 			.add(MapMismatchArrayAdapter())
 			.add(NormalizeDexLegacyUserRoles.new())
 			.add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
 			.add(
 				// @formatter:off
-                PolymorphicJsonAdapterFactory.of(DexRelationship::class.java, "type")
-                    .withSubtype(DexRelatedManga::class.java, DexEntityType.Manga.toDexEnum())
-                    .withSubtype(DexRelatedCover::class.java, DexEntityType.CoverArt.toDexEnum())
-                    .withSubtype(DexRelatedAuthor::class.java, DexEntityType.Author.toDexEnum())
-                    .withSubtype(DexRelatedAuthor::class.java, DexEntityType.Artist.toDexEnum())
-                    .withSubtype(DexRelatedUser::class.java, DexEntityType.User.toDexEnum())
-                    .withSubtype(DexRelatedUser::class.java, DexEntityType.Leader.toDexEnum())
-                    .withSubtype(DexRelatedUser::class.java, DexEntityType.Member.toDexEnum())
-                    .withSubtype(DexRelatedGroup::class.java, DexEntityType.ScanlationGroup.toDexEnum())
-                    .withSubtype(DexRelationshipImpl::class.java, DexEntityType.Chapter.toDexEnum())
-                    .withSubtype(DexRelationshipImpl::class.java, DexEntityType.Tag.toDexEnum())
-                    .withSubtype(DexRelationshipImpl::class.java, DexEntityType.CustomList.toDexEnum())
-            )
-            .build()
+				PolymorphicJsonAdapterFactory.of(DexRelationship::class.java, "type")
+					.withSubtype(DexRelatedManga::class.java, DexEntityType.Manga.toDexEnum())
+					.withSubtype(DexRelatedCover::class.java, DexEntityType.CoverArt.toDexEnum())
+					.withSubtype(DexRelatedAuthor::class.java, DexEntityType.Author.toDexEnum())
+					.withSubtype(DexRelatedAuthor::class.java, DexEntityType.Artist.toDexEnum())
+					.withSubtype(DexRelatedUser::class.java, DexEntityType.User.toDexEnum())
+					.withSubtype(DexRelatedUser::class.java, DexEntityType.Leader.toDexEnum())
+					.withSubtype(DexRelatedUser::class.java, DexEntityType.Member.toDexEnum())
+					.withSubtype(DexRelatedGroup::class.java, DexEntityType.ScanlationGroup.toDexEnum())
+					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.Chapter.toDexEnum())
+					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.Tag.toDexEnum())
+					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.CustomList.toDexEnum())
+			)
+			.build()
 
+		object Adapters {
+			 val stringListAdapter = moshi.adapter<List<String>>()
+
+			 val visibilityAdapter = moshi.adapter<DexListVisibility>()
+			 val ratingAdapter = moshi.adapter<DexContentRating>()
+			 val mangaTagGroupAdapter = moshi.adapter<DexMangaTagGroup>()
+
+			 val localeAdapter = moshi.adapter<DexLocale>()
+			 val localeListAdapter = moshi.adapter<List<DexLocale>>()
+
+			 val localeObjectAdapter = moshi.adapter<DexLocaleObject>()
+			 val localeObjectListAdapter = moshi.adapter<List<DexLocaleObject>>()
+
+			 val userRoleListAdapter = moshi.adapter<List<DexUserRole>>()
+
+			val errorResponseAdapter = moshi.adapter<DexErrorResponse>()
+		}
+	}
+
+	companion object {
         /**
          * Abstract class for MangaDex to inherit from.
          *

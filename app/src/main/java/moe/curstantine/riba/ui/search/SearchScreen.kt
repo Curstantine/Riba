@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import moe.curstantine.riba.RibaHostState
+import moe.curstantine.riba.api.riba.RibaHostState
 
 @Composable
 fun SearchScreen(state: RibaHostState, paddingValues: State<PaddingValues>) {

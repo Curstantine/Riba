@@ -48,7 +48,7 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
-import moe.curstantine.riba.RibaHostState
+import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.riba.RibaError
 import moe.curstantine.riba.api.riba.RibaResult

@@ -10,7 +10,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import moe.curstantine.riba.RibaHostState
+import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.ui.home.HomeScreen
 import moe.curstantine.riba.ui.home.HomeViewModel
 import moe.curstantine.riba.ui.library.LibraryScreen

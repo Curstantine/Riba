@@ -29,7 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
-import moe.curstantine.riba.RibaHostState
+import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderProperty
@@ -243,7 +243,7 @@ class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
 		Log.i(DexLogTag.DEBUG.tag, "Loading seasonal list.")
 
 		val list = when (val list =
-			service.mangadex.mdlist.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
+			service.mangadex.mdList.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
 			is RibaResult.Success -> list.unwrapOrNull()!!
 			is RibaResult.Error -> return@launch seasonal.postValue(list)
 		}

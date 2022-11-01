@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
-import moe.curstantine.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexCoverSize
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
@@ -48,6 +47,7 @@ import moe.curstantine.riba.api.mangadex.models.DexChapterQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.riba.RibaAPIService
+import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.*
 import moe.curstantine.riba.nav.RibaNavigator
@@ -168,6 +168,7 @@ private fun MangaDetailHeader(
 	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
 
 	val clipboardManager = LocalClipboardManager.current
+	val preferredLanguages = remember { hostState.settings.getLanguagePreference() }
 
 	val notAvailable = stringResource(R.string.not_available)
 	val shareMessage = stringResource(R.string.copied_to_clipboard, stringResource(R.string.link).lowercase())
@@ -190,7 +191,11 @@ private fun MangaDetailHeader(
 	}
 
 	val localizedTags = remember(tags) {
-		tags?.unwrapOrNull()?.map { it.name?.get(DexLocale.English) ?: notAvailable } ?: emptyList()
+		tags?.unwrapOrNull()?.map { tag ->
+			tag.name
+				?.runCatching { DexUtils.getPreferredLocalizedValue(preferredLanguages, tag.name) }
+				?.getOrNull() ?: notAvailable
+		} ?: emptyList()
 	}
 
 	val artistAuthors = remember(localizedAuthors, localizedArtists) {
@@ -198,12 +203,17 @@ private fun MangaDetailHeader(
 		(localizedAuthors + filteredArtists).ifEmpty { null }
 	}
 
-	val isMoreEnabled = remember(manga) {
+	val localizedDescription = remember(manga) {
+		manga?.unwrapOrNull()?.description?.let {
+			DexUtils.getPreferredLocalizedValue(preferredLanguages, it)
+		}
+	}
+
+	val isMoreEnabled = remember(manga, tags) {
 		if (manga == null || manga is RibaResult.Error) false else {
-			val privateMango = manga!!.unwrap()
 			val privateTags = tags?.unwrapOrNull()
 
-			(privateMango.description != null && privateMango.description[DexLocale.English] != null) || (privateTags != null && privateTags.size > 5)
+			(localizedDescription != null) || (privateTags != null && privateTags.size > 5)
 		}
 	}
 
@@ -259,7 +269,7 @@ private fun MangaDetailHeader(
 							Icon(
 								tint = colorScheme.primary,
 								imageVector = Icons.Rounded.Star,
-								contentDescription = "Rating",
+								contentDescription = stringResource(R.string.rating),
 								modifier = Modifier.size(22.dp)
 							)
 							Spacer(modifier = Modifier.width(2.dp))
@@ -274,12 +284,14 @@ private fun MangaDetailHeader(
 							Icon(
 								tint = mutedOnBackground,
 								imageVector = Icons.Rounded.Bookmark,
-								contentDescription = "Follows",
+								contentDescription = stringResource(R.string.follows),
 								modifier = Modifier.size(22.dp)
 							)
 							Spacer(modifier = Modifier.width(2.dp))
 							Text(
-								text = privateStats.follows.toString(), style = textStyle, color = mutedOnBackground
+								text = privateStats.follows.toString(),
+								style = textStyle,
+								color = mutedOnBackground
 							)
 						}
 
@@ -288,7 +300,7 @@ private fun MangaDetailHeader(
 							Icon(
 								tint = mutedOnBackground.copy(alpha = 0.35F),
 								imageVector = Icons.Rounded.Visibility,
-								contentDescription = "Views",
+								contentDescription = stringResource(R.string.views),
 								modifier = Modifier.size(22.dp)
 							)
 							Spacer(modifier = Modifier.width(2.dp))
@@ -376,7 +388,7 @@ private fun MangaDetailHeader(
 				}
 
 				// TODO: Add better markdown support (mainly for lines/rules, codeblocks and lists)
-				if (privateManga.description != null && privateManga.description[DexLocale.English] != null) {
+				if (localizedDescription != null) {
 					Spacer(Modifier.padding(top = 14.dp))
 
 					Text(
@@ -390,8 +402,10 @@ private fun MangaDetailHeader(
 					)
 
 					MarkdownText(
-						markdown = privateManga.description[DexLocale.English]!!, style = typography.bodyMedium.copy(
-							fontFamily = Nunito, color = colorScheme.onBackground.copy(alpha = 0.75F)
+						markdown = localizedDescription,
+						style = typography.bodyMedium.copy(
+							fontFamily = Nunito,
+							color = colorScheme.onBackground.copy(alpha = 0.75F)
 						)
 					)
 				}
@@ -430,34 +444,37 @@ private fun ChapterItem(chap: RibaFulfilledChapter) {
 	}
 
 	val groupNames = remember { chap.groups.map { it.name } }
+	val languageFlagId = remember { chap.chapter.language.getFlagId() }
 
-	ListItem(leadingContent = {
-		val languageFlagId = remember { chap.chapter.language.getFlagId() }
-
-		Box(contentAlignment = Alignment.Center) {
-			if (languageFlagId != null) {
-				Image(
-					modifier = Modifier.size(24.dp),
-					contentScale = ContentScale.FillWidth,
-					painter = painterResource(id = languageFlagId),
-					contentDescription = chap.chapter.language.toString(),
-				)
-			} else {
-				Text(
-					text = chap.chapter.language.toString(), style = MaterialTheme.typography.bodySmall
-				)
+	ListItem(
+		headlineText = { Text(text = stringResource(which, chapterName)) },
+		supportingText = { Text(text = groupNames.joinToString(", ")) },
+		leadingContent = {
+			Box(contentAlignment = Alignment.Center) {
+				if (languageFlagId != null) {
+					Image(
+						modifier = Modifier.size(24.dp),
+						contentScale = ContentScale.FillWidth,
+						painter = painterResource(id = languageFlagId),
+						contentDescription = chap.chapter.language.toString(),
+					)
+				} else {
+					Text(
+						text = chap.chapter.language.toString(),
+						style = MaterialTheme.typography.bodySmall
+					)
+				}
 			}
-		}
-	}, headlineText = {
-		Text(text = stringResource(which, chapterName))
-	}, supportingText = { Text(text = groupNames.joinToString(", ")) })
+		},
+	)
 }
 
 @Composable
 private fun DetailChipRow(values: List<String>, label: String, width: Dp) = if (values.isEmpty()) Unit
 else Column(Modifier.widthIn(max = width)) {
 	Text(
-		text = label, style = MaterialTheme.typography.titleSmall.copy(
+		text = label,
+		style = MaterialTheme.typography.titleSmall.copy(
 			color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
 			fontFamily = Rubik,
 			fontWeight = FontWeight.Medium
