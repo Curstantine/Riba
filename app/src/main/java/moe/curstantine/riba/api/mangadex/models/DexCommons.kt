@@ -86,6 +86,9 @@ enum class DexUserRole {
 	@field:Json(name = "ROLE_POWER_UPLOADER")
 	PowerUploader,
 
+	@field:Json(name = "ROLE_VIP")
+	Vip,
+
 	/**
 	 * MangaDex staff, don't really know why this exists.
 	 *
