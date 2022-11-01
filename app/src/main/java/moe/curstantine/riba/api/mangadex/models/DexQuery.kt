@@ -1,12 +1,14 @@
 package moe.curstantine.riba.api.mangadex.models
 
-import moe.curstantine.riba.api.adapters.retrofit.EnumValue
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = false)
 enum class DexQueryOrderValue {
-	@EnumValue("asc")
+	@field:Json(name = "asc")
 	Ascending,
 
-	@EnumValue("desc")
+	@field:Json(name = "desc")
 	Descending
 }
 
@@ -15,18 +17,32 @@ enum class DexQueryOrderValue {
  *
  * @see DexChapterQueryOrderProperty for chapter properties.
  */
-enum class DexQueryOrderProperty(val propStr: String) {
-	CreatedAt("order[createdAt]"),
-	UpdatedAt("order[updatedAt]"),
+@JsonClass(generateAdapter = false)
+enum class DexQueryOrderProperty {
+	@field:Json(name = "order[createdAt]")
+	CreatedAt,
+
+	@field:Json(name = "order[updatedAt]")
+	UpdatedAt
 }
 
 /**
  * Query order properties used for chapter endpoints.
  */
-enum class DexChapterQueryOrderProperty(val propStr: String) {
-	Chapter("order[chapter]"),
-	Volume("order[volume]"),
-	ChapterCreatedAt("order[chapterCreatedAt]"),
-	ChapterUpdatedAt("order[chapterUpdatedAt]"),
-	ChapterPublishedAt("order[chapterPublishedAt]"),
+@JsonClass(generateAdapter = false)
+enum class DexChapterQueryOrderProperty {
+	@field:Json(name = "order[chapter]")
+	Chapter,
+
+	@field:Json(name = "order[volume]")
+	Volume,
+
+	@field:Json(name = "order[chapterCreatedAt]")
+	ChapterCreatedAt,
+
+	@field:Json(name = "order[chapterUpdatedAt]")
+	ChapterUpdatedAt,
+
+	@field:Json(name = "order[chapterPublishedAt]")
+	ChapterPublishedAt,
 }

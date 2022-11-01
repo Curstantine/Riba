@@ -3,7 +3,7 @@ package moe.curstantine.riba.api.mangadex.models
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.R
-import moe.curstantine.riba.api.adapters.retrofit.EnumValue
+import moe.curstantine.riba.api.adapters.retrofit.getEnumValue
 import moe.curstantine.riba.api.mangadex.DexUtils
 
 @JsonClass(generateAdapter = false)
@@ -117,12 +117,9 @@ enum class DexUserRole {
 
 	/**
 	 * @return [Json.name] of this enum value.
-	 * @throws NullPointerException  if the given annotation class is null
-	 * @throws IllegalArgumentException  if this doesn't have a [Json] annotation.
+	 * @throws NullPointerException  If the annotation couldn't be found for this enum.
 	 */
-	fun toDexEnum(): String = this.declaringClass.getField(this.name)
-		.getAnnotation(Json::class.java)?.name ?: throw IllegalStateException("No Json annotation found for $this")
-
+	fun toDexEnum(): String = this.getEnumValue()
 
 	companion object {
 		/**
@@ -185,96 +182,73 @@ enum class DexEntityType {
 
 	/**
 	 * @return [Json.name] of this enum value.
-	 * @throws NullPointerException  if the given annotation class is null
-	 * @throws IllegalArgumentException  if this doesn't have a [Json] annotation.
+	 * @throws NullPointerException  If the annotation couldn't be found for this enum.
 	 */
-	fun toDexEnum(): String = this.declaringClass.getField(this.name)
-		.getAnnotation(Json::class.java)?.name ?: throw IllegalStateException("No Json annotation found for $this")
+	fun toDexEnum(): String = this.getEnumValue()
 }
 
 @JsonClass(generateAdapter = false)
 enum class DexLocale {
-	@EnumValue("en")
 	@field:Json(name = "en")
 	English,
 
-	@EnumValue("ja")
 	@field:Json(name = "ja")
 	Japanese,
 
-	@EnumValue("ja-ro")
 	@field:Json(name = "ja-ro")
 	JapaneseRomanized,
 
-	@EnumValue("zh")
 	@field:Json(name = "zh")
 	SimplifiedChinese,
 
-	@EnumValue("zh-hk")
 	@field:Json(name = "zh-hk")
 	TraditionalChinese,
 
-	@EnumValue("zh-ro")
 	@field:Json(name = "zh-ro")
 	ChineseRomanized,
 
-	@EnumValue("ko")
 	@field:Json(name = "ko")
 	Korean,
 
-	@EnumValue("ko-ro")
 	@field:Json(name = "ko-ro")
 	KoreanRomanized,
 
-	@EnumValue("se")
 	@field:Json(name = "se")
 	Swedish,
 
-	@EnumValue("fi")
 	@field:Json(name = "fi")
 	Finnish,
 
-	@EnumValue("fr")
 	@field:Json(name = "fr")
 	French,
 
-	@EnumValue("de")
 	@field:Json(name = "de")
 	German,
 
-	@EnumValue("it")
 	@field:Json(name = "it")
 	Italian,
 
-	@EnumValue("es")
 	@field:Json(name = "es")
 	Spanish,
 
-	@EnumValue("pt")
 	@field:Json(name = "pt")
 	Portuguese,
 
-	@EnumValue("ru")
 	@field:Json(name = "ru")
 	Russian,
 
-	@EnumValue("vi")
 	@field:Json(name = "vi")
 	Vietnamese,
 
-	@EnumValue("ar")
 	@field:Json(name = "ar")
 	Arabic,
 
-	@EnumValue("tr")
 	@field:Json(name = "tr")
 	Turkish,
 
-	@EnumValue("id")
 	@field:Json(name = "id")
 	Indonesian,
 
-	@EnumValue("ms")
 	@field:Json(name = "ms")
 	Malay,
 

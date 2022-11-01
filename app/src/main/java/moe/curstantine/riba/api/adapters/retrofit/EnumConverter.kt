@@ -1,14 +1,12 @@
 package moe.curstantine.riba.api.adapters.retrofit
 
+import android.util.Log
+import com.squareup.moshi.Json
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
-/**
- * A [Converter.Factory] which converts enums to their string representation.
- */
-@Target(AnnotationTarget.FIELD)
-annotation class EnumValue(val value: String)
 
 class EnumConverter : Converter.Factory() {
 	override fun stringConverter(
@@ -16,18 +14,25 @@ class EnumConverter : Converter.Factory() {
 		annotations: Array<Annotation>,
 		retrofit: Retrofit
 	): Converter<Enum<*>, String>? {
-		return if (type is Class<*> && type.isEnum) {
-			Converter { enum ->
-				try {
-					enum.javaClass
-						.getField(enum.name)
-						.getAnnotation(EnumValue::class.java)?.value
-				} catch (exception: Exception) {
-					null
-				} ?: enum.toString()
+		if (type !is Class<*> || !type.isEnum) return null
+
+		return Converter { enum ->
+			try {
+				enum.getEnumValue()
+			} catch (e: Throwable) {
+				Log.e(DexLogTag.MISSING.tag, "No EnumValue annotation found for $enum", e)
+				throw e
 			}
-		} else {
-			null
 		}
 	}
 }
+
+/**
+ * Gets the value of the enum using [Json].
+ *
+ * @return [Json.name] of this enum.
+ *
+ * @throws NullPointerException  If the annotation couldn't be found for this enum.
+ */
+fun Enum<*>.getEnumValue(): String = this.javaClass.getField(this.name).getAnnotation(Json::class.java)?.name
+	?: throw NullPointerException("No Json annotation found for $this")

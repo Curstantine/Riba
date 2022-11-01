@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.curstantine.riba.api.adapters.retrofit.getEnumValue
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
@@ -88,7 +89,7 @@ class MangaService(
 			limit = limit,
 			offset = offset,
 			includes = includes.map { it.toDexEnum() },
-			sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
+			sort = sort?.let { mapOf(Pair(it.first.getEnumValue(), it.second)) } ?: emptyMap(),
 		)
 
 		val riba = response.data.map { it.toRibaManga() }

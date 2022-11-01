@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import moe.curstantine.riba.api.adapters.retrofit.getEnumValue
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.MangaDexService
@@ -67,7 +68,7 @@ class ChapterService(
 				includes = includes.map { it.toDexEnum() },
 				originalLanguage = originalLanguage,
 				translatedLanguage = translatedLanguage,
-				sort = sort?.let { mapOf(Pair(it.first.propStr, it.second)) } ?: emptyMap(),
+				sort = sort?.let { mapOf(Pair(it.first.getEnumValue(), it.second)) } ?: emptyMap(),
 			)
 
 			val map = mutableMapOf<String, MutableList<RibaFulfilledChapter>>()
