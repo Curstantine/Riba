@@ -51,6 +51,7 @@ import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.*
 import moe.curstantine.riba.nav.RibaNavigator
+import moe.curstantine.riba.ui.common.components.FlexibleErrorReceiver
 import moe.curstantine.riba.ui.common.components.FlexibleIndicator
 import moe.curstantine.riba.ui.theme.Nunito
 import moe.curstantine.riba.ui.theme.RibaTheme
@@ -67,11 +68,24 @@ fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 	val statistic by viewModel.statistic.collectAsState()
 	val cover by viewModel.statistic.collectAsState()
 
-	val isLoading = remember(manga, statistic) { manga == null && statistic == null && cover == null }
+	val isLoading = remember(manga, statistic, cover) {
+		manga == null && statistic == null && cover == null
+	}
+	val isErrorBubbled = remember(manga, statistic, cover) {
+		manga is RibaResult.Error || statistic is RibaResult.Error || cover is RibaResult.Error
+	}
 
 	SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing), onRefresh = { viewModel.refresh() }) {
-		if (isLoading || isRefreshing) FlexibleIndicator() else {
-			Scaffold(topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
+		if (isLoading || isRefreshing) FlexibleIndicator()
+		else if (isErrorBubbled) {
+			FlexibleErrorReceiver(remember(manga, statistic, cover) {
+				if (manga is RibaResult.Error) manga!!.unwrapError()
+				else if (statistic is RibaResult.Error) statistic!!.unwrapError()
+				else cover!!.unwrapError()
+			})
+		} else {
+			Scaffold(
+				topBar = { ScreenTopBar(state.navigator, scrollBehavior) },
 				snackbarHost = { SnackbarHost(state.snackbarHost) },
 				content = { MangaDetailBody(state, scrollBehavior, it, viewModel) })
 		}
@@ -567,14 +581,15 @@ class MangaDetailsViewModel(
 		}
 	}
 
+	// TODO: Handle offline errors.
 	private fun loadDetails(refresh: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
 		Log.i(
 			DexLogTag.DEBUG.tag, "${if (refresh) "Refreshing" else "Loading"} details for $mangaId"
 		)
 
-		val localManga =
-			service.mangadex.manga.get(mangaId, forceInsert = refresh, tryDatabase = !refresh).also { _manga.emit(it) }
-				.let { if (it is RibaResult.Success) it.value else return@launch }
+		val localManga = service.mangadex.manga.get(mangaId, forceInsert = refresh, tryDatabase = !refresh)
+			.also { _manga.emit(it) }
+			.let { if (it is RibaResult.Success) it.value else return@launch }
 
 		launch {
 			followed.emit(service.mangadex.manga.checkFollowStatus(mangaId, refresh))

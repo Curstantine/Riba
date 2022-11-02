@@ -7,6 +7,7 @@ import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
 import moe.curstantine.riba.api.mangadex.models.DexResult
 import moe.curstantine.riba.api.riba.RibaError
 import retrofit2.HttpException
+import java.net.UnknownHostException
 import java.sql.SQLException
 import java.util.*
 
@@ -56,9 +57,15 @@ open class DexError(
 			"Expected groups and uploader to be an exact match with chapter, but failed."
 		)
 
+		object NoInternet : DexError(
+			"Cannot reach MangaDex!",
+			"You need an internet connection to fetch data from MangaDex."
+		)
+
 		fun tryHandle(e: Throwable): DexError {
 			return when (e) {
 				is DexError -> e
+				is UnknownHostException -> NoInternet
 				is HttpException -> fromHttpException(e)
 				is JsonDataException -> InvalidJSON(e.message)
 				is SQLException -> DatabaseError(e.message)
