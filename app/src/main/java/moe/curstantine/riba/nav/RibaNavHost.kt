@@ -22,12 +22,7 @@ import moe.curstantine.riba.ui.search.SearchScreen
 @Composable
 fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
 	val paddingValue = remember(paddingValues) { mutableStateOf(paddingValues) }
-
-//    DisposableEffect(paddingValues) {
-//        paddingValue.value = paddingValues
-//        onDispose { }
-//    }
-
+	
 	NavHost(
 		navController = state.navigator.navController,
 		startDestination = RibaRoute.vanillaRoute,
