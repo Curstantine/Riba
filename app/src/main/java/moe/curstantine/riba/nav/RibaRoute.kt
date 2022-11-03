@@ -64,6 +64,7 @@ sealed class RibaRoute(internal val path: String) {
 					else -> throw IllegalArgumentException("Unknown route: $route")
 				}
 				Settings.path -> when (parts[1]) {
+					Settings.Screen.path -> Settings.Screen
 					Settings.General.path -> Settings.General
 					Settings.Appearance.path -> Settings.Appearance
 					Settings.Language.path -> Settings.Language
