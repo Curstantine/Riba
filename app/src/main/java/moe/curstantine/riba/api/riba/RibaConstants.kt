@@ -6,7 +6,13 @@ object RibaConstants {
 
 	object Preferences {
 		const val SETTINGS = "Riba-Settings"
-		const val LANGUAGE_ORDER = "LanguageOrder"
 		const val FIRST_RUN = "FirstRun"
+
+		const val LANGUAGE_ORDER = "LanguageOrder"
+		const val LANGUAGE_CHAPTERS = "LanguageChapters"
+		const val LANGUAGE_ORIGINAL = "LanguageOriginal"
+
+		const val DATA_SAVER = "DataSaver"
+		const val PORT_443 = "Port443"
 	}
 }

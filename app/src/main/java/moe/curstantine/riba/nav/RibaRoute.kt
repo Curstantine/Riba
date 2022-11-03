@@ -26,7 +26,6 @@ sealed class RibaRoute(protected val nestedPath: String) {
 		object Screen : RibaRoute("screen")
 		object General : RibaRoute("general")
 		object Appearance : RibaRoute("appearance")
-		object Language : RibaRoute("language")
 		object About : RibaRoute("about")
 	}
 
@@ -76,7 +75,6 @@ sealed class RibaRoute(protected val nestedPath: String) {
 					Settings.Screen.nestedPath -> Settings.Screen
 					Settings.General.nestedPath -> Settings.General
 					Settings.Appearance.nestedPath -> Settings.Appearance
-					Settings.Language.nestedPath -> Settings.Language
 					Settings.About.nestedPath -> Settings.About
 					else -> throw IllegalArgumentException("Unknown route: $route")
 				}

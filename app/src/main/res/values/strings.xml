@@ -10,8 +10,23 @@
 
 	<string name="general">General</string>
 	<string name="appearance">Appearance</string>
-	<string name="language">Language</string>
 	<string name="about">About</string>
+
+	<string name="language">Language</string>
+	<string name="language_precedence">Language Precedence</string>
+	<string name="language_precedence_description">Language precedence to use when localizing titles and descriptions.</string>
+	<string name="chapter_language_filter">Chapter Language Filter</string>
+	<string name="chapter_language_filter_description">Global language for chapters.</string>
+	<string name="original_language_filter">Original Language Filter</string>
+	<string name="original_language_filter_description">Filter titles by their originally published language.</string>
+
+	<string name="content_delivery">Content Delivery</string>
+	<string name="data_saver">Data Saver</string>
+	<string name="data_saver_description">Reduce data usage by using lower quality images.</string>
+	<string name="mangadex_home_port_443">Use port 443 for MangaDex@Home</string>
+	<string name="mangadex_home_port_443_description">This might help fix content loading issues on school or corporate networks.</string>
+
+	<string name="reset_to_defaults">Reset to Defaults</string>
 
 	<string name="md_lists">MDLists</string>
 	<string name="seasonal">Seasonal</string>
@@ -39,6 +54,7 @@
 	<string name="expand">Expand</string>
 	<string name="share">Share</string>
 	<string name="filter">Filter</string>
+	<string name="confirm">Confirm</string>
 	<string name="_continue">Continue</string>
 	<string name="add_to_library">Add to Library</string>
 	<string name="start_reading">Start Reading</string>
