@@ -199,7 +199,7 @@ private fun AccountDropDown(expanded: MutableState<Boolean>, navigateTo: (RibaRo
 		Divider(modifier = Modifier.padding(vertical = 8.dp))
 
 		DropdownMenuItem(
-			onClick = { navigateTo(RibaRoute.Settings) },
+			onClick = { navigateTo(RibaRoute.Settings.Screen) },
 			text = { Text(text = stringResource(R.string.settings)) },
 		)
 	}

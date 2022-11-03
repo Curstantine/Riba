@@ -15,7 +15,7 @@ class RibaNavigator(val navController: NavHostController) {
 	}
 
 	fun navigateTo(route: RibaRoute) {
-		this.navController.navigate(route.path)
+		this.navController.navigate(route.route)
 	}
 
 	fun navigateTo(route: RibaRoute, vararg args: Pair<String, String>) {
@@ -40,7 +40,7 @@ class RibaNavigator(val navController: NavHostController) {
 	fun currentRouteAsState(): State<RibaRoute> {
 		val navBackStackEntry by navController.currentBackStackEntryAsState()
 		val route = navBackStackEntry?.destination?.route
-			?: RibaRoute.Home.path
+			?: RibaRoute.Landing.Home.route
 
 		return remember(route) { mutableStateOf(RibaRoute.fromPath(route)) }
 	}

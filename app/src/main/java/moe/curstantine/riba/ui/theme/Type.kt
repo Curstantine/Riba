@@ -60,19 +60,19 @@ val Typography = Typography(
 		lineHeight = 20.sp,
 	),
 	titleSmall = TextStyle(
-		fontFamily = Nunito,
+		fontFamily = Rubik,
 		fontWeight = FontWeight.Medium,
 		fontSize = 14.sp,
 		lineHeight = 20.sp,
 	),
 	titleMedium = TextStyle(
-		fontFamily = Nunito,
+		fontFamily = Rubik,
 		fontWeight = FontWeight.Medium,
 		fontSize = 16.sp,
 		lineHeight = 24.sp,
 	),
 	titleLarge = TextStyle(
-		fontFamily = Nunito,
+		fontFamily = Rubik,
 		fontWeight = FontWeight.Normal,
 		fontSize = 22.sp,
 		lineHeight = 28.sp,

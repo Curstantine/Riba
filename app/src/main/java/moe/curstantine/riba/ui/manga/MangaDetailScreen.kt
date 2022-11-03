@@ -506,21 +506,25 @@ else Column(Modifier.widthIn(max = width)) {
 
 @Composable
 private fun ScreenTopBar(ribaNavigator: RibaNavigator, scrollBehavior: TopAppBarScrollBehavior) =
-	TopAppBar(title = {}, scrollBehavior = scrollBehavior, colors = TopAppBarDefaults.smallTopAppBarColors(
-		scrolledContainerColor = Color.Transparent,
-		containerColor = Color.Transparent,
-		titleContentColor = Color.Transparent
-	), actions = {
-		IconButton(
-			onClick = { ribaNavigator.popBackStack() },
-			content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
-		)
-
-		Spacer(Modifier.weight(1F))
-
-		// TODO: Handle more
-		IconButton(onClick = { }, content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) })
-	})
+	TopAppBar(
+		title = {},
+		scrollBehavior = scrollBehavior,
+		colors = TopAppBarDefaults.smallTopAppBarColors(
+			scrolledContainerColor = Color.Transparent,
+			containerColor = Color.Transparent,
+			titleContentColor = Color.Transparent
+		),
+		navigationIcon = {
+			IconButton(
+				onClick = { ribaNavigator.popBackStack() },
+				content = { Icon(Icons.Rounded.ArrowBack, stringResource(R.string.back)) },
+			)
+		},
+		actions = {
+			// TODO: Handle more
+			IconButton(onClick = { }, content = { Icon(Icons.Rounded.MoreVert, stringResource(R.string.more)) })
+		}
+	)
 
 
 class MangaDetailsViewModel(

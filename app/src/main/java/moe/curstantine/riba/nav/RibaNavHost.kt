@@ -1,7 +1,6 @@
 package moe.curstantine.riba.nav
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -17,24 +16,20 @@ import moe.curstantine.riba.ui.library.LibraryScreen
 import moe.curstantine.riba.ui.manga.MangaDetailScreen
 import moe.curstantine.riba.ui.manga.MangaDetailsViewModel
 import moe.curstantine.riba.ui.search.SearchScreen
+import moe.curstantine.riba.ui.settings.SettingsScreen
 
 
 @Composable
 fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
 	val paddingValue = remember(paddingValues) { mutableStateOf(paddingValues) }
-	
+
 	NavHost(
 		navController = state.navigator.navController,
-		startDestination = RibaRoute.vanillaRoute,
-		route = RibaRoute.route,
+		startDestination = RibaRoute.Landing.path,
 	) {
-		vanillaGraph(state, paddingValue)
-		baseGraph(state)
-	}
-}
+		landing(state, paddingValue)
+		settings(state)
 
-fun NavGraphBuilder.baseGraph(state: RibaHostState) {
-	navigation(startDestination = RibaRoute.Manga.path, route = RibaRoute.baseRoute) {
 		composable(RibaRoute.Manga.path) {
 			val viewModel = remember {
 				MangaDetailsViewModel(
@@ -46,24 +41,28 @@ fun NavGraphBuilder.baseGraph(state: RibaHostState) {
 
 			MangaDetailScreen(state, viewModel)
 		}
+	}
+}
 
-		composable(RibaRoute.Settings.path) {
-			Text("Settings")
+fun NavGraphBuilder.settings(state: RibaHostState) {
+	navigation(startDestination = RibaRoute.Settings.Screen.route, route = RibaRoute.Settings.path) {
+		composable(RibaRoute.Settings.Screen.route) {
+			SettingsScreen(state)
 		}
 	}
 }
 
-fun NavGraphBuilder.vanillaGraph(state: RibaHostState, paddingValues: State<PaddingValues>) {
+fun NavGraphBuilder.landing(state: RibaHostState, paddingValues: State<PaddingValues>) {
 	val homeViewModel = HomeViewModel(state.service)
 
-	navigation(startDestination = RibaRoute.Home.path, route = RibaRoute.vanillaRoute) {
-		composable(RibaRoute.Home.path) {
+	navigation(startDestination = RibaRoute.Landing.Home.route, route = RibaRoute.Landing.path) {
+		composable(RibaRoute.Landing.Home.route) {
 			HomeScreen(state, paddingValues, homeViewModel)
 		}
-		composable(RibaRoute.Library.path) {
+		composable(RibaRoute.Landing.Library.route) {
 			LibraryScreen(state, paddingValues)
 		}
-		composable(RibaRoute.Search.path) {
+		composable(RibaRoute.Landing.Search.route) {
 			SearchScreen(state, paddingValues)
 		}
 	}

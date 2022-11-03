@@ -8,6 +8,11 @@
 	<string name="library">Library</string>
 	<string name="settings">Settings</string>
 
+	<string name="general">General</string>
+	<string name="appearance">Appearance</string>
+	<string name="language">Language</string>
+	<string name="about">About</string>
+
 	<string name="md_lists">MDLists</string>
 	<string name="seasonal">Seasonal</string>
 	<string name="recently_added">Recently Added</string>

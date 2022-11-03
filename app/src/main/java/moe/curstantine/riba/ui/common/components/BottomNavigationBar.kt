@@ -33,7 +33,7 @@ fun MangoNavigationBar(state: RibaHostState) {
 				NavigationBarItem(
 					icon = item.icon,
 					label = item.label,
-					selected = state.navigator.currentRoute() == item.route.path,
+					selected = state.navigator.currentRoute() == item.route.route,
 					onClick = { state.navigator.navigateTo(item.route) },
 				)
 			}
@@ -94,20 +94,20 @@ sealed class MangoNavigationBarItem(
 	val requiresAuth: Boolean = false,
 ) {
 	object Home : MangoNavigationBarItem(
-		route = RibaRoute.Home,
+		route = RibaRoute.Landing.Home,
 		icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
 		label = { Text(stringResource(R.string.home)) },
 	)
 
 	object Library : MangoNavigationBarItem(
-		route = RibaRoute.Library,
+		route = RibaRoute.Landing.Library,
 		icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
 		label = { Text(stringResource(R.string.library)) },
 		requiresAuth = true,
 	)
 
 	object Search : MangoNavigationBarItem(
-		route = RibaRoute.Search,
+		route = RibaRoute.Landing.Search,
 		icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
 		label = { Text(stringResource(R.string.search)) },
 	)
