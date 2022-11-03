@@ -19,7 +19,7 @@ class RibaNavigator(val navController: NavHostController) {
 	}
 
 	fun navigateTo(route: RibaRoute, vararg args: Pair<String, String>) {
-		val path = route.path.let {
+		val path = route.route.let {
 			args.fold(it) { acc, pair ->
 				acc.replace("{${pair.first}}", pair.second)
 			}

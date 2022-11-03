@@ -30,7 +30,7 @@ fun RibaNavHost(state: RibaHostState, paddingValues: PaddingValues) {
 		landing(state, paddingValue)
 		settings(state)
 
-		composable(RibaRoute.Manga.path) {
+		composable(RibaRoute.Manga.route) {
 			val viewModel = remember {
 				MangaDetailsViewModel(
 					state.service,
