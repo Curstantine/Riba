@@ -669,7 +669,7 @@ class MangaDetailsViewModel(
 		}
 
 		val flattened: RibaResult<List<RibaFulfilledChapter>> = response.map { it.data[mangaId] ?: emptyList() }.map {
-			if (_chapters.value is RibaResult.Success) {
+			if (_chapters.value is RibaResult.Success && !refresh) {
 				(_chapters.value as RibaResult.Success<List<RibaFulfilledChapter>>).value + it
 			} else it
 		}
