@@ -16,6 +16,7 @@ import moe.curstantine.riba.ui.library.LibraryScreen
 import moe.curstantine.riba.ui.manga.MangaDetailScreen
 import moe.curstantine.riba.ui.manga.MangaDetailsViewModel
 import moe.curstantine.riba.ui.search.SearchScreen
+import moe.curstantine.riba.ui.settings.SettingsGeneralScreen
 import moe.curstantine.riba.ui.settings.SettingsScreen
 
 
@@ -48,6 +49,9 @@ fun NavGraphBuilder.settings(state: RibaHostState) {
 	navigation(startDestination = RibaRoute.Settings.Screen.route, route = RibaRoute.Settings.path) {
 		composable(RibaRoute.Settings.Screen.route) {
 			SettingsScreen(state)
+		}
+		composable(RibaRoute.Settings.General.route) {
+			SettingsGeneralScreen(state)
 		}
 	}
 }

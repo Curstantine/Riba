@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
-import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.riba.RibaSettings
 import moe.curstantine.riba.ui.common.dialogs.SortableItemDialog
@@ -26,7 +25,7 @@ import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
 
 @Composable
-fun GeneralScreen(state: RibaHostState) {
+fun SettingsGeneralScreen(state: RibaHostState) {
 	val coroutineScope = rememberCoroutineScope()
 	val scrollState = rememberScrollState()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -151,5 +150,5 @@ private fun CategoryHeader(text: String) = Text(
 @Preview
 @Composable
 private fun GeneralScreenPreview() {
-	RibaTheme { GeneralScreen(RibaHostState.createDummy()) }
+	RibaTheme { SettingsGeneralScreen(RibaHostState.createDummy()) }
 }
