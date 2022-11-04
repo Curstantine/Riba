@@ -22,8 +22,19 @@ class RibaSettings(context: Context) {
 	 * Resets all settings to default values.
 	 */
 	fun reset() {
-		setLanguagePreference(listOf(DexLocale.English, DexLocale.JapaneseRomanized, DexLocale.Japanese))
 		setChapterLanguage(listOf(DexLocale.English))
+		setLanguagePreference(
+			listOf(
+				DexLocale.English,
+				DexLocale.JapaneseRomanized,
+				DexLocale.Japanese,
+				DexLocale.KoreanRomanized,
+				DexLocale.Korean,
+				DexLocale.ChineseRomanized,
+				DexLocale.SimplifiedChinese,
+				DexLocale.TraditionalChinese,
+			)
+		)
 		setOriginalLanguage(
 			listOf(
 				DexLocale.Japanese,

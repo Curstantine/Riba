@@ -96,11 +96,9 @@ private fun LanguageContent(coroutineScope: CoroutineScope, settings: RibaSettin
 			isOpen = showLanguagePrecedenceDialog,
 			title = stringResource(R.string.language_precedence),
 			description = stringResource(R.string.language_precedence_description),
-			items = settings.getLanguagePreference().associateBy({ it.name }, { it.toString() }),
+			items = settings.getLanguagePreference(),
 			onConfirm = {
-				coroutineScope.launch {
-					settings.setLanguagePreference(it.keys.map { DexLocale.valueOf(it) })
-				}
+				coroutineScope.launch { settings.setLanguagePreference(it) }
 			}
 		)
 	}

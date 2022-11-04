@@ -1,0 +1,255 @@
+package moe.curstantine.riba.ui.common.dialogs
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.launch
+import moe.curstantine.riba.R
+import moe.curstantine.riba.api.mangadex.models.DexLocale
+import moe.curstantine.riba.api.mangadex.models.DexLocaleType
+
+@Composable
+fun SortableItemDialog(
+	isOpen: MutableState<Boolean>,
+	title: String,
+	description: String,
+	items: List<DexLocale>,
+	onConfirm: (List<DexLocale>) -> Unit
+) {
+	val colorScheme = MaterialTheme.colorScheme
+	val typography = MaterialTheme.typography
+	val shapes = MaterialTheme.shapes
+
+	val coroutineScope = rememberCoroutineScope()
+	val localeMap = remember { items.mapIndexed { index, it -> index to it }.toMutableStateMap() }
+
+	Dialog(
+		onDismissRequest = { isOpen.value = false },
+		properties = DialogProperties(dismissOnClickOutside = false, usePlatformDefaultWidth = false)
+	) {
+		Surface(
+			modifier = Modifier.padding(horizontal = 24.dp),
+			tonalElevation = 4.dp,
+			shadowElevation = 4.dp,
+			shape = shapes.extraLarge,
+		) {
+			Column(Modifier.padding(vertical = 24.dp)) {
+				Column(
+					modifier = Modifier.padding(horizontal = 24.dp),
+					verticalArrangement = Arrangement.spacedBy(8.dp)
+				) {
+					Text(title, style = typography.headlineSmall)
+					Text(
+						text = description,
+						style = typography.bodyMedium.copy(color = colorScheme.onSurfaceVariant)
+					)
+				}
+
+				Divider(Modifier.padding(top = 24.dp))
+				LazyColumn(Modifier.height(320.dp)) {
+					items(localeMap.size) { key ->
+						val locale = localeMap[key]!!
+						var showLocaleDropDown by remember { mutableStateOf(false) }
+
+						Box {
+							LocaleItem(
+								locale = locale,
+								canBeRemoved = localeMap.keys.size > 1,
+								onItemPress = { showLocaleDropDown = true },
+								onRemove = {
+									coroutineScope.launch {
+										val temp = localeMap.toMutableMap()
+
+										// Gets the keys from deleted index until end,
+										// then pushes each and every item up by 1, which will
+										// overwrite the deleted item.
+										// This leads to the last key being duplicated,
+										// hence why the last key is removed from the temp map.
+										for (i in (key + 1) until temp.size) {
+											temp[i - 1] = temp[i]!!
+										}
+
+										temp.remove(temp.keys.last())
+										localeMap.clear()
+										localeMap.putAll(temp)
+									}
+								},
+								isMoveUpEnabled = key != 0,
+								onMoveUp = {
+									coroutineScope.launch {
+										val index = localeMap.values.indexOf(locale)
+										if (index > 0) {
+											val temp = localeMap[index - 1]!!
+											localeMap[index - 1] = locale
+											localeMap[index] = temp
+										}
+									}
+								},
+								isMoveDownEnabled = key < localeMap.keys.size - 1,
+								onMoveDown = {
+									coroutineScope.launch {
+										val index = localeMap.values.indexOf(locale)
+										if (index < localeMap.size - 1) {
+											val temp = localeMap[index + 1]!!
+											localeMap[index + 1] = locale
+											localeMap[index] = temp
+										}
+									}
+								}
+							)
+
+							DropdownMenu(
+								modifier = Modifier
+									.heightIn(max = 380.dp)
+									.width(220.dp),
+								expanded = showLocaleDropDown,
+								offset = DpOffset(10.dp, 0.dp),
+								onDismissRequest = { showLocaleDropDown = false }
+							) {
+								val availableLocales = DexLocale.values().filter {
+									it !in localeMap.values && it != DexLocale.NotImplemented
+								}
+
+								for (availableLocale in availableLocales) {
+									LocaleDropDownItem(
+										locale = availableLocale,
+										onClick = {
+											coroutineScope.launch {
+												localeMap[key] = availableLocale
+												showLocaleDropDown = false
+											}
+										}
+									)
+								}
+							}
+						}
+					}
+
+					item {
+						OutlinedButton(
+							modifier = Modifier
+								.padding(vertical = 12.dp, horizontal = 24.dp)
+								.fillMaxWidth(),
+							content = { Text(stringResource(R.string.add_locale)) },
+							onClick = {
+								coroutineScope.launch {
+									localeMap[localeMap.size] = DexLocale.NotImplemented
+								}
+							},
+						)
+					}
+				}
+				Divider(Modifier.padding(bottom = 24.dp))
+
+				Row(Modifier.padding(horizontal = 24.dp)) {
+					Spacer(Modifier.weight(1F))
+					TextButton(
+						content = { Text(stringResource(R.string.cancel)) },
+						onClick = { isOpen.value = false },
+					)
+					TextButton(
+						content = { Text(stringResource(R.string.confirm)) },
+						onClick = {
+							onConfirm(localeMap.values.toList())
+							isOpen.value = false
+						},
+					)
+				}
+			}
+		}
+	}
+}
+
+@Composable
+private fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
+	val languageFlagId = remember { locale.getFlagId() }
+	val languageName = remember(locale) { locale.getLanguage() }
+	val languageType = remember(locale) { locale.getTypeName() }
+
+	DropdownMenuItem(
+		onClick = onClick,
+		text = {
+			Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+				Text(languageName)
+				if (locale.type != DexLocaleType.Default) {
+					Text(languageType, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F))
+				}
+			}
+		},
+		leadingIcon = {
+			if (languageFlagId != null) {
+				Image(
+					modifier = Modifier.size(24.dp),
+					contentScale = ContentScale.FillWidth,
+					painter = painterResource(id = languageFlagId),
+					contentDescription = null,
+				)
+			}
+		},
+	)
+}
+
+@Composable
+private fun LocaleItem(
+	locale: DexLocale,
+	onItemPress: () -> Unit = {},
+	onMoveUp: () -> Unit = {},
+	onMoveDown: () -> Unit = {},
+	onRemove: () -> Unit = {},
+	canBeRemoved: Boolean = true,
+	isMoveUpEnabled: Boolean = true,
+	isMoveDownEnabled: Boolean = true,
+) {
+	val languageName = remember(locale) { locale.getLanguage() }
+	val languageType = remember(locale) { locale.getTypeName() }
+
+	ListItem(
+		modifier = Modifier
+			.padding(0.dp)
+			.clickable { onItemPress.invoke() },
+		headlineText = { Text(languageName) },
+		supportingText = {
+			if (locale.type != DexLocaleType.Default) {
+				Text(languageType, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F))
+			}
+		},
+		leadingContent = {
+			AnimatedVisibility(canBeRemoved) {
+				IconButton(enabled = canBeRemoved, onClick = onRemove) {
+					Icon(
+						Icons.Rounded.Delete,
+						contentDescription = stringResource(R.string.remove),
+						tint = MaterialTheme.colorScheme.error
+					)
+				}
+			}
+		},
+		trailingContent = {
+			Row(horizontalArrangement = Arrangement.End) {
+				IconButton(enabled = isMoveUpEnabled, onClick = onMoveUp) {
+					Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(R.string.up))
+				}
+
+				IconButton(enabled = isMoveDownEnabled, onClick = onMoveDown) {
+					Icon(Icons.Rounded.ArrowDownward, contentDescription = stringResource(R.string.down))
+				}
+			}
+		},
+	)
+}

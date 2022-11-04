@@ -190,8 +190,17 @@ enum class DexEntityType {
 	fun toDexEnum(): String = this.getEnumValue()
 }
 
+enum class DexLocaleType {
+	Default,
+	Romanized,
+	Traditional,
+	Simplified;
+
+	override fun toString(): String = DexUtils.toTitleCase(name)
+}
+
 @JsonClass(generateAdapter = false)
-enum class DexLocale {
+enum class DexLocale(val type: DexLocaleType = DexLocaleType.Default) {
 	@field:Json(name = "en")
 	English,
 
@@ -199,22 +208,22 @@ enum class DexLocale {
 	Japanese,
 
 	@field:Json(name = "ja-ro")
-	JapaneseRomanized,
+	JapaneseRomanized(DexLocaleType.Romanized),
 
 	@field:Json(name = "zh")
-	SimplifiedChinese,
+	SimplifiedChinese(DexLocaleType.Simplified),
 
 	@field:Json(name = "zh-hk")
-	TraditionalChinese,
+	TraditionalChinese(DexLocaleType.Traditional),
 
 	@field:Json(name = "zh-ro")
-	ChineseRomanized,
+	ChineseRomanized(DexLocaleType.Romanized),
 
 	@field:Json(name = "ko")
 	Korean,
 
 	@field:Json(name = "ko-ro")
-	KoreanRomanized,
+	KoreanRomanized(DexLocaleType.Romanized),
 
 	@field:Json(name = "se")
 	Swedish,
@@ -258,7 +267,35 @@ enum class DexLocale {
 	@field:Json(name = "private_not_impl")
 	NotImplemented;
 
-	override fun toString(): String = DexUtils.toTitleCase(name)
+	override fun toString(): String = DexUtils
+		.toTitleCase(name)
+		.replace("Romanized", "(Romanized)")
+
+	/**
+	 * Returns the human name of the [DexLocaleType] of this locale.
+	 */
+	fun getTypeName(): String = this.type.toString()
+
+	/**
+	 * Ignores [DexLocaleType] and returns just the language name.
+	 *
+	 * This is not 1:1 compatible with [valueOf] this enum, as it can return values that are not
+	 * part of this enum set.
+	 *
+	 * Examples:
+	 * - [DexLocale.JapaneseRomanized] -> `"Japanese"`
+	 * - [DexLocale.TraditionalChinese] -> `"Chinese"` (DexLocale.Chinese doesn't exist!)
+	 *
+	 * 	@see toString
+	 * 	@see getTypeName
+	 */
+	fun getLanguage(): String {
+		return if (this.type == DexLocaleType.Default) this.toString()
+		else {
+			this.name.replace("(Romanized|Simplified|Traditional)".toRegex(), "")
+		}
+
+	}
 
 	/**
 	 * @return Flag asset ID or null if the locale doesn't have a flag.
@@ -266,8 +303,11 @@ enum class DexLocale {
 	fun getFlagId(): Int? {
 		return when (this) {
 			English -> R.drawable.flag_uk
+			JapaneseRomanized,
 			Japanese -> R.drawable.flag_jp
+			KoreanRomanized,
 			Korean -> R.drawable.flag_kr
+			ChineseRomanized,
 			SimplifiedChinese -> R.drawable.flag_cn
 			TraditionalChinese -> R.drawable.flag_hk
 			Finnish -> R.drawable.flag_fi
