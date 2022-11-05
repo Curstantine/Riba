@@ -53,6 +53,12 @@ fun NavGraphBuilder.settings(state: RibaHostState) {
 		composable(RibaRoute.Settings.General.route) {
 			SettingsGeneralScreen(state)
 		}
+		composable(RibaRoute.Settings.Appearance.route) {
+			TODO()
+		}
+		composable(RibaRoute.Settings.About.route) {
+			TODO()
+		}
 	}
 }
 

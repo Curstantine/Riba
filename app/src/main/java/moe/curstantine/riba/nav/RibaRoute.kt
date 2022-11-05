@@ -31,7 +31,7 @@ sealed class RibaRoute(protected val nestedPath: String) {
 
 	val route: String
 		get() {
-			val annot = this.javaClass.enclosingClass.getAnnotation(InternalNester::class.java)
+			val annot = this::class.java.enclosingClass.getAnnotation(InternalNester::class.java)
 			return if (annot != null) annot.path + "/" + nestedPath else nestedPath
 		}
 
@@ -53,6 +53,8 @@ sealed class RibaRoute(protected val nestedPath: String) {
 	}
 
 	companion object {
+		@Target(AnnotationTarget.CLASS)
+		@Retention(AnnotationRetention.RUNTIME)
 		private annotation class InternalNester(val path: String, val type: Type)
 
 		/**
@@ -61,7 +63,8 @@ sealed class RibaRoute(protected val nestedPath: String) {
 		 * @throws IllegalArgumentException if the given [route] is not a valid [RibaRoute].
 		 */
 		fun fromPath(route: String): RibaRoute {
-			val parts = route.split("/").map { it.replace("\\{.*\\}".toRegex(), "") }
+			@Suppress("RegExpRedundantEscape")
+			val parts = route.split("/").map { it.replace(Regex("\\{.*\\}"), "") }
 
 			return when (parts[0]) {
 				"manga" -> Manga

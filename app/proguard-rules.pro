@@ -1,3 +1,6 @@
+# Decorative navigation object with annotaitons
+-keep class moe.curstantine.riba.nav.RibaRoute$*
+
 # OkHttp dependencies
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
