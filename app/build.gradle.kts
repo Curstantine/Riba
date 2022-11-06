@@ -10,10 +10,12 @@ object AppConfig {
 	const val targetSdk = 33
 }
 
+// Related: https://youtrack.jetbrains.com/issue/KTIJ-19369
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-	id("com.android.application")
-	id("org.jetbrains.kotlin.android")
-	id("com.google.devtools.ksp") version "1.7.20-1.0.7"
+	alias(androidx.plugins.application)
+	alias(kotlinx.plugins.android)
+	alias(kotlinx.plugins.ksp)
 }
 
 android {
@@ -41,7 +43,7 @@ android {
 			versionNameSuffix = "-debug"
 		}
 		getByName("release") {
-			isDebuggable = false
+			isDebuggable = true
 			isMinifyEnabled = true
 			isShrinkResources = true
 			proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")

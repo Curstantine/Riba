@@ -2,19 +2,11 @@ package moe.curstantine.riba.api.mangadex
 
 import android.content.Context
 import androidx.room.Room
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapter
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.adapters.moshi.LocalDateTimeConverter
-import moe.curstantine.riba.api.adapters.moshi.MapMismatchArrayAdapter
-import moe.curstantine.riba.api.adapters.moshi.NormalizeDexLegacyUserRoles
-import moe.curstantine.riba.api.adapters.moshi.NormalizeMismatchType
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
 import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.mangadex.services.*
 import moe.curstantine.riba.api.riba.RibaHttpService
 import moe.curstantine.riba.api.riba.RibaResult
@@ -23,125 +15,76 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MangaDexService(context: Context) {
-	val author: AuthorService
-	val chapter: ChapterService
-	val group: GroupService
-	val manga: MangaService
-	val mdList: MDListService
-	val user: UserService
+	private val database = Room
+		.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
+		.build()
 
-	init {
-		val database = Room
-			.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
-			.build()
+	private val okhttp = OkHttpClient.Builder()
+		.addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
+		.build()
 
-		val okhttp = OkHttpClient.Builder()
-			.addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
-			.build()
+	private val retrofit = Retrofit.Builder()
+		.client(okhttp)
+		.baseUrl(DexConstants.BASE_API)
+		.addConverterFactory(EnumConverter())
+		.addConverterFactory(MoshiConverterFactory.create(Serde.moshi))
+		.build()
 
-		val retrofit = Retrofit.Builder()
-			.client(okhttp)
-			.baseUrl(DexConstants.BASE_API)
-			.addConverterFactory(EnumConverter())
-			.addConverterFactory(MoshiConverterFactory.create(Serde.moshi))
-			.build()
+	val user: UserService = UserService(
+		context,
+		retrofit.create(UserService.Companion.APIService::class.java),
+		UserService.Companion.Database(database)
+	)
 
-		user = UserService(
-			context,
-			retrofit.create(UserService.Companion.APIService::class.java),
-			UserService.Companion.Database(database)
-		)
+	val author: AuthorService = AuthorService(
+		retrofit.create(AuthorService.Companion.APIService::class.java),
+		AuthorService.Companion.Database(database)
+	)
 
-		author = AuthorService(
-			retrofit.create(AuthorService.Companion.APIService::class.java),
-			AuthorService.Companion.Database(database)
-		)
+	val group: GroupService = GroupService(
+		retrofit.create(GroupService.Companion.APIService::class.java),
+		GroupService.Companion.Database(database),
+		user,
+	)
 
-		group = GroupService(
-			retrofit.create(GroupService.Companion.APIService::class.java),
-			GroupService.Companion.Database(database),
-			user,
-		)
+	val chapter: ChapterService = ChapterService(
+		retrofit.create(ChapterService.Companion.APIService::class.java),
+		ChapterService.Companion.Database(database),
+		user,
+		group
+	)
 
-		chapter = ChapterService(
-			retrofit.create(ChapterService.Companion.APIService::class.java),
-			ChapterService.Companion.Database(database),
-			user,
-			group
-		)
+	val manga: MangaService = MangaService(
+		retrofit.create(MangaService.Companion.APIService::class.java),
+		MangaService.Companion.Database(database),
+		author,
+		user,
+	)
 
-		manga = MangaService(
-			retrofit.create(MangaService.Companion.APIService::class.java),
-			MangaService.Companion.Database(database),
-			author,
-			user,
-		)
-
-		mdList = MDListService(
-			retrofit.create(MDListService.Companion.APIService::class.java),
-			MDListService.Companion.Database(database),
-			user,
-		)
-	}
-
-	object Serde {
-		val moshi: Moshi = Moshi.Builder()
-			.add(LocalDateTimeConverter())
-			.add(MapMismatchArrayAdapter())
-			.add(NormalizeDexLegacyUserRoles.new())
-			.add(NormalizeMismatchType.new(DexLocale::class.java, DexLocale.NotImplemented))
-			.add(
-				// @formatter:off
-				PolymorphicJsonAdapterFactory.of(DexRelationship::class.java, "type")
-					.withSubtype(DexRelatedManga::class.java, DexEntityType.Manga.toDexEnum())
-					.withSubtype(DexRelatedCover::class.java, DexEntityType.CoverArt.toDexEnum())
-					.withSubtype(DexRelatedAuthor::class.java, DexEntityType.Author.toDexEnum())
-					.withSubtype(DexRelatedAuthor::class.java, DexEntityType.Artist.toDexEnum())
-					.withSubtype(DexRelatedUser::class.java, DexEntityType.User.toDexEnum())
-					.withSubtype(DexRelatedUser::class.java, DexEntityType.Leader.toDexEnum())
-					.withSubtype(DexRelatedUser::class.java, DexEntityType.Member.toDexEnum())
-					.withSubtype(DexRelatedGroup::class.java, DexEntityType.ScanlationGroup.toDexEnum())
-					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.Chapter.toDexEnum())
-					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.Tag.toDexEnum())
-					.withSubtype(DexRelationshipImpl::class.java, DexEntityType.CustomList.toDexEnum())
-			)
-			.build()
-
-		object Adapters {
-			 val stringListAdapter = moshi.adapter<List<String>>()
-
-			 val visibilityAdapter = moshi.adapter<DexListVisibility>()
-			 val ratingAdapter = moshi.adapter<DexContentRating>()
-			 val mangaTagGroupAdapter = moshi.adapter<DexMangaTagGroup>()
-
-			 val localeAdapter = moshi.adapter<DexLocale>()
-			 val localeListAdapter = moshi.adapter<List<DexLocale>>()
-
-			 val localeObjectAdapter = moshi.adapter<DexLocaleObject>()
-			 val localeObjectListAdapter = moshi.adapter<List<DexLocaleObject>>()
-
-			 val userRoleListAdapter = moshi.adapter<List<DexUserRole>>()
-
-			val errorResponseAdapter = moshi.adapter<DexErrorResponse>()
-		}
-	}
+	val mdList: MDListService = MDListService(
+		retrofit.create(MDListService.Companion.APIService::class.java),
+		MDListService.Companion.Database(database),
+		user,
+	)
 
 	companion object {
-        /**
-         * Abstract class for MangaDex to inherit from.
-         *
-         * Implements [contextualInvoke] of [RibaHttpService] to handle [DexError]s
-         */
-        abstract class Service : RibaHttpService() {
-            override suspend fun <T> contextualInvoke(
-                call: suspend (it: CoroutineScope) -> T
-            ): RibaResult<T> = withContext(coroutineScope.coroutineContext) {
-                try {
-                    RibaResult.Success(call.invoke(this))
-                } catch (e: Throwable) {
-                    RibaResult.Error(DexError.tryHandle(e))
-                }
-            }
-        }
-    }
+		val Serde = DexSerde()
+
+		/**
+		 * Abstract class for MangaDex to inherit from.
+		 *
+		 * Implements [contextualInvoke] of [RibaHttpService] to handle [DexError]s
+		 */
+		abstract class Service : RibaHttpService() {
+			override suspend fun <T> contextualInvoke(
+				call: suspend (it: CoroutineScope) -> T
+			): RibaResult<T> = withContext(coroutineScope.coroutineContext) {
+				try {
+					RibaResult.Success(call.invoke(this))
+				} catch (e: Throwable) {
+					RibaResult.Error(DexError.tryHandle(e))
+				}
+			}
+		}
+	}
 }

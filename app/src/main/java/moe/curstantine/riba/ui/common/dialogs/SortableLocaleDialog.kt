@@ -11,6 +11,7 @@ import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -35,15 +36,15 @@ fun SortableItemDialog(
 
 	SimpleDialog(isOpen) {
 		SimpleDialogHeader(title, description)
-
 		Divider(Modifier.padding(top = 24.dp))
+
 		LazyColumn(Modifier.height(320.dp)) {
 			items(localeMap.size) { key ->
 				val locale = localeMap[key]!!
 				var showLocaleDropDown by remember { mutableStateOf(false) }
 
 				Box {
-					LocaleItem(
+					LocaleListItem(
 						locale = locale,
 						canBeRemoved = localeMap.keys.size > 1,
 						onItemPress = { showLocaleDropDown = true },
@@ -97,8 +98,8 @@ fun SortableItemDialog(
 						offset = DpOffset(10.dp, 0.dp),
 						onDismissRequest = { showLocaleDropDown = false }
 					) {
-						val availableLocales = DexLocale.values().filter {
-							it !in localeMap.values && it != DexLocale.NotImplemented
+						val availableLocales = remember {
+							DexLocale.values().filter { it !in localeMap.values && it != DexLocale.NotImplemented }
 						}
 
 						for (availableLocale in availableLocales) {
@@ -143,8 +144,8 @@ fun SortableItemDialog(
 }
 
 @Composable
-private fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
-	val languageFlagId = remember { locale.getFlagId() }
+fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
+	val languageFlagId = remember(locale) { locale.getFlagId() }
 	val languageName = remember(locale) { locale.getLanguage() }
 	val languageType = remember(locale) { locale.getTypeName() }
 
@@ -172,18 +173,20 @@ private fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
 }
 
 @Composable
-private fun LocaleItem(
+fun LocaleListItem(
 	locale: DexLocale,
 	onItemPress: () -> Unit = {},
 	onMoveUp: () -> Unit = {},
 	onMoveDown: () -> Unit = {},
 	onRemove: () -> Unit = {},
-	canBeRemoved: Boolean = true,
-	isMoveUpEnabled: Boolean = true,
-	isMoveDownEnabled: Boolean = true,
+	isSortingEnabled: Boolean = true,
+	canBeRemoved: Boolean = false,
+	isMoveUpEnabled: Boolean = false,
+	isMoveDownEnabled: Boolean = false,
 ) {
 	val languageName = remember(locale) { locale.getLanguage() }
 	val languageType = remember(locale) { locale.getTypeName() }
+	val languageFlagId = remember(locale) { locale.getFlagId() }
 
 	ListItem(
 		modifier = Modifier
@@ -196,26 +199,46 @@ private fun LocaleItem(
 			}
 		},
 		leadingContent = {
-			AnimatedVisibility(canBeRemoved) {
-				IconButton(enabled = canBeRemoved, onClick = onRemove) {
-					Icon(
-						Icons.Rounded.Delete,
-						contentDescription = stringResource(R.string.remove),
-						tint = MaterialTheme.colorScheme.error
+			if (isSortingEnabled) {
+				DeleteButton(canBeRemoved, onRemove)
+			} else if (languageFlagId != null) {
+				Box(contentAlignment = Alignment.Center) {
+					Image(
+						modifier = Modifier.size(24.dp),
+						contentScale = ContentScale.FillWidth,
+						painter = painterResource(id = languageFlagId),
+						contentDescription = null,
 					)
 				}
 			}
 		},
 		trailingContent = {
-			Row(horizontalArrangement = Arrangement.End) {
-				IconButton(enabled = isMoveUpEnabled, onClick = onMoveUp) {
-					Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(R.string.up))
-				}
+			if (isSortingEnabled) {
+				Row(horizontalArrangement = Arrangement.End) {
+					IconButton(enabled = isMoveUpEnabled, onClick = onMoveUp) {
+						Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(R.string.up))
+					}
 
-				IconButton(enabled = isMoveDownEnabled, onClick = onMoveDown) {
-					Icon(Icons.Rounded.ArrowDownward, contentDescription = stringResource(R.string.down))
+					IconButton(enabled = isMoveDownEnabled, onClick = onMoveDown) {
+						Icon(Icons.Rounded.ArrowDownward, contentDescription = stringResource(R.string.down))
+					}
 				}
+			} else {
+				DeleteButton(canBeRemoved, onRemove)
 			}
 		},
 	)
+}
+
+@Composable
+private fun DeleteButton(enabled: Boolean, onClick: () -> Unit) {
+	AnimatedVisibility(enabled) {
+		IconButton(enabled = enabled, onClick = onClick) {
+			Icon(
+				Icons.Rounded.Delete,
+				contentDescription = stringResource(R.string.remove),
+				tint = MaterialTheme.colorScheme.error
+			)
+		}
+	}
 }

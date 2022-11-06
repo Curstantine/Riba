@@ -30,5 +30,5 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "MangoDex"
+rootProject.name = "Riba"
 include(":app")

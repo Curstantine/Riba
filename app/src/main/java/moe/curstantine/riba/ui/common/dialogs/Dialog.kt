@@ -19,7 +19,7 @@ import moe.curstantine.riba.R
 @Composable
 fun SimpleDialog(
 	isOpen: MutableState<Boolean>,
-	properties: DialogProperties = DialogProperties(dismissOnClickOutside = false, usePlatformDefaultWidth = false),
+	properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 	content: @Composable ColumnScope.() -> Unit
 ) {
 	Dialog(

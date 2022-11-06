@@ -16,7 +16,7 @@
 	<string name="language_precedence">Language Precedence</string>
 	<string name="language_precedence_description">Language precedence to use when localizing titles and descriptions.</string>
 	<string name="chapter_language_filter">Chapter Language Filter</string>
-	<string name="chapter_language_filter_description">Global language for chapters.</string>
+	<string name="chapter_language_filter_description">Language filter for chapters.</string>
 	<string name="original_language_filter">Original Language Filter</string>
 	<string name="original_language_filter_description">Filter titles by their originally published language.</string>
 

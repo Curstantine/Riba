@@ -9,8 +9,8 @@ object RibaConstants {
 		const val FIRST_RUN = "FirstRun"
 
 		const val LANGUAGE_ORDER = "LanguageOrder"
-		const val LANGUAGE_CHAPTERS = "LanguageChapters"
-		const val LANGUAGE_ORIGINAL = "LanguageOriginal"
+		const val CHAPTER_LANGUAGES = "ChapterLanguages"
+		const val LANGUAGE_ORIGINAL = "OriginalLanguage"
 
 		const val DATA_SAVER = "DataSaver"
 		const val PORT_443 = "Port443"

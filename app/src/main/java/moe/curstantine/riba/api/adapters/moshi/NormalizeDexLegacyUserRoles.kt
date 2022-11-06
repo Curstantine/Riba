@@ -27,7 +27,7 @@ class NormalizeDexLegacyUserRoles internal constructor(
 	}
 
 	companion object {
-		fun new() = object : Factory {
+		fun create() = object : Factory {
 			override fun create(
 				type: Type,
 				annotations: MutableSet<out Annotation>,

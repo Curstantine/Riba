@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.riba.RibaSettings
+import moe.curstantine.riba.ui.common.dialogs.LocaleSelectionDialog
 import moe.curstantine.riba.ui.common.dialogs.SortableItemDialog
 import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
@@ -69,35 +70,54 @@ fun SettingsGeneralScreen(state: RibaHostState) {
 @Composable
 private fun LanguageContent(coroutineScope: CoroutineScope, settings: RibaSettings) {
 	val showLanguagePrecedenceDialog = remember { mutableStateOf(false) }
-	var showLanguageDialog by remember { mutableStateOf(false) }
+	val showChapterLanguageFilterDialog = remember { mutableStateOf(false) }
+
+	val languagePrecedenceText = stringResource(R.string.language_precedence)
+	val languagePrecedenceDescriptionText = stringResource(R.string.language_precedence_description)
+	val chapterLanguageFilterText = stringResource(R.string.chapter_language_filter)
+	val chapterLanguageFilterDescriptionText = stringResource(R.string.chapter_language_filter_description)
+	val originalLanguageFilterText = stringResource(R.string.original_language_filter)
+	val originalLanguageFilterDescriptionText = stringResource(R.string.original_language_filter_description)
 
 	Column {
 		CategoryHeader(text = stringResource(R.string.language))
 		ListItem(
 			modifier = Modifier.clickable { showLanguagePrecedenceDialog.value = true },
-			headlineText = { Text(stringResource(R.string.language_precedence)) },
-			supportingText = { Text(stringResource(R.string.language_precedence_description)) },
+			headlineText = { Text(languagePrecedenceText) },
+			supportingText = { Text(languagePrecedenceDescriptionText) },
+		)
+		ListItem(
+			modifier = Modifier.clickable { showChapterLanguageFilterDialog.value = true },
+			headlineText = { Text(chapterLanguageFilterText) },
+			supportingText = { Text(chapterLanguageFilterDescriptionText) },
 		)
 		ListItem(
 			modifier = Modifier.clickable { },
-			headlineText = { Text(stringResource(R.string.chapter_language_filter)) },
-			supportingText = { Text(stringResource(R.string.chapter_language_filter_description)) },
-		)
-		ListItem(
-			modifier = Modifier.clickable { },
-			headlineText = { Text(stringResource(R.string.original_language_filter)) },
-			supportingText = { Text(stringResource(R.string.original_language_filter_description)) },
+			headlineText = { Text(originalLanguageFilterText) },
+			supportingText = { Text(originalLanguageFilterDescriptionText) },
 		)
 	}
 
 	if (showLanguagePrecedenceDialog.value) {
 		SortableItemDialog(
 			isOpen = showLanguagePrecedenceDialog,
-			title = stringResource(R.string.language_precedence),
-			description = stringResource(R.string.language_precedence_description),
+			title = languagePrecedenceText,
+			description = languagePrecedenceDescriptionText,
 			items = settings.getLanguagePreference(),
 			onConfirm = {
 				coroutineScope.launch { settings.setLanguagePreference(it) }
+			}
+		)
+	}
+
+	if (showChapterLanguageFilterDialog.value) {
+		LocaleSelectionDialog(
+			isOpen = showChapterLanguageFilterDialog,
+			title = chapterLanguageFilterText,
+			description = chapterLanguageFilterDescriptionText,
+			items = settings.getChapterLanguages(),
+			onConfirm = {
+				coroutineScope.launch { settings.setChapterLanguages(it) }
 			}
 		)
 	}

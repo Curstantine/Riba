@@ -8,10 +8,10 @@ import java.time.format.DateTimeFormatter
 
 class Converters {
 	@TypeConverter
-	fun fromListString(list: List<String>): String = MangaDexService.Serde.Adapters.stringListAdapter.toJson(list)
+	fun fromListString(list: List<String>): String = MangaDexService.Serde.stringListAdapter.toJson(list)
 
 	@TypeConverter
-	fun toListString(string: String): List<String> = MangaDexService.Serde.Adapters.stringListAdapter.fromJson(string)!!
+	fun toListString(string: String): List<String> = MangaDexService.Serde.stringListAdapter.fromJson(string)!!
 
 	@TypeConverter
 	fun toLocalDateTime(time: String): LocalDateTime = LocalDateTime.parse(time)
@@ -22,65 +22,65 @@ class Converters {
 
 	@TypeConverter
 	fun toDexVisibility(v: String) =
-		MangaDexService.Serde.Adapters.visibilityAdapter.fromJson(v)!!
+		MangaDexService.Serde.visibilityAdapter.fromJson(v)!!
 
 	@TypeConverter
 	fun fromDexVisibility(v: DexListVisibility): String =
-		MangaDexService.Serde.Adapters.visibilityAdapter.toJson(v)
+		MangaDexService.Serde.visibilityAdapter.toJson(v)
 
 	@TypeConverter
 	fun toDexRating(r: String) =
-		MangaDexService.Serde.Adapters.ratingAdapter.fromJson(r)!!
+		MangaDexService.Serde.ratingAdapter.fromJson(r)!!
 
 	@TypeConverter
 	fun fromDexRating(r: DexContentRating): String =
-		MangaDexService.Serde.Adapters.ratingAdapter.toJson(r)
+		MangaDexService.Serde.ratingAdapter.toJson(r)
 
 	@TypeConverter
 	fun toDexMangaTagGroup(g: String): DexMangaTagGroup =
-		MangaDexService.Serde.Adapters.mangaTagGroupAdapter.fromJson(g)!!
+		MangaDexService.Serde.mangaTagGroupAdapter.fromJson(g)!!
 
 	@TypeConverter
 	fun fromMangaTagGroup(g: DexMangaTagGroup): String =
-		MangaDexService.Serde.Adapters.mangaTagGroupAdapter.toJson(g)
+		MangaDexService.Serde.mangaTagGroupAdapter.toJson(g)
 
 	@TypeConverter
 	fun toDexLocale(l: String): DexLocale =
-		MangaDexService.Serde.Adapters.localeAdapter.fromJson(l)!!
+		MangaDexService.Serde.localeAdapter.fromJson(l)!!
 
 	@TypeConverter
 	fun fromDexLocale(l: DexLocale): String =
-		MangaDexService.Serde.Adapters.localeAdapter.toJson(l)
+		MangaDexService.Serde.localeAdapter.toJson(l)
 
 	@TypeConverter
 	fun toDexLocaleList(string: String): List<DexLocale> =
-		MangaDexService.Serde.Adapters.localeListAdapter.fromJson(string)!!
+		MangaDexService.Serde.localeListAdapter.fromJson(string)!!
 
 	@TypeConverter
 	fun fromDexLocaleList(l: List<DexLocale>): String =
-		MangaDexService.Serde.Adapters.localeListAdapter.toJson(l)
+		MangaDexService.Serde.localeListAdapter.toJson(l)
 
 	@TypeConverter
 	fun toDexLocaleObject(locale: String): DexLocaleObject =
-		MangaDexService.Serde.Adapters.localeObjectAdapter.fromJson(locale)!!
+		MangaDexService.Serde.localeObjectAdapter.fromJson(locale)!!
 
 	@TypeConverter
 	fun fromDexLocaleObject(locale: DexLocaleObject): String =
-		MangaDexService.Serde.Adapters.localeObjectAdapter.toJson(locale)
+		MangaDexService.Serde.localeObjectAdapter.toJson(locale)
 
 	@TypeConverter
 	fun toDexLocaleObjectList(string: String): List<DexLocaleObject> =
-		MangaDexService.Serde.Adapters.localeObjectListAdapter.fromJson(string)!!
+		MangaDexService.Serde.localeObjectListAdapter.fromJson(string)!!
 
 	@TypeConverter
 	fun fromDexLocaleObjectList(list: List<DexLocaleObject>): String =
-		MangaDexService.Serde.Adapters.localeObjectListAdapter.toJson(list)
+		MangaDexService.Serde.localeObjectListAdapter.toJson(list)
 
 	@TypeConverter
 	fun toDexUserRoleList(string: String): List<DexUserRole> =
-		MangaDexService.Serde.Adapters.userRoleListAdapter.fromJson(string)!!
+		MangaDexService.Serde.userRoleListAdapter.fromJson(string)!!
 
 	@TypeConverter
 	fun fromDexUserRoleList(list: List<DexUserRole>): String =
-		MangaDexService.Serde.Adapters.userRoleListAdapter.toJson(list)
+		MangaDexService.Serde.userRoleListAdapter.toJson(list)
 }

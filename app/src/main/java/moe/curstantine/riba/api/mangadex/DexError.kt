@@ -76,7 +76,7 @@ open class DexError(
 		fun fromHttpException(e: HttpException): DexError {
 			val errorBody = e.response()?.errorBody()?.source()?.let {
 				try {
-					MangaDexService.Serde.Adapters.errorResponseAdapter.fromJson(it)
+					MangaDexService.Serde.errorResponseAdapter.fromJson(it)
 				} catch (e: Throwable) {
 					val error = DexErrorAttributes(
 						id = "",

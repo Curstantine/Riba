@@ -2,8 +2,10 @@ package moe.curstantine.riba.api.riba
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexLocale
@@ -15,14 +17,21 @@ class RibaSettings(context: Context) {
 	)
 
 	init {
-		if (!preferences.getBoolean(RibaConstants.Preferences.FIRST_RUN, false)) reset()
+		if (!preferences.getBoolean(RibaConstants.Preferences.FIRST_RUN, false)) {
+			try {
+				reset()
+				preferences.edit().putBoolean(RibaConstants.Preferences.FIRST_RUN, true).apply()
+			} catch (e: Throwable) {
+				Log.e(DexLogTag.DEBUG.tag, "pepega'd @$e")
+			}
+		}
 	}
 
 	/**
 	 * Resets all settings to default values.
 	 */
 	fun reset() {
-		setChapterLanguage(listOf(DexLocale.English))
+		setChapterLanguages(listOf(DexLocale.English))
 		setLanguagePreference(
 			listOf(
 				DexLocale.English,
@@ -54,14 +63,14 @@ class RibaSettings(context: Context) {
 	 */
 	fun getLanguagePreference(): List<DexLocale> {
 		return preferences.getString(RibaConstants.Preferences.LANGUAGE_ORDER, null)!!.let {
-			MangaDexService.Serde.Adapters.localeListAdapter.fromJson(it)!!
+			MangaDexService.Serde.localeListAdapter.fromJson(it)!!
 		}
 	}
 
 	fun setLanguagePreference(languages: List<DexLocale>) {
 		preferences.edit().putString(
 			RibaConstants.Preferences.LANGUAGE_ORDER,
-			MangaDexService.Serde.Adapters.localeListAdapter.toJson(languages)
+			MangaDexService.Serde.localeListAdapter.toJson(languages)
 		).apply()
 	}
 
@@ -69,15 +78,15 @@ class RibaSettings(context: Context) {
 	 * Chapter language preference.
 	 */
 	fun getChapterLanguages(): List<DexLocale> {
-		return preferences.getString(RibaConstants.Preferences.LANGUAGE_CHAPTERS, null)!!.let {
-			MangaDexService.Serde.Adapters.localeListAdapter.fromJson(it)!!
+		return preferences.getString(RibaConstants.Preferences.CHAPTER_LANGUAGES, null)!!.let {
+			MangaDexService.Serde.localeListAdapter.fromJson(it)!!
 		}
 	}
 
-	fun setChapterLanguage(languages: List<DexLocale>) {
+	fun setChapterLanguages(languages: List<DexLocale>) {
 		preferences.edit().putString(
-			RibaConstants.Preferences.LANGUAGE_CHAPTERS,
-			MangaDexService.Serde.Adapters.localeListAdapter.toJson(languages)
+			RibaConstants.Preferences.CHAPTER_LANGUAGES,
+			MangaDexService.Serde.localeListAdapter.toJson(languages)
 		).apply()
 	}
 
@@ -88,14 +97,14 @@ class RibaSettings(context: Context) {
 	 */
 	fun getOriginalLanguage(): List<DexLocale> {
 		return preferences.getString(RibaConstants.Preferences.LANGUAGE_ORIGINAL, null)!!.let {
-			MangaDexService.Serde.Adapters.localeListAdapter.fromJson(it)!!
+			MangaDexService.Serde.localeListAdapter.fromJson(it)!!
 		}
 	}
 
 	fun setOriginalLanguage(language: List<DexLocale>) {
 		preferences.edit().putString(
 			RibaConstants.Preferences.LANGUAGE_ORIGINAL,
-			MangaDexService.Serde.Adapters.localeListAdapter.toJson(language)
+			MangaDexService.Serde.localeListAdapter.toJson(language)
 		).apply()
 	}
 

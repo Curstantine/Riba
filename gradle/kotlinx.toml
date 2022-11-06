@@ -1,5 +1,7 @@
 [versions]
 kotlin_version = "1.7.20"
+ksp_version = "1.7.20-1.0.8"
 
 [plugins]
 android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin_version" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
