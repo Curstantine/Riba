@@ -24,9 +24,7 @@ fun LocaleSelectionDialog(
 ) {
 	val coroutineScope = rememberCoroutineScope()
 	val localeList = remember { items.toMutableStateList() }
-	val availableLocales = remember(localeList) {
-		DexLocale.values().filter { it !in localeList && it != DexLocale.NotImplemented }
-	}
+	val availableLocales = remember(localeList) { DexLocale.values().filter { !localeList.contains(it) } }
 
 	SimpleDialog(isOpen) {
 		SimpleDialogHeader(title, description)
@@ -41,9 +39,9 @@ fun LocaleSelectionDialog(
 					LocaleListItem(
 						locale = locale,
 						isSortingEnabled = false,
-						onItemPress = { coroutineScope.launch { showLocaleDropDown.value = true } },
 						canBeRemoved = localeList.size > 1,
 						onRemove = { coroutineScope.launch { localeList.remove(locale) } },
+						onItemPress = { coroutineScope.launch { showLocaleDropDown.value = true } },
 					)
 
 					DropdownMenu(

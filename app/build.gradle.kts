@@ -3,7 +3,7 @@
 object AppConfig {
 	const val applicationId = "moe.curstantine.riba"
 	const val versionCode = 1
-	const val versionName = "1.0"
+	const val versionName = "0.0.1"
 
 	const val compileSdk = 33
 	const val minSdk = 26
@@ -71,11 +71,10 @@ android {
 	packagingOptions {
 		resources {
 			excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-			excludes += "/META-INF/{AL2.0,LGPL2.1}"
 		}
 	}
 
-	namespace = "moe.curstantine.riba"
+	namespace = AppConfig.applicationId
 }
 
 dependencies {

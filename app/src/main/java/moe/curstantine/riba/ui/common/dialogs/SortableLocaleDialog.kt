@@ -145,7 +145,10 @@ fun SortableItemDialog(
 
 @Composable
 fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
-	val languageFlagId = remember(locale) { locale.getFlagId() }
+	// TODO: Add flag icon when DropDownMenu supports LazyColumn,
+	//  loading the flag affects the performance of the menu really badly.
+	//	val languageFlagId = remember(locale) { locale.getFlagId() }
+
 	val languageName = remember(locale) { locale.getLanguage() }
 	val languageType = remember(locale) { locale.getTypeName() }
 
@@ -159,16 +162,16 @@ fun LocaleDropDownItem(locale: DexLocale, onClick: () -> Unit) {
 				}
 			}
 		},
-		leadingIcon = {
-			if (languageFlagId != null) {
-				Image(
-					modifier = Modifier.size(24.dp),
-					contentScale = ContentScale.FillWidth,
-					painter = painterResource(id = languageFlagId),
-					contentDescription = null,
-				)
-			}
-		},
+//		leadingIcon = {
+//			if (languageFlagId != null) {
+//				Image(
+//					modifier = Modifier.size(24.dp),
+//					contentScale = ContentScale.FillWidth,
+//					painter = painterResource(id = languageFlagId),
+//					contentDescription = null,
+//				)
+//			}
+//		},
 	)
 }
 
@@ -218,7 +221,6 @@ fun LocaleListItem(
 					IconButton(enabled = isMoveUpEnabled, onClick = onMoveUp) {
 						Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(R.string.up))
 					}
-
 					IconButton(enabled = isMoveDownEnabled, onClick = onMoveDown) {
 						Icon(Icons.Rounded.ArrowDownward, contentDescription = stringResource(R.string.down))
 					}
