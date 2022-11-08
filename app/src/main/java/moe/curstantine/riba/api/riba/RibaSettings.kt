@@ -2,10 +2,8 @@ package moe.curstantine.riba.api.riba
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.DexUtils
 import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexLocale
@@ -18,12 +16,8 @@ class RibaSettings(context: Context) {
 
 	init {
 		if (!preferences.getBoolean(RibaConstants.Preferences.FIRST_RUN, false)) {
-			try {
-				reset()
-				preferences.edit().putBoolean(RibaConstants.Preferences.FIRST_RUN, true).apply()
-			} catch (e: Throwable) {
-				Log.e(DexLogTag.DEBUG.tag, "pepega'd @$e")
-			}
+			reset()
+			preferences.edit().putBoolean(RibaConstants.Preferences.FIRST_RUN, true).apply()
 		}
 	}
 
@@ -44,7 +38,7 @@ class RibaSettings(context: Context) {
 				DexLocale.TraditionalChinese,
 			)
 		)
-		setOriginalLanguage(
+		setOriginalLanguages(
 			listOf(
 				DexLocale.Japanese,
 				DexLocale.SimplifiedChinese,
@@ -95,15 +89,15 @@ class RibaSettings(context: Context) {
 	 *
 	 * The language of the originally published title.
 	 */
-	fun getOriginalLanguage(): List<DexLocale> {
-		return preferences.getString(RibaConstants.Preferences.LANGUAGE_ORIGINAL, null)!!.let {
+	fun getOriginalLanguages(): List<DexLocale> {
+		return preferences.getString(RibaConstants.Preferences.ORIGINAL_LANGUAGES, null)!!.let {
 			MangaDexService.Serde.localeListAdapter.fromJson(it)!!
 		}
 	}
 
-	fun setOriginalLanguage(language: List<DexLocale>) {
+	fun setOriginalLanguages(language: List<DexLocale>) {
 		preferences.edit().putString(
-			RibaConstants.Preferences.LANGUAGE_ORIGINAL,
+			RibaConstants.Preferences.ORIGINAL_LANGUAGES,
 			MangaDexService.Serde.localeListAdapter.toJson(language)
 		).apply()
 	}

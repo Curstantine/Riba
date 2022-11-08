@@ -10,7 +10,7 @@ object RibaConstants {
 
 		const val LANGUAGE_ORDER = "LanguageOrder"
 		const val CHAPTER_LANGUAGES = "ChapterLanguages"
-		const val LANGUAGE_ORIGINAL = "OriginalLanguage"
+		const val ORIGINAL_LANGUAGES = "OriginalLanguages"
 
 		const val DATA_SAVER = "DataSaver"
 		const val PORT_443 = "Port443"

@@ -14,11 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.theme.RibaTheme
+import moe.curstantine.riba.ui.theme.Rubik
 
 @Composable
 fun SettingsScreen(state: RibaHostState) {
@@ -56,6 +59,18 @@ private fun ScreenTopBar(state: RibaHostState) =
 		},
 	)
 
+@Composable
+fun CategoryHeader(text: String) = Text(
+	text = text,
+	modifier = Modifier
+		.padding(horizontal = 8.dp)
+		.padding(bottom = 6.dp),
+	style = MaterialTheme.typography.labelLarge.copy(
+		fontFamily = Rubik,
+		fontWeight = FontWeight.Medium,
+		color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F)
+	)
+)
 
 @Preview
 @Composable

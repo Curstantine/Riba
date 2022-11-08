@@ -71,6 +71,7 @@ fun SettingsGeneralScreen(state: RibaHostState) {
 private fun LanguageContent(coroutineScope: CoroutineScope, settings: RibaSettings) {
 	val showLanguagePrecedenceDialog = remember { mutableStateOf(false) }
 	val showChapterLanguageFilterDialog = remember { mutableStateOf(false) }
+	val showOriginalLanguageFilterDialog = remember { mutableStateOf(false) }
 
 	val languagePrecedenceText = stringResource(R.string.language_precedence)
 	val languagePrecedenceDescriptionText = stringResource(R.string.language_precedence_description)
@@ -92,7 +93,7 @@ private fun LanguageContent(coroutineScope: CoroutineScope, settings: RibaSettin
 			supportingText = { Text(chapterLanguageFilterDescriptionText) },
 		)
 		ListItem(
-			modifier = Modifier.clickable { },
+			modifier = Modifier.clickable { showOriginalLanguageFilterDialog.value = true },
 			headlineText = { Text(originalLanguageFilterText) },
 			supportingText = { Text(originalLanguageFilterDescriptionText) },
 		)
@@ -122,6 +123,17 @@ private fun LanguageContent(coroutineScope: CoroutineScope, settings: RibaSettin
 		)
 	}
 
+	if (showOriginalLanguageFilterDialog.value) {
+		LocaleSelectionDialog(
+			isOpen = showOriginalLanguageFilterDialog,
+			title = originalLanguageFilterText,
+			description = originalLanguageFilterDescriptionText,
+			items = settings.getOriginalLanguages(),
+			onConfirm = {
+				coroutineScope.launch { settings.setOriginalLanguages(it) }
+			}
+		)
+	}
 }
 
 @Composable
@@ -147,25 +159,13 @@ private fun ContentDeliveryContent(coroutineScope: CoroutineScope, settings: Rib
 			trailingContent = {
 				Switch(checked = isPort433Enabled, onCheckedChange = {
 					isPort433Enabled = it
-					coroutineScope.launch { settings.setPort443Enabled(!isPort433Enabled) }
+					coroutineScope.launch { settings.setPort443Enabled(it) }
 				})
 			},
 		)
 	}
 }
 
-@Composable
-private fun CategoryHeader(text: String) = Text(
-	text = text,
-	modifier = Modifier
-		.padding(horizontal = 8.dp)
-		.padding(bottom = 6.dp),
-	style = MaterialTheme.typography.labelLarge.copy(
-		fontFamily = Rubik,
-		fontWeight = FontWeight.Medium,
-		color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5F)
-	)
-)
 
 @Preview
 @Composable
