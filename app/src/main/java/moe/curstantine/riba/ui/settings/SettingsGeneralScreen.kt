@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +22,6 @@ import moe.curstantine.riba.api.riba.RibaSettings
 import moe.curstantine.riba.ui.common.dialogs.LocaleSelectionDialog
 import moe.curstantine.riba.ui.common.dialogs.SortableItemDialog
 import moe.curstantine.riba.ui.theme.RibaTheme
-import moe.curstantine.riba.ui.theme.Rubik
 
 @Composable
 fun SettingsGeneralScreen(state: RibaHostState) {
@@ -33,15 +31,10 @@ fun SettingsGeneralScreen(state: RibaHostState) {
 
 	Scaffold(
 		topBar = {
-			TopAppBar(
-				title = { Text(stringResource(R.string.general)) },
+			SubTopBar(
+				text = stringResource(R.string.general),
 				scrollBehavior = scrollBehavior,
-				navigationIcon = {
-					IconButton(onClick = { state.navigator.popBackStack() }) {
-						Icon(Icons.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
-					}
-				}
-			)
+				onBack = { state.navigator.popBackStack() })
 		}
 	) {
 		Column(
@@ -62,7 +55,6 @@ fun SettingsGeneralScreen(state: RibaHostState) {
 				onClick = { coroutineScope.launch { state.settings.reset() } },
 				content = { Text(stringResource(R.string.reset_to_defaults)) }
 			)
-
 		}
 	}
 }

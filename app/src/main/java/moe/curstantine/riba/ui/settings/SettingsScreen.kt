@@ -1,33 +1,27 @@
 package moe.curstantine.riba.ui.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaHostState
+import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
 
 @Composable
 fun SettingsScreen(state: RibaHostState) {
-	Scaffold(
-		topBar = { ScreenTopBar(state) },
-	) {
+	Scaffold(topBar = { TopBar(state) }) {
 		Column(modifier = Modifier.padding(it)) {
 			ListItem(
 				modifier = Modifier.clickable { state.navigator.navigateTo(RibaRoute.Settings.General) },
@@ -49,7 +43,7 @@ fun SettingsScreen(state: RibaHostState) {
 }
 
 @Composable
-private fun ScreenTopBar(state: RibaHostState) =
+private fun TopBar(state: RibaHostState) =
 	MediumTopAppBar(
 		title = { Text(stringResource(R.string.settings)) },
 		navigationIcon = {
@@ -57,6 +51,18 @@ private fun ScreenTopBar(state: RibaHostState) =
 				Icon(Icons.Rounded.ArrowBack, contentDescription = null)
 			}
 		},
+	)
+
+@Composable
+fun SubTopBar(text: String, scrollBehavior: TopAppBarScrollBehavior, onBack : () -> Unit) =
+	TopAppBar(
+		title = { Text(text) },
+		scrollBehavior = scrollBehavior,
+		navigationIcon = {
+			IconButton(onClick = onBack) {
+				Icon(Icons.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
+			}
+		}
 	)
 
 @Composable

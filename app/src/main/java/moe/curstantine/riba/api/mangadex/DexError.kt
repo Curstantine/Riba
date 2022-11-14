@@ -7,6 +7,7 @@ import moe.curstantine.riba.api.mangadex.models.DexErrorResponse
 import moe.curstantine.riba.api.mangadex.models.DexResult
 import moe.curstantine.riba.api.riba.RibaError
 import retrofit2.HttpException
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.sql.SQLException
 import java.util.*
@@ -59,12 +60,13 @@ open class DexError(
 
 		object NoInternet : DexError(
 			"Cannot reach MangaDex!",
-			"You need an internet connection to fetch data from MangaDex."
+			"You need a stable internet connection to fetch data from MangaDex."
 		)
 
 		fun tryHandle(e: Throwable): DexError {
 			return when (e) {
 				is DexError -> e
+				is SocketTimeoutException,
 				is UnknownHostException -> NoInternet
 				is HttpException -> fromHttpException(e)
 				is JsonDataException -> InvalidJSON(e.message)
