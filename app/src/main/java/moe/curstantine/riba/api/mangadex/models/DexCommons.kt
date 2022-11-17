@@ -17,7 +17,11 @@ enum class DexResult {
 	@field:Json(name = "error")
 	Error;
 
-	override fun toString() = DexUtils.toNormalizedString(name)
+	/**
+	 * @return [Json.name] of this enum value.
+	 * @throws NullPointerException  If the annotation couldn't be found for this enum.
+	 */
+	fun toDexEnum(): String = this.getEnumValue()
 }
 
 @JsonClass(generateAdapter = false)

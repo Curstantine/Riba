@@ -1,10 +1,6 @@
 package moe.curstantine.riba.api.adapters.moshi
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
+import com.squareup.moshi.*
 import java.lang.reflect.Type
 
 class NormalizeMismatchType<T>(

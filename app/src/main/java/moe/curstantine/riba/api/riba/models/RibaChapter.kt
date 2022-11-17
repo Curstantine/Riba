@@ -88,6 +88,13 @@ data class RibaChapter(
 	@ColumnInfo val updatedAt: LocalDateTime,
 	@ColumnInfo val version: Int,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaChapter): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaChapter(
 			id = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f",

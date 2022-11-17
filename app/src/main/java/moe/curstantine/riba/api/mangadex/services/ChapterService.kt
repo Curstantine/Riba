@@ -1,32 +1,14 @@
 package moe.curstantine.riba.api.mangadex.services
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import moe.curstantine.riba.api.adapters.retrofit.getEnumValue
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
-import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.DexChapterCollection
-import moe.curstantine.riba.api.mangadex.models.DexChapterData
-import moe.curstantine.riba.api.mangadex.models.DexChapterQueryOrderProperty
-import moe.curstantine.riba.api.mangadex.models.DexEntityType
-import moe.curstantine.riba.api.mangadex.models.DexLocale
-import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
-import moe.curstantine.riba.api.mangadex.models.DexRelatedGroup
-import moe.curstantine.riba.api.mangadex.models.DexRelatedUser
-import moe.curstantine.riba.api.mangadex.models.toRibaChapter
+import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
-import moe.curstantine.riba.api.riba.models.RibaChapter
-import moe.curstantine.riba.api.riba.models.RibaCollection
-import moe.curstantine.riba.api.riba.models.RibaFulfilledChapter
-import moe.curstantine.riba.api.riba.models.RibaGroup
-import moe.curstantine.riba.api.riba.models.RibaUser
+import moe.curstantine.riba.api.riba.models.*
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
@@ -37,9 +19,7 @@ class ChapterService(
 	override val database: Database,
 	private val userService: UserService,
 	private val groupService: GroupService,
-) : MangaDexService.Companion.Service() {
-	override val coroutineScope = CoroutineScope(Dispatchers.IO)
-
+) : RibaHttpService() {
 	private val defaultChapterIncludes = listOf(
 		DexEntityType.User,
 		DexEntityType.ScanlationGroup,
@@ -49,6 +29,7 @@ class ChapterService(
 	 * @return A Map with Manga ID as its key and a value with [RibaFulfilledChapter]
 	 */
 	suspend fun getCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		mangaId: String? = null,
 		ids: List<String>? = null,
 		limit: Int = 10,
@@ -58,8 +39,8 @@ class ChapterService(
 		translatedLanguage: List<DexLocale>? = null,
 		sort: Pair<DexChapterQueryOrderProperty, DexQueryOrderValue>? = null,
 		forceInsert: Boolean = false,
-	): RibaResult<RibaCollection<Map<String, List<RibaFulfilledChapter>>>> =
-		contextualInvoke { scope ->
+	): RibaCollection<Map<String, List<RibaFulfilledChapter>>> =
+		withContext(dispatcher) {
 			val response = service.getCollection(
 				mangaId = mangaId,
 				ids = ids,
@@ -75,7 +56,7 @@ class ChapterService(
 
 			for (chapter in response.data) {
 				val riba = chapter.toRibaChapter()
-				val meta = insertChapterMeta(scope.coroutineContext, chapter)
+				val meta = insertChapterMeta(dispatcher, chapter)
 				val manga = chapter.relationships.first { it.type == DexEntityType.Manga }
 
 				if (map[manga.id] == null) map[manga.id] = mutableListOf()
@@ -89,7 +70,7 @@ class ChapterService(
 				)
 			}
 
-			scope.launch {
+			launch {
 				map.values.forEach { mangaChapters ->
 					database.insertCollection(
 						context = coroutineContext,
@@ -99,7 +80,7 @@ class ChapterService(
 				}
 			}
 
-			return@contextualInvoke RibaCollection(
+			return@withContext RibaCollection(
 				data = map,
 				limit = response.limit,
 				offset = response.offset,
@@ -113,43 +94,40 @@ class ChapterService(
 	 * @return A [Map] with Chapter ID as its key and a value with [RibaFulfilledChapter]
 	 */
 	suspend fun getStrictCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>,
 		forceInsert: Boolean = false,
 		tryDatabase: Boolean = true,
-	): RibaResult<Map<String, RibaFulfilledChapter>> = contextualInvoke {
+	): Map<String, RibaFulfilledChapter> = withContext(dispatcher) {
 		val map = ids.associateBy({ it }, { null }).toMutableMap<String, RibaFulfilledChapter?>()
 
 		if (tryDatabase) for (chapter in database.getCollection(ids)) {
 			val groups = groupService.database.getCollection(chapter.groups)
 			val uploader = userService.database.get(chapter.uploader)
 
-			if (groups.size == chapter.groups.size || uploader == null) {
-				Log.i(
-					DexLogTag.MISSING.tag,
-					"Groups were $groups, where expected value was ${chapter.groups}; uploader was $uploader, where expected value was ${chapter.uploader}",
-					DexError.Companion.MissingChapterData
+			if (groups.size != chapter.groups.size || uploader == null) {
+				val error = DexError.MissingChapterData.setAdditional(
+					"Groups were ${groups.map { it.id }}," +
+						" where expected value was ${chapter.groups};" +
+						" uploader was $uploader, where expected value was ${chapter.uploader}",
 				)
-				continue
+
+				error.log(DexLogTag.MISSING, Log.ERROR)
+				throw error
 			}
 
-			map[chapter.id] = RibaFulfilledChapter(
-				chapter,
-				groups,
-				uploader,
-			)
+			map[chapter.id] = RibaFulfilledChapter(chapter, groups, uploader)
 		}
 
 		val missingIds = map.filterValues { it == null }.keys.toList()
 		if (missingIds.isNotEmpty()) {
-			val response = getCollection(ids = missingIds, forceInsert = forceInsert)
-				.unwrap()
-
-			for (chapter in response.data.values.flatten()) {
-				map[chapter.chapter.id] = chapter
-			}
+			getCollection(ids = missingIds, forceInsert = forceInsert)
+				.data.values.flatten()
+				.forEach { map[it.chapter.id] = it }
 		}
 
-		return@contextualInvoke map.filterValues { it != null }.mapValues { it.value!! }
+		@Suppress("UNCHECKED_CAST")
+		return@withContext map.filterValues { it != null } as Map<String, RibaFulfilledChapter>
 	}
 
 	/**
@@ -159,47 +137,43 @@ class ChapterService(
 	 *
 	 * @see getCollection
 	 */
-	suspend fun getStrictCollectionForManga(mangaId: String): RibaResult<List<RibaFulfilledChapter>> =
-		contextualInvoke {
-			val list = mutableListOf<RibaFulfilledChapter>()
+	suspend fun getStrictCollectionForManga(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
+		mangaId: String
+	): List<RibaFulfilledChapter> = withContext(dispatcher) {
+		val list = mutableListOf<RibaFulfilledChapter>()
 
-			for (chapter in database.getCollectionForManga(mangaId)) {
-				val groups = groupService.database.getCollection(chapter.groups)
-				val uploader = userService.database.get(chapter.uploader)
+		for (chapter in database.getCollectionForManga(mangaId)) {
+			val groups = groupService.database.getCollection(chapter.groups)
+			val uploader = userService.database.get(chapter.uploader)
 
-				if (groups.size == chapter.groups.size || uploader == null) {
-					val error = DexError.Companion.MissingChapterData
-					Log.i(
-						DexLogTag.MISSING.tag,
-						"Groups were $groups, where expected value was ${chapter.groups}; uploader was $uploader, where expected value was ${chapter.uploader}",
-						error
-					)
-					throw error
-				}
-
-				list.add(
-					RibaFulfilledChapter(
-						chapter,
-						groups,
-						uploader,
-					)
+			if (groups.size != chapter.groups.size || uploader == null) {
+				val error = DexError.MissingChapterData.setAdditional(
+					"Groups were ${groups.map { it.id }}," +
+						" where expected value was ${chapter.groups};" +
+						" uploader was $uploader, where expected value was ${chapter.uploader}",
 				)
+
+				error.log(DexLogTag.MISSING, Log.ERROR)
+				throw error
 			}
 
-			return@contextualInvoke list
+			list.add(RibaFulfilledChapter(chapter, groups, uploader))
 		}
 
+		return@withContext list
+	}
+
 	private suspend fun insertChapterMeta(
-		context: CoroutineContext,
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		chapter: DexChapterData
-	): Pair<RibaUser, List<RibaGroup>> = withContext(context) {
+	): Pair<RibaUser, List<RibaGroup>> = withContext(dispatcher) {
 		val uploader = async {
 			val user = chapter.relationships
 				.first { it.type == DexEntityType.User }
 				.let { (it as DexRelatedUser).toRibaUser() }
 
 			launch { userService.database.insert(user) }
-
 			return@async user
 		}
 
@@ -208,8 +182,7 @@ class ChapterService(
 				.filter { it.type == DexEntityType.ScanlationGroup }
 				.map { (it as DexRelatedGroup).toRibaGroup() }
 
-			launch { groupService.database.insertCollection(coroutineContext, groups) }
-
+			launch { groupService.database.insertCollection(dispatcher, groups) }
 			return@async groups
 		}
 
@@ -232,25 +205,17 @@ class ChapterService(
 			): DexChapterCollection
 		}
 
-		class Database(
-			private val database: DexDatabase
-		) : RibaHttpService.Companion.Database(database) {
+		class Database(private val database: DexDatabase) : RibaHttpService.Companion.Database(database) {
 			suspend fun get(id: String) = database.chapter().get(id)
-
 			suspend fun getCollection(ids: List<String>) = database.chapter().get(ids)
-
-			suspend fun getCollectionForManga(mangaId: String) = database
-				.chapter()
-				.getForManga(mangaId)
+			suspend fun getCollectionForManga(mangaId: String) = database.chapter().getForManga(mangaId)
 
 			suspend fun insert(chapter: RibaChapter, force: Boolean = false) {
 				val oldChapter = database.chapter().get(chapter.id)
 
-				if (force.not() && oldChapter != null && oldChapter.version >= chapter.version) {
-					return
+				if (!(force.not() && oldChapter != null && chapter.isOlderThan(oldChapter))) {
+					database.chapter().insert(chapter)
 				}
-
-				database.chapter().insert(chapter)
 			}
 
 			suspend fun insertCollection(
@@ -269,11 +234,8 @@ class ChapterService(
 				for ((id, newThis) in chapterMap) {
 					val oldThis = oldChapterMap[id]
 
-					if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-						continue
-					} else {
-						launch { database.chapter().insert(newThis) }
-					}
+					if (force.not() && oldThis != null && newThis.isOlderThan(oldThis)) continue
+					else launch { database.chapter().insert(newThis) }
 				}
 			}
 		}

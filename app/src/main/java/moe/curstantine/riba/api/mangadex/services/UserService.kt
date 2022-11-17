@@ -10,23 +10,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import moe.curstantine.riba.api.mangadex.DexConstants
 import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
-import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaUser
 import retrofit2.http.*
-import kotlin.coroutines.CoroutineContext
 
 // TODO: Implement Guest/Anon
 class UserService(
 	context: Context,
+	globalCoroutineScope: CoroutineScope,
 	override val service: APIService,
 	override val database: Database,
-) : MangaDexService.Companion.Service() {
-	override val coroutineScope = CoroutineScope(Dispatchers.IO)
-
+) : RibaHttpService() {
 	private val preferences: SharedPreferences = context.getSharedPreferences(
 		DexConstants.USER_PREFERENCE,
 		Context.MODE_PRIVATE
@@ -36,70 +32,76 @@ class UserService(
 	val currentUser: StateFlow<RibaUser?> = _currentUser.asStateFlow()
 
 	init {
-		coroutineScope.launch {
+		globalCoroutineScope.launch {
 			try {
 				handleTokenExpiry()
-				_currentUser.emit(getCurrentUserDetails(tryDatabase = true).unwrap())
+				_currentUser.emit(getCurrentUserDetails(tryDatabase = true))
 			} catch (e: DexError) {
-				Log.w(DexLogTag.DEBUG.tag, "Failed to handle token expiry", e)
+				Log.w(DexLogTag.DEBUG.tagName, "Failed to handle token expiry", e)
 			}
 		}
 	}
 
 	suspend fun login(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		username: String,
 		password: String
-	): RibaResult<DexUserAuthResponse> = contextualInvoke {
+	): DexUserAuthResponse = withContext(dispatcher) {
 		val response = service.login(DexUserAuthBody(username, password))
 
-		it.launch {
-			val details = getCurrentUserDetails(sessionOverride = response.token.session).unwrap()
+		launch {
+			val details = getCurrentUserDetails(sessionOverride = response.token.session)
 			setPreferences(details.id, response.token)
 			_currentUser.emit(details)
 		}
 
-		return@contextualInvoke response
+		return@withContext response
 	}
 
-	suspend fun logout(): RibaResult<DexBaseResponseImpl> = contextualInvoke {
+	suspend fun logout(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default
+	): DexBaseResponseImpl = withContext(dispatcher) {
 		handleTokenExpiry()
 		val response = service.logout(getSessionToken())
-		Log.d(DexLogTag.DEBUG.tag, "Logout response: ${response.result}")
+		Log.d(DexLogTag.DEBUG.tagName, "Logout response: ${response.result}")
 
-		it.launch {
+		launch {
 			removePreferences()
 			_currentUser.emit(null)
 		}
 
-		return@contextualInvoke response
+		return@withContext response
 	}
 
-	private suspend fun refresh(refreshToken: String): RibaResult<DexUserAuthResponse> =
-		contextualInvoke {
-			val response = service.refresh(DexUserAuthRefreshBody(refreshToken))
-
-			it.launch {
-				setPreferences(getUserId(), response.token)
-				_currentUser.emit(getCurrentUserDetails(tryDatabase = true).unwrap())
-			}
-
-			return@contextualInvoke response
+	private suspend fun refresh(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
+		refreshToken: String
+	): DexUserAuthResponse = withContext(dispatcher) {
+		val response = service.refresh(DexUserAuthRefreshBody(refreshToken))
+		launch {
+			setPreferences(getUserId(), response.token)
+			_currentUser.emit(getCurrentUserDetails(tryDatabase = true))
 		}
+
+		return@withContext response
+	}
 
 	/**
 	 * @param sessionOverride overrides the [getSessionToken] with the given token.
 	 */
 	private suspend fun getCurrentUserDetails(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		sessionOverride: String? = null,
 		tryDatabase: Boolean = false
-	): RibaResult<RibaUser> = contextualInvoke {
+	): RibaUser = withContext(dispatcher) {
 		if (tryDatabase) {
 			val local = database.get(getUserId())
 
-			if (local != null) return@contextualInvoke local else {
+			if (local != null) return@withContext local else {
 				Log.w(
-					DexLogTag.DEBUG.tag,
-					"tryDatabase was true, but user was not in the database, continuing to fetch.",
+					DexLogTag.DEBUG.tagName,
+					"tryDatabase was true, but user was not in the database," +
+						" continuing to fetch.",
 				)
 			}
 		}
@@ -108,16 +110,35 @@ class UserService(
 			.getCurrentUserDetails(sessionOverride ?: getSessionToken())
 			.data.toRibaUser()
 
-		it.launch { database.insert(response) }
+		launch { database.insert(response) }
+		return@withContext response
+	}
 
-		return@contextualInvoke response
+	/**
+	 * Handles expired tokens intelligently.
+	 *
+	 * @throws DexError.NotAuthenticated if the user is not logged in.
+	 * @throws DexError.ReAuthenticationRequired if the user is logged in, but will need a re-authentication due to expired tokens.
+	 */
+	suspend fun handleTokenExpiry(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default
+	) = withContext(dispatcher) {
+		val timeElapsed = currentTimeSeconds() - getAuthTime()
+
+		if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
+			Log.d(DexLogTag.DEBUG.tagName, "Refresh token expired, need to re-authenticate.")
+			throw DexError.ReAuthenticationRequired
+		} else if (timeElapsed >= DexConstants.SESSION_EXPIRY) {
+			Log.d(DexLogTag.DEBUG.tagName, "Session token expired, refreshing.")
+			refresh(dispatcher, getRefreshToken())
+		}
 	}
 
 	/**
 	 * @throws DexError.NotAuthenticated if the user is not signed in.
 	 */
 	fun getUserId(): String {
-		return preferences.getString("user", null) ?: throw DexError.Companion.NotAuthenticated
+		return preferences.getString("user", null) ?: throw DexError.NotAuthenticated
 	}
 
 	/**
@@ -126,14 +147,14 @@ class UserService(
 	fun getSessionToken(prefixed: Boolean = true): String {
 		return preferences.getString("session", null)
 			?.apply { if (prefixed) return "Bearer $this" }
-			?: throw DexError.Companion.NotAuthenticated
+			?: throw DexError.NotAuthenticated
 	}
 
 	/**
 	 * @throws DexError.NotAuthenticated if the user is not signed in.
 	 */
 	private fun getRefreshToken(): String {
-		return preferences.getString("refresh", null) ?: throw DexError.Companion.NotAuthenticated
+		return preferences.getString("refresh", null) ?: throw DexError.NotAuthenticated
 	}
 
 	/**
@@ -143,27 +164,9 @@ class UserService(
 	 */
 	private fun getAuthTime(): Long {
 		val authTime = preferences.getLong("authTime", -1L)
-		if (authTime == -1L) throw DexError.Companion.NotAuthenticated
+		if (authTime == -1L) throw DexError.NotAuthenticated
 
 		return authTime
-	}
-
-	/**
-	 * Handles expired tokens intelligently.
-	 *
-	 * @throws DexError.NotAuthenticated if the user is not logged in.
-	 * @throws DexError.ReAuthenticationRequired if the user is logged in, but will need a re-authentication due to expired tokens.
-	 */
-	suspend fun handleTokenExpiry() {
-		val timeElapsed = currentTimeSeconds() - getAuthTime()
-
-		if (timeElapsed >= DexConstants.REFRESH_EXPIRY) {
-			Log.d(DexLogTag.DEBUG.tag, "Refresh token expired, need to re-authenticate.")
-			throw DexError.Companion.ReAuthenticationRequired
-		} else if (timeElapsed >= DexConstants.SESSION_EXPIRY) {
-			Log.d(DexLogTag.DEBUG.tag, "Session token expired, refreshing.")
-			refresh(getRefreshToken())
-		}
 	}
 
 	private fun setPreferences(userId: String, tokens: DexUserAuthTokens) = preferences.edit()
@@ -184,11 +187,12 @@ class UserService(
 	 * NOTE: This method needs authentication.
 	 */
 	suspend fun getCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>? = null,
 		username: String? = null,
 		limit: Int? = 10,
 		offset: Int? = null,
-	): RibaResult<List<RibaUser>> = contextualInvoke { scope ->
+	): List<RibaUser> = withContext(dispatcher) {
 		handleTokenExpiry()
 		val response = service.getCollection(
 			token = getSessionToken(),
@@ -199,9 +203,9 @@ class UserService(
 		)
 
 		val riba = response.data.map { it.toRibaUser() }
-		scope.launch { database.insertCollection(coroutineContext, riba) }
+		launch { database.insertCollection(dispatcher, riba) }
 
-		return@contextualInvoke riba
+		return@withContext riba
 	}
 
 	companion object {
@@ -240,22 +244,18 @@ class UserService(
 			suspend fun insert(user: RibaUser, force: Boolean = false) {
 				val oldUser = get(user.id)
 
-				if (force.not() && oldUser != null && oldUser.version >= user.version) {
-					return
+				if (!(force.not() && oldUser != null && user.isOlderThan(oldUser))) {
+					database.user().insert(user)
 				}
-
-				database.user().insert(user)
 			}
 
 			suspend fun insertCollection(
-				context: CoroutineContext,
+				dispatcher: CoroutineDispatcher = Dispatchers.Default,
 				users: List<RibaUser>,
 				force: Boolean = false
-			) = withContext(context) {
+			) = withContext(dispatcher) {
 				val userJob = this.async { users.associateBy { it.id } }
-				val oldUserJob = this.async {
-					getCollection(users.map { it.id }).associateBy { it.id }
-				}
+				val oldUserJob = this.async { getCollection(users.map { it.id }).associateBy { it.id } }
 
 				val oldUserMap = oldUserJob.await()
 				val userMap = userJob.await()
@@ -263,11 +263,8 @@ class UserService(
 				for ((id, newThis) in userMap) {
 					val oldThis = oldUserMap[id]
 
-					if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-						continue
-					} else {
-						launch { database.user().insert(newThis) }
-					}
+					if (force.not() && oldThis != null && newThis.isOlderThan(oldThis)) continue
+					else launch { database.user().insert(newThis) }
 				}
 			}
 		}

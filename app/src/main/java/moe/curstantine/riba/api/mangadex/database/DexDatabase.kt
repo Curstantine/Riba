@@ -3,28 +3,8 @@ package moe.curstantine.riba.api.mangadex.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import moe.curstantine.riba.api.mangadex.database.dao.AuthorDao
-import moe.curstantine.riba.api.mangadex.database.dao.ChapterDao
-import moe.curstantine.riba.api.mangadex.database.dao.CoverDao
-import moe.curstantine.riba.api.mangadex.database.dao.GroupDao
-import moe.curstantine.riba.api.mangadex.database.dao.ListDao
-import moe.curstantine.riba.api.mangadex.database.dao.MangaDao
-import moe.curstantine.riba.api.mangadex.database.dao.MangaLinkDao
-import moe.curstantine.riba.api.mangadex.database.dao.StatisticDao
-import moe.curstantine.riba.api.mangadex.database.dao.TagDao
-import moe.curstantine.riba.api.mangadex.database.dao.UserDao
-import moe.curstantine.riba.api.mangadex.database.dao.UserFollowDao
-import moe.curstantine.riba.api.riba.models.RibaAuthor
-import moe.curstantine.riba.api.riba.models.RibaChapter
-import moe.curstantine.riba.api.riba.models.RibaCover
-import moe.curstantine.riba.api.riba.models.RibaGroup
-import moe.curstantine.riba.api.riba.models.RibaManga
-import moe.curstantine.riba.api.riba.models.RibaMangaLink
-import moe.curstantine.riba.api.riba.models.RibaMangaList
-import moe.curstantine.riba.api.riba.models.RibaStatistic
-import moe.curstantine.riba.api.riba.models.RibaTag
-import moe.curstantine.riba.api.riba.models.RibaUser
-import moe.curstantine.riba.api.riba.models.RibaUserFollow
+import moe.curstantine.riba.api.mangadex.database.dao.*
+import moe.curstantine.riba.api.riba.models.*
 
 @Database(
 	version = 1,

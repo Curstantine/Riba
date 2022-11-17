@@ -1,66 +1,58 @@
 package moe.curstantine.riba.api.mangadex.services
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.mangadex.MangaDexService
+import kotlinx.coroutines.*
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.DexAuthor
 import moe.curstantine.riba.api.mangadex.models.DexAuthorCollection
 import moe.curstantine.riba.api.mangadex.models.DexEntityType
 import moe.curstantine.riba.api.mangadex.models.toRibaAuthor
 import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaAuthor
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import kotlin.coroutines.CoroutineContext
 
-class AuthorService(
-	override val service: APIService,
-	override val database: Database
-) : MangaDexService.Companion.Service() {
-	override val coroutineScope = CoroutineScope(Dispatchers.IO)
-
+class AuthorService(override val service: APIService, override val database: Database) : RibaHttpService() {
 	suspend fun get(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		id: String,
 		forceInsert: Boolean = false,
 		tryDatabase: Boolean = true,
-	): RibaResult<RibaAuthor> = contextualInvoke { scope ->
+	): RibaAuthor = withContext(dispatcher) {
 		if (tryDatabase) {
 			val localAuthor = database.get(id)
-			if (localAuthor != null) return@contextualInvoke localAuthor
+			if (localAuthor != null) return@withContext localAuthor
 		}
 
 		val response = service.get(id).data.toRibaAuthor()
-		scope.launch { database.insert(response, forceInsert) }
+		launch { database.insert(response, forceInsert) }
 
-		return@contextualInvoke response
+		return@withContext response
 	}
 
 	suspend fun getCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>? = null,
 		limit: Int = 10,
 		offset: Int? = null,
 		includes: List<DexEntityType>? = null,
 		forceInsert: Boolean = false,
-	): RibaResult<List<RibaAuthor>> = contextualInvoke { scope ->
-		val response = service.getCollection(ids, limit, offset, includes?.map { it.toDexEnum() })
-		val riba = response.data.map { it.toRibaAuthor() }
+	): List<RibaAuthor> = withContext(dispatcher) {
+		val response = service
+			.getCollection(ids, limit, offset, includes?.map { it.toDexEnum() })
+			.data.map { it.toRibaAuthor() }
+		launch { database.insertCollection(coroutineContext, response, forceInsert) }
 
-		scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
-
-		return@contextualInvoke riba
+		return@withContext response
 	}
 
 	suspend fun getStrictCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>,
 		forceInsert: Boolean = false,
 		tryDatabase: Boolean = true,
-	): RibaResult<List<RibaAuthor>> = contextualInvoke {
+	): List<RibaAuthor> = withContext(dispatcher) {
 		val idMap: MutableMap<String, RibaAuthor?> = ids
 			.associateBy({ it }, { null })
 			.toMutableMap()
@@ -72,11 +64,11 @@ class AuthorService(
 
 		val missingIds = idMap.filterValues { it == null }.keys.toList()
 		if (missingIds.isNotEmpty()) {
-			val response = getCollection(ids = missingIds, limit = missingIds.size, forceInsert = forceInsert)
-			response.unwrap().forEach { artist -> idMap[artist.id] = artist }
+			getCollection(ids = missingIds, limit = missingIds.size, forceInsert = forceInsert)
+				.forEach { artist -> idMap[artist.id] = artist }
 		}
 
-		return@contextualInvoke idMap.values.mapNotNull { it }
+		return@withContext idMap.values.mapNotNull { it }
 	}
 
 	companion object {
@@ -94,8 +86,7 @@ class AuthorService(
 			): DexAuthorCollection
 		}
 
-		class Database(private val database: DexDatabase) :
-			RibaHttpService.Companion.Database(database) {
+		class Database(private val database: DexDatabase) : RibaHttpService.Companion.Database(database) {
 			suspend fun get(id: String) = database.author().get(id)
 
 			suspend fun getCollection(ids: List<String>) = database.author().get(ids)
@@ -103,11 +94,9 @@ class AuthorService(
 			suspend fun insert(author: RibaAuthor, force: Boolean = false) {
 				val oldAuthor = database.author().get(author.id)
 
-				if (force.not() && oldAuthor != null && oldAuthor.version >= author.version) {
-					return
+				if (!(force.not() && oldAuthor != null && author.isOlderThan(oldAuthor))) {
+					database.author().insert(author)
 				}
-
-				database.author().insert(author)
 			}
 
 			suspend fun insertCollection(
@@ -115,10 +104,8 @@ class AuthorService(
 				authors: List<RibaAuthor>,
 				force: Boolean = false
 			) = withContext(context) {
-				val authorJob = this.async { authors.associateBy { it.id } }
-				val oldAuthorJob = this.async {
-					getCollection(authors.map { it.id }).associateBy { it.id }
-				}
+				val authorJob = async { authors.associateBy { it.id } }
+				val oldAuthorJob = async { getCollection(authors.map { it.id }).associateBy { it.id } }
 
 				val oldAuthorMap = oldAuthorJob.await()
 				val authorMap = authorJob.await()
@@ -126,11 +113,8 @@ class AuthorService(
 				for ((id, newThis) in authorMap) {
 					val oldThis = oldAuthorMap[id]
 
-					if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-						continue
-					} else {
-						launch { database.author().insert(newThis) }
-					}
+					if (force.not() && oldThis != null && newThis.isOlderThan(oldThis)) continue
+					else launch { database.author().insert(newThis) }
 				}
 			}
 		}

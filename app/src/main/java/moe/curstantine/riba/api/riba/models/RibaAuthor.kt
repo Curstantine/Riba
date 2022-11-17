@@ -17,6 +17,13 @@ data class RibaAuthor(
 	@ColumnInfo val description: DexLocaleObject?,
 	@ColumnInfo val version: Int,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaAuthor): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaAuthor(
 			"fc343004-569b-4750-aba0-05ab35efc17c",

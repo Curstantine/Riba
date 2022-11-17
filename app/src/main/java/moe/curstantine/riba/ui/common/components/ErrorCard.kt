@@ -1,19 +1,11 @@
 package moe.curstantine.riba.ui.common.components
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Error
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +15,8 @@ import moe.curstantine.riba.api.riba.RibaError
 fun ErrorCard(error: RibaError) {
 	val typography = MaterialTheme.typography
 	val colorScheme = MaterialTheme.colorScheme
+
+	val additional = remember(error) { error.getAdditional() }
 
 	OutlinedCard(
 		modifier = Modifier
@@ -38,14 +32,14 @@ fun ErrorCard(error: RibaError) {
 			Icon(imageVector = Icons.Rounded.Error, contentDescription = null)
 			Spacer(modifier = Modifier.width(12.dp))
 			Text(
-				error.human,
+				text = error.message,
 				style = typography.titleMedium.copy(color = colorScheme.onErrorContainer)
 			)
 		}
 
-		if (error.additional != null) {
+		if (additional != null) {
 			Text(
-				error.additional!!,
+				text = additional,
 				style = typography.bodyMedium.copy(
 					color = colorScheme.onErrorContainer.copy(alpha = 0.75F)
 				)
@@ -57,5 +51,5 @@ fun ErrorCard(error: RibaError) {
 @Preview
 @Composable
 private fun ErrorCardPreview() {
-	ErrorCard(RibaError.Companion.Impl.ResultNotError)
+	ErrorCard(RibaError("Error message", "Additional message", Error("Caused Error")))
 }

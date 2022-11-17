@@ -1,33 +1,31 @@
 package moe.curstantine.riba.api.riba.models
 
-import moe.curstantine.riba.api.riba.RibaResult
-
 /**
- * [RibaManga] with relationships wrapped in [RibaResult]
+ * [RibaManga] with relationships wrapped in [Result]
  */
 class RibaResultManga(
-	val manga: RibaResult<RibaManga>,
-	val cover: RibaResult<RibaCover?>?,
-	val authors: RibaResult<List<RibaAuthor>>?,
-	val artists: RibaResult<List<RibaAuthor>>?,
-	val tags: RibaResult<List<RibaTag>>?,
-	val statistic: RibaResult<RibaStatistic>?,
-	val chapters: RibaResult<List<RibaFulfilledChapter>>?,
-	val isFollowing: RibaResult<Boolean>?,
+	val manga: Result<RibaManga>,
+	val cover: Result<RibaCover?>?,
+	val authors: Result<List<RibaAuthor>>?,
+	val artists: Result<List<RibaAuthor>>?,
+	val tags: Result<List<RibaTag>>?,
+	val statistic: Result<RibaStatistic>?,
+	val chapters: Result<List<RibaFulfilledChapter>>?,
+	val isFollowing: Result<Boolean>?,
 ) {
 	companion object {
 		/**
 		 * Usage is discouraged, use this only when you need to eagerly pass an error
 		 */
 		fun fromNullables(
-			manga: RibaResult<RibaManga>,
-			cover: RibaResult<RibaCover?>? = null,
-			authors: RibaResult<List<RibaAuthor>>? = null,
-			artists: RibaResult<List<RibaAuthor>>? = null,
-			tags: RibaResult<List<RibaTag>>? = null,
-			statistic: RibaResult<RibaStatistic>? = null,
-			chapters: RibaResult<List<RibaFulfilledChapter>>? = null,
-			isFollowing: RibaResult<Boolean>? = null,
+			manga: Result<RibaManga>,
+			cover: Result<RibaCover?>? = null,
+			authors: Result<List<RibaAuthor>>? = null,
+			artists: Result<List<RibaAuthor>>? = null,
+			tags: Result<List<RibaTag>>? = null,
+			statistic: Result<RibaStatistic>? = null,
+			chapters: Result<List<RibaFulfilledChapter>>? = null,
+			isFollowing: Result<Boolean>? = null,
 		): RibaResultManga {
 			return RibaResultManga(
 				manga,
@@ -42,13 +40,13 @@ class RibaResultManga(
 		}
 
 		fun getDefault(): RibaResultManga = RibaResultManga(
-			RibaResult.Success(RibaManga.getDefault()),
-			RibaResult.Success(RibaCover.getDefault()),
-			RibaResult.Success(listOf(RibaAuthor.getDefault())),
-			RibaResult.Success(listOf(RibaAuthor.getDefault(), RibaAuthor.getDefault(), RibaAuthor.getDefault())),
-			RibaResult.Success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
-			RibaResult.Success(RibaStatistic.getDefault()),
-			RibaResult.Success(
+			Result.success(RibaManga.getDefault()),
+			Result.success(RibaCover.getDefault()),
+			Result.success(listOf(RibaAuthor.getDefault())),
+			Result.success(listOf(RibaAuthor.getDefault(), RibaAuthor.getDefault(), RibaAuthor.getDefault())),
+			Result.success(listOf(RibaTag.getDefault(), RibaTag.getDefault())),
+			Result.success(RibaStatistic.getDefault()),
+			Result.success(
 				listOf(
 					RibaFulfilledChapter.getDefault(),
 					RibaFulfilledChapter.getDefault(),
@@ -56,7 +54,7 @@ class RibaResultManga(
 					RibaFulfilledChapter.getDefault()
 				)
 			),
-			RibaResult.Success(true)
+			Result.success(true)
 		)
 	}
 }
