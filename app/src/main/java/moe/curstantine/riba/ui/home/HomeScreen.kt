@@ -29,15 +29,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
-import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexConstants
+import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
 import moe.curstantine.riba.api.riba.RibaAPIService
 import moe.curstantine.riba.api.riba.RibaConstants
-import moe.curstantine.riba.api.riba.RibaResult
+import moe.curstantine.riba.api.riba.RibaHostState
+import moe.curstantine.riba.api.riba.models.RibaCover
 import moe.curstantine.riba.api.riba.models.RibaFulFilledManga
+import moe.curstantine.riba.api.riba.models.RibaManga
 import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.common.dialogs.AuthDialog
 import moe.curstantine.riba.ui.manga.MangaCardRow
@@ -139,11 +141,11 @@ private fun HeaderRow(
 					)
 				},
 				onClick = {
-					coroutineScope.launch {
-						val resp = state.service.mangadex.user.logout()
+					coroutineScope.launch(Dispatchers.IO) {
+						val resp = state.service.mangadex.user.runCatching { logout(Dispatchers.IO) }
 
 						state.snackbarHost.showSnackbar(
-							if (resp is RibaResult.Error) resp.error.human
+							if (resp.isFailure) resp.exceptionOrNull()?.message ?: DexError.Unknown.message
 							else signOutMessage
 						)
 					}
@@ -224,64 +226,83 @@ private fun PreviewAccountDropDown() {
 }
 
 class HomeViewModel(private val service: RibaAPIService) : ViewModel() {
-	fun getSeasonal(): LiveData<RibaResult<List<RibaFulFilledManga>>> = seasonal
-	fun getRecent(): LiveData<RibaResult<List<RibaFulFilledManga>>> = recent
+	fun getSeasonal(): LiveData<Result<List<RibaFulFilledManga>>> = seasonal
+	fun getRecent(): LiveData<Result<List<RibaFulFilledManga>>> = recent
 
-	private val seasonal: MutableLiveData<RibaResult<List<RibaFulFilledManga>>> by lazy {
-		MutableLiveData<RibaResult<List<RibaFulFilledManga>>>().also {
-			loadSeasonal()
-		}
+	private val seasonal: MutableLiveData<Result<List<RibaFulFilledManga>>> by lazy {
+		MutableLiveData<Result<List<RibaFulFilledManga>>>().also { loadSeasonal() }
 	}
 
-	private val recent: MutableLiveData<RibaResult<List<RibaFulFilledManga>>> by lazy {
-		MutableLiveData<RibaResult<List<RibaFulFilledManga>>>().also {
-			loadRecent()
-		}
+	private val recent: MutableLiveData<Result<List<RibaFulFilledManga>>> by lazy {
+		MutableLiveData<Result<List<RibaFulFilledManga>>>().also { loadRecent() }
 	}
 
 	private fun loadSeasonal() = viewModelScope.launch(Dispatchers.IO) {
-		Log.i(DexLogTag.DEBUG.tag, "Loading seasonal list.")
+		Log.i(DexLogTag.DEBUG.tagName, "Loading seasonal list.")
 
-		val list = when (val list =
-			service.mangadex.mdList.get(DexConstants.SEASONAL_LIST, tryDatabase = true)) {
-			is RibaResult.Success -> list.unwrapOrNull()!!
-			is RibaResult.Error -> return@launch seasonal.postValue(list)
+		val list = service.mangadex.mdList.runCatching {
+			get(Dispatchers.IO, DexConstants.SEASONAL_LIST, tryDatabase = true)
+		}
+			.onFailure { return@launch seasonal.postValue(Result.failure(it)) }
+			.getOrThrow()
+
+		val titles = service.mangadex.manga.runCatching {
+			getStrictCollection(Dispatchers.IO, ids = list.titles)
+		}
+			.onFailure { return@launch seasonal.postValue(Result.failure(it)) }
+			.getOrThrow()
+
+
+		val coverAssociates: Map<String, RibaCover?> = titles
+			.filter { it.coverId != null }
+			.associateBy<RibaManga, String, RibaCover?>({ it.coverId!! }, { null }).toMutableMap()
+			.apply {
+				service.mangadex.manga.runCatching {
+					getCoverCollection(
+						dispatcher = Dispatchers.IO,
+						ids = this@apply.keys.toList(),
+						limit = this@apply.size
+					)
+				}.onSuccess { it.forEach { cover -> this[cover.id] = cover } }
+			}
+
+		val fulfilledTitles = titles.map {
+			RibaFulFilledManga.fromNullables(manga = it, cover = coverAssociates[it.coverId])
 		}
 
-		val titles = when (val collection =
-			service.mangadex.manga.getStrictCollection(ids = list.titles)) {
-			is RibaResult.Success -> collection.unwrapOrNull()!!
-			is RibaResult.Error -> return@launch seasonal.postValue(collection)
-		}
-
-		return@launch seasonal.postValue(RibaResult.Success(titles.map {
-			RibaFulFilledManga.fromNullables(
-				manga = it,
-				cover = it.coverId?.let { id ->
-					service.mangadex.manga.getCover(id).unwrapOrNull()
-				},
-			)
-		}))
-
+		return@launch seasonal.postValue(Result.success(fulfilledTitles))
 	}
 
 	private fun loadRecent() = viewModelScope.launch(Dispatchers.IO) {
-		Log.i(DexLogTag.DEBUG.tag, "Loading recent list.")
+		Log.i(DexLogTag.DEBUG.tagName, "Loading recent list.")
 
-		val list = service.mangadex.manga.getCollection(
-			limit = 25,
-			sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending),
-		).map {
-			it.map { manga ->
-				RibaFulFilledManga.fromNullables(
-					manga = manga,
-					cover = manga.coverId?.let { id ->
-						service.mangadex.manga.getCover(id).unwrapOrNull()
-					},
-				)
+		val titles = service.mangadex.manga.runCatching {
+			getCollection(
+				dispatcher = Dispatchers.IO,
+				limit = 25,
+				sort = Pair(DexQueryOrderProperty.CreatedAt, DexQueryOrderValue.Descending)
+			)
+		}
+			.onFailure { return@launch recent.postValue(Result.failure(it)) }
+			.getOrThrow()
+
+		val coverAssociates: Map<String, RibaCover?> = titles
+			.filter { it.coverId != null }
+			.associateBy<RibaManga, String, RibaCover?>({ it.coverId!! }, { null }).toMutableMap()
+			.apply {
+				service.mangadex.manga.runCatching {
+					getCoverCollection(
+						dispatcher = Dispatchers.IO,
+						ids = this@apply.keys.toList(),
+						limit = this@apply.size
+					)
+				}.onSuccess { it.forEach { cover -> this[cover.id] = cover } }
 			}
+
+		val fulfilledTitles = titles.map {
+			RibaFulFilledManga.fromNullables(manga = it, cover = coverAssociates[it.coverId])
 		}
 
-		return@launch recent.postValue(list)
+		return@launch recent.postValue(Result.success(fulfilledTitles))
 	}
 }

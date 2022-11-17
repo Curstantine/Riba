@@ -1,19 +1,13 @@
 package moe.curstantine.riba
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
-import moe.curstantine.riba.api.mangadex.DexLogTag
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.nav.RibaNavHost
 import moe.curstantine.riba.nav.RibaRoute

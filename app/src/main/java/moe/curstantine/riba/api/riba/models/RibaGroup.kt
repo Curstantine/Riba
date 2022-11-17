@@ -30,6 +30,13 @@ data class RibaGroup(
 	 */
 	@ColumnInfo val members: List<String>?,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaGroup): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaGroup(
 			id = "a408e049-2d88-429f-8c03-f0cc8ab2325c",

@@ -20,7 +20,7 @@ class EnumConverter : Converter.Factory() {
 			try {
 				enum.getEnumValue()
 			} catch (e: Throwable) {
-				Log.e(DexLogTag.MISSING.tag, "No EnumValue annotation found for $enum", e)
+				Log.e(DexLogTag.MISSING.tagName, "No EnumValue annotation found for $enum", e)
 				throw e
 			}
 		}

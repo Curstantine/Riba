@@ -1,9 +1,12 @@
 package moe.curstantine.riba.ui.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaHostState
-import moe.curstantine.riba.nav.RibaNavigator
 import moe.curstantine.riba.nav.RibaRoute
 import moe.curstantine.riba.ui.theme.RibaTheme
 import moe.curstantine.riba.ui.theme.Rubik
@@ -54,7 +56,7 @@ private fun TopBar(state: RibaHostState) =
 	)
 
 @Composable
-fun SubTopBar(text: String, scrollBehavior: TopAppBarScrollBehavior, onBack : () -> Unit) =
+fun SubTopBar(text: String, scrollBehavior: TopAppBarScrollBehavior, onBack: () -> Unit) =
 	TopAppBar(
 		title = { Text(text) },
 		scrollBehavior = scrollBehavior,

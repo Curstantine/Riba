@@ -13,6 +13,13 @@ data class RibaUser(
 	@ColumnInfo val roles: List<DexUserRole>,
 	@ColumnInfo val version: Int,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaUser): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaUser(
 			id = "c36ab005-6329-4fe1-8517-099d7e134515",

@@ -2,13 +2,7 @@ package moe.curstantine.riba.ui.common.components
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilledTonalButton
@@ -38,6 +32,8 @@ fun FlexibleErrorReceiver(error: RibaError) {
 	val issueIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(RibaConstants.ISSUES_URL)) }
 	val statusIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.STATUS_PAGE)) }
 
+	val additional = remember(error) { error.getAdditional() }
+
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
@@ -46,13 +42,13 @@ fun FlexibleErrorReceiver(error: RibaError) {
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
 		Text(
-			text = error.human,
+			text = error.message,
 			style = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
 		)
 
-		if (error.additional != null) {
+		if (additional != null) {
 			Text(
-				text = error.additional!!,
+				text = additional,
 				style = typography.bodySmall.copy(color = colorScheme.onSurface.copy(alpha = 0.75F)),
 				textAlign = TextAlign.Center
 			)

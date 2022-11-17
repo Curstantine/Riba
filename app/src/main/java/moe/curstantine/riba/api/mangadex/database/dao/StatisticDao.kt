@@ -1,10 +1,6 @@
 package moe.curstantine.riba.api.mangadex.database.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import moe.curstantine.riba.api.riba.models.RibaStatistic
 
 

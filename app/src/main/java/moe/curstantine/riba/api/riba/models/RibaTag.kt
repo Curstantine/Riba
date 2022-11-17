@@ -17,6 +17,13 @@ data class RibaTag(
 	@ColumnInfo val group: DexMangaTagGroup,
 	@ColumnInfo val version: Int,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaTag): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaTag(
 			id = "423e2eae-a7a2-4a8b-ac03-a8351462d71d",

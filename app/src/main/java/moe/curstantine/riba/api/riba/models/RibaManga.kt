@@ -28,6 +28,13 @@ data class RibaManga(
 	 */
 	@ColumnInfo val version: Int,
 ) {
+	/**
+	 * Compares the age with [version] on [other] and `this` object.
+	 *
+	 * If the [version] is the same or newer, it'll return `true`.
+	 */
+	fun isOlderThan(other: RibaManga): Boolean = other.version >= version
+
 	companion object {
 		fun getDefault() = RibaManga(
 			id = "9c33607-9180-4ba6-b85c-e4b5faee7192",

@@ -5,9 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import moe.curstantine.riba.nav.RibaNavigator
 
 data class RibaHostState(
+	val applicationScope: CoroutineScope,
 	val navigator: RibaNavigator,
 	val snackbarHost: SnackbarHostState,
 	val service: RibaAPIService,
@@ -17,11 +20,13 @@ data class RibaHostState(
 		@Composable
 		fun create(): RibaHostState {
 			val context = LocalContext.current
+			val applicationScope = CoroutineScope(SupervisorJob())
 
 			return RibaHostState(
+				applicationScope,
 				RibaNavigator(rememberNavController()),
 				remember { SnackbarHostState() },
-				remember { RibaAPIService(context) },
+				remember { RibaAPIService(context, applicationScope) },
 				remember { RibaSettings(context) },
 			)
 		}
@@ -29,6 +34,7 @@ data class RibaHostState(
 
 		@Composable
 		fun createDummy() = RibaHostState(
+			CoroutineScope(SupervisorJob()),
 			RibaNavigator.createDummy(),
 			SnackbarHostState(),
 			RibaAPIService.createDummy(),

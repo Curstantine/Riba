@@ -3,18 +3,15 @@ package moe.curstantine.riba.api.mangadex
 import android.content.Context
 import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
 import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.services.*
-import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-class MangaDexService(context: Context) {
+class MangaDexService(context: Context, applicationCoroutineScope: CoroutineScope) {
 	private val database = Room
 		.databaseBuilder(context, DexDatabase::class.java, DexConstants.DATABASE_NAME)
 		.build()
@@ -32,6 +29,7 @@ class MangaDexService(context: Context) {
 
 	val user: UserService = UserService(
 		context,
+		applicationCoroutineScope,
 		retrofit.create(UserService.Companion.APIService::class.java),
 		UserService.Companion.Database(database)
 	)
@@ -69,22 +67,5 @@ class MangaDexService(context: Context) {
 
 	companion object {
 		val Serde = DexSerde()
-
-		/**
-		 * Abstract class for MangaDex to inherit from.
-		 *
-		 * Implements [contextualInvoke] of [RibaHttpService] to handle [DexError]s
-		 */
-		abstract class Service : RibaHttpService() {
-			override suspend fun <T> contextualInvoke(
-				call: suspend (it: CoroutineScope) -> T
-			): RibaResult<T> = withContext(coroutineScope.coroutineContext) {
-				try {
-					RibaResult.Success(call.invoke(this))
-				} catch (e: Throwable) {
-					RibaResult.Error(DexError.tryHandle(e))
-				}
-			}
-		}
 	}
 }

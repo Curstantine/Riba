@@ -1,50 +1,46 @@
 package moe.curstantine.riba.api.mangadex.services
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.mangadex.MangaDexService
+import kotlinx.coroutines.*
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaMangaList
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
-import kotlin.coroutines.CoroutineContext
 
 class MDListService(
 	override val service: APIService,
 	override val database: Database,
 	private val userService: UserService,
-) : MangaDexService.Companion.Service() {
-	override val coroutineScope = CoroutineScope(Dispatchers.IO)
-
+) : RibaHttpService() {
 	private val defaultMDListIncludes = listOf(DexEntityType.User)
 
 	suspend fun get(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		id: String,
 		includes: List<DexEntityType> = defaultMDListIncludes,
 		forceInsert: Boolean = false,
 		tryDatabase: Boolean = true,
-	): RibaResult<RibaMangaList> = contextualInvoke { scope ->
+	): RibaMangaList = withContext(dispatcher) {
 		if (tryDatabase) {
 			val localList = database.get(id)
-			if (localList != null) return@contextualInvoke localList
+			if (localList != null) return@withContext localList
 		}
 
 		val response = service.get(id, includes.map { it.toDexEnum() })
 		val riba = response.data.toRibaMangaList()
 
-		scope.launch { database.insert(riba, forceInsert) }
-		scope.launch { insertMeta(coroutineContext, response.data) }
+		launch { database.insert(riba, forceInsert) }
+		launch { insertMeta(dispatcher, response.data) }
 
-		return@contextualInvoke riba
+		return@withContext riba
 	}
 
-	private suspend fun insertMeta(context: CoroutineContext, list: DexMDListData) = withContext(context) {
+	private suspend fun insertMeta(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
+		list: DexMDListData,
+	) = withContext(dispatcher) {
 		launch {
 			val uploader = list.relationships
 				.first { it.type == DexEntityType.User }
@@ -64,18 +60,15 @@ class MDListService(
 			): DexMDList
 		}
 
-		class Database(private val database: DexDatabase) :
-			RibaHttpService.Companion.Database(database) {
+		class Database(private val database: DexDatabase) : RibaHttpService.Companion.Database(database) {
 			suspend fun get(id: String) = database.list().get(id)
 
 			suspend fun insert(list: RibaMangaList, force: Boolean = false) {
 				val oldList = database.list().get(list.id)
 
-				if (force.not() && oldList != null && oldList.version >= list.version) {
-					return
+				if (!(force.not() && oldList != null && list.isOlderThan(oldList))) {
+					database.list().insert(list)
 				}
-
-				database.list().insert(list)
 			}
 		}
 	}

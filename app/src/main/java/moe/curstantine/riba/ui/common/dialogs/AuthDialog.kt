@@ -4,28 +4,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
@@ -46,12 +31,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import moe.curstantine.riba.R
-import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.api.mangadex.DexConstants
+import moe.curstantine.riba.api.mangadex.DexError
 import moe.curstantine.riba.api.riba.RibaError
-import moe.curstantine.riba.api.riba.RibaResult
+import moe.curstantine.riba.api.riba.RibaHostState
 
 
 // TODO: Make this a Material 3 compliant full-screen dialog when the API is out.
@@ -78,17 +64,12 @@ fun AuthDialog(state: RibaHostState, isOpen: MutableState<Boolean>) = if (!isOpe
 				enabled = username.value.isNotBlank() && password.value.isNotBlank(),
 				content = { Text(stringResource(R.string._continue)) },
 				onClick = {
-					coroutineScope.launch {
-						val resp = state.service.mangadex.user.login(
-							username.value,
-							password.value
-						)
-
-						if (resp is RibaResult.Error) {
-							error.postValue(resp.error)
-						} else {
-							isOpen.value = false
+					coroutineScope.launch(Dispatchers.IO) {
+						state.service.mangadex.user.runCatching {
+							login(Dispatchers.IO, username.value, password.value)
 						}
+							.onFailure { error.postValue(DexError.tryHandle(it)) }
+							.onSuccess { isOpen.value = false }
 					}
 				},
 			)
@@ -112,6 +93,7 @@ private fun AuthDialogContent(
 	val autofillTree = LocalAutofillTree.current
 
 	val error = errorData.observeAsState()
+	val additional = remember(error) { error.value?.getAdditional() }
 
 	val forgotPasswordIntent = remember {
 		Intent(Intent.ACTION_VIEW, Uri.parse(DexConstants.FORGOT_PASSWORD))
@@ -149,13 +131,13 @@ private fun AuthDialogContent(
 			) {
 				if (error.value != null) {
 					Text(
-						text = error.value!!.human,
+						text = error.value!!.message,
 						style = typography.titleSmall.copy(color = colorScheme.onError),
 						textAlign = TextAlign.Center
 					)
 
 					Text(
-						text = error.value!!.additional ?: "",
+						text = additional ?: "",
 						style = typography.bodySmall.copy(
 							color = colorScheme.onError.copy(alpha = 0.75F)
 						),

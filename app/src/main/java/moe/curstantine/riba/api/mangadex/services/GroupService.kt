@@ -1,41 +1,29 @@
 package moe.curstantine.riba.api.mangadex.services
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moe.curstantine.riba.api.mangadex.MangaDexService
+import kotlinx.coroutines.*
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
-import moe.curstantine.riba.api.mangadex.models.DexEntityType
-import moe.curstantine.riba.api.mangadex.models.DexGroupCollection
-import moe.curstantine.riba.api.mangadex.models.DexGroupData
-import moe.curstantine.riba.api.mangadex.models.DexRelatedUser
-import moe.curstantine.riba.api.mangadex.models.toRibaGroup
+import moe.curstantine.riba.api.mangadex.models.*
 import moe.curstantine.riba.api.riba.RibaHttpService
-import moe.curstantine.riba.api.riba.RibaResult
 import moe.curstantine.riba.api.riba.models.RibaGroup
 import retrofit2.http.GET
 import retrofit2.http.Query
-import kotlin.coroutines.CoroutineContext
 
 class GroupService(
 	override val service: APIService,
 	override val database: Database,
 	private val userService: UserService
-) : MangaDexService.Companion.Service() {
-	override val coroutineScope = CoroutineScope(Dispatchers.IO)
-
+) : RibaHttpService() {
 	private val defaultGroupIncludes = listOf(DexEntityType.Leader, DexEntityType.Member)
 
 	suspend fun getCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>? = null,
 		name: String? = null,
 		limit: Int? = 10,
 		offset: Int? = null,
 		includes: List<DexEntityType>? = defaultGroupIncludes,
 		forceInsert: Boolean = false,
-	): RibaResult<List<RibaGroup>> = contextualInvoke { scope ->
+	): List<RibaGroup> = withContext(dispatcher) {
 		val response = service.getCollection(
 			ids = ids,
 			name = name,
@@ -46,19 +34,18 @@ class GroupService(
 
 		val riba = response.data.map { it.toRibaGroup() }
 
-		scope.launch { database.insertCollection(scope.coroutineContext, riba, forceInsert) }
-		scope.launch {
-			response.data.forEach { insertGroupMeta(scope.coroutineContext, it, forceInsert) }
-		}
+		launch { database.insertCollection(dispatcher, riba, forceInsert) }
+		launch { response.data.forEach { insertGroupMeta(dispatcher, it, forceInsert) } }
 
-		return@contextualInvoke riba
+		return@withContext riba
 	}
 
 	suspend fun getStrictCollection(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		ids: List<String>,
 		forceInsert: Boolean = false,
 		tryDatabase: Boolean = true,
-	): RibaResult<List<RibaGroup>> = contextualInvoke { scope ->
+	): List<RibaGroup> = withContext(dispatcher) {
 		val idMap: MutableMap<String, RibaGroup?> = ids
 			.associateBy({ it }, { null })
 			.toMutableMap()
@@ -70,24 +57,24 @@ class GroupService(
 
 		val missingIds = idMap.filterValues { it == null }.keys.toList()
 		if (missingIds.isNotEmpty()) {
-			val response = getCollection(ids = missingIds, forceInsert = forceInsert).unwrap()
-			response.forEach { group -> idMap[group.id] = group }
+			getCollection(ids = missingIds, forceInsert = forceInsert)
+				.forEach { group -> idMap[group.id] = group }
 		}
 
-		return@contextualInvoke idMap.values.mapNotNull { it }
+		return@withContext idMap.values.mapNotNull { it }
 	}
 
 	private suspend fun insertGroupMeta(
-		context: CoroutineContext,
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		group: DexGroupData,
 		forceInsert: Boolean
-	) = withContext(context) {
+	) = withContext(dispatcher) {
 		// We will be skipping leader since leader is included in both member and itself.
 		val members = group.relationships
 			.filter { it.type == DexEntityType.Member }
 			.map { (it as DexRelatedUser).toRibaUser() }
 
-		userService.database.insertCollection(coroutineContext, members, forceInsert)
+		userService.database.insertCollection(dispatcher, members, forceInsert)
 	}
 
 	companion object {
@@ -121,10 +108,10 @@ class GroupService(
 			}
 
 			suspend fun insertCollection(
-				context: CoroutineContext,
+				dispatcher: CoroutineDispatcher = Dispatchers.Default,
 				groups: Collection<RibaGroup>,
 				force: Boolean = false
-			) = withContext(context) {
+			) = withContext(dispatcher) {
 				val groupJob = this.async { groups.associateBy { it.id } }
 				val oldGroupJob = this.async {
 					getCollection(groups.map { it.id }).associateBy { it.id }
@@ -136,11 +123,8 @@ class GroupService(
 				for ((id, newThis) in groupMap) {
 					val oldThis = oldGroupMap[id]
 
-					if (force.not() && oldThis != null && oldThis.version >= newThis.version) {
-						continue
-					} else {
-						launch { database.group().insert(newThis) }
-					}
+					if (force.not() && oldThis != null && newThis.isOlderThan(oldThis)) continue
+					else launch { database.group().insert(newThis) }
 				}
 			}
 		}

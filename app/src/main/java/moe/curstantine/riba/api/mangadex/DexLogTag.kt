@@ -1,16 +1,14 @@
 package moe.curstantine.riba.api.mangadex
 
-import moe.curstantine.riba.api.riba.RibaError
+import moe.curstantine.riba.api.riba.RibaLogTag
 
 /**
- * Logger tags used to quickly locate the source of error from logcat.
+ * MangaDex implementation of [RibaLogTag] for easy logging.
  */
-enum class DexLogTag(override val tag: String) : RibaError.Companion.LogTag {
-	MISSING("DexMissingContent"),
-	RESTRICTED("DexRestrictedContent"),
-	DEBUG("DexDebug"),
-	REQUEST("DexRequest");
-
-	override fun toString(): String = tag
+sealed class DexLogTag(override val tagName: String) : RibaLogTag(tagName) {
+	object DEBUG : DexLogTag("DexDebug")
+	object MISSING : DexLogTag("DexMissingContent")
+	object RESTRICTED : DexLogTag("DexRestrictedContent")
+	object REQUEST : DexLogTag("DexRequest")
 }
 

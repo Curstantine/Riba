@@ -1,6 +1,5 @@
 package moe.curstantine.riba.api.riba
 
-import kotlinx.coroutines.CoroutineScope
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 
 /**
@@ -9,9 +8,6 @@ import moe.curstantine.riba.api.mangadex.database.DexDatabase
 abstract class RibaHttpService {
 	abstract val database: Database
 	protected abstract val service: APIService
-	protected abstract val coroutineScope: CoroutineScope
-
-	abstract suspend fun <T> contextualInvoke(call: suspend (it: CoroutineScope) -> T): RibaResult<T>
 
 	companion object {
 		/**
