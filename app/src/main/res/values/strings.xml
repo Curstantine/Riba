@@ -34,6 +34,7 @@
 
 	<string name="no_title">No Title</string>
 	<string name="no_author_artists">No Valid Authors/Artists</string>
+	<string name="no_chapters">No chapters available!</string>
 	<string name="no_cover">Cover Not Available</string>
 	<string name="cover_error">Could not load the cover</string>
 
@@ -112,4 +113,8 @@
         It\'s not required to sign-in to a MangaDex account,
         but most features will be disabled without it.
     </string>
+
+	<string name="tips_turn_off_chapter_filter">
+		Gamer Tip: Try turning off chapter filters.
+	</string>
 </resources>

@@ -42,3 +42,20 @@ object DexUtils {
 		return DexConstants.BASE_SITE + "/title/" + mangaId
 	}
 }
+
+/**
+ * Tries to find a localized value that matches a given locale.
+ *
+ * It'll respect the precedence of the [preferredLocales] list,
+ * and if none of the values match, it'll return the first non-null value.
+ *
+ * eg:
+ * 	1. When [preferredLocales] are `["en", "zh"]` and `this` is `{"en": "English", "zh": "Chinese"}`
+ * 	it'll return the value in `en` key.
+ * 	2. When [preferredLocales] are `["en", "zh"]` and `this` is `{"fr": "French"}`,
+ * 	it'll return the value in `fr` key.
+ *
+ * @throws NoSuchElementException if [this] doesn't have non-null values.
+ */
+fun DexLocaleObject.getPreferredLocalizedValue(preferredLocales: List<DexLocale>) =
+	DexUtils.getPreferredLocalizedValue(preferredLocales, this)

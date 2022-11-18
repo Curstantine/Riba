@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,10 +42,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.curstantine.riba.R
-import moe.curstantine.riba.api.mangadex.DexCoverSize
-import moe.curstantine.riba.api.mangadex.DexError
-import moe.curstantine.riba.api.mangadex.DexLogTag
-import moe.curstantine.riba.api.mangadex.DexUtils
+import moe.curstantine.riba.api.mangadex.*
 import moe.curstantine.riba.api.mangadex.models.DexChapterQueryOrderProperty
 import moe.curstantine.riba.api.mangadex.models.DexLocale
 import moe.curstantine.riba.api.mangadex.models.DexQueryOrderValue
@@ -94,11 +93,14 @@ private fun MangaDetailBody(
 	paddingValues: PaddingValues,
 	viewModel: MangaDetailsViewModel,
 ) {
+	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
+
 	val chapterRes by viewModel.chapters.collectAsState()
 	val areChaptersLoading by viewModel.areChaptersLoading.collectAsState()
 
 	val chapters = remember(chapterRes) { chapterRes?.getOrNull() }
 	var chapterListEndReached by remember { mutableStateOf(false) }
+	var filtersApplied by remember { mutableStateOf(false) }
 
 	LazyColumn(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) {
 		item { MangaDetailHeader(state, paddingValues, viewModel) }
@@ -108,37 +110,70 @@ private fun MangaDetailBody(
 				Box(
 					contentAlignment = Alignment.Center,
 					modifier = Modifier
-						.background(MaterialTheme.colorScheme.error)
+						.background(colorScheme.error)
 						.heightIn(42.dp)
 						.fillMaxWidth()
 						.padding(horizontal = 16.dp, vertical = 4.dp)
 				) {
 					Text(
 						text = chapterRes!!.exceptionOrNull()!!.message!!,
-						style = MaterialTheme.typography.bodyMedium,
-						color = MaterialTheme.colorScheme.onError,
+						style = typography.bodyMedium,
+						color = colorScheme.onError,
 					)
 				}
 			}
 		}
 
-		if (chapterRes?.isSuccess == true && chapters != null) {
-			item {
-				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.height(64.dp)
-						.padding(horizontal = 16.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Spacer(Modifier.weight(1F))
+		if (chapters != null) {
+			if (!filtersApplied && chapters.isNotEmpty()) {
+				item {
+					Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(64.dp)
+							.padding(horizontal = 16.dp),
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						Spacer(Modifier.weight(1F))
 
-					IconButton(onClick = { /*TODO*/ }) {
-						Icon(
-							imageVector = Icons.Rounded.FilterList,
-							tint = MaterialTheme.colorScheme.primary,
-							contentDescription = stringResource(R.string.filter)
-						)
+						IconButton(onClick = { filtersApplied = !filtersApplied }) {
+							Icon(
+								imageVector = Icons.Rounded.FilterList,
+								tint = colorScheme.primary,
+								contentDescription = stringResource(R.string.filter)
+							)
+						}
+					}
+				}
+			}
+
+			if (chapters.isEmpty()) {
+				item {
+					OutlinedCard(
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(128.dp)
+							.padding(16.dp)
+					) {
+						Column(
+							modifier = Modifier.fillMaxSize(),
+							horizontalAlignment = Alignment.CenterHorizontally,
+							verticalArrangement = Arrangement.Center
+						) {
+							Text(
+								text = stringResource(R.string.no_chapters),
+								style = typography.titleMedium,
+								color = colorScheme.onBackground,
+							)
+
+							AnimatedVisibility(filtersApplied) {
+								Text(
+									text = stringResource(R.string.tips_turn_off_chapter_filter),
+									style = typography.bodySmall,
+									color = mutedOnBackground,
+								)
+							}
+						}
 					}
 				}
 			}
@@ -168,8 +203,6 @@ private fun MangaDetailHeader(
 	paddingValues: PaddingValues,
 	viewModel: MangaDetailsViewModel,
 ) {
-	val typography = MaterialTheme.typography
-	val colorScheme = MaterialTheme.colorScheme
 	val mutedOnBackground = colorScheme.onBackground.copy(alpha = 0.75F)
 
 	val clipboardManager = LocalClipboardManager.current
@@ -195,6 +228,9 @@ private fun MangaDetailHeader(
 	val cover = remember(coverResult) { coverResult?.getOrNull() }
 	val tags = remember(tagResult) { tagResult?.getOrNull() }
 
+	val localizedTitle = remember(manga) {
+		manga?.title?.runCatching { getPreferredLocalizedValue(preferredLanguages) }?.getOrNull() ?: notAvailable
+	}
 	val localizedAuthors = remember(artists) { authors?.map { it.name ?: notAvailable } ?: emptyList() }
 	val localizedArtists = remember(artists) { artists?.map { it.name ?: notAvailable } ?: emptyList() }
 	val artistAuthors = remember(localizedAuthors, localizedArtists) {
@@ -205,7 +241,7 @@ private fun MangaDetailHeader(
 	val localizedTags = remember(tags) {
 		tags?.runCatching {
 			map { tag ->
-				if (tag.name != null) DexUtils.getPreferredLocalizedValue(preferredLanguages, tag.name)
+				if (tag.name != null) tag.name.getPreferredLocalizedValue(preferredLanguages)
 				else notAvailable
 			}
 		}?.getOrNull() ?: emptyList()
@@ -253,8 +289,12 @@ private fun MangaDetailHeader(
 			) {
 				Column(Modifier.padding(bottom = 16.dp)) {
 					Text(
-						text = manga?.title?.get(DexLocale.English) ?: notAvailable,
-						style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontFamily = Rubik)
+						text = localizedTitle,
+						style = (when (localizedTitle.length) {
+							in 0..50 -> typography.headlineSmall
+							in 51..75 -> typography.titleLarge
+							else -> typography.titleMedium
+						}).copy(fontWeight = FontWeight.Bold, fontFamily = Rubik)
 					)
 					Text(
 						text = artistAuthors?.joinToString(", ") ?: stringResource(R.string.no_author_artists),
@@ -395,8 +435,8 @@ private fun MangaDetailHeader(
 					Text(
 						modifier = Modifier.padding(bottom = 4.dp),
 						text = stringResource(R.string.description),
-						style = MaterialTheme.typography.titleSmall.copy(
-							color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+						style = typography.titleSmall.copy(
+							color = colorScheme.onBackground.copy(alpha = 0.85F),
 							fontFamily = Rubik,
 							fontWeight = FontWeight.Medium
 						)
@@ -462,7 +502,7 @@ private fun ChapterItem(chap: RibaFulfilledChapter) {
 				} else {
 					Text(
 						text = chap.chapter.language.toString(),
-						style = MaterialTheme.typography.bodySmall
+						style = typography.bodySmall
 					)
 				}
 			}
@@ -475,8 +515,8 @@ private fun DetailChipRow(values: List<String>, label: String, width: Dp) = if (
 else Column(Modifier.widthIn(max = width)) {
 	Text(
 		text = label,
-		style = MaterialTheme.typography.titleSmall.copy(
-			color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85F),
+		style = typography.titleSmall.copy(
+			color = colorScheme.onBackground.copy(alpha = 0.85F),
 			fontFamily = Rubik,
 			fontWeight = FontWeight.Medium
 		)
@@ -561,13 +601,19 @@ class MangaDetailsViewModel(
 		if (!isDummy) {
 			loadDetails()
 		} else {
-			_manga.value = Result.success(RibaManga.getDefault())
+			_manga.value = Result.success(
+				RibaManga.getDefault().copy(title = mapOf(Pair(DexLocale.English, "Pe".repeat(26))))
+			)
 			_statistic.value = Result.success(RibaStatistic.getDefault())
 			_cover.value = Result.success(RibaCover.getDefault())
 			_authors.value = Result.success(listOf(RibaAuthor.getDefault()))
 			_artists.value = Result.success(listOf(RibaAuthor.getDefault()))
 			_tags.value = Result.success(listOf(RibaTag.getDefault()))
-			_chapters.value = Result.success(listOf(RibaFulfilledChapter.getDefault()))
+			_chapters.value = Result.success(
+				listOf(
+//				RibaFulfilledChapter.getDefault()
+				)
+			)
 		}
 	}
 
