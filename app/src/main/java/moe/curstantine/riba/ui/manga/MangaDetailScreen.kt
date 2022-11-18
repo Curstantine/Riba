@@ -32,6 +32,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.CoroutineScope
@@ -74,8 +75,19 @@ fun MangaDetailScreen(state: RibaHostState, viewModel: MangaDetailsViewModel) {
 			?.let { DexError.tryHandle(it) }
 	}
 
-	SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing), onRefresh = { viewModel.refresh() }) {
-		if (isLoading || isRefreshing) FlexibleIndicator()
+	SwipeRefresh(
+		state = rememberSwipeRefreshState(isRefreshing),
+		onRefresh = { viewModel.refresh() },
+		indicator = { refreshState, trigger ->
+			SwipeRefreshIndicator(
+				state = refreshState,
+				refreshTriggerDistance = trigger,
+				contentColor = colorScheme.primary,
+				backgroundColor = colorScheme.surface,
+			)
+		}
+	) {
+		if (isLoading) FlexibleIndicator()
 		else if (bubbledError != null) FlexibleErrorReceiver(bubbledError)
 		else {
 			Scaffold(
@@ -125,7 +137,7 @@ private fun MangaDetailBody(
 		}
 
 		if (chapters != null) {
-			if (!filtersApplied && chapters.isNotEmpty()) {
+			if (filtersApplied || chapters.isNotEmpty()) {
 				item {
 					Row(
 						modifier = Modifier
@@ -690,6 +702,8 @@ class MangaDetailsViewModel(
 		}
 
 		launch { handleChapterLoad(coroutineContext, refresh) }
+
+		if (refresh) _isRefreshing.emit(false)
 	}
 
 	private suspend fun handleChapterLoad(context: CoroutineContext, refresh: Boolean) = withContext(context) {
@@ -790,8 +804,16 @@ class MangaDetailsViewModel(
 
 	fun refresh() = viewModelScope.launch(Dispatchers.IO) {
 		_isRefreshing.emit(true)
-		offset.emit(0)
-		loadDetails(true).run { _isRefreshing.emit(false) }
+
+		if (!isDummy) {
+			offset.emit(0)
+			loadDetails(true)
+		} else {
+			// Since we can check whether it blocks the main or not like this.
+			@Suppress("BlockingMethodInNonBlockingContext")
+			Thread.sleep(10000)
+			_isRefreshing.emit(false)
+		}
 	}
 
 	companion object {
