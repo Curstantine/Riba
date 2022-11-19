@@ -489,13 +489,7 @@ private fun ChapterItem(chap: RibaFulfilledChapter) {
 		} else R.string.oneshot
 	}
 
-	val chapterName = remember {
-		if (chap.chapter.chapter != null) {
-			if (!chap.chapter.title.isNullOrBlank()) "${chap.chapter.chapter} - ${chap.chapter.title}"
-			else chap.chapter.chapter.toString()
-		} else ""
-	}
-
+	val chapterName = remember { chap.chapter.getNormalizedTitle() }
 	val groupNames = remember { chap.groups.map { it.name } }
 	val languageFlagId = remember { chap.chapter.language.getFlagId() }
 

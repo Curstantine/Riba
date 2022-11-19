@@ -9,14 +9,11 @@ import moe.curstantine.riba.api.mangadex.MangaDexService
 import moe.curstantine.riba.api.mangadex.models.DexLocale
 
 class RibaSettings(context: Context) {
-	private val preferences: SharedPreferences = context.getSharedPreferences(
-		RibaConstants.Preferences.SETTINGS,
-		Context.MODE_PRIVATE
-	)
+	private val preferences: SharedPreferences = context
+		.getSharedPreferences(RibaConstants.Preferences.SETTINGS, Context.MODE_PRIVATE)
 
 	init {
-		if (!preferences.getBoolean(RibaConstants.Preferences.FIRST_RUN, false)) {
-			reset()
+		if (!preferences.getBoolean(RibaConstants.Preferences.FIRST_RUN, false)) reset().run {
 			preferences.edit().putBoolean(RibaConstants.Preferences.FIRST_RUN, true).apply()
 		}
 	}
@@ -25,27 +22,11 @@ class RibaSettings(context: Context) {
 	 * Resets all settings to default values.
 	 */
 	fun reset() {
-		setChapterLanguages(listOf(DexLocale.English))
-		setLanguagePreference(
-			listOf(
-				DexLocale.English,
-				DexLocale.JapaneseRomanized,
-				DexLocale.Japanese,
-				DexLocale.KoreanRomanized,
-				DexLocale.Korean,
-				DexLocale.ChineseRomanized,
-				DexLocale.SimplifiedChinese,
-				DexLocale.TraditionalChinese,
-			)
-		)
-		setOriginalLanguages(
-			listOf(
-				DexLocale.Japanese,
-				DexLocale.SimplifiedChinese,
-				DexLocale.TraditionalChinese,
-				DexLocale.Korean
-			)
-		)
+		setChapterLanguages(Defaults.CHAPTER_LANGUAGES)
+		setLanguagePreference(Defaults.LANGUAGE_PREFERENCES)
+		setOriginalLanguages(Defaults.ORIGINAL_LANGUAGES)
+		setDataSaverEnabled(Defaults.DATA_SAVER)
+		setPort443Enabled(Defaults.PORT_443)
 	}
 
 	/**
@@ -124,9 +105,33 @@ class RibaSettings(context: Context) {
 		preferences.edit().putBoolean(RibaConstants.Preferences.PORT_443, enabled).apply()
 	}
 
-
 	companion object {
 		@Composable
 		fun createDummy() = RibaSettings(LocalContext.current)
+
+		object Defaults {
+			val CHAPTER_LANGUAGES = listOf(DexLocale.English)
+
+			val LANGUAGE_PREFERENCES = listOf(
+				DexLocale.English,
+				DexLocale.JapaneseRomanized,
+				DexLocale.Japanese,
+				DexLocale.KoreanRomanized,
+				DexLocale.Korean,
+				DexLocale.ChineseRomanized,
+				DexLocale.SimplifiedChinese,
+				DexLocale.TraditionalChinese,
+			)
+
+			val ORIGINAL_LANGUAGES = listOf(
+				DexLocale.Japanese,
+				DexLocale.SimplifiedChinese,
+				DexLocale.TraditionalChinese,
+				DexLocale.Korean
+			)
+
+			const val DATA_SAVER = false
+			const val PORT_443 = false
+		}
 	}
 }

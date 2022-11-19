@@ -95,6 +95,11 @@ data class RibaChapter(
 	 */
 	fun isOlderThan(other: RibaChapter): Boolean = other.version >= version
 
+	fun getNormalizedTitle(): String {
+		return if (chapter == null) "" else {
+			if (!title.isNullOrBlank()) "$chapter - $title" else chapter.toString()
+		}
+	}
 	companion object {
 		fun getDefault() = RibaChapter(
 			id = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f",
