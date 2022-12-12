@@ -11,6 +11,9 @@ interface ListDao {
 	@Query("SELECT * FROM lists WHERE id IN (:ids)")
 	suspend fun get(ids: List<String>): List<RibaMangaList>
 
+	@Query("SELECT * FROM lists WHERE userId IN (:id)")
+	suspend fun getForUserID(id: String): List<RibaMangaList>
+
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	suspend fun insert(list: RibaMangaList)
 

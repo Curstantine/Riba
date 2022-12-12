@@ -9,10 +9,13 @@ package moe.curstantine.riba.api.riba.models
  * @property limit Limit per response provided to the server.
  *
  * @property offset Offset of the response provided to the server.
+ *
+ * @property cached Whether this response is created locally.
  */
 data class RibaCollection<T>(
 	val total: Int,
 	val limit: Int,
 	val offset: Int,
-	val data: T
+	val data: T,
+	val cached: Boolean = false,
 )

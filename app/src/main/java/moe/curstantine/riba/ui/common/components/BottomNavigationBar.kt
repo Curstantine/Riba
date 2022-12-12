@@ -11,17 +11,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import moe.curstantine.riba.R
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.nav.RibaRoute
 
 @Composable
-fun MangoNavigationBar(state: RibaHostState) {
+fun RibaNavigationBar(state: RibaHostState) {
 	NavigationBar {
 		val currentUser by state.service.mangadex.user.currentUser.collectAsState()
 
-		for (item in MangoNavigationBarItem.values()) {
+		for (item in RibaNavigationBarItem.values()) {
 			val isVisible = remember(currentUser) { if (item.requiresAuth) currentUser != null else true }
 
 			AnimatedVisibility(
@@ -43,31 +44,36 @@ fun MangoNavigationBar(state: RibaHostState) {
 
 @Preview
 @Composable
-fun MangoNavigationBarPreview() {
+fun RibaBottomNavigationBarPreview(shouldSandbox: Boolean = true) {
 	var activeIndex by remember { mutableStateOf(0) }
-	var isSignedIn by remember { mutableStateOf(false) }
+	var isSignedIn by remember { mutableStateOf(!shouldSandbox) }
 
-	Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Bottom) {
-		FilledTonalButton(
-			modifier = Modifier
-				.padding(horizontal = 16.dp)
-				.fillMaxWidth(),
-			onClick = { isSignedIn = !isSignedIn }) {
-			Text("Sign ${if (isSignedIn) "out" else "in"}")
+	Column(
+		modifier = if (shouldSandbox) Modifier.fillMaxSize() else Modifier,
+		verticalArrangement = if (shouldSandbox) Arrangement.Bottom else Arrangement.Top,
+	) {
+		if (shouldSandbox) {
+			FilledTonalButton(
+				modifier = Modifier
+					.padding(horizontal = 16.dp)
+					.fillMaxWidth(),
+				onClick = { isSignedIn = !isSignedIn }) {
+				Text("Sign ${if (isSignedIn) "out" else "in"}")
+			}
+
+			Slider(
+				modifier = Modifier.padding(horizontal = 16.dp),
+				value = activeIndex.toFloat(),
+				onValueChange = { activeIndex = it.toInt() },
+				valueRange = 0F..RibaNavigationBarItem.values().size.minus(1).toFloat(),
+				steps = RibaNavigationBarItem.values().size,
+			)
 		}
 
-		Slider(
-			modifier = Modifier.padding(horizontal = 16.dp),
-			value = activeIndex.toFloat(),
-			onValueChange = { activeIndex = it.toInt() },
-			valueRange = 0F..MangoNavigationBarItem.values().size.minus(1).toFloat(),
-			steps = MangoNavigationBarItem.values().size,
-		)
-
 		NavigationBar {
-			for (item in MangoNavigationBarItem.values()) {
+			for (item in RibaNavigationBarItem.values()) {
 				val isVisible = remember(isSignedIn) { if (item.requiresAuth) isSignedIn else true }
-				val thisIndex = remember { MangoNavigationBarItem.values().indexOf(item) }
+				val thisIndex = remember { RibaNavigationBarItem.values().indexOf(item) }
 
 				AnimatedVisibility(
 					visible = isVisible,
@@ -87,33 +93,33 @@ fun MangoNavigationBarPreview() {
 	}
 }
 
-sealed class MangoNavigationBarItem(
+sealed class RibaNavigationBarItem(
 	val route: RibaRoute,
 	val icon: @Composable () -> Unit,
 	val label: @Composable () -> Unit,
 	val requiresAuth: Boolean = false,
 ) {
-	object Home : MangoNavigationBarItem(
+	object Home : RibaNavigationBarItem(
 		route = RibaRoute.Landing.Home,
 		icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
 		label = { Text(stringResource(R.string.home)) },
 	)
 
-	object Library : MangoNavigationBarItem(
+	object Library : RibaNavigationBarItem(
 		route = RibaRoute.Landing.Library,
 		icon = { Icon(Icons.Rounded.LibraryBooks, contentDescription = "Library") },
 		label = { Text(stringResource(R.string.library)) },
 		requiresAuth = true,
 	)
 
-	object Search : MangoNavigationBarItem(
+	object Search : RibaNavigationBarItem(
 		route = RibaRoute.Landing.Search,
 		icon = { Icon(Icons.Rounded.Search, contentDescription = "Search") },
 		label = { Text(stringResource(R.string.search)) },
 	)
 
 	companion object {
-		fun values(): List<MangoNavigationBarItem> {
+		fun values(): List<RibaNavigationBarItem> {
 			return listOf(Home, Library, Search)
 		}
 	}

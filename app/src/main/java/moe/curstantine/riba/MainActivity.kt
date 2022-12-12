@@ -11,7 +11,7 @@ import androidx.core.view.WindowCompat
 import moe.curstantine.riba.api.riba.RibaHostState
 import moe.curstantine.riba.nav.RibaNavHost
 import moe.curstantine.riba.nav.RibaRoute
-import moe.curstantine.riba.ui.common.components.MangoNavigationBar
+import moe.curstantine.riba.ui.common.components.RibaNavigationBar
 import moe.curstantine.riba.ui.theme.RibaTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
 							currentRoute.type == RibaRoute.Type.Default,
 							exit = fadeOut() + shrinkVertically(),
 							enter = fadeIn() + expandVertically(),
-							content = { MangoNavigationBar(state) }
+							content = { RibaNavigationBar(state) }
 						)
 					},
 				)

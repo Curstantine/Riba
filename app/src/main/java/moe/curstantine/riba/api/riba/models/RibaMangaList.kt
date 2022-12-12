@@ -24,4 +24,15 @@ data class RibaMangaList(
 	 * If the [version] is the same or newer, it'll return `true`.
 	 */
 	fun isOlderThan(other: RibaMangaList): Boolean = other.version >= version
+
+	companion object {
+		fun getDefault() = RibaMangaList(
+			id = "0",
+			name = "Default",
+			visibility = DexListVisibility.Public,
+			titles = listOf("1", "2", "3"),
+			userId = "0",
+			version = 0,
+		)
+	}
 }

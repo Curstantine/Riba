@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonClass
 import moe.curstantine.riba.api.riba.models.RibaMangaList
 
 typealias DexMDList = DexResponse<DexMDListAttributes>
+typealias DexMDListCollection = DexCollectionResponse<DexMDListAttributes>
 typealias DexMDListData = DexResponseData<DexMDListAttributes>
 
 @JsonClass(generateAdapter = true)
