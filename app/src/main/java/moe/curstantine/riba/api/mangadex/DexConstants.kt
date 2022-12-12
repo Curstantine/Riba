@@ -28,6 +28,8 @@ object DexConstants {
 	 * 30 days in seconds
 	 */
 	const val REFRESH_EXPIRY = 2592000
+
+	const val MAX_CACHE_SIZE: Long = 50 * 1024 * 1024 // 10 MB
 }
 
 enum class DexCoverSize(val size: Int) {

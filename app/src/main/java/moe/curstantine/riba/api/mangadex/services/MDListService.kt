@@ -34,7 +34,7 @@ class MDListService(
 		val riba = response.data.toRibaMangaList()
 
 		launch { database.insert(riba, forceInsert) }
-		launch { insertMeta(dispatcher, response.data) }
+		launch { insertMeta(dispatcher, response.data, forceInsert) }
 
 		return@withContext riba
 	}
@@ -62,11 +62,44 @@ class MDListService(
 			)
 		}
 
-		val response = service.getUserLists(userService.getSessionToken(), limit, offset)
+		val response = service.getUserLists(
+			token = userService.getSessionToken(),
+			limit = limit,
+			offset = offset,
+		)
+		val riba = response.data.map { it.toRibaMangaList() }
+		launch { database.insertCollection(dispatcher, riba, forceInsert) }
+
+		return@withContext RibaCollection(
+			total = response.total,
+			limit = response.limit,
+			offset = response.offset,
+			data = riba
+		)
+	}
+
+	/**
+	 * Returns the logged in user's followed MDLists.
+	 *
+	 * NOTE: This method needs authentication.
+	 */
+	suspend fun getUserFollowedLists(
+		dispatcher: CoroutineDispatcher = Dispatchers.Default,
+		limit: Int? = null,
+		offset: Int? = null,
+		includes: List<DexEntityType> = defaultMDListIncludes,
+		forceInsert: Boolean = false,
+	): RibaCollection<List<RibaMangaList>> = withContext(dispatcher) {
+		val response = service.getUserFollowedLists(
+			token = userService.getSessionToken(),
+			limit = limit,
+			offset = offset,
+			includes = includes.map { it.toDexEnum() },
+		)
 		val riba = response.data.map { it.toRibaMangaList() }
 
 		launch { database.insertCollection(dispatcher, riba, forceInsert) }
-		launch { response.data.forEach { insertMeta(dispatcher, it) } }
+		launch { response.data.forEach { insertMeta(dispatcher, it, forceInsert) } }
 
 		return@withContext RibaCollection(
 			total = response.total,
@@ -79,13 +112,14 @@ class MDListService(
 	private suspend fun insertMeta(
 		dispatcher: CoroutineDispatcher = Dispatchers.Default,
 		list: DexMDListData,
+		forceInsert: Boolean,
 	) = withContext(dispatcher) {
 		launch {
-			val uploader = list.relationships
+			val user = list.relationships
 				.first { it.type == DexEntityType.User }
 				.let { it as DexRelatedUser }
 
-			userService.database.insert(uploader.toRibaUser())
+			userService.database.insert(user.toRibaUser(), forceInsert)
 		}
 	}
 
@@ -98,11 +132,19 @@ class MDListService(
 				@Query("includes[]") includes: List<String>?
 			): DexMDList
 
-			@GET("/user/follows/list")
+			@GET("/user/list")
 			suspend fun getUserLists(
 				@Header("Authorization") token: String,
 				@Query("limit") limit: Int?,
 				@Query("offset") offset: Int?,
+			): DexMDListCollection
+
+			@GET("/user/follows/list")
+			suspend fun getUserFollowedLists(
+				@Header("Authorization") token: String,
+				@Query("limit") limit: Int?,
+				@Query("offset") offset: Int?,
+				@Query("includes[]") includes: List<String>?
 			): DexMDListCollection
 		}
 

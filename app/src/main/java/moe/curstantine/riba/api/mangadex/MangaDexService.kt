@@ -3,10 +3,12 @@ package moe.curstantine.riba.api.mangadex
 import android.content.Context
 import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
+import moe.curstantine.riba.api.adapters.retrofit.ClientInfoInterceptor
 import moe.curstantine.riba.api.adapters.retrofit.EnumConverter
 import moe.curstantine.riba.api.adapters.retrofit.HeaderInterceptor
 import moe.curstantine.riba.api.mangadex.database.DexDatabase
 import moe.curstantine.riba.api.mangadex.services.*
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -17,7 +19,9 @@ class MangaDexService(context: Context, applicationCoroutineScope: CoroutineScop
 		.build()
 
 	private val okhttp = OkHttpClient.Builder()
+		.addInterceptor(ClientInfoInterceptor())
 		.addInterceptor(HeaderInterceptor(DexLogTag.REQUEST))
+		.cache(Cache(context.cacheDir, DexConstants.MAX_CACHE_SIZE))
 		.build()
 
 	private val retrofit = Retrofit.Builder()

@@ -632,8 +632,9 @@ class MangaDetailsViewModel(
 		val localManga = service.mangadex.manga.runCatching {
 			get(Dispatchers.IO, mangaId, forceInsert = refresh, tryDatabase = !refresh)
 		}
-			.also { _manga.emit(it) }
-			.let { if (it.isSuccess) it.getOrThrow() else return@launch }
+			.onFailure { _manga.emit(Result.failure(DexError.tryHandle(it))) }
+			.also { if (it.isFailure) return@launch else it }
+			.getOrThrow()
 
 		launch {
 			service.mangadex.manga.runCatching { checkFollowStatus(Dispatchers.IO, mangaId, refresh) }
