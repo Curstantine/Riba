@@ -1,9 +1,5 @@
 # Riba
 
-```
-Note: More or less abandoned, my laptop can't even run the project without freezing right now.
-```
-
 Lightweight Android client for [MangaDex](https://mangadex.org/) that aims to be a full replacement for the official
 website.
 
