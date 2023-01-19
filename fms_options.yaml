@@ -1,0 +1,17 @@
+family: MaterialSymbols
+output:
+    flutter: lib/material_symbols.dart
+    font: assets/fonts/material_symbols.ttf
+
+symbols:
+    home_outlined:
+        name: Home
+    home_filled:
+        name: Home
+        fill: true
+
+    library_outlined:
+        name: Library Books
+    library_filled:
+        name: Library Books
+        fill: true

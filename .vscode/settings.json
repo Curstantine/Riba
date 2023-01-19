@@ -1,0 +1,14 @@
+{
+	"dart.lineLength": 100,
+	"prettier.printWidth": 100,
+	"prettier.useTabs": true,
+	"prettier.tabWidth": 4,
+	"editor.rulers": [
+		{
+			"column": 100
+		}
+	],
+	"cSpell.words": [
+		"riba"
+	]
+}
