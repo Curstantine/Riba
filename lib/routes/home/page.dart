@@ -34,18 +34,18 @@ class _HomeState extends State<Home> {
           NavigationDestination(
               label: "Home",
               icon: currentPageIndex == 0
-                  ? const Icon(MaterialSymbols.home_selected)
-                  : const Icon(MaterialSymbols.home)),
+                  ? const Icon(MaterialSymbols.home_filled)
+                  : const Icon(MaterialSymbols.home_outlined)),
           NavigationDestination(
               label: "Library",
               icon: currentPageIndex == 1
-                  ? const Icon(Icons.my_library_books_rounded)
-                  : const Icon(Icons.my_library_books_outlined)),
+                  ? const Icon(MaterialSymbols.library_filled)
+                  : const Icon(MaterialSymbols.library_outlined)),
           NavigationDestination(
               label: "Search",
               icon: currentPageIndex == 2
-                  ? const Icon(Icons.search_rounded)
-                  : const Icon(Icons.search_outlined)),
+                  ? const Icon(MaterialSymbols.search_filled)
+                  : const Icon(MaterialSymbols.search_outlined)),
         ],
       ),
       body: PageView(

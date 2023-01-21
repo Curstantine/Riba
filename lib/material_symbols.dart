@@ -18,11 +18,19 @@ class _MaterialSymbolsData extends IconData {
 class MaterialSymbols {
   const MaterialSymbols._();
 
-  static const home_selected = _MaterialSymbolsData(0xf101, 'home_selected');
-  static const home = _MaterialSymbolsData(0xf102, 'home');
+  static const home_filled = _MaterialSymbolsData(0xf101, 'home_filled');
+  static const home_outlined = _MaterialSymbolsData(0xf102, 'home_outlined');
+  static const library_filled = _MaterialSymbolsData(0xf103, 'library_filled');
+  static const library_outlined = _MaterialSymbolsData(0xf104, 'library_outlined');
+  static const search_filled = _MaterialSymbolsData(0xf105, 'search_filled');
+  static const search_outlined = _MaterialSymbolsData(0xf106, 'search_outlined');
 
   static const all = <String, _MaterialSymbolsData>{
-    'home_selected': home_selected,
-    'home': home,
+    'home_filled': home_filled,
+    'home_outlined': home_outlined,
+    'library_filled': library_filled,
+    'library_outlined': library_outlined,
+    'search_filled': search_filled,
+    'search_outlined': search_outlined,
   };
 }

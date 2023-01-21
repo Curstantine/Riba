@@ -15,3 +15,13 @@ symbols:
     library_filled:
         name: Library Books
         fill: true
+
+    search_outlined:
+        name: Search
+    search_filled:
+        name: Search
+        fill: true
+
+default:
+  style: rounded
+  weight: 500

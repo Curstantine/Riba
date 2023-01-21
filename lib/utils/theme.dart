@@ -9,17 +9,30 @@ part 'theme.g.dart';
 
 class ThemeManager with ChangeNotifier {
   static late ThemeManager instance;
-  ThemeManager._internal({required this.id, required this.mode});
+  ThemeManager._internal({required this.id, required this.mode}) {
+    addListener(onChange);
+  }
+
+  @override
+  void dispose() {
+    removeListener(onChange);
+    super.dispose();
+  }
+
+  void onChange() {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: mode.toBrightness(),
+      statusBarIconBrightness:
+          mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light,
+    ));
+  }
 
   static Future<void> init() async {
     instance = ThemeManager._internal(
       id: Settings.instance.data.themeId,
       mode: Settings.instance.data.themeMode,
     );
-
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
 
     await instance.refresh();
   }
