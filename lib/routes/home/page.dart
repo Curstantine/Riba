@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riba/material_symbols.dart';
 import 'package:riba/routes/home/home_content.dart';
 import 'package:riba/utils/constants.dart';
+import 'package:riba/widgets/user_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -22,30 +23,30 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(media.padding.top + 64),
+        child: const SafeArea(child: UserBar()),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,
-        onDestinationSelected: (value) {
-          setState(() => currentPageIndex = value);
-          pageController.animateToPage(value, duration: Durations.normal, curve: Curves.ease);
-        },
-        destinations: [
+        onDestinationSelected: onDestinationSelected,
+        destinations: const [
           NavigationDestination(
               label: "Home",
-              icon: currentPageIndex == 0
-                  ? const Icon(MaterialSymbols.home_filled)
-                  : const Icon(MaterialSymbols.home_outlined)),
+              icon: Icon(MaterialSymbols.home_outlined),
+              selectedIcon: Icon(MaterialSymbols.home_filled)),
           NavigationDestination(
               label: "Library",
-              icon: currentPageIndex == 1
-                  ? const Icon(MaterialSymbols.library_filled)
-                  : const Icon(MaterialSymbols.library_outlined)),
+              icon: Icon(MaterialSymbols.library_outlined),
+              selectedIcon: Icon(MaterialSymbols.library_filled)),
           NavigationDestination(
               label: "Search",
-              icon: currentPageIndex == 2
-                  ? const Icon(MaterialSymbols.search_filled)
-                  : const Icon(MaterialSymbols.search_outlined)),
+              icon: Icon(MaterialSymbols.search_outlined),
+              selectedIcon: Icon(MaterialSymbols.search_filled)),
         ],
       ),
       body: PageView(
@@ -61,8 +62,10 @@ class _HomeState extends State<Home> {
   }
 
   void onPageChanged(int value) {
-    if (value != currentPageIndex) {
-      setState(() => currentPageIndex = value);
-    }
+    setState(() => currentPageIndex = value);
+  }
+
+  void onDestinationSelected(int value) {
+    pageController.animateToPage(value, duration: Durations.normal, curve: Curves.easeIn);
   }
 }
