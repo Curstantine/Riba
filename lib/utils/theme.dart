@@ -20,12 +20,7 @@ class ThemeManager with ChangeNotifier {
   }
 
   void onChange() {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarBrightness: mode.toBrightness(),
-      statusBarIconBrightness:
-          mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light,
-    ));
+    setSystemOverlayStyles();
   }
 
   static Future<void> init() async {
@@ -42,9 +37,18 @@ class ThemeManager with ChangeNotifier {
   late ColorScheme scheme;
 
   ThemeData get theme => ThemeData(
-        useMaterial3: true,
-        colorScheme: scheme,
-        brightness: mode.toBrightness(),
+      useMaterial3: true,
+      colorScheme: scheme,
+      textTheme: textTheme,
+      brightness: mode.toBrightness());
+
+  TextTheme get textTheme => const TextTheme(
+        titleLarge: TextStyle(fontFamily: FontFamily.Rubik),
+        titleMedium: TextStyle(fontFamily: FontFamily.Rubik, letterSpacing: 0.2),
+        titleSmall: TextStyle(fontFamily: FontFamily.Rubik),
+        labelLarge: TextStyle(fontFamily: FontFamily.Rubik),
+        labelMedium: TextStyle(fontFamily: FontFamily.Rubik),
+        labelSmall: TextStyle(fontFamily: FontFamily.Rubik),
       );
 
   Future<void> setTheme(ThemeId themeId) async {
@@ -80,6 +84,21 @@ class ThemeManager with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Sets the system overlay styles used by the app.
+  ///
+  /// In case a relevant parameter is not passed, it will be set to a default value.
+  void setSystemOverlayStyles({
+    Color statusBarColor = Colors.transparent,
+    Brightness? statusBarBrightness,
+    Brightness? statusBarIconBrightness,
+  }) =>
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: statusBarColor,
+        statusBarBrightness: statusBarBrightness ?? mode.toBrightness(),
+        statusBarIconBrightness: statusBarIconBrightness ??
+            (mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light),
+      ));
 
   static Map<ThemeId, ColorScheme> themes = {
     ThemeId.lavender: ColorScheme.fromSeed(seedColor: Colors.purple.shade500)
