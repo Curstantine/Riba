@@ -20,7 +20,9 @@ class ThemeManager with ChangeNotifier {
   }
 
   void onChange() {
-    setSystemOverlayStyles();
+    if (!preventSystemOverlaySync) {
+      setSystemOverlayStyles();
+    }
   }
 
   static Future<void> init() async {
@@ -35,6 +37,9 @@ class ThemeManager with ChangeNotifier {
   late ThemeId id;
   late ThemeMode mode;
   late ColorScheme scheme;
+
+  /// Stops the changes done by [setSystemOverlayStyles] whenever [refresh] | [onChange] is called.
+  bool preventSystemOverlaySync = false;
 
   ThemeData get theme => ThemeData(
       useMaterial3: true,

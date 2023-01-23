@@ -12,40 +12,32 @@ class MangaView extends StatefulWidget {
 }
 
 class _MangaViewState extends State<MangaView> {
-  bool isStatusBarDarkened = true;
-
   final scrollController = ScrollController();
   final image = const NetworkImage(
     "https://cdn.discordapp.com/attachments/403905762692431872/1066705519592607824/9F2FDACC-D07C-418C-A392-BAF23458CBC9.jpg",
   );
 
+  bool isStatusBarDarkened = true;
+
   @override
   void initState() {
     super.initState();
+    ThemeManager.instance.preventSystemOverlaySync = true;
+    ThemeManager.instance.addListener(onThemeChange);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       log("Running post frame hook.", name: "MangaView");
-      ThemeManager.instance.setSystemOverlayStyles(
-        statusBarColor: Theme.of(context).colorScheme.background.withOpacity(0.75),
-      );
+      _darkenStatusBar();
     });
 
-    scrollController.addListener(() {
-      final statusBarColor = Theme.of(context).colorScheme.background.withOpacity(0.75);
-
-      if (!isStatusBarDarkened && scrollController.offset < 150) {
-        isStatusBarDarkened = true;
-        ThemeManager.instance.setSystemOverlayStyles(statusBarColor: statusBarColor);
-      }
-
-      if (isStatusBarDarkened && scrollController.offset > 150) {
-        isStatusBarDarkened = false;
-        ThemeManager.instance.setSystemOverlayStyles();
-      }
-    });
+    scrollController.addListener(_changeSystemOverlayStyles);
   }
 
   @override
   void dispose() {
+    ThemeManager.instance.preventSystemOverlaySync = false;
+    ThemeManager.instance.setSystemOverlayStyles();
+    ThemeManager.instance.removeListener(onThemeChange);
+
     scrollController.dispose();
     super.dispose();
   }
@@ -81,7 +73,7 @@ class _MangaViewState extends State<MangaView> {
               end: Alignment.bottomCenter,
               stops: const [0, 0.5, 0.75, 1],
               colors: [
-                Colors.transparent,
+                theme.colorScheme.background.withOpacity(0),
                 theme.colorScheme.background.withOpacity(0.85),
                 theme.colorScheme.background.withOpacity(0.95),
                 theme.colorScheme.background,
@@ -102,7 +94,7 @@ class _MangaViewState extends State<MangaView> {
                 child: progress == null
                     ? SizedBox.expand(child: child)
                     : SizedBox(
-                        height: 200,
+                        height: media.padding.top + 200,
                         child: Center(child: CircularProgressIndicator(value: progress))),
               );
             },
@@ -111,7 +103,7 @@ class _MangaViewState extends State<MangaView> {
         Container(
           width: double.infinity,
           padding:
-              Edges.horizontalMedium.copyWith(top: media.padding.top + 150, bottom: Edges.large),
+              Edges.horizontalMedium.copyWith(top: media.padding.top + 200, bottom: Edges.large),
           constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text("Title that's long enough to make Kizuna happy",
@@ -121,5 +113,36 @@ class _MangaViewState extends State<MangaView> {
         ),
       ],
     );
+  }
+
+  void onThemeChange() {
+    log("Platform brightness changed.", name: "MangaView");
+    _changeSystemOverlayStyles(force: true);
+  }
+
+  void _changeSystemOverlayStyles({bool force = false}) {
+    log(
+      "Changing system overlay style.\n"
+      "\tforce: $force\n"
+      "\tisStatusBarDarkened: $isStatusBarDarkened\n"
+      "\tBrightness: ${WidgetsBinding.instance.window.platformBrightness}\n"
+      "\tSchemeBrightness: ${ThemeManager.instance.scheme.brightness}",
+      name: "MangaView",
+    );
+
+    if ((force || !isStatusBarDarkened) && scrollController.offset < 300) _darkenStatusBar();
+    if ((force || isStatusBarDarkened) && scrollController.offset > 300) _lightenStatusBar();
+  }
+
+  void _darkenStatusBar() {
+    var statusBarColor = ThemeManager.instance.scheme.background.withOpacity(0.75);
+
+    isStatusBarDarkened = true;
+    ThemeManager.instance.setSystemOverlayStyles(statusBarColor: statusBarColor);
+  }
+
+  void _lightenStatusBar() {
+    isStatusBarDarkened = false;
+    ThemeManager.instance.setSystemOverlayStyles();
   }
 }
