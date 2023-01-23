@@ -10,38 +10,43 @@ part of 'manga.dart';
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
 extension GetMangaCollection on Isar {
-  IsarCollection<Manga> get mangas => this.collection();
+  IsarCollection<Manga> get manga => this.collection();
 }
 
 const MangaSchema = CollectionSchema(
   name: r'Manga',
   id: -5643034226035087553,
   properties: {
-    r'authors': PropertySchema(
+    r'altTitles': PropertySchema(
       id: 0,
-      name: r'authors',
+      name: r'altTitles',
       type: IsarType.objectList,
       target: r'Localizations',
     ),
-    r'description': PropertySchema(
+    r'authors': PropertySchema(
       id: 1,
+      name: r'authors',
+      type: IsarType.stringList,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.object,
       target: r'Localizations',
     ),
     r'id': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'id',
       type: IsarType.string,
     ),
     r'originalLocale': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'originalLocale',
       type: IsarType.object,
       target: r'Locale',
     ),
     r'titles': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'titles',
       type: IsarType.object,
       target: r'Localizations',
@@ -54,10 +59,7 @@ const MangaSchema = CollectionSchema(
   idName: r'isarId',
   indexes: {},
   links: {},
-  embeddedSchemas: {
-    r'Localizations': LocalizationsSchema,
-    r'Locale': LocaleSchema
-  },
+  embeddedSchemas: {r'Localizations': LocalizationsSchema, r'Locale': LocaleSchema},
   getId: _mangaGetId,
   getLinks: _mangaGetLinks,
   attach: _mangaAttach,
@@ -70,25 +72,28 @@ int _mangaEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.authors.length * 3;
+  bytesCount += 3 + object.altTitles.length * 3;
   {
     final offsets = allOffsets[Localizations]!;
+    for (var i = 0; i < object.altTitles.length; i++) {
+      final value = object.altTitles[i];
+      bytesCount += LocalizationsSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
+  bytesCount += 3 + object.authors.length * 3;
+  {
     for (var i = 0; i < object.authors.length; i++) {
       final value = object.authors[i];
-      bytesCount +=
-          LocalizationsSchema.estimateSize(value, offsets, allOffsets);
+      bytesCount += value.length * 3;
     }
   }
   bytesCount += 3 +
-      LocalizationsSchema.estimateSize(
-          object.description, allOffsets[Localizations]!, allOffsets);
+      LocalizationsSchema.estimateSize(object.description, allOffsets[Localizations]!, allOffsets);
   bytesCount += 3 + object.id.length * 3;
-  bytesCount += 3 +
-      LocaleSchema.estimateSize(
-          object.originalLocale, allOffsets[Locale]!, allOffsets);
-  bytesCount += 3 +
-      LocalizationsSchema.estimateSize(
-          object.titles, allOffsets[Localizations]!, allOffsets);
+  bytesCount +=
+      3 + LocaleSchema.estimateSize(object.originalLocale, allOffsets[Locale]!, allOffsets);
+  bytesCount +=
+      3 + LocalizationsSchema.estimateSize(object.titles, allOffsets[Localizations]!, allOffsets);
   return bytesCount;
 }
 
@@ -102,23 +107,24 @@ void _mangaSerialize(
     offsets[0],
     allOffsets,
     LocalizationsSchema.serialize,
-    object.authors,
+    object.altTitles,
   );
+  writer.writeStringList(offsets[1], object.authors);
   writer.writeObject<Localizations>(
-    offsets[1],
+    offsets[2],
     allOffsets,
     LocalizationsSchema.serialize,
     object.description,
   );
-  writer.writeString(offsets[2], object.id);
+  writer.writeString(offsets[3], object.id);
   writer.writeObject<Locale>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     LocaleSchema.serialize,
     object.originalLocale,
   );
   writer.writeObject<Localizations>(
-    offsets[4],
+    offsets[5],
     allOffsets,
     LocalizationsSchema.serialize,
     object.titles,
@@ -131,33 +137,35 @@ Manga _mangaDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Manga();
-  object.authors = reader.readObjectList<Localizations>(
-        offsets[0],
-        LocalizationsSchema.deserialize,
-        allOffsets,
+  final object = Manga(
+    altTitles: reader.readObjectList<Localizations>(
+          offsets[0],
+          LocalizationsSchema.deserialize,
+          allOffsets,
+          Localizations(),
+        ) ??
+        [],
+    authors: reader.readStringList(offsets[1]) ?? [],
+    description: reader.readObjectOrNull<Localizations>(
+          offsets[2],
+          LocalizationsSchema.deserialize,
+          allOffsets,
+        ) ??
         Localizations(),
-      ) ??
-      [];
-  object.description = reader.readObjectOrNull<Localizations>(
-        offsets[1],
-        LocalizationsSchema.deserialize,
-        allOffsets,
-      ) ??
-      Localizations();
-  object.id = reader.readString(offsets[2]);
-  object.originalLocale = reader.readObjectOrNull<Locale>(
-        offsets[3],
-        LocaleSchema.deserialize,
-        allOffsets,
-      ) ??
-      Locale();
-  object.titles = reader.readObjectOrNull<Localizations>(
-        offsets[4],
-        LocalizationsSchema.deserialize,
-        allOffsets,
-      ) ??
-      Localizations();
+    id: reader.readString(offsets[3]),
+    originalLocale: reader.readObjectOrNull<Locale>(
+          offsets[4],
+          LocaleSchema.deserialize,
+          allOffsets,
+        ) ??
+        Locale(),
+    titles: reader.readObjectOrNull<Localizations>(
+          offsets[5],
+          LocalizationsSchema.deserialize,
+          allOffsets,
+        ) ??
+        Localizations(),
+  );
   return object;
 }
 
@@ -177,22 +185,24 @@ P _mangaDeserializeProp<P>(
           ) ??
           []) as P;
     case 1:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 2:
       return (reader.readObjectOrNull<Localizations>(
             offset,
             LocalizationsSchema.deserialize,
             allOffsets,
           ) ??
           Localizations()) as P;
-    case 2:
-      return (reader.readString(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
       return (reader.readObjectOrNull<Locale>(
             offset,
             LocaleSchema.deserialize,
             allOffsets,
           ) ??
           Locale()) as P;
-    case 4:
+    case 5:
       return (reader.readObjectOrNull<Localizations>(
             offset,
             LocalizationsSchema.deserialize,
@@ -263,8 +273,7 @@ extension MangaQueryWhere on QueryBuilder<Manga, Manga, QWhereClause> {
     });
   }
 
-  QueryBuilder<Manga, Manga, QAfterWhereClause> isarIdLessThan(Id isarId,
-      {bool include = false}) {
+  QueryBuilder<Manga, Manga, QAfterWhereClause> isarIdLessThan(Id isarId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: isarId, includeUpper: include),
@@ -290,8 +299,218 @@ extension MangaQueryWhere on QueryBuilder<Manga, Manga, QWhereClause> {
 }
 
 extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsLengthEqualTo(
-      int length) {
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'altTitles',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'authors',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'authors',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'authors',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'authors',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'authors',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'authors',
@@ -556,29 +775,25 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
 }
 
 extension MangaQueryObject on QueryBuilder<Manga, Manga, QFilterCondition> {
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> authorsElement(
-      FilterQuery<Localizations> q) {
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> altTitlesElement(FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'authors');
+      return query.object(q, r'altTitles');
     });
   }
 
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> description(
-      FilterQuery<Localizations> q) {
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> description(FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'description');
     });
   }
 
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLocale(
-      FilterQuery<Locale> q) {
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLocale(FilterQuery<Locale> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'originalLocale');
     });
   }
 
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> titles(
-      FilterQuery<Localizations> q) {
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> titles(FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'titles');
     });
@@ -628,8 +843,13 @@ extension MangaQuerySortThenBy on QueryBuilder<Manga, Manga, QSortThenBy> {
 }
 
 extension MangaQueryWhereDistinct on QueryBuilder<Manga, Manga, QDistinct> {
-  QueryBuilder<Manga, Manga, QDistinct> distinctById(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Manga, Manga, QDistinct> distinctByAuthors() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'authors');
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QDistinct> distinctById({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
@@ -643,7 +863,13 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Manga, List<Localizations>, QQueryOperations> authorsProperty() {
+  QueryBuilder<Manga, List<Localizations>, QQueryOperations> altTitlesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'altTitles');
+    });
+  }
+
+  QueryBuilder<Manga, List<String>, QQueryOperations> authorsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'authors');
     });

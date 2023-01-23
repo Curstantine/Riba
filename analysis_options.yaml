@@ -1,3 +1,5 @@
 include: package:flutter_lints/flutter.yaml
 linter:
-  rules:
+    rules:
+      prefer_single_quotes: false
+      prefer_double_quotes: true

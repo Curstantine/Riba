@@ -1,17 +1,19 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riba/repositories/mangadex/mangadex.dart';
 import 'package:riba/utils/theme.dart';
 import 'package:riba/utils/constants.dart';
 
-class MangaView extends StatefulWidget {
+class MangaView extends ConsumerStatefulWidget {
   const MangaView({super.key});
 
   @override
-  State<MangaView> createState() => _MangaViewState();
+  ConsumerState<MangaView> createState() => _MangaViewState();
 }
 
-class _MangaViewState extends State<MangaView> {
+class _MangaViewState extends ConsumerState<MangaView> {
   final scrollController = ScrollController();
   final image = const NetworkImage(
     "https://cdn.discordapp.com/attachments/403905762692431872/1066705519592607824/9F2FDACC-D07C-418C-A392-BAF23458CBC9.jpg",
@@ -44,20 +46,30 @@ class _MangaViewState extends State<MangaView> {
 
   @override
   Widget build(BuildContext context) {
+    final mangadex = ref.read(mangaDexPod);
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      body: SingleChildScrollView(
-        controller: scrollController,
-        child: Column(
-          children: [
-            detailsHeader(theme, media),
-            const SizedBox(height: 1000),
-          ],
-        ),
-      ),
+      body: FutureBuilder<dynamic>(
+          future: mangadex.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
+          builder: (context, snapshot) {
+            log(
+              "FutureBuilder: ${snapshot.connectionState}\n" "\tdata: ${snapshot.data}",
+              name: "MangaView",
+            );
+
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                children: [
+                  detailsHeader(theme, media),
+                  const SizedBox(height: 1000),
+                ],
+              ),
+            );
+          }),
     );
   }
 

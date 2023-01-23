@@ -61,3 +61,29 @@ enum Language {
   final String isoCode;
   const Language(this.isoCode);
 }
+
+extension ToLocalizations on Map<String, String> {
+  Localizations toLocalizations() {
+    final locales = Localizations();
+
+    forEach((key, value) {
+      locales.localizations[locales.localizations.length] = key.toLocale();
+      locales.values[locales.values.length] = value;
+    });
+
+    if (locales.localizations.length != locales.values.length) {
+      throw Exception("The length of localizations and values are not the same.");
+    }
+
+    return locales;
+  }
+}
+
+extension ToLocale on String {
+  Locale toLocale() {
+    final isRomanized = endsWith("-ro");
+    final language = Language.values.firstWhere((e) => e.isoCode == replaceFirst("-ro", ""));
+
+    return Locale.withItem(language, isRomanized);
+  }
+}

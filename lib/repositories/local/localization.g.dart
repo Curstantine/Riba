@@ -112,10 +112,9 @@ P _localizationsDeserializeProp<P>(
   }
 }
 
-extension LocalizationsQueryFilter
-    on QueryBuilder<Localizations, Localizations, QFilterCondition> {
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsLengthEqualTo(int length) {
+extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations, QFilterCondition> {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsLengthEqualTo(
+      int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'localizations',
@@ -127,8 +126,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsIsEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'localizations',
@@ -140,8 +138,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsIsNotEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'localizations',
@@ -153,8 +150,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsLengthLessThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsLengthLessThan(
     int length, {
     bool include = false,
   }) {
@@ -169,8 +165,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsLengthGreaterThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
@@ -185,8 +180,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsLengthBetween(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -203,8 +197,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsNull() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.elementIsNull(
         property: r'values',
@@ -212,8 +205,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsNotNull() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.elementIsNotNull(
         property: r'values',
@@ -221,8 +213,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementEqualTo(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
@@ -235,8 +226,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementGreaterThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -251,8 +241,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementLessThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -267,8 +256,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementBetween(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -287,8 +275,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementStartsWith(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -301,8 +288,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementEndsWith(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -315,8 +301,9 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementContains(
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'values',
@@ -326,8 +313,9 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementMatches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'values',
@@ -337,8 +325,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'values',
@@ -347,8 +334,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsNotEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'values',
@@ -357,8 +343,8 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesLengthEqualTo(int length) {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesLengthEqualTo(
+      int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'values',
@@ -370,8 +356,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesIsEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'values',
@@ -383,8 +368,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesIsNotEmpty() {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'values',
@@ -396,8 +380,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesLengthLessThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesLengthLessThan(
     int length, {
     bool include = false,
   }) {
@@ -412,8 +395,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesLengthGreaterThan(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
@@ -428,8 +410,7 @@ extension LocalizationsQueryFilter
     });
   }
 
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesLengthBetween(
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -447,10 +428,9 @@ extension LocalizationsQueryFilter
   }
 }
 
-extension LocalizationsQueryObject
-    on QueryBuilder<Localizations, Localizations, QFilterCondition> {
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      localizationsElement(FilterQuery<Locale> q) {
+extension LocalizationsQueryObject on QueryBuilder<Localizations, Localizations, QFilterCondition> {
+  QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsElement(
+      FilterQuery<Locale> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'localizations');
     });
@@ -509,8 +489,7 @@ Locale _localeDeserialize(
 ) {
   final object = Locale();
   object.language =
-      _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[0])] ??
-          Language.english;
+      _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[0])] ?? Language.english;
   object.romanized = reader.readBool(offsets[1]);
   return object;
 }
@@ -523,8 +502,7 @@ P _localeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (_LocalelanguageValueEnumMap[reader.readByteOrNull(offset)] ??
-          Language.english) as P;
+      return (_LocalelanguageValueEnumMap[reader.readByteOrNull(offset)] ?? Language.english) as P;
     case 1:
       return (reader.readBool(offset)) as P;
     default:
@@ -548,8 +526,7 @@ const _LocalelanguageValueEnumMap = {
 };
 
 extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
-  QueryBuilder<Locale, Locale, QAfterFilterCondition> languageEqualTo(
-      Language value) {
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> languageEqualTo(Language value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'language',
@@ -601,8 +578,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Locale, Locale, QAfterFilterCondition> romanizedEqualTo(
-      bool value) {
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> romanizedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'romanized',

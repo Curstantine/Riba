@@ -3,7 +3,7 @@ import 'package:riba/repositories/mangadex/manga.dart';
 
 part 'general.g.dart';
 
-class MDResponse<T> {
+class MDResponse {
   final String result;
   final String response;
   final MDResponseData data;
@@ -89,5 +89,12 @@ class Relationship {
     required this.id,
     required this.type,
   });
+
   factory Relationship.fromJson(Map<String, dynamic> json) => _$RelationshipFromJson(json);
+}
+
+extension RelationshipList on List<Relationship> {
+  List<Relationship> ofType(EntityType type) {
+    return where((element) => element.type == type).toList();
+  }
 }

@@ -40,7 +40,5 @@ class ThemeIdAdapter extends TypeAdapter<ThemeId> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ThemeIdAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is ThemeIdAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

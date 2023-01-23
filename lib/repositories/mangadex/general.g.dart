@@ -11,8 +11,7 @@ Relationship _$RelationshipFromJson(Map<String, dynamic> json) => Relationship(
       type: $enumDecode(_$EntityTypeEnumMap, json['type']),
     );
 
-Map<String, dynamic> _$RelationshipToJson(Relationship instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$RelationshipToJson(Relationship instance) => <String, dynamic>{
       'id': instance.id,
       'type': _$EntityTypeEnumMap[instance.type]!,
     };
