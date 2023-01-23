@@ -91,6 +91,7 @@ class _MangaViewState extends State<MangaView> {
           child: Image(
             fit: BoxFit.fitWidth,
             image: image,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
             loadingBuilder: (context, child, loadingProgress) {
               final progress = loadingProgress?.expectedTotalBytes != null
                   ? loadingProgress!.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
@@ -105,7 +106,6 @@ class _MangaViewState extends State<MangaView> {
                         child: Center(child: CircularProgressIndicator(value: progress))),
               );
             },
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
           ),
         ),
         Container(
