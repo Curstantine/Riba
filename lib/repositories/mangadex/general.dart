@@ -1,46 +1,63 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:riba/repositories/mangadex/manga.dart';
 
 part 'general.g.dart';
 
 class MDResponse<T> {
   final String result;
   final String response;
-  final T data;
+  final MDResponseData data;
 
   MDResponse({
     required this.result,
     required this.response,
     required this.data,
   });
+
   factory MDResponse.fromJson(Map<String, dynamic> json) {
     final isEntity = json["response"] == "entity";
+    if (!isEntity) throw UnimplementedError();
 
     return MDResponse(
       result: json["result"] as String,
       response: json["response"] as String,
-      data: (isEntity ? EntityData.fromJson(json["data"]) : json["data"]) as T,
+      data: (isEntity ? EntityData.fromJson(json["data"]) : json["data"]),
     );
   }
 }
 
-class EntityData<T> {
+abstract class MDResponseData {
   final String id;
   final EntityType type;
+
+  const MDResponseData({required this.id, required this.type});
+}
+
+class EntityData<T> extends MDResponseData {
   final T attributes;
   final List<Relationship> relationships;
 
   EntityData({
-    required this.id,
-    required this.type,
+    required super.id,
+    required super.type,
     required this.attributes,
     required this.relationships,
   });
 
   factory EntityData.fromJson(Map<String, dynamic> json) {
+    final type = $enumDecode(_$EntityTypeEnumMap, json["type"]);
+    late T attributes;
+
+    if (type == EntityType.manga) {
+      attributes = MangaAttributes.fromJson(json["attributes"]) as T;
+    } else {
+      throw UnimplementedError("Entity type $type is not implemented yet.");
+    }
+
     return EntityData(
       id: json["id"] as String,
-      type: $enumDecode(_$EntityTypeEnumMap, json["type"]),
-      attributes: json["attributes"] as T,
+      type: type,
+      attributes: attributes,
       relationships: (json["relationships"] as List<dynamic>)
           .map((e) => Relationship.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -53,6 +70,14 @@ enum EntityType {
   manga,
   chapter,
   author,
+  artist,
+  user,
+  @JsonValue("cover_art")
+  coverArt,
+  @JsonValue("scanlation_group")
+  scanlationGroup,
+  @JsonValue("based_on")
+  basedOn,
 }
 
 @JsonSerializable()

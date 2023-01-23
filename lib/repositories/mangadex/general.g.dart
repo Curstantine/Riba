@@ -21,4 +21,9 @@ const _$EntityTypeEnumMap = {
   EntityType.manga: 'manga',
   EntityType.chapter: 'chapter',
   EntityType.author: 'author',
+  EntityType.artist: 'artist',
+  EntityType.user: 'user',
+  EntityType.coverArt: 'cover_art',
+  EntityType.scanlationGroup: 'scanlation_group',
+  EntityType.basedOn: 'based_on',
 };
