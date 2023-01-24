@@ -1,6 +1,6 @@
-import 'package:isar/isar.dart';
+import "package:isar/isar.dart";
 
-part 'localization.g.dart';
+part "localization.g.dart";
 
 /// A class that represents a localization object.
 ///
@@ -9,9 +9,8 @@ part 'localization.g.dart';
 ///
 ///e.g.
 ///```
-///   Locale.English -> "English Title"
-///   Locale.RomanizedJapanese -> "Romanized Japanese Title"
-///
+/// Locale.English -> "English Title"
+/// Locale.RomanizedJapanese -> "Romanized Japanese Title"
 /// localizations[0] = Locale.English && values[0] = "English Title"
 /// ```
 @embedded

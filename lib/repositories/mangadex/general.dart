@@ -1,7 +1,7 @@
-import 'package:json_annotation/json_annotation.dart';
-import 'package:riba/repositories/mangadex/manga.dart';
+import "package:json_annotation/json_annotation.dart";
+import "package:riba/repositories/mangadex/manga.dart";
 
-part 'general.g.dart';
+part "general.g.dart";
 
 class MDResponse {
   final String result;

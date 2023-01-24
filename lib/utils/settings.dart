@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:riba/utils/theme.dart';
+import "package:flutter/material.dart";
+import "package:hive/hive.dart";
+import "package:riba/utils/theme.dart";
 
 class Settings {
   static late Settings instance;
@@ -27,8 +27,8 @@ class Settings {
 
 class _Keys {
   static const self = "settings";
-  static const themeId = 'themeId';
-  static const themeMode = 'themeMode';
+  static const themeId = "themeId";
+  static const themeMode = "themeMode";
 }
 
 class SettingsData {

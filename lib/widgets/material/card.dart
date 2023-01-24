@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:riba/utils/constants.dart';
+import "package:flutter/material.dart";
+import "package:riba/utils/constants.dart";
 
 class FilledCard extends StatelessWidget {
   const FilledCard({super.key, required this.child});

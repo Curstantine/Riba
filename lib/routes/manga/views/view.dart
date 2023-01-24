@@ -1,10 +1,10 @@
-import 'dart:developer';
+import "dart:developer";
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riba/repositories/mangadex/mangadex.dart';
-import 'package:riba/utils/theme.dart';
-import 'package:riba/utils/constants.dart';
+import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/utils/theme.dart";
+import "package:riba/utils/constants.dart";
 
 class MangaView extends ConsumerStatefulWidget {
   const MangaView({super.key});
@@ -53,7 +53,9 @@ class _MangaViewState extends ConsumerState<MangaView> {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: FutureBuilder<dynamic>(
-          future: mangadex.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
+          future: !mangadex.hasValue
+              ? null
+              : mangadex.value!.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
           builder: (context, snapshot) {
             log(
               "FutureBuilder: ${snapshot.connectionState}\n" "\tdata: ${snapshot.data}",

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'localization.dart';
+part of "localization.dart";
 
 // **************************************************************************
 // IsarEmbeddedGenerator
@@ -10,18 +10,18 @@ part of 'localization.dart';
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
 const LocalizationsSchema = Schema(
-  name: r'Localizations',
+  name: r"Localizations",
   id: 8014919257847374935,
   properties: {
-    r'localizations': PropertySchema(
+    r"localizations": PropertySchema(
       id: 0,
-      name: r'localizations',
+      name: r"localizations",
       type: IsarType.objectList,
-      target: r'Locale',
+      target: r"Locale",
     ),
-    r'values': PropertySchema(
+    r"values": PropertySchema(
       id: 1,
-      name: r'values',
+      name: r"values",
       type: IsarType.stringList,
     )
   },
@@ -108,7 +108,7 @@ P _localizationsDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNullList(offset) ?? []) as P;
     default:
-      throw IsarError('Unknown property with id $propertyId');
+      throw IsarError("Unknown property with id $propertyId");
   }
 }
 
@@ -117,7 +117,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
       int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         length,
         true,
         length,
@@ -129,7 +129,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         0,
         true,
         0,
@@ -141,7 +141,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         0,
         false,
         999999,
@@ -156,7 +156,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         0,
         true,
         length,
@@ -171,7 +171,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         length,
         include,
         999999,
@@ -188,7 +188,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'localizations',
+        r"localizations",
         lower,
         includeLower,
         upper,
@@ -200,7 +200,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.elementIsNull(
-        property: r'values',
+        property: r"values",
       ));
     });
   }
@@ -208,7 +208,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.elementIsNotNull(
-        property: r'values',
+        property: r"values",
       ));
     });
   }
@@ -219,7 +219,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -234,7 +234,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -249,7 +249,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -265,7 +265,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'values',
+        property: r"values",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -281,7 +281,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -294,7 +294,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -306,7 +306,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'values',
+        property: r"values",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -318,7 +318,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'values',
+        property: r"values",
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -328,8 +328,8 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'values',
-        value: '',
+        property: r"values",
+        value: "",
       ));
     });
   }
@@ -337,8 +337,8 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'values',
-        value: '',
+        property: r"values",
+        value: "",
       ));
     });
   }
@@ -347,7 +347,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
       int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         length,
         true,
         length,
@@ -359,7 +359,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         0,
         true,
         0,
@@ -371,7 +371,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> valuesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         0,
         false,
         999999,
@@ -386,7 +386,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         0,
         true,
         length,
@@ -401,7 +401,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         length,
         include,
         999999,
@@ -418,7 +418,7 @@ extension LocalizationsQueryFilter on QueryBuilder<Localizations, Localizations,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'values',
+        r"values",
         lower,
         includeLower,
         upper,
@@ -432,7 +432,7 @@ extension LocalizationsQueryObject on QueryBuilder<Localizations, Localizations,
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition> localizationsElement(
       FilterQuery<Locale> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'localizations');
+      return query.object(q, r"localizations");
     });
   }
 }
@@ -441,18 +441,18 @@ extension LocalizationsQueryObject on QueryBuilder<Localizations, Localizations,
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
 const LocaleSchema = Schema(
-  name: r'Locale',
+  name: r"Locale",
   id: -6418009249489833142,
   properties: {
-    r'language': PropertySchema(
+    r"language": PropertySchema(
       id: 0,
-      name: r'language',
+      name: r"language",
       type: IsarType.byte,
       enumMap: _LocalelanguageEnumValueMap,
     ),
-    r'romanized': PropertySchema(
+    r"romanized": PropertySchema(
       id: 1,
-      name: r'romanized',
+      name: r"romanized",
       type: IsarType.bool,
     )
   },
@@ -506,16 +506,16 @@ P _localeDeserializeProp<P>(
     case 1:
       return (reader.readBool(offset)) as P;
     default:
-      throw IsarError('Unknown property with id $propertyId');
+      throw IsarError("Unknown property with id $propertyId");
   }
 }
 
 const _LocalelanguageEnumValueMap = {
-  'english': 0,
-  'japanese': 1,
-  'simpleChinese': 2,
-  'traditionalChinese': 3,
-  'korean': 4,
+  "english": 0,
+  "japanese": 1,
+  "simpleChinese": 2,
+  "traditionalChinese": 3,
+  "korean": 4,
 };
 const _LocalelanguageValueEnumMap = {
   0: Language.english,
@@ -529,7 +529,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
   QueryBuilder<Locale, Locale, QAfterFilterCondition> languageEqualTo(Language value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'language',
+        property: r"language",
         value: value,
       ));
     });
@@ -542,7 +542,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'language',
+        property: r"language",
         value: value,
       ));
     });
@@ -555,7 +555,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'language',
+        property: r"language",
         value: value,
       ));
     });
@@ -569,7 +569,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'language',
+        property: r"language",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -581,7 +581,7 @@ extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
   QueryBuilder<Locale, Locale, QAfterFilterCondition> romanizedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'romanized',
+        property: r"romanized",
         value: value,
       ));
     });

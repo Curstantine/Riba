@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:riba/routes/manga/widgets/horizontal_list.dart';
+import "package:flutter/material.dart";
+import "package:riba/routes/manga/widgets/horizontal_list.dart";
 
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});

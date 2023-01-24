@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:riba/utils/constants.dart';
-import 'package:riba/routes/manga/widgets/card.dart';
+import "package:flutter/material.dart";
+import "package:riba/utils/constants.dart";
+import "package:riba/routes/manga/widgets/card.dart";
 
 class HorizontalMangaList extends StatelessWidget {
   const HorizontalMangaList({super.key, required this.title});

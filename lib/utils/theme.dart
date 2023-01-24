@@ -1,11 +1,11 @@
-import 'package:dynamic_color/dynamic_color.dart' show CorePaletteToColorScheme, DynamicColorPlugin;
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
-import 'package:riba/utils/constants.dart';
-import 'package:riba/utils/settings.dart';
+import "package:dynamic_color/dynamic_color.dart" show CorePaletteToColorScheme, DynamicColorPlugin;
+import "package:flutter/material.dart";
+import "package:flutter/services.dart";
+import "package:hive/hive.dart";
+import "package:riba/utils/constants.dart";
+import "package:riba/utils/settings.dart";
 
-part 'theme.g.dart';
+part "theme.g.dart";
 
 class ThemeManager with ChangeNotifier {
   static late ThemeManager instance;
@@ -76,7 +76,7 @@ class ThemeManager with ChangeNotifier {
     } else {
       if (brightness == Brightness.light) return const ColorScheme.light();
       if (brightness == Brightness.dark) return const ColorScheme.dark();
-      throw Exception('Unknown brightness: $brightness');
+      throw Exception("Unknown brightness: $brightness");
     }
   }
 
@@ -123,7 +123,7 @@ extension ToThemeMode on Brightness {
   ThemeMode toThemeMode() {
     if (this == Brightness.light) return ThemeMode.light;
     if (this == Brightness.dark) return ThemeMode.dark;
-    throw Exception('Unknown brightness: $this');
+    throw Exception("Unknown brightness: $this");
   }
 }
 
@@ -137,7 +137,7 @@ extension ToBrightness on ThemeMode {
       case ThemeMode.system:
         return WidgetsBinding.instance.window.platformBrightness;
       default:
-        throw Exception('Unknown theme mode: $this');
+        throw Exception("Unknown theme mode: $this");
     }
   }
 }
@@ -166,7 +166,7 @@ class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
       case 2:
         return ThemeMode.dark;
       default:
-        throw Exception('Unknown theme mode: $this');
+        throw Exception("Unknown theme mode: $this");
     }
   }
 

@@ -1,9 +1,9 @@
-import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
-import 'package:riba/routes/manga/views/view.dart';
-import 'package:riba/utils/theme.dart';
-import 'package:riba/utils/constants.dart';
-import 'package:riba/widgets/material/card.dart';
+import "package:animations/animations.dart";
+import "package:flutter/material.dart";
+import "package:riba/routes/manga/views/view.dart";
+import "package:riba/utils/theme.dart";
+import "package:riba/utils/constants.dart";
+import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatelessWidget {
   const MangaCard({super.key});
