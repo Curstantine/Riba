@@ -11,6 +11,8 @@ import "mangadex.dart";
 
 part "manga.g.dart";
 
+typedef MDMangaEntity = MDResponse<EntityData<MangaAttributes>, MangaAttributes>;
+
 class MDMangaRepo {
   MDMangaRepo(this.client, this.rateLimiter, this.database) {
     rateLimiter.rates["/manga:GET"] = const Rate(4, Duration(seconds: 1));
@@ -20,18 +22,17 @@ class MDMangaRepo {
   final RateLimiter rateLimiter;
   final Isar database;
 
-  Future<EntityData<MangaAttributes>> getManga(String id) async {
+  Future<Manga> getManga(String id) async {
     await rateLimiter.wait("/manga:GET");
     final request = await http.get(MangaDex.url.resolve("/manga/$id"));
-    final response = MDResponse.fromJson(jsonDecode(request.body) as Map<String, dynamic>);
-    final data = response.data as EntityData<MangaAttributes>;
+    final response = MDMangaEntity.fromJson(jsonDecode(request.body));
+    final manga = response.data.toManga();
 
     if (response.result == "ok") {
-      final manga = data.toManga();
       database.writeTxn(() => database.manga.put(manga));
     }
 
-    return data;
+    return manga;
   }
 }
 

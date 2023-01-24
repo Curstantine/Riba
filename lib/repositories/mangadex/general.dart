@@ -3,10 +3,10 @@ import "package:riba/repositories/mangadex/manga.dart";
 
 part "general.g.dart";
 
-class MDResponse {
+class MDResponse<T extends MDResponseData, A extends Object> {
   final String result;
   final String response;
-  final MDResponseData data;
+  final T data;
 
   MDResponse({
     required this.result,
@@ -21,7 +21,7 @@ class MDResponse {
     return MDResponse(
       result: json["result"] as String,
       response: json["response"] as String,
-      data: (isEntity ? EntityData.fromJson(json["data"]) : json["data"]),
+      data: (isEntity ? EntityData<A>.fromJson(json["data"]) : json["data"]),
     );
   }
 }
@@ -48,10 +48,10 @@ class EntityData<T> extends MDResponseData {
     final type = $enumDecode(_$EntityTypeEnumMap, json["type"]);
     late T attributes;
 
-    if (type == EntityType.manga) {
+    if (T == MangaAttributes && type == EntityType.manga) {
       attributes = MangaAttributes.fromJson(json["attributes"]) as T;
     } else {
-      throw UnimplementedError("Entity type $type is not implemented yet.");
+      throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
     }
 
     return EntityData(

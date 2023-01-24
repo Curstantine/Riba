@@ -46,7 +46,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
 
   @override
   Widget build(BuildContext context) {
-    final mangadex = ref.read(mangaDexPod);
+    final mangadex = ref.watch(mangaDexPod);
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
 

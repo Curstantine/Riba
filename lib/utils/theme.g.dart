@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "theme.dart";
+part of 'theme.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
@@ -40,5 +40,7 @@ class ThemeIdAdapter extends TypeAdapter<ThemeId> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ThemeIdAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
+      other is ThemeIdAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }
