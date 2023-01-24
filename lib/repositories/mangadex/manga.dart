@@ -6,6 +6,7 @@ import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/rate_limiter.dart";
+import "package:riba/utils/hash.dart";
 import "general.dart";
 import "mangadex.dart";
 
@@ -23,6 +24,9 @@ class MDMangaRepo {
   final Isar database;
 
   Future<Manga> getManga(String id) async {
+    final inDB = await database.manga.get(fastHash(id));
+    if (inDB != null) return inDB;
+
     await rateLimiter.wait("/manga:GET");
     final request = await http.get(MangaDex.url.resolve("/manga/$id"));
     final response = MDMangaEntity.fromJson(jsonDecode(request.body));
@@ -49,6 +53,7 @@ class MangaAttributes {
     required this.description,
     required this.originalLanguage,
   });
+
   factory MangaAttributes.fromJson(Map<String, dynamic> json) => _$MangaAttributesFromJson(json);
 }
 

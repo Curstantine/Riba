@@ -1,6 +1,8 @@
 import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 
+import "error.dart";
+
 part "general.g.dart";
 
 class MDResponse<T extends MDResponseData, A extends Object> {
@@ -8,18 +10,21 @@ class MDResponse<T extends MDResponseData, A extends Object> {
   final String response;
   final T data;
 
-  MDResponse({
-    required this.result,
-    required this.response,
-    required this.data,
-  });
+  const MDResponse({required this.result, required this.response, required this.data});
 
   factory MDResponse.fromJson(Map<String, dynamic> json) {
+    final result = json["result"] as String;
+
+    if (result != "ok" || result != "ko") {
+      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
+      throw MDException(errors);
+    }
+
     final isEntity = json["response"] == "entity";
     if (!isEntity) throw UnimplementedError();
 
     return MDResponse(
-      result: json["result"] as String,
+      result: result,
       response: json["response"] as String,
       data: (isEntity ? EntityData<A>.fromJson(json["data"]) : json["data"]),
     );
@@ -37,7 +42,7 @@ class EntityData<T> extends MDResponseData {
   final T attributes;
   final List<Relationship> relationships;
 
-  EntityData({
+  const EntityData({
     required super.id,
     required super.type,
     required this.attributes,

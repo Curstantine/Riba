@@ -1,8 +1,9 @@
-import "dart:developer";
-
-import "package:flutter/material.dart";
+import "package:flutter/material.dart" hide Locale;
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/utils/constants.dart";
 
@@ -26,10 +27,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
     super.initState();
     ThemeManager.instance.preventSystemOverlaySync = true;
     ThemeManager.instance.addListener(onThemeChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      log("Running post frame hook.", name: "MangaView");
-      _darkenStatusBar();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _darkenStatusBar());
 
     scrollController.addListener(_changeSystemOverlayStyles);
   }
@@ -48,34 +46,54 @@ class _MangaViewState extends ConsumerState<MangaView> {
   Widget build(BuildContext context) {
     final mangadex = ref.watch(mangaDexPod);
     final theme = Theme.of(context);
-    final media = MediaQuery.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      body: FutureBuilder<dynamic>(
-          future: !mangadex.hasValue
-              ? null
-              : mangadex.value!.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
+      body: mangadex.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text(error.toString())),
+        data: (data) => FutureBuilder<dynamic>(
+          future: data.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
           builder: (context, snapshot) {
-            log(
-              "FutureBuilder: ${snapshot.connectionState}\n" "\tdata: ${snapshot.data}",
-              name: "MangaView",
-            );
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              final error = handleError(snapshot.error!);
+
+              return Center(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Text(error.title, style: theme.textTheme.headline6),
+                  Text(error.description, style: theme.textTheme.bodyText2),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => setState(() => {}),
+                    child: const Text("Retry"),
+                  ),
+                ]),
+              );
+            }
 
             return SingleChildScrollView(
               controller: scrollController,
               child: Column(
                 children: [
-                  detailsHeader(theme, media),
+                  detailsHeader(snapshot.data),
                   const SizedBox(height: 1000),
                 ],
               ),
             );
-          }),
+          },
+        ),
+      ),
     );
   }
 
-  Widget detailsHeader(ThemeData theme, MediaQueryData media) {
+  Widget detailsHeader(Manga manga) {
+    final theme = Theme.of(context);
+    final media = MediaQuery.of(context);
+
     return Stack(
       children: [
         Container(
@@ -120,8 +138,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
               Edges.horizontalMedium.copyWith(top: media.padding.top + 200, bottom: Edges.large),
           constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("Title that's long enough to make Kizuna happy",
-                style: theme.textTheme.titleLarge),
+            Text(manga.titles.get(Locale.en) ?? "fuck", style: theme.textTheme.titleLarge),
             Text("Kizuna AI", style: theme.textTheme.labelMedium?.withColorAlpha(0.5))
           ]),
         ),
@@ -130,20 +147,10 @@ class _MangaViewState extends ConsumerState<MangaView> {
   }
 
   void onThemeChange() {
-    log("Platform brightness changed.", name: "MangaView");
     _changeSystemOverlayStyles(force: true);
   }
 
   void _changeSystemOverlayStyles({bool force = false}) {
-    log(
-      "Changing system overlay style.\n"
-      "\tforce: $force\n"
-      "\tisStatusBarDarkened: $isStatusBarDarkened\n"
-      "\tBrightness: ${WidgetsBinding.instance.window.platformBrightness}\n"
-      "\tSchemeBrightness: ${ThemeManager.instance.scheme.brightness}",
-      name: "MangaView",
-    );
-
     if ((force || !isStatusBarDarkened) && scrollController.offset < 300) _darkenStatusBar();
     if ((force || isStatusBarDarkened) && scrollController.offset > 300) _lightenStatusBar();
   }

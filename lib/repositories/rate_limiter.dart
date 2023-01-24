@@ -1,4 +1,8 @@
+import "dart:developer";
+
 class RateLimiter {
+  RateLimiter({required this.name});
+
   /// Map of signature and it's rate.
   ///
   /// A signature is a string that identifies a request.
@@ -7,6 +11,7 @@ class RateLimiter {
   ///   `/manga:GET` for `GET https://api.mangadex.org/manga`
   final Map<String, Rate> rates = {};
   final Map<String, List<DateTime>> rateStamps = {};
+  final String name;
 
   Future<void> wait(String signature) async {
     if (!rates.containsKey(signature)) throw Exception("No rate limit for $signature");
@@ -19,8 +24,10 @@ class RateLimiter {
 
     if (withinDuration.length > rate.requests) {
       final elapsed = now.difference(withinDuration.last);
+      final remaining = rate.duration - elapsed;
+      log("Rate limit exceeded for $signature, waiting $remaining", name: name);
 
-      await Future.delayed(rate.duration - elapsed);
+      await Future.delayed(remaining);
       rateStamps[signature] = [now];
     } else {
       rateStamps[signature]!.add(DateTime.now());
