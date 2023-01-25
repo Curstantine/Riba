@@ -23,6 +23,7 @@ const _$EntityTypeEnumMap = {
   EntityType.author: "author",
   EntityType.artist: "artist",
   EntityType.user: "user",
+  EntityType.tag: "tag",
   EntityType.coverArt: "cover_art",
   EntityType.scanlationGroup: "scanlation_group",
   EntityType.basedOn: "based_on",

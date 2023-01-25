@@ -14,6 +14,8 @@ class Manga {
   late Localizations description;
   late List<Localizations> altTitles;
   late List<String> authors;
+  late List<String> artists;
+  late List<String> tags;
   late Locale originalLocale;
 
   Manga({
@@ -22,6 +24,8 @@ class Manga {
     required this.description,
     required this.altTitles,
     required this.authors,
+    required this.artists,
+    required this.tags,
     required this.originalLocale,
   });
 }

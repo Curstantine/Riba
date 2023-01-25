@@ -1,65 +1,100 @@
 import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/mangadex/tag.dart";
 
 import "error.dart";
 
 part "general.g.dart";
 
-class MDResponse<T extends MDResponseData, A extends Object> {
+class MDResponse {
   final String result;
   final String response;
-  final T data;
 
-  const MDResponse({required this.result, required this.response, required this.data});
+  const MDResponse({required this.result, required this.response});
+}
 
-  factory MDResponse.fromJson(Map<String, dynamic> json) {
+class MDEntityResponse<T> extends MDResponse {
+  final MDResponseData<T> data;
+
+  factory MDEntityResponse.fromJson(Map<String, dynamic> json) {
     final result = json["result"] as String;
 
-    if (result != "ok" || result != "ko") {
+    if (result == "error") {
       final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
       throw MDException(errors);
     }
 
-    final isEntity = json["response"] == "entity";
-    if (!isEntity) throw UnimplementedError();
+    final responseType = json["response"] as String;
 
-    return MDResponse(
+    if (responseType != "entity") {
+      throw Exception("Response type is not entity.");
+    }
+
+    return MDEntityResponse(
       result: result,
-      response: json["response"] as String,
-      data: (isEntity ? EntityData<A>.fromJson(json["data"]) : json["data"]),
+      response: responseType,
+      data: MDResponseData<T>.fromJson(json["data"]),
     );
   }
+
+  const MDEntityResponse({required super.result, required super.response, required this.data});
 }
 
-abstract class MDResponseData {
+class MDCollectionResponse<T> extends MDResponse {
+  final List<MDResponseData<T>> data;
+
+  factory MDCollectionResponse.fromJson(Map<String, dynamic> json) {
+    final result = json["result"] as String;
+
+    if (result == "error") {
+      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
+      throw MDException(errors);
+    }
+
+    final responseType = json["response"] as String;
+
+    if (responseType != "collection") {
+      throw Exception("Response type is not collection.");
+    }
+
+    return MDCollectionResponse(
+      result: result,
+      response: responseType,
+      data: (json["data"] as List<Map<String, dynamic>>)
+          .map((e) => MDResponseData<T>.fromJson(e))
+          .toList(),
+    );
+  }
+
+  const MDCollectionResponse({required super.result, required super.response, required this.data});
+}
+
+class MDResponseData<T> {
   final String id;
   final EntityType type;
-
-  const MDResponseData({required this.id, required this.type});
-}
-
-class EntityData<T> extends MDResponseData {
   final T attributes;
   final List<Relationship> relationships;
 
-  const EntityData({
-    required super.id,
-    required super.type,
+  const MDResponseData({
+    required this.id,
+    required this.type,
     required this.attributes,
     required this.relationships,
   });
 
-  factory EntityData.fromJson(Map<String, dynamic> json) {
+  factory MDResponseData.fromJson(Map<String, dynamic> json) {
     final type = $enumDecode(_$EntityTypeEnumMap, json["type"]);
     late T attributes;
 
-    if (T == MangaAttributes && type == EntityType.manga) {
+    if (type == EntityType.manga) {
       attributes = MangaAttributes.fromJson(json["attributes"]) as T;
+    } else if (type == EntityType.tag) {
+      attributes = TagAttributes.fromJson(json["attributes"]) as T;
     } else {
       throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
     }
 
-    return EntityData(
+    return MDResponseData(
       id: json["id"] as String,
       type: type,
       attributes: attributes,
@@ -77,6 +112,7 @@ enum EntityType {
   author,
   artist,
   user,
+  tag,
   @JsonValue("cover_art")
   coverArt,
   @JsonValue("scanlation_group")

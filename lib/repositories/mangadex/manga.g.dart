@@ -13,13 +13,6 @@ MangaAttributes _$MangaAttributesFromJson(Map<String, dynamic> json) =>
           .map((e) => Map<String, String>.from(e as Map))
           .toList(),
       description: Map<String, String>.from(json["description"] as Map),
+      tags: TagAttributes.fromList(json["tags"] as List),
       originalLanguage: json["originalLanguage"] as String,
     );
-
-Map<String, dynamic> _$MangaAttributesToJson(MangaAttributes instance) =>
-    <String, dynamic>{
-      "title": instance.title,
-      "altTitles": instance.altTitles,
-      "description": instance.description,
-      "originalLanguage": instance.originalLanguage,
-    };
