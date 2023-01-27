@@ -1,12 +1,12 @@
-import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/repositories/mangadex/tag.dart";
 
+import "author.dart";
+import "cover_art.dart";
 import "error.dart";
+import "relationship.dart";
 
-part "general.g.dart";
-
-class MDResponse {
+abstract class MDResponse {
   final String result;
   final String response;
 
@@ -33,7 +33,7 @@ class MDEntityResponse<T> extends MDResponse {
     return MDEntityResponse(
       result: result,
       response: responseType,
-      data: MDResponseData<T>.fromJson(json["data"]),
+      data: MDResponseData<T>.fromMap(json["data"]),
     );
   }
 
@@ -42,6 +42,8 @@ class MDEntityResponse<T> extends MDResponse {
 
 class MDCollectionResponse<T> extends MDResponse {
   final List<MDResponseData<T>> data;
+
+  const MDCollectionResponse({required super.result, required super.response, required this.data});
 
   factory MDCollectionResponse.fromJson(Map<String, dynamic> json) {
     final result = json["result"] as String;
@@ -61,12 +63,10 @@ class MDCollectionResponse<T> extends MDResponse {
       result: result,
       response: responseType,
       data: (json["data"] as List<Map<String, dynamic>>)
-          .map((e) => MDResponseData<T>.fromJson(e))
+          .map((e) => MDResponseData<T>.fromMap(e))
           .toList(),
     );
   }
-
-  const MDCollectionResponse({required super.result, required super.response, required this.data});
 }
 
 class MDResponseData<T> {
@@ -82,30 +82,21 @@ class MDResponseData<T> {
     required this.relationships,
   });
 
-  factory MDResponseData.fromJson(Map<String, dynamic> json) {
-    final type = $enumDecode(_$EntityTypeEnumMap, json["type"]);
-    late T attributes;
-
-    if (type == EntityType.manga) {
-      attributes = MangaAttributes.fromJson(json["attributes"]) as T;
-    } else if (type == EntityType.tag) {
-      attributes = TagAttributes.fromJson(json["attributes"]) as T;
-    } else {
-      throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
-    }
+  factory MDResponseData.fromMap(Map<String, dynamic> map) {
+    final type = EntityType.fromJsonValue(map["type"] as String);
+    final attributes = mapToEntity<T>(map["attributes"], type);
 
     return MDResponseData(
-      id: json["id"] as String,
+      id: map["id"] as String,
       type: type,
       attributes: attributes,
-      relationships: (json["relationships"] as List<dynamic>)
+      relationships: (map["relationships"] as List<dynamic>)
           .map((e) => Relationship.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
 }
 
-@JsonEnum()
 enum EntityType {
   manga,
   chapter,
@@ -113,29 +104,43 @@ enum EntityType {
   artist,
   user,
   tag,
-  @JsonValue("cover_art")
   coverArt,
-  @JsonValue("scanlation_group")
   scanlationGroup,
-  @JsonValue("based_on")
-  basedOn,
-}
+  basedOn;
 
-@JsonSerializable()
-class Relationship {
-  final String id;
-  final EntityType type;
+  static Map<EntityType, String> get jsonValues => {
+        manga: "manga",
+        chapter: "chapter",
+        author: "author",
+        artist: "artist",
+        user: "user",
+        tag: "tag",
+        coverArt: "cover_art",
+        scanlationGroup: "scanlation_group",
+        basedOn: "based_on",
+      };
 
-  Relationship({
-    required this.id,
-    required this.type,
-  });
-
-  factory Relationship.fromJson(Map<String, dynamic> json) => _$RelationshipFromJson(json);
-}
-
-extension RelationshipList on List<Relationship> {
-  List<Relationship> ofType(EntityType type) {
-    return where((element) => element.type == type).toList();
+  factory EntityType.fromJsonValue(String str) {
+    return jsonValues.entries.firstWhere((e) => e.value == str).key;
   }
+
+  String toJsonValue() => jsonValues[this]!;
+}
+
+T mapToEntity<T>(Map<String, dynamic> map, EntityType type) {
+  late T attributes;
+
+  if (type == EntityType.manga) {
+    attributes = MangaAttributes.fromMap(map) as T;
+  } else if (type == EntityType.author || type == EntityType.artist) {
+    attributes = AuthorAttributes.fromMap(map) as T;
+  } else if (type == EntityType.tag) {
+    attributes = TagAttributes.fromMap(map) as T;
+  } else if (type == EntityType.coverArt) {
+    attributes = CoverArtAttributes.fromMap(map) as T;
+  } else {
+    throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
+  }
+
+  return attributes;
 }

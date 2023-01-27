@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/url.dart";
 
 final mangaDexPod = FutureProvider<MangaDex>((ref) async {
   final database = await ref.watch(isarPod.future);
@@ -11,7 +12,7 @@ final mangaDexPod = FutureProvider<MangaDex>((ref) async {
 });
 
 class MangaDex {
-  static final Uri url = Uri.https("api.mangadex.org");
+  static final url = URL(hostname: "api.mangadex.org", pathSegments: []);
 
   final Client client = Client();
   final RateLimiter rateLimiter = RateLimiter(name: "MangaDex");

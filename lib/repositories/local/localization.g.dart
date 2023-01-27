@@ -49,9 +49,7 @@ int _localizationsEstimateSize(
   {
     for (var i = 0; i < object.values.length; i++) {
       final value = object.values[i];
-      if (value != null) {
-        bytesCount += value.length * 3;
-      }
+      bytesCount += value.length * 3;
     }
   }
   return bytesCount;
@@ -78,15 +76,16 @@ Localizations _localizationsDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Localizations();
-  object.localizations = reader.readObjectList<Locale>(
-        offsets[0],
-        LocaleSchema.deserialize,
-        allOffsets,
-        Locale(),
-      ) ??
-      [];
-  object.values = reader.readStringOrNullList(offsets[1]) ?? [];
+  final object = Localizations(
+    localizations: reader.readObjectList<Locale>(
+          offsets[0],
+          LocaleSchema.deserialize,
+          allOffsets,
+          Locale(),
+        ) ??
+        const [],
+    values: reader.readStringList(offsets[1]) ?? const [],
+  );
   return object;
 }
 
@@ -104,9 +103,9 @@ P _localizationsDeserializeProp<P>(
             allOffsets,
             Locale(),
           ) ??
-          []) as P;
+          const []) as P;
     case 1:
-      return (reader.readStringOrNullList(offset) ?? []) as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
@@ -204,26 +203,8 @@ extension LocalizationsQueryFilter
   }
 
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.elementIsNull(
-        property: r"values",
-      ));
-    });
-  }
-
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
-      valuesElementIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.elementIsNotNull(
-        property: r"values",
-      ));
-    });
-  }
-
-  QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
       valuesElementEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -237,7 +218,7 @@ extension LocalizationsQueryFilter
 
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
       valuesElementGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -253,7 +234,7 @@ extension LocalizationsQueryFilter
 
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
       valuesElementLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -269,8 +250,8 @@ extension LocalizationsQueryFilter
 
   QueryBuilder<Localizations, Localizations, QAfterFilterCondition>
       valuesElementBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -513,11 +494,11 @@ Locale _localeDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Locale();
-  object.language =
-      _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[1])] ??
-          Language.english;
-  object.romanized = reader.readBool(offsets[2]);
+  final object = Locale(
+    language: _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+        Language.none,
+    romanized: reader.readBoolOrNull(offsets[2]) ?? false,
+  );
   return object;
 }
 
@@ -532,27 +513,29 @@ P _localeDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 1:
       return (_LocalelanguageValueEnumMap[reader.readByteOrNull(offset)] ??
-          Language.english) as P;
+          Language.none) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
 }
 
 const _LocalelanguageEnumValueMap = {
-  "english": 0,
-  "japanese": 1,
-  "simpleChinese": 2,
-  "traditionalChinese": 3,
-  "korean": 4,
+  "none": 0,
+  "english": 1,
+  "japanese": 2,
+  "simpleChinese": 3,
+  "traditionalChinese": 4,
+  "korean": 5,
 };
 const _LocalelanguageValueEnumMap = {
-  0: Language.english,
-  1: Language.japanese,
-  2: Language.simpleChinese,
-  3: Language.traditionalChinese,
-  4: Language.korean,
+  0: Language.none,
+  1: Language.english,
+  2: Language.japanese,
+  3: Language.simpleChinese,
+  4: Language.traditionalChinese,
+  5: Language.korean,
 };
 
 extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {

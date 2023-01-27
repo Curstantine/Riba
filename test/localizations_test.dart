@@ -3,15 +3,15 @@ import "package:riba/repositories/local/localization.dart";
 
 void main() {
   test("String.toLocale", () {
-    expect("en".toLocale(), Locale.en);
+    expect(Locale.fromJsonValue("en"), Locale.en);
 
-    expect("ja".toLocale(), Locale.ja);
-    expect("zh".toLocale(), Locale.zh);
-    expect("zh-hk".toLocale(), Locale.zhHk);
+    expect(Locale.fromJsonValue("ja"), Locale.ja);
+    expect(Locale.fromJsonValue("zh"), Locale.zh);
+    expect(Locale.fromJsonValue("zh-hk"), Locale.zhHk);
 
-    expect("ja-ro".toLocale(), Locale.jaRo);
-    expect("zh-ro".toLocale(), Locale.zhRo);
-    expect("zh-hk-ro".toLocale(), Locale.zhHkRo);
+    expect(Locale.fromJsonValue("ja-ro"), Locale.jaRo);
+    expect(Locale.fromJsonValue("zh-ro"), Locale.zhRo);
+    expect(Locale.fromJsonValue("zh-hk-ro"), Locale.zhHkRo);
   });
 
   test("Localizations.toLocalizations", () {
@@ -21,7 +21,7 @@ void main() {
       "zh": "Chinese",
     };
 
-    final localizations = locales.toLocalizations();
+    final localizations = Localizations.fromMap(locales);
     expect(localizations.get(Locale.en), "English");
     expect(localizations.get(Locale.ja), "Japanese");
     expect(localizations.get(Locale.zh), "Chinese");

@@ -1,22 +1,55 @@
-import "package:json_annotation/json_annotation.dart";
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+
+import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/tag.dart";
 
 import "general.dart";
 
-part "tag.g.dart";
-
-@JsonSerializable()
 class TagAttributes {
   final Map<String, String> name;
+  final TagGroup group;
+  final Map<String, String> description;
 
   const TagAttributes({
     required this.name,
+    required this.group,
+    required this.description,
   });
 
-  factory TagAttributes.fromJson(Map<String, dynamic> json) => _$TagAttributesFromJson(json);
-
-  static List<MDResponseData<TagAttributes>> fromList(List<dynamic> list) {
-    return list
-        .map((e) => MDResponseData<TagAttributes>.fromJson(e as Map<String, dynamic>))
-        .toList();
+  factory TagAttributes.fromMap(Map<String, dynamic> map) {
+    return TagAttributes(
+      name: map["name"] as Map<String, String>,
+      group: TagGroup.fromJsonValue(map["group"]),
+      description: map["description"] as Map<String, String>,
+    );
   }
+}
+
+extension ToTag on MDResponseData<TagAttributes> {
+  Tag toTag() => Tag(
+        id: id,
+        name: Localizations.fromMap(attributes.name),
+        description: Localizations.fromMap(attributes.description),
+        group: attributes.group,
+      );
+}
+
+enum TagGroup {
+  content,
+  format,
+  genre,
+  theme;
+
+  static Map<TagGroup, String> get jsonValues => {
+        content: "content",
+        format: "format",
+        genre: "genre",
+        theme: "theme",
+      };
+
+  static TagGroup fromJsonValue(String str) {
+    return jsonValues.entries.firstWhere((e) => e.value == str).key;
+  }
+
+  String toJsonValue() => jsonValues[this]!;
 }

@@ -1,15 +1,20 @@
-import "package:json_annotation/json_annotation.dart";
+import "dart:convert";
 
-part "error.g.dart";
-
-@JsonSerializable()
 class MDError {
   final String title;
   final int status;
 
   const MDError({required this.title, required this.status});
 
-  factory MDError.fromJson(Map<String, dynamic> json) => _$MDErrorFromJson(json);
+  factory MDError.fromMap(Map<String, dynamic> map) {
+    return MDError(
+      title: map["title"] as String,
+      status: map["status"] as int,
+    );
+  }
+
+  factory MDError.fromJson(String source) =>
+      MDError.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class MDException implements Exception {

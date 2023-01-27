@@ -12,7 +12,7 @@ dependencies:
 
     animations: ^2.0.7
     dynamic_color: ^1.5.4
-    json_annotation: ^4.7.0
+    logging: ^1.1.0
 
     http: ^0.13.5
     path_provider: ^2.0.11
@@ -31,7 +31,6 @@ dev_dependencies:
 
     flutter_lints: ^2.0.0
     build_runner: ^2.3.3
-    json_serializable: ^6.5.4
 
     isar_generator: ^3.0.5
     hive_generator: ^2.0.0

@@ -17,38 +17,55 @@ part "localization.g.dart";
 /// ```
 @embedded
 class Localizations {
-  List<Locale> localizations = [];
-  List<String?> values = [];
+  List<Locale> localizations;
+  List<String> values;
+
+  Localizations({this.localizations = const [], this.values = const []});
 
   String? get(Locale locale) {
     final index = localizations.indexOf(locale);
     if (index == -1) return null;
     return values[index];
   }
+
+  factory Localizations.fromMap(Map<String, String> map) {
+    final List<Locale> localizations = [];
+    final List<String> values = [];
+
+    map.forEach((key, value) {
+      try {
+        localizations.add(Locale.fromJsonValue(key));
+        values.add(value);
+      } catch (e) {
+        log("Ignoring $key: ${e.toString()}", name: "Localizations.toLocalizations");
+      }
+    });
+
+    if (localizations.length != values.length) {
+      throw Exception("The length of localizations and values are not the same.");
+    }
+
+    return Localizations(localizations: localizations, values: values);
+  }
 }
 
 @embedded
 class Locale {
-  Locale();
-
   @Enumerated(EnumType.ordinal)
-  late Language language;
-  late bool romanized;
+  Language language;
+  bool romanized;
 
-  factory Locale.withItem(Language language, bool romanized) {
-    return Locale()
-      ..language = language
-      ..romanized = romanized;
+  Locale({this.language = Language.none, this.romanized = false});
+
+  factory Locale.fromJsonValue(String locale) {
+    final isRomanized = locale.endsWith("-ro");
+    final language = Language.values.firstWhere(
+      (e) => isRomanized ? e.isoCode == locale.replaceFirst("-ro", "") : e.isoCode == locale,
+      orElse: () => throw Exception("The language code is not supported."),
+    );
+
+    return Locale(language: language, romanized: isRomanized);
   }
-
-  static Locale en = Locale.withItem(Language.english, false);
-  static Locale ja = Locale.withItem(Language.japanese, false);
-  static Locale zh = Locale.withItem(Language.simpleChinese, false);
-  static Locale zhHk = Locale.withItem(Language.traditionalChinese, false);
-
-  static Locale jaRo = Locale.withItem(Language.japanese, true);
-  static Locale zhRo = Locale.withItem(Language.simpleChinese, true);
-  static Locale zhHkRo = Locale.withItem(Language.traditionalChinese, true);
 
   @override
   operator ==(Object other) {
@@ -60,10 +77,20 @@ class Locale {
 
   @override
   int get hashCode => language.hashCode ^ romanized.hashCode;
+
+  static Locale en = Locale(language: Language.english, romanized: false);
+  static Locale ja = Locale(language: Language.japanese, romanized: false);
+  static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
+  static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
+
+  static Locale jaRo = Locale(language: Language.japanese, romanized: true);
+  static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
+  static Locale zhHkRo = Locale(language: Language.traditionalChinese, romanized: true);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
 enum Language {
+  none("none"),
   english("en"),
   japanese("ja"),
   simpleChinese("zh"),
@@ -72,40 +99,4 @@ enum Language {
 
   final String isoCode;
   const Language(this.isoCode);
-}
-
-extension ToLocalizations on Map<String, String> {
-  Localizations toLocalizations() {
-    final locales = Localizations();
-
-    forEach((key, value) {
-      try {
-        locales.localizations.add(key.toLocale());
-        locales.values.add(value);
-      } catch (e) {
-        log("Ignoring $key: ${e.toString()}", name: "Localizations.toLocalizations");
-      }
-    });
-
-    if (locales.localizations.length != locales.values.length) {
-      throw Exception("The length of localizations and values are not the same.");
-    }
-
-    return locales;
-  }
-}
-
-extension ToLocale on String {
-  /// Converts a string into a language code.
-  ///
-  /// Throws an exception if the language code is not supported.
-  Locale toLocale() {
-    final isRomanized = endsWith("-ro");
-    final language = Language.values.firstWhere(
-      (e) => isRomanized ? e.isoCode == replaceFirst("-ro", "") : e.isoCode == this,
-      orElse: () => throw Exception("The language code is not supported."),
-    );
-
-    return Locale.withItem(language, isRomanized);
-  }
 }
