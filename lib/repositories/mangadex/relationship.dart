@@ -32,6 +32,15 @@ class Relationship<T> {
       attributes: attributes,
     );
   }
+
+  Relationship<N> cast<N>() {
+    return Relationship<N>(
+      id: id,
+      type: type,
+      related: related,
+      attributes: attributes as N,
+    );
+  }
 }
 
 enum MangaRelationType {
@@ -79,7 +88,7 @@ enum MangaRelationType {
 }
 
 extension RelationshipList on List<Relationship> {
-  List<Relationship> ofType(EntityType type) {
-    return where((element) => element.type == type).toList();
+  List<Relationship<T>> ofType<T>(EntityType type) {
+    return where((e) => e.type == type).map((e) => e.cast<T>()).toList();
   }
 }

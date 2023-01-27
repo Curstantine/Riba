@@ -60,6 +60,11 @@ const MangaSchema = CollectionSchema(
       name: r"titles",
       type: IsarType.object,
       target: r"Localizations",
+    ),
+    r"version": PropertySchema(
+      id: 8,
+      name: r"version",
+      type: IsarType.long,
     )
   },
   estimateSize: _mangaEstimateSize,
@@ -162,6 +167,7 @@ void _mangaSerialize(
     LocalizationsSchema.serialize,
     object.titles,
   );
+  writer.writeLong(offsets[8], object.version);
 }
 
 Manga _mangaDeserialize(
@@ -200,6 +206,7 @@ Manga _mangaDeserialize(
           allOffsets,
         ) ??
         Localizations(),
+    version: reader.readLong(offsets[8]),
   );
   return object;
 }
@@ -248,6 +255,8 @@ P _mangaDeserializeProp<P>(
             allOffsets,
           ) ??
           Localizations()) as P;
+    case 8:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
@@ -1244,6 +1253,58 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> versionEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> versionGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> versionLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> versionBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"version",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension MangaQueryObject on QueryBuilder<Manga, Manga, QFilterCondition> {
@@ -1290,6 +1351,18 @@ extension MangaQuerySortBy on QueryBuilder<Manga, Manga, QSortBy> {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> sortByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> sortByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.desc);
+    });
+  }
 }
 
 extension MangaQuerySortThenBy on QueryBuilder<Manga, Manga, QSortThenBy> {
@@ -1314,6 +1387,18 @@ extension MangaQuerySortThenBy on QueryBuilder<Manga, Manga, QSortThenBy> {
   QueryBuilder<Manga, Manga, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isarId", Sort.desc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> thenByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> thenByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.desc);
     });
   }
 }
@@ -1341,6 +1426,12 @@ extension MangaQueryWhereDistinct on QueryBuilder<Manga, Manga, QDistinct> {
   QueryBuilder<Manga, Manga, QDistinct> distinctByTags() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"tags");
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QDistinct> distinctByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"version");
     });
   }
 }
@@ -1398,6 +1489,12 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
   QueryBuilder<Manga, Localizations, QQueryOperations> titlesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"titles");
+    });
+  }
+
+  QueryBuilder<Manga, int, QQueryOperations> versionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"version");
     });
   }
 }

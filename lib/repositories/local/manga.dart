@@ -17,6 +17,7 @@ class Manga {
   late List<String> artists;
   late List<String> tags;
   late Locale originalLocale;
+  late int version;
 
   Manga({
     required this.id,
@@ -27,5 +28,6 @@ class Manga {
     required this.artists,
     required this.tags,
     required this.originalLocale,
+    required this.version,
   });
 }

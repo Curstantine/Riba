@@ -2,6 +2,8 @@ import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/general.dart";
 
+import "relationship.dart";
+
 class AuthorAttributes {
   final String name;
   final Map<String, String> biography;
@@ -20,6 +22,7 @@ class AuthorAttributes {
   final String? weibo;
   final String? naver;
   final String? website;
+  final int version;
 
   const AuthorAttributes({
     required this.name,
@@ -39,6 +42,7 @@ class AuthorAttributes {
     this.weibo,
     this.naver,
     this.website,
+    required this.version,
   });
 
   factory AuthorAttributes.fromMap(Map<String, dynamic> map) {
@@ -60,6 +64,7 @@ class AuthorAttributes {
       weibo: map["weibo"] as String?,
       naver: map["naver"] as String?,
       website: map["website"] as String?,
+      version: map["version"] as int,
     );
   }
 }
@@ -70,5 +75,20 @@ extension ToAuthor on MDResponseData<AuthorAttributes> {
         createdAt: attributes.createdAt,
         description: Localizations.fromMap(attributes.biography),
         name: attributes.name,
+        version: attributes.version,
       );
+}
+
+extension ToRelAuthor on Relationship<AuthorAttributes> {
+  Author toAuthor() {
+    if (attributes == null) throw Exception("Attributes is null");
+
+    return Author(
+      id: id,
+      createdAt: attributes!.createdAt,
+      description: Localizations.fromMap(attributes!.biography),
+      name: attributes!.name,
+      version: attributes!.version,
+    );
+  }
 }

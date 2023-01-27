@@ -2,11 +2,15 @@ import "dart:convert";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
+import "package:riba/repositories/local/author.dart";
+import "package:riba/repositories/mangadex/author.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/utils/hash.dart";
 
+import "cover_art.dart";
 import "general.dart";
 import "mangadex.dart";
 import "relationship.dart";
@@ -47,10 +51,14 @@ class MDMangaRepo {
   }
 
   void insertMeta(MDMangaEntity response, Manga manga) {
-    final authorRels = response.data.relationships.ofType(EntityType.author) +
-        response.data.relationships.ofType(EntityType.artist);
+    final authors = response.data.relationships.ofType<AuthorAttributes>(EntityType.author) +
+        response.data.relationships.ofType<AuthorAttributes>(EntityType.artist);
+
+    final coverArts = response.data.relationships.ofType<CoverArtAttributes>(EntityType.coverArt);
 
     database.writeTxn(() async {
+      database.authors.putAll(authors.map((e) => e.toAuthor()).toList());
+      database.coverArts.putAll(coverArts.map((e) => e.toCoverArt()).toList());
       database.manga.put(manga);
     });
   }
@@ -62,6 +70,7 @@ class MangaAttributes {
   final Map<String, String> description;
   final String originalLanguage;
   final List<MDResponseData<TagAttributes>> tags;
+  final int version;
 
   const MangaAttributes({
     required this.title,
@@ -69,6 +78,7 @@ class MangaAttributes {
     required this.description,
     required this.tags,
     required this.originalLanguage,
+    required this.version,
   });
 
   factory MangaAttributes.fromMap(Map<String, dynamic> map) {
@@ -82,6 +92,7 @@ class MangaAttributes {
       tags: (map["tags"] as List<dynamic>)
           .map((e) => MDResponseData<TagAttributes>.fromMap(e))
           .toList(),
+      version: map["version"] as int,
     );
   }
 }
@@ -97,6 +108,7 @@ extension ToManga on MDResponseData<MangaAttributes> {
       artists: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
       tags: attributes.tags.map((e) => e.id).toList(),
       originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
+      version: attributes.version,
     );
   }
 }

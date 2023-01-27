@@ -9,11 +9,13 @@ class TagAttributes {
   final Map<String, String> name;
   final TagGroup group;
   final Map<String, String> description;
+  final int version;
 
   const TagAttributes({
     required this.name,
     required this.group,
     required this.description,
+    required this.version,
   });
 
   factory TagAttributes.fromMap(Map<String, dynamic> map) {
@@ -21,6 +23,7 @@ class TagAttributes {
       name: map["name"] as Map<String, String>,
       group: TagGroup.fromJsonValue(map["group"]),
       description: map["description"] as Map<String, String>,
+      version: map["version"] as int,
     );
   }
 }
@@ -31,6 +34,7 @@ extension ToTag on MDResponseData<TagAttributes> {
         name: Localizations.fromMap(attributes.name),
         description: Localizations.fromMap(attributes.description),
         group: attributes.group,
+        version: attributes.version,
       );
 }
 

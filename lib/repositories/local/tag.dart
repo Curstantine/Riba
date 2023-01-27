@@ -12,6 +12,8 @@ class Tag {
 
   late Localizations name;
   late Localizations description;
+  late int version;
+
   @Enumerated(EnumType.ordinal)
   late TagGroup group;
 
@@ -20,5 +22,6 @@ class Tag {
     required this.name,
     required this.description,
     required this.group,
+    required this.version,
   });
 }

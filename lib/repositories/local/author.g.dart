@@ -43,6 +43,11 @@ const AuthorSchema = CollectionSchema(
       name: r"socials",
       type: IsarType.objectList,
       target: r"AuthorSocial",
+    ),
+    r"version": PropertySchema(
+      id: 5,
+      name: r"version",
+      type: IsarType.long,
     )
   },
   estimateSize: _authorEstimateSize,
@@ -106,6 +111,7 @@ void _authorSerialize(
     AuthorSocialSchema.serialize,
     object.socials,
   );
+  writer.writeLong(offsets[5], object.version);
 }
 
 Author _authorDeserialize(
@@ -124,6 +130,7 @@ Author _authorDeserialize(
         Localizations(),
     id: reader.readString(offsets[2]),
     name: reader.readString(offsets[3]),
+    version: reader.readLong(offsets[5]),
   );
   object.socials = reader.readObjectList<AuthorSocial>(
         offsets[4],
@@ -163,6 +170,8 @@ P _authorDeserializeProp<P>(
             AuthorSocial(),
           ) ??
           []) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
@@ -699,6 +708,59 @@ extension AuthorQueryFilter on QueryBuilder<Author, Author, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Author, Author, QAfterFilterCondition> versionEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Author, Author, QAfterFilterCondition> versionGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Author, Author, QAfterFilterCondition> versionLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"version",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Author, Author, QAfterFilterCondition> versionBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"version",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension AuthorQueryObject on QueryBuilder<Author, Author, QFilterCondition> {
@@ -755,6 +817,18 @@ extension AuthorQuerySortBy on QueryBuilder<Author, Author, QSortBy> {
       return query.addSortBy(r"name", Sort.desc);
     });
   }
+
+  QueryBuilder<Author, Author, QAfterSortBy> sortByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Author, Author, QAfterSortBy> sortByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.desc);
+    });
+  }
 }
 
 extension AuthorQuerySortThenBy on QueryBuilder<Author, Author, QSortThenBy> {
@@ -805,6 +879,18 @@ extension AuthorQuerySortThenBy on QueryBuilder<Author, Author, QSortThenBy> {
       return query.addSortBy(r"name", Sort.desc);
     });
   }
+
+  QueryBuilder<Author, Author, QAfterSortBy> thenByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Author, Author, QAfterSortBy> thenByVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"version", Sort.desc);
+    });
+  }
 }
 
 extension AuthorQueryWhereDistinct on QueryBuilder<Author, Author, QDistinct> {
@@ -825,6 +911,12 @@ extension AuthorQueryWhereDistinct on QueryBuilder<Author, Author, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"name", caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Author, Author, QDistinct> distinctByVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"version");
     });
   }
 }
@@ -863,6 +955,12 @@ extension AuthorQueryProperty on QueryBuilder<Author, Author, QQueryProperty> {
   QueryBuilder<Author, List<AuthorSocial>, QQueryOperations> socialsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"socials");
+    });
+  }
+
+  QueryBuilder<Author, int, QQueryOperations> versionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"version");
     });
   }
 }

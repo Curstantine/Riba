@@ -13,12 +13,14 @@ class Author {
   late Localizations description;
   late List<AuthorSocial> socials;
   late DateTime createdAt;
+  late int version;
 
   Author({
     required this.id,
     required this.name,
     required this.description,
     required this.createdAt,
+    required this.version,
   });
 }
 
