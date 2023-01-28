@@ -57,11 +57,14 @@ class Locale {
 
   Locale({this.language = Language.none, this.romanized = false});
 
+  /// Returns a locale based on a string.
+  ///
+  /// Throws an exception if the language is not supported.
   factory Locale.fromJsonValue(String locale) {
     final isRomanized = locale.endsWith("-ro");
     final language = Language.values.firstWhere(
       (e) => isRomanized ? e.isoCode == locale.replaceFirst("-ro", "") : e.isoCode == locale,
-      orElse: () => throw Exception("The language code is not supported."),
+      orElse: () => throw Exception("Language $locale is not supported."),
     );
 
     return Locale(language: language, romanized: isRomanized);

@@ -6,8 +6,10 @@ import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/author.dart";
+import "package:riba/repositories/local/tag.dart";
 import "package:riba/repositories/mangadex/author.dart";
 import "package:riba/repositories/rate_limiter.dart";
+import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/hash.dart";
 
 import "cover_art.dart";
@@ -35,31 +37,61 @@ class MDMangaRepo {
     EntityType.coverArt.toJsonValue(),
   ];
 
-  Future<Manga> getManga(String id) async {
+  Future<MangaData> getManga(String id) async {
     final inDB = await database.manga.get(fastHash(id));
-    if (inDB != null) return inDB;
+
+    if (inDB != null) {
+      final data = await Future.wait([
+        database.authors.getAll(inDB.artists.map((e) => fastHash(e)).toList()),
+        database.authors.getAll(inDB.authors.map((e) => fastHash(e)).toList()),
+        database.tags.getAll(inDB.tags.map((e) => fastHash(e)).toList()),
+        inDB.usedCover != null
+            ? database.covers.get(fastHash(inDB.usedCover!))
+            : Future.value(null),
+      ]);
+
+      return MangaData(
+        manga: inDB,
+        authors: data.whereType<Author>().where((e) => inDB.authors.contains(e.id)).toList(),
+        artists: data.whereType<Author>().where((e) => inDB.artists.contains(e.id)).toList(),
+        tags: data.whereType<Tag>().toList(),
+        cover: data.whereType<CoverArt?>().first,
+      );
+    }
 
     await rateLimiter.wait("/manga:GET");
     final reqUrl = url.addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
     final response = MDMangaEntity.fromJson(jsonDecode(request.body));
-    final manga = response.data.toManga();
 
-    if (response.result == "ok") insertMeta(response, manga);
-    return manga;
+    final internalMangaData = InternalMangaData(
+        manga: response.data.toManga(),
+        authors: response.data.relationships
+            .ofType<AuthorAttributes>(EntityType.author)
+            .map((e) => e.toAuthor())
+            .toList(),
+        artists: response.data.relationships
+            .ofType<AuthorAttributes>(EntityType.artist)
+            .map((e) => e.toAuthor())
+            .toList(),
+        covers: response.data.relationships
+            .ofType<CoverArtAttributes>(EntityType.coverArt)
+            .map((e) => e.toCoverArt())
+            .toList(),
+        tags: response.data.attributes.tags.map((e) => e.toTag()).toList());
+
+    insertMeta(internalMangaData);
+
+    return internalMangaData.toMangaData();
   }
 
-  void insertMeta(MDMangaEntity response, Manga manga) {
-    final authors = response.data.relationships.ofType<AuthorAttributes>(EntityType.author) +
-        response.data.relationships.ofType<AuthorAttributes>(EntityType.artist);
-
-    final coverArts = response.data.relationships.ofType<CoverArtAttributes>(EntityType.coverArt);
-
+  void insertMeta(InternalMangaData internalMangaData) {
     database.writeTxn(() async {
-      database.authors.putAll(authors.map((e) => e.toAuthor()).toList());
-      database.coverArts.putAll(coverArts.map((e) => e.toCoverArt()).toList());
-      database.manga.put(manga);
+      database.authors.putAll(internalMangaData.authors + internalMangaData.artists);
+      database.covers.putAll(internalMangaData.covers);
+      database.tags.putAll(internalMangaData.tags);
+      database.manga.put(internalMangaData.manga);
     });
   }
 }
@@ -99,6 +131,8 @@ class MangaAttributes {
 
 extension ToManga on MDResponseData<MangaAttributes> {
   Manga toManga() {
+    final covers = relationships.ofType<CoverArtAttributes>(EntityType.coverArt).map((e) => e.id);
+
     return Manga(
       id: id,
       titles: Localizations.fromMap(attributes.title),
@@ -106,6 +140,8 @@ extension ToManga on MDResponseData<MangaAttributes> {
       description: Localizations.fromMap(attributes.description),
       authors: relationships.ofType(EntityType.author).map((e) => e.id).toList(),
       artists: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
+      covers: covers.toList(),
+      usedCover: covers.isEmpty ? null : covers.first,
       tags: attributes.tags.map((e) => e.id).toList(),
       originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
       version: attributes.version,

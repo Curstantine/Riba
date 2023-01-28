@@ -4,7 +4,7 @@ import "localization.dart";
 
 part "cover_art.g.dart";
 
-@collection
+@Collection(accessor: "covers")
 class CoverArt {
   late String id;
   Id get isarId => fastHash(id);

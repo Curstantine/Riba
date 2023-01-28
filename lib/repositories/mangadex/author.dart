@@ -72,9 +72,10 @@ class AuthorAttributes {
 extension ToAuthor on MDResponseData<AuthorAttributes> {
   Author toAuthor() => Author(
         id: id,
-        createdAt: attributes.createdAt,
-        description: Localizations.fromMap(attributes.biography),
         name: attributes.name,
+        description: Localizations.fromMap(attributes.biography),
+        socials: attributes.toAuthorSocials(),
+        createdAt: attributes.createdAt,
         version: attributes.version,
       );
 }
@@ -85,9 +86,10 @@ extension ToRelAuthor on Relationship<AuthorAttributes> {
 
     return Author(
       id: id,
-      createdAt: attributes!.createdAt,
-      description: Localizations.fromMap(attributes!.biography),
       name: attributes!.name,
+      description: Localizations.fromMap(attributes!.biography),
+      socials: attributes!.toAuthorSocials(),
+      createdAt: attributes!.createdAt,
       version: attributes!.version,
     );
   }

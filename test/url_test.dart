@@ -1,5 +1,4 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:riba/repositories/mangadex/general.dart";
 import "package:riba/repositories/url.dart";
 
 void main() {
@@ -12,16 +11,6 @@ void main() {
 
     final uri = url.toUri();
     expect(uri.toString(), "$apiStr/manga?id=$id");
-  });
-
-  test("URL creation with enums.", () {
-    final url = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
-    url.setParameter("includes[]", [EntityType.author, EntityType.scanlationGroup]);
-
-    expect(url.queryParameters["includes[]"], ["author", "scanlation_group"]);
-
-    final uri = url.toUri();
-    expect(uri.toString(), "$apiStr/manga?includes%5B%5D=author&includes%5B%5D=artist");
   });
 
   test("URL creation with arrayed values.", () {

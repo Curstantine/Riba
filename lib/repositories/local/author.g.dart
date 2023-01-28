@@ -130,15 +130,15 @@ Author _authorDeserialize(
         Localizations(),
     id: reader.readString(offsets[2]),
     name: reader.readString(offsets[3]),
+    socials: reader.readObjectList<AuthorSocial>(
+          offsets[4],
+          AuthorSocialSchema.deserialize,
+          allOffsets,
+          AuthorSocial(),
+        ) ??
+        [],
     version: reader.readLong(offsets[5]),
   );
-  object.socials = reader.readObjectList<AuthorSocial>(
-        offsets[4],
-        AuthorSocialSchema.deserialize,
-        allOffsets,
-        AuthorSocial(),
-      ) ??
-      [];
   return object;
 }
 
@@ -1026,11 +1026,11 @@ AuthorSocial _authorSocialDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = AuthorSocial();
-  object.type =
-      _AuthorSocialtypeValueEnumMap[reader.readByteOrNull(offsets[1])] ??
-          AuthorSocialType.twitter;
-  object.value = reader.readString(offsets[2]);
+  final object = AuthorSocial(
+    type: _AuthorSocialtypeValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+        AuthorSocialType.none,
+    value: reader.readStringOrNull(offsets[2]) ?? "",
+  );
   return object;
 }
 
@@ -1045,43 +1045,45 @@ P _authorSocialDeserializeProp<P>(
       return (reader.readLong(offset)) as P;
     case 1:
       return (_AuthorSocialtypeValueEnumMap[reader.readByteOrNull(offset)] ??
-          AuthorSocialType.twitter) as P;
+          AuthorSocialType.none) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
 }
 
 const _AuthorSocialtypeEnumValueMap = {
-  "twitter": 0,
-  "pixiv": 1,
-  "melonBook": 2,
-  "fanBox": 3,
-  "booth": 4,
-  "nicoVideo": 5,
-  "skeb": 6,
-  "fantia": 7,
-  "tumblr": 8,
-  "youtube": 9,
-  "weibo": 10,
-  "naver": 11,
-  "website": 12,
+  "none": 0,
+  "twitter": 1,
+  "pixiv": 2,
+  "melonBook": 3,
+  "fanBox": 4,
+  "booth": 5,
+  "nicoVideo": 6,
+  "skeb": 7,
+  "fantia": 8,
+  "tumblr": 9,
+  "youtube": 10,
+  "weibo": 11,
+  "naver": 12,
+  "website": 13,
 };
 const _AuthorSocialtypeValueEnumMap = {
-  0: AuthorSocialType.twitter,
-  1: AuthorSocialType.pixiv,
-  2: AuthorSocialType.melonBook,
-  3: AuthorSocialType.fanBox,
-  4: AuthorSocialType.booth,
-  5: AuthorSocialType.nicoVideo,
-  6: AuthorSocialType.skeb,
-  7: AuthorSocialType.fantia,
-  8: AuthorSocialType.tumblr,
-  9: AuthorSocialType.youtube,
-  10: AuthorSocialType.weibo,
-  11: AuthorSocialType.naver,
-  12: AuthorSocialType.website,
+  0: AuthorSocialType.none,
+  1: AuthorSocialType.twitter,
+  2: AuthorSocialType.pixiv,
+  3: AuthorSocialType.melonBook,
+  4: AuthorSocialType.fanBox,
+  5: AuthorSocialType.booth,
+  6: AuthorSocialType.nicoVideo,
+  7: AuthorSocialType.skeb,
+  8: AuthorSocialType.fantia,
+  9: AuthorSocialType.tumblr,
+  10: AuthorSocialType.youtube,
+  11: AuthorSocialType.weibo,
+  12: AuthorSocialType.naver,
+  13: AuthorSocialType.website,
 };
 
 extension AuthorSocialQueryFilter
