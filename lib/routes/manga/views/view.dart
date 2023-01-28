@@ -1,8 +1,8 @@
 import "package:flutter/material.dart" hide Locale;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/utils/constants.dart";
@@ -52,15 +52,15 @@ class _MangaViewState extends ConsumerState<MangaView> {
       body: mangadex.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text(error.toString())),
-        data: (data) => FutureBuilder<dynamic>(
+        data: (data) => FutureBuilder<MangaData>(
           future: data.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.hasError) {
-              final error = handleError(snapshot.error!);
+            if (snapshot.hasError || !snapshot.hasData) {
+              final error = handleError(snapshot.error ?? "Data was null without errors.");
 
               return Center(
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -79,7 +79,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
               controller: scrollController,
               child: Column(
                 children: [
-                  detailsHeader(snapshot.data),
+                  detailsHeader(snapshot.data!),
                   const SizedBox(height: 1000),
                 ],
               ),
@@ -90,7 +90,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
     );
   }
 
-  Widget detailsHeader(Manga manga) {
+  Widget detailsHeader(MangaData mangaData) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
 
@@ -138,7 +138,8 @@ class _MangaViewState extends ConsumerState<MangaView> {
               Edges.horizontalMedium.copyWith(top: media.padding.top + 200, bottom: Edges.large),
           constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(manga.titles.get(Locale.en) ?? "fuck", style: theme.textTheme.titleLarge),
+            Text(mangaData.manga.titles.get(Locale.en) ?? "fuck",
+                style: theme.textTheme.titleLarge),
             Text("Kizuna AI", style: theme.textTheme.labelMedium?.withColorAlpha(0.5))
           ]),
         ),
