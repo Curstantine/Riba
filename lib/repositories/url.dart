@@ -45,6 +45,11 @@ class URL {
     return this;
   }
 
+  URL addPathSegments(List<String> segments) {
+    pathSegments.addAll(segments);
+    return this;
+  }
+
   Uri toUri() {
     return Uri(
       scheme: useHttps ? "https" : "http",

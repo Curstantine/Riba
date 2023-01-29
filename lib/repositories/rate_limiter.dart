@@ -1,5 +1,6 @@
 import "dart:developer";
 
+/// Generic rate limiter that could be used to impose limits based on a signature/key.
 class RateLimiter {
   RateLimiter({required this.name});
 

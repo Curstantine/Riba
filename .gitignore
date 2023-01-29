@@ -45,3 +45,6 @@ app.*.map.json
 
 # Isar related
 isar.dll
+
+# Test related
+tmp/
