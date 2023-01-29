@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/material.dart" hide Locale;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:riba/repositories/local/localization.dart";
@@ -16,9 +18,6 @@ class MangaView extends ConsumerStatefulWidget {
 
 class _MangaViewState extends ConsumerState<MangaView> {
   final scrollController = ScrollController();
-  final image = const NetworkImage(
-    "https://cdn.discordapp.com/attachments/403905762692431872/1066705519592607824/9F2FDACC-D07C-418C-A392-BAF23458CBC9.jpg",
-  );
 
   bool isStatusBarDarkened = true;
 
@@ -44,16 +43,16 @@ class _MangaViewState extends ConsumerState<MangaView> {
 
   @override
   Widget build(BuildContext context) {
-    final mangadex = ref.watch(mangaDexPod);
+    final futureDex = ref.watch(mangaDexPod);
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      body: mangadex.when(
+      body: futureDex.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text(error.toString())),
-        data: (data) => FutureBuilder<MangaData>(
-          future: data.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
+        data: (mangadex) => FutureBuilder<MangaData>(
+          future: mangadex.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192"),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(child: CircularProgressIndicator());
@@ -79,7 +78,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
               controller: scrollController,
               child: Column(
                 children: [
-                  detailsHeader(snapshot.data!),
+                  detailsHeader(mangadex, snapshot.data!),
                   const SizedBox(height: 1000),
                 ],
               ),
@@ -90,7 +89,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
     );
   }
 
-  Widget detailsHeader(MangaData mangaData) {
+  Widget detailsHeader(MangaDex mangadex, MangaData mangaData) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
 
@@ -112,23 +111,24 @@ class _MangaViewState extends ConsumerState<MangaView> {
               ],
             ),
           ),
-          child: Image(
-            fit: BoxFit.fitWidth,
-            image: image,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-            loadingBuilder: (context, child, loadingProgress) {
-              final progress = loadingProgress?.expectedTotalBytes != null
-                  ? loadingProgress!.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                  : null;
+          child: FutureBuilder<File>(
+            future: mangadex.covers.getCoverArt(mangaData.manga.id, mangaData.cover!.fileName),
+            builder: (context, snapshot) {
+              Widget? child;
 
-              return AnimatedSwitcher(
-                duration: Durations.normal,
-                child: progress == null
-                    ? SizedBox.expand(child: child)
-                    : SizedBox(
-                        height: media.padding.top + 200,
-                        child: Center(child: CircularProgressIndicator(value: progress))),
-              );
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                child = const CircularProgressIndicator();
+              }
+
+              if (snapshot.hasError) {
+                child = Text(snapshot.error.toString());
+              }
+
+              if (child != null) {
+                return SizedBox(height: media.padding.top + 200, child: Center(child: child));
+              }
+
+              return Image.file(snapshot.data!, fit: BoxFit.cover);
             },
           ),
         ),
@@ -138,9 +138,14 @@ class _MangaViewState extends ConsumerState<MangaView> {
               Edges.horizontalMedium.copyWith(top: media.padding.top + 200, bottom: Edges.large),
           constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(mangaData.manga.titles.get(Locale.en) ?? "fuck",
-                style: theme.textTheme.titleLarge),
-            Text("Kizuna AI", style: theme.textTheme.labelMedium?.withColorAlpha(0.5))
+            Text(
+              mangaData.manga.titles.get(Locale.en) ?? "fuck",
+              style: theme.textTheme.titleLarge,
+            ),
+            Text(
+              (mangaData.authors + mangaData.artists).map((e) => e.name).join(", "),
+              style: theme.textTheme.labelMedium?.withColorAlpha(0.5),
+            )
           ]),
         ),
       ],
