@@ -6,7 +6,7 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/utils/theme.dart";
+import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 
 class MangaView extends ConsumerStatefulWidget {

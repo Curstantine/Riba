@@ -3,13 +3,53 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:hive/hive.dart";
 import "package:riba/utils/constants.dart";
-import "package:riba/utils/settings.dart";
+
+import "settings.dart";
 
 part "theme.g.dart";
 
+class ThemeSettings extends SettingsController<ThemeSettingsData> {
+  @override
+  String id = "theme";
+
+  @override
+  late Box box;
+
+  @override
+  ThemeSettingsData get defaultValue => ThemeSettingsData(
+        id: ThemeId.dynamic,
+        mode: ThemeMode.system,
+      );
+
+  @override
+  Future<void> init() async {
+    Hive.registerAdapter(ThemeIdAdapter());
+    Hive.registerAdapter(ThemeModeAdapter());
+
+    box = await Hive.openBox(id);
+  }
+
+  @override
+  ThemeSettingsData get() {
+    return ThemeSettingsData(
+      id: box.get("id", defaultValue: defaultValue.id),
+      mode: box.get("mode", defaultValue: defaultValue.mode),
+    );
+  }
+
+  @override
+  void save(ThemeSettingsData data) {
+    box.put("id", data.id);
+    box.put("mode", data.mode);
+  }
+}
+
 class ThemeManager with ChangeNotifier {
-  static late ThemeManager instance;
-  ThemeManager._internal({required this.id, required this.mode}) {
+  static bool _initialized = false;
+  static get instance => Settings.instance.theme;
+
+  ThemeManager._internal({required this.id, required this.mode, required this.settings}) {
+    _initialized = true;
     addListener(onChange);
   }
 
@@ -25,17 +65,24 @@ class ThemeManager with ChangeNotifier {
     }
   }
 
-  static Future<void> init() async {
-    instance = ThemeManager._internal(
-      id: Settings.instance.data.themeId,
-      mode: Settings.instance.data.themeMode,
-    );
+  static Future<ThemeManager> init() async {
+    if (_initialized) throw Exception("ThemeManager is already initialized.");
 
-    await instance.refresh();
+    final settingsFactory = ThemeSettings();
+    await settingsFactory.init();
+
+    // await instance.refresh();
+
+    return ThemeManager._internal(
+      id: settingsFactory.get().id,
+      mode: settingsFactory.get().mode,
+      settings: settingsFactory,
+    );
   }
 
-  late ThemeId id;
-  late ThemeMode mode;
+  ThemeId id;
+  ThemeMode mode;
+  ThemeSettings settings;
   late ColorScheme scheme;
 
   /// Stops the changes done by [setSystemOverlayStyles] whenever [refresh] | [onChange] is called.
@@ -117,6 +164,13 @@ enum ThemeId {
 
   @HiveField(1)
   lavender,
+}
+
+class ThemeSettingsData {
+  ThemeSettingsData({required this.id, required this.mode});
+
+  ThemeId id;
+  ThemeMode mode;
 }
 
 extension ToThemeMode on Brightness {

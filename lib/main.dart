@@ -1,20 +1,15 @@
 import "package:flutter/material.dart" hide Router;
 import "package:hive_flutter/hive_flutter.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:riba/settings/theme.dart";
 import "package:riba/utils/router.dart";
-import "package:riba/utils/settings.dart";
-import "package:riba/utils/theme.dart";
+import "package:riba/settings/settings.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Hive and its adapters
   await Hive.initFlutter();
-  Hive.registerAdapter(ThemeIdAdapter());
-  Hive.registerAdapter(ThemeModeAdapter());
-
   await Settings.init();
-  await ThemeManager.init();
 
   runApp(const ProviderScope(child: App()));
 }
@@ -42,8 +37,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: ThemeManager.instance.mode,
-      theme: ThemeManager.instance.theme,
+      themeMode: Settings.instance.theme.mode,
+      theme: Settings.instance.theme.theme,
       debugShowCheckedModeBanner: false,
       initialRoute: Router.home,
       onGenerateRoute: Router.onGenerateRoute,
