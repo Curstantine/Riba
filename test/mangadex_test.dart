@@ -22,7 +22,7 @@ void main() async {
   tearDown(() async {
     await database.writeTxn(() async => await database.clear());
     try {
-      // await tempDirectory.delete(recursive: true);
+      await tempDirectory.delete(recursive: true);
     } on FileSystemException {
       log("Failed to delete the temp directory", name: "MangaDexTest", level: Level.SHOUT.value);
     }
