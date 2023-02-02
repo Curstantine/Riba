@@ -50,12 +50,24 @@ class URL {
     return this;
   }
 
+  URL asRef() {
+    return copyWith(
+      useHttps: useHttps,
+      hostname: hostname,
+      pathSegments: List.from(pathSegments),
+      queryParameters: Map.from(queryParameters),
+    );
+  }
+
   Uri toUri() {
     return Uri(
       scheme: useHttps ? "https" : "http",
       host: hostname,
       pathSegments: pathSegments,
-      queryParameters: queryParameters,
+      queryParameters: queryParameters.isEmpty ? null : queryParameters,
     );
   }
+
+  @override
+  String toString() => toUri().toString();
 }

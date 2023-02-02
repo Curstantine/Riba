@@ -1,5 +1,6 @@
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/repositories/mangadex/tag.dart";
+import "package:riba/repositories/url.dart";
 
 import "author.dart";
 import "cover_art.dart";
@@ -16,12 +17,18 @@ abstract class MDResponse {
 class MDEntityResponse<T> extends MDResponse {
   final MDResponseData<T> data;
 
-  factory MDEntityResponse.fromJson(Map<String, dynamic> json) {
+  const MDEntityResponse({
+    required super.result,
+    required super.response,
+    required this.data,
+  });
+
+  factory MDEntityResponse.fromJson(Map<String, dynamic> json, {URL? url}) {
     final result = json["result"] as String;
 
     if (result == "error") {
-      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
-      throw MDException(errors);
+      final errors = MDError.fromMap((json["errors"] as List<dynamic>)[0]);
+      throw MDException(errors, url: url);
     }
 
     final responseType = json["response"] as String;
@@ -36,21 +43,23 @@ class MDEntityResponse<T> extends MDResponse {
       data: MDResponseData<T>.fromMap(json["data"]),
     );
   }
-
-  const MDEntityResponse({required super.result, required super.response, required this.data});
 }
 
 class MDCollectionResponse<T> extends MDResponse {
   final List<MDResponseData<T>> data;
 
-  const MDCollectionResponse({required super.result, required super.response, required this.data});
+  const MDCollectionResponse({
+    required super.result,
+    required super.response,
+    required this.data,
+  });
 
-  factory MDCollectionResponse.fromJson(Map<String, dynamic> json) {
+  factory MDCollectionResponse.fromJson(Map<String, dynamic> json, {URL? url}) {
     final result = json["result"] as String;
 
     if (result == "error") {
-      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
-      throw MDException(errors);
+      final errors = MDError.fromMap((json["errors"] as List<dynamic>)[0]);
+      throw MDException(errors, url: url);
     }
 
     final responseType = json["response"] as String;

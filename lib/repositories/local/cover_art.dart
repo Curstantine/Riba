@@ -4,6 +4,11 @@ import "localization.dart";
 
 part "cover_art.g.dart";
 
+/// CoverArt model to be stored in the local database.
+///
+/// ### Note
+/// This model doesn't implement an eq operator, as it is impossible to do that
+/// without losing performance. Instead, use the [isLooselyEqual] method.
 @Collection(accessor: "covers")
 class CoverArt {
   late String id;
@@ -27,4 +32,15 @@ class CoverArt {
     required this.updatedAt,
     required this.version,
   });
+
+  /// Checks if the given [CoverArt] has the same [id] and the [version] as this.
+  bool isLooselyEqual(CoverArt other) {
+    return id == other.id && version == other.version;
+  }
+
+  @override
+  // ignore: hash_and_equals
+  operator ==(Object other) {
+    throw UnimplementedError();
+  }
 }

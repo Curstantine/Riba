@@ -1,4 +1,4 @@
-import "dart:convert";
+import "package:riba/repositories/url.dart";
 
 class MDError {
   final String title;
@@ -12,14 +12,12 @@ class MDError {
       status: map["status"] as int,
     );
   }
-
-  factory MDError.fromJson(String source) =>
-      MDError.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class MDException implements Exception {
-  const MDException(this.response);
+  const MDException(this.response, {this.url});
   final MDError response;
+  final URL? url;
 
   get title => response.title;
   get status => response.status;

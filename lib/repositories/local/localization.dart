@@ -15,6 +15,10 @@ part "localization.g.dart";
 /// Locale.RomanizedJapanese -> "Romanized Japanese Title"
 /// localizations[0] = Locale.English && values[0] = "English Title"
 /// ```
+///
+/// ### Note
+/// This model doesn't implement an eq operator, as it is impossible to do that
+/// without losing performance.
 @embedded
 class Localizations {
   List<Locale> localizations;
@@ -26,6 +30,18 @@ class Localizations {
     final index = localizations.indexOf(locale);
     if (index == -1) return null;
     return values[index];
+  }
+
+  /// Returns the preferred localization based on the list of locales.
+  ///
+  /// If the preferred locale is not found, the first localization is returned.
+  String getPreferred(List<Locale> locales) {
+    for (final locale in locales) {
+      final loc = get(locale);
+      if (loc != null) return loc;
+    }
+
+    return values.first;
   }
 
   factory Localizations.fromMap(Map<String, String> map) {
@@ -46,6 +62,12 @@ class Localizations {
     }
 
     return Localizations(localizations: localizations, values: values);
+  }
+
+  @override
+  // ignore: hash_and_equals
+  operator ==(Object other) {
+    throw UnimplementedError();
   }
 }
 
@@ -71,15 +93,15 @@ class Locale {
   }
 
   @override
-  operator ==(Object other) {
-    if (other is Locale) {
-      return language == other.language && romanized == other.romanized;
-    }
-    return false;
-  }
+  int get hashCode => language.hashCode ^ romanized.hashCode;
 
   @override
-  int get hashCode => language.hashCode ^ romanized.hashCode;
+  operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Locale &&
+          runtimeType == other.runtimeType &&
+          language == other.language &&
+          romanized == other.romanized);
 
   static Locale en = Locale(language: Language.english, romanized: false);
   static Locale ja = Locale(language: Language.japanese, romanized: false);

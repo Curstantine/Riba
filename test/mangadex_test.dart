@@ -22,16 +22,19 @@ void main() async {
   tearDown(() async {
     await database.writeTxn(() async => await database.clear());
     try {
-      await tempDirectory.delete(recursive: true);
+      // await tempDirectory.delete(recursive: true);
     } on FileSystemException {
       log("Failed to delete the temp directory", name: "MangaDexTest", level: Level.SHOUT.value);
     }
   });
 
+  const mangaId = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
+  const coverFile = "c18da525-e34f-4128-a696-4477b6ce6827.png";
+
   group("MangaDex.Manga", () {
     test("Manga.getManga", () async {
-      final mangaData = await mangaDex.manga.getManga("f9c33607-9180-4ba6-b85c-e4b5faee7192");
-      expect(mangaData.manga.id, "f9c33607-9180-4ba6-b85c-e4b5faee7192");
+      final mangaData = await mangaDex.manga.getManga(mangaId);
+      expect(mangaData.manga.id, mangaId);
 
       final dbMangaData = await mangaDex.manga.getManga(mangaData.manga.id);
       expect(dbMangaData.manga.id, mangaData.manga.id);
@@ -40,54 +43,40 @@ void main() async {
 
   group("MangaDex.CoverArt", () {
     test("CoverArt.getFileName", () {
-      final original = mangaDex.covers.getFileName(
-        "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-        CoverSize.original,
-      );
+      final original = mangaDex.covers.getFileName(coverFile, CoverSize.original);
+      final medium = mangaDex.covers.getFileName(coverFile, CoverSize.medium);
+      final small = mangaDex.covers.getFileName(coverFile, CoverSize.small);
 
-      final medium = mangaDex.covers.getFileName(
-        "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-        CoverSize.medium,
-      );
-
-      final small = mangaDex.covers.getFileName(
-        "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-        CoverSize.small,
-      );
-
-      expect(original, "26dd2770-d383-42e9-a42b-32765a4d99c8.png");
-      expect(medium, "26dd2770-d383-42e9-a42b-32765a4d99c8.png.512.jpg");
-      expect(small, "26dd2770-d383-42e9-a42b-32765a4d99c8.png.256.jpg");
+      expect(original, coverFile);
+      expect(medium, "$coverFile.512.jpg");
+      expect(small, "$coverFile.256.jpg");
     });
-  });
-  test("CoverArt.getCoverArt", () async {
-    final cover = await mangaDex.covers.getCoverArt(
-      "8f3e1818-a015-491d-bd81-3addc4d7d56a",
-      "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-    );
+    test("CoverArt.getCoverArt", () async {
+      final cover = await mangaDex.covers.getCoverArt(mangaId, coverFile);
 
-    final mediumCover = await mangaDex.covers.getCoverArt(
-      "8f3e1818-a015-491d-bd81-3addc4d7d56a",
-      "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-      size: CoverSize.medium,
-    );
+      final mediumCover = await mangaDex.covers.getCoverArt(
+        mangaId,
+        coverFile,
+        size: CoverSize.medium,
+      );
 
-    final smallCover = await mangaDex.covers.getCoverArt(
-      "8f3e1818-a015-491d-bd81-3addc4d7d56a",
-      "26dd2770-d383-42e9-a42b-32765a4d99c8.png",
-      size: CoverSize.small,
-    );
+      final smallCover = await mangaDex.covers.getCoverArt(
+        mangaId,
+        coverFile,
+        size: CoverSize.small,
+      );
 
-    expect(cover, isNotNull);
-    expect(cover.existsSync(), true);
-    expect(cover.statSync().type, FileSystemEntityType.file);
+      expect(cover, isNotNull);
+      expect(cover.existsSync(), true);
+      expect(cover.statSync().type, FileSystemEntityType.file);
 
-    expect(mediumCover, isNotNull);
-    expect(mediumCover.existsSync(), true);
-    expect(mediumCover.statSync().type, FileSystemEntityType.file);
+      expect(mediumCover, isNotNull);
+      expect(mediumCover.existsSync(), true);
+      expect(mediumCover.statSync().type, FileSystemEntityType.file);
 
-    expect(smallCover, isNotNull);
-    expect(smallCover.existsSync(), true);
-    expect(smallCover.statSync().type, FileSystemEntityType.file);
+      expect(smallCover, isNotNull);
+      expect(smallCover.existsSync(), true);
+      expect(smallCover.statSync().type, FileSystemEntityType.file);
+    });
   });
 }

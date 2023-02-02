@@ -16,5 +16,8 @@ flutter pub run fms build material_symbols.yaml
 
 ## Prerequisites
 
-- `flutter`
-- `node`
+- `flutter` version 3.7 or higher.
+    - Target the latest version possible.
+- `node` version 17 or higher.
+    - For icon generation.
+

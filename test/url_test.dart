@@ -33,4 +33,17 @@ void main() {
       "$apiStr/manga?ids%5B%5D=$id&ids%5B%5D=$id&sort%5Btitle%5D=asc&limit=100",
     );
   });
+  test("Reference usage without modifying the original pointer.", () {
+    final base = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
+    expect(base.toString(), "$apiStr/manga");
+
+    final onId = base.asRef().addPathSegment(id);
+    final onIncludes = base.asRef().setParameter("includes[]", ["chapters"]);
+    final onIdIncludes = base.asRef().addPathSegment(id).setParameter("includes[]", ["chapters"]);
+
+    expect(base.toString(), "$apiStr/manga");
+    expect(onId.toString(), "$apiStr/manga/$id");
+    expect(onIncludes.toString(), "$apiStr/manga?includes%5B%5D=chapters");
+    expect(onIdIncludes.toString(), "$apiStr/manga/$id?includes%5B%5D=chapters");
+  });
 }

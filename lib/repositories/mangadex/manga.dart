@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:developer";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
@@ -38,6 +39,7 @@ class MDMangaRepo {
   ];
 
   Future<MangaData> getManga(String id) async {
+    log("getManga($id)", name: "MDMangaRepo");
     final inDB = await database.manga.get(fastHash(id));
 
     if (inDB != null) {
@@ -52,18 +54,18 @@ class MDMangaRepo {
 
       return MangaData(
         manga: inDB,
-        authors: data.whereType<Author>().where((e) => inDB.authors.contains(e.id)).toList(),
-        artists: data.whereType<Author>().where((e) => inDB.artists.contains(e.id)).toList(),
-        tags: data.whereType<Tag>().toList(),
-        cover: data.whereType<CoverArt?>().first,
+        authors: (data[0] as List<Author?>).cast(),
+        artists: (data[1] as List<Author?>).cast(),
+        tags: (data[2] as List<Tag?>).cast(),
+        cover: data[3] as CoverArt?,
       );
     }
 
     await rateLimiter.wait("/manga:GET");
-    final reqUrl = url.addPathSegment(id).setParameter("includes[]", includes);
+    final reqUrl = url.asRef().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDMangaEntity.fromJson(jsonDecode(request.body));
+    final response = MDMangaEntity.fromJson(jsonDecode(request.body), url: reqUrl);
 
     final internalMangaData = InternalMangaData(
         manga: response.data.toManga(),

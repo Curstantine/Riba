@@ -30,14 +30,13 @@ class MDCoverArtRepo {
     if (file.existsSync()) return file;
 
     await rateLimiter.wait("/covers:GET");
-    final reqUrl = url.addPathSegments([mangaId, getFileName(filename, size)]);
-    final response = await client.get(reqUrl.toUri(), headers: {
-      "Accept": "image/jpeg,image/png",
-    });
+    final reqUrl = url.asRef().addPathSegments([mangaId, getFileName(filename, size)]);
+    final response = await client.get(reqUrl.toUri());
 
     if (response.statusCode != 200) {
       throw MDException(
         MDError(status: response.statusCode, title: "Failed to retrieve the cover art"),
+        url: reqUrl,
       );
     }
 

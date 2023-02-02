@@ -5,6 +5,11 @@ import "package:riba/utils/hash.dart";
 
 part "author.g.dart";
 
+/// Author/Artist model to be stored in the local database.
+///
+/// ### Note
+/// This model doesn't implement an eq operator, as it is impossible to do that
+/// without losing performance. Instead, use the [isLooselyEqual] method.
 @collection
 class Author {
   late String id;
@@ -24,6 +29,17 @@ class Author {
     required this.createdAt,
     required this.version,
   });
+
+  /// Checks if the given [Author] has the same [id] and the [version] as this.
+  bool isLooselyEqual(Author other) {
+    return id == other.id && version == other.version;
+  }
+
+  @override
+  // ignore: hash_and_equals
+  operator ==(Object other) {
+    throw UnimplementedError();
+  }
 }
 
 @embedded
@@ -35,15 +51,15 @@ class AuthorSocial {
   AuthorSocial({this.type = AuthorSocialType.none, this.value = ""});
 
   @override
-  operator ==(Object other) {
-    if (other is AuthorSocial) {
-      return type == other.type && value == other.value;
-    }
-    return false;
-  }
+  int get hashCode => type.hashCode ^ value.hashCode;
 
   @override
-  int get hashCode => type.hashCode ^ value.hashCode;
+  operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AuthorSocial &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          value == other.value);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS

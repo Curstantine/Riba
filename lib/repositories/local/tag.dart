@@ -5,6 +5,11 @@ import "package:riba/utils/hash.dart";
 
 part "tag.g.dart";
 
+/// Tag model to be stored in the local database.
+///
+/// ### Note
+/// This model doesn't implement an eq operator, as it is impossible to do that
+/// without losing performance. Instead, use the [isLooselyEqual] method.
 @collection
 class Tag {
   late String id;
@@ -24,4 +29,15 @@ class Tag {
     required this.group,
     required this.version,
   });
+
+  /// Checks if the given [Tag] has the same [id] and the [version] as this.
+  bool isLooselyEqual(Tag other) {
+    return id == other.id && version == other.version;
+  }
+
+  @override
+  // ignore: hash_and_equals
+  operator ==(Object other) {
+    throw UnimplementedError();
+  }
 }
