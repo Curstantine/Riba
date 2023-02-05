@@ -99,3 +99,9 @@ extension ToAuthorSocials on AuthorAttributes {
     ];
   }
 }
+
+extension FilterAuthors on List<Author> {
+  List<Author> whereNotIn(List<Author> other) {
+    return where((element) => !other.any((e) => e.isLooselyEqual(element))).toList();
+  }
+}

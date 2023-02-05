@@ -29,6 +29,16 @@ symbols:
     more_vert:
         name: More Vert
 
+    add:
+        name: Add
+        weight: 400
+
+    check:
+        name: Check
+
+    sync:
+        name: Sync
+
 default:
   style: rounded
   weight: 500

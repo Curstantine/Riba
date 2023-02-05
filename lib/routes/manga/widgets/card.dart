@@ -13,9 +13,13 @@ class MangaCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return OpenContainer(
-      tappable: true,
+      tappable: false,
       transitionDuration: Durations.normal,
+      openElevation: 0,
+      openColor: Colors.transparent,
+      closedElevation: 0,
       closedColor: Colors.transparent,
+      closedShape: const RoundedRectangleBorder(borderRadius: Corners.allMedium),
       openBuilder: (context, action) => const MangaView(),
       closedBuilder: (context, action) {
         return ConstrainedBox(
@@ -24,12 +28,7 @@ class MangaCard extends StatelessWidget {
             OutlinedCard(
                 clipBehavior: Clip.hardEdge,
                 margin: Edges.verticalExtraSmall,
-                child: InkWell(
-                    onTap: action,
-                    splashColor: theme.colorScheme.secondary.withOpacity(0.2),
-                    hoverColor: theme.colorScheme.secondary.withOpacity(0.3),
-                    focusColor: theme.colorScheme.secondary.withOpacity(0.3),
-                    child: const SizedBox(height: 200, width: 150))),
+                child: InkWell(onTap: action, child: const SizedBox(height: 200, width: 150))),
             Text("A Title That's Long Enough to Make Kizuna Happy",
                 maxLines: 2,
                 softWrap: true,

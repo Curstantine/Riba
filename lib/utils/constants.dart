@@ -302,8 +302,20 @@ class Shapes {
       );
 }
 
+class IconButtonStyles {
+  static filledIcon(ColorScheme colors) => IconButton.styleFrom(
+        foregroundColor: colors.onPrimary,
+        backgroundColor: colors.primary,
+        disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
+        hoverColor: colors.onPrimary.withOpacity(0.08),
+        focusColor: colors.onPrimary.withOpacity(0.12),
+        highlightColor: colors.onPrimary.withOpacity(0.12),
+      );
+}
+
 class Durations {
   static const Duration normal = Duration(milliseconds: 150);
+  static const Duration slow = Duration(milliseconds: 200);
 }
 
 class FontFamily {

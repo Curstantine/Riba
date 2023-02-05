@@ -1,6 +1,8 @@
-import "package:flutter/material.dart";
+import "package:flutter/material.dart" hide Router;
+import "package:riba/material_symbols.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
+import "package:riba/utils/router.dart";
 
 class UserBar extends StatelessWidget {
   const UserBar({super.key});
@@ -31,7 +33,13 @@ class UserBar extends StatelessWidget {
           ],
         ),
         const Spacer(),
-        IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
+        PopupMenuButton(
+          icon: const Icon(MaterialSymbols.more_vert),
+          onSelected: (value) => Router.push(context, value),
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: Router.settings, child: Text("Settings")),
+          ],
+        ),
       ]),
     );
   }

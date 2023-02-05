@@ -7,11 +7,9 @@ class HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [HorizontalMangaList(title: "Seasonal")],
-        ),
+      child: ListView(
+        primary: true,
+        children: const [HorizontalMangaList(title: "Seasonal")],
       ),
     );
   }

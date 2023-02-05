@@ -71,13 +71,14 @@ class ThemeManager with ChangeNotifier {
     final settingsFactory = ThemeSettings();
     await settingsFactory.init();
 
-    // await instance.refresh();
-
-    return ThemeManager._internal(
+    final manager = ThemeManager._internal(
       id: settingsFactory.get().id,
       mode: settingsFactory.get().mode,
       settings: settingsFactory,
     );
+
+    await manager.setTheme(manager.id);
+    return manager;
   }
 
   ThemeId id;
@@ -96,11 +97,8 @@ class ThemeManager with ChangeNotifier {
 
   TextTheme get textTheme => const TextTheme(
         titleLarge: TextStyle(fontFamily: FontFamily.Rubik),
-        titleMedium: TextStyle(fontFamily: FontFamily.Rubik, letterSpacing: 0.2),
+        titleMedium: TextStyle(fontFamily: FontFamily.Rubik),
         titleSmall: TextStyle(fontFamily: FontFamily.Rubik),
-        labelLarge: TextStyle(fontFamily: FontFamily.Rubik),
-        labelMedium: TextStyle(fontFamily: FontFamily.Rubik),
-        labelSmall: TextStyle(fontFamily: FontFamily.Rubik),
       );
 
   Future<void> setTheme(ThemeId themeId) async {
@@ -114,6 +112,16 @@ class ThemeManager with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refresh() async {
+    if (mode == ThemeMode.system) {
+      if (id == ThemeId.dynamic) {
+        scheme = await getDynamicColorScheme();
+      }
+
+      notifyListeners();
+    }
+  }
+
   Future<ColorScheme> getDynamicColorScheme() async {
     final palette = await DynamicColorPlugin.getCorePalette();
     final brightness = mode.toBrightness();
@@ -124,16 +132,6 @@ class ThemeManager with ChangeNotifier {
       if (brightness == Brightness.light) return const ColorScheme.light();
       if (brightness == Brightness.dark) return const ColorScheme.dark();
       throw Exception("Unknown brightness: $brightness");
-    }
-  }
-
-  Future<void> refresh() async {
-    if (mode == ThemeMode.system) {
-      if (id == ThemeId.dynamic) {
-        scheme = await getDynamicColorScheme();
-      }
-
-      notifyListeners();
     }
   }
 

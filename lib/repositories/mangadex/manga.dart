@@ -38,10 +38,10 @@ class MDMangaRepo {
     EntityType.coverArt.toJsonValue(),
   ];
 
-  Future<MangaData> getManga(String id) async {
-    log("getManga($id)", name: "MDMangaRepo");
-    final inDB = await database.manga.get(fastHash(id));
+  Future<MangaData> get(String id) async {
+    log("get($id)", name: "MDMangaRepo");
 
+    final inDB = await database.manga.get(fastHash(id));
     if (inDB != null) {
       final data = await Future.wait([
         database.authors.getAll(inDB.artists.map((e) => fastHash(e)).toList()),

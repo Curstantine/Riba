@@ -1,3 +1,4 @@
+import "dart:developer";
 import "dart:io";
 
 import "package:http/http.dart";
@@ -21,11 +22,13 @@ class MDCoverArtRepo {
 
   final url = URL(hostname: "uploads.mangadex.org", pathSegments: ["covers"]);
 
-  Future<File> getCoverArt(
+  Future<File> get(
     String mangaId,
     String filename, {
     CoverSize size = CoverSize.original,
   }) async {
+    log("get($mangaId, $filename, $size)", name: "MDCoverArtRepo");
+
     final file = getFile(mangaId, filename, size);
     if (file.existsSync()) return file;
 

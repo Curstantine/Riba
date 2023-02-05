@@ -11,16 +11,12 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 void main() async {
   await Isar.initializeIsarCore(download: true);
 
-  final database = await openDatabase();
+  final database = await Database.init();
   final tempDirectory = Directory("./tmp/mangadex");
-  final mangaDex = MangaDex(
-    database: database,
-    userAgent: "Riba/test-runner",
-    directory: tempDirectory,
-  );
+  final mangaDex = MangaDex.instance;
 
   tearDown(() async {
-    await database.writeTxn(() async => await database.clear());
+    await database.local.writeTxn(() async => await database.local.clear());
     try {
       await tempDirectory.delete(recursive: true);
     } on FileSystemException {
@@ -33,10 +29,10 @@ void main() async {
 
   group("MangaDex.Manga", () {
     test("Manga.getManga", () async {
-      final mangaData = await mangaDex.manga.getManga(mangaId);
+      final mangaData = await mangaDex.manga.get(mangaId);
       expect(mangaData.manga.id, mangaId);
 
-      final dbMangaData = await mangaDex.manga.getManga(mangaData.manga.id);
+      final dbMangaData = await mangaDex.manga.get(mangaData.manga.id);
       expect(dbMangaData.manga.id, mangaData.manga.id);
     });
   });
@@ -52,15 +48,15 @@ void main() async {
       expect(small, "$coverFile.256.jpg");
     });
     test("CoverArt.getCoverArt", () async {
-      final cover = await mangaDex.covers.getCoverArt(mangaId, coverFile);
+      final cover = await mangaDex.covers.get(mangaId, coverFile);
 
-      final mediumCover = await mangaDex.covers.getCoverArt(
+      final mediumCover = await mangaDex.covers.get(
         mangaId,
         coverFile,
         size: CoverSize.medium,
       );
 
-      final smallCover = await mangaDex.covers.getCoverArt(
+      final smallCover = await mangaDex.covers.get(
         mangaId,
         coverFile,
         size: CoverSize.small,

@@ -18,16 +18,21 @@ class _MaterialSymbolsData extends IconData {
 class MaterialSymbols {
   const MaterialSymbols._();
 
-  static const home_filled = _MaterialSymbolsData(0xf101, "home_filled");
-  static const home_outlined = _MaterialSymbolsData(0xf102, "home_outlined");
-  static const library_filled = _MaterialSymbolsData(0xf103, "library_filled");
-  static const library_outlined = _MaterialSymbolsData(0xf104, "library_outlined");
-  static const more_vert = _MaterialSymbolsData(0xf105, "more_vert");
-  static const person_filled = _MaterialSymbolsData(0xf106, "person_filled");
-  static const search_filled = _MaterialSymbolsData(0xf107, "search_filled");
-  static const search_outlined = _MaterialSymbolsData(0xf108, "search_outlined");
+  static const add = _MaterialSymbolsData(0xf101, "add");
+  static const check = _MaterialSymbolsData(0xf102, "check");
+  static const home_filled = _MaterialSymbolsData(0xf103, "home_filled");
+  static const home_outlined = _MaterialSymbolsData(0xf104, "home_outlined");
+  static const library_filled = _MaterialSymbolsData(0xf105, "library_filled");
+  static const library_outlined = _MaterialSymbolsData(0xf106, "library_outlined");
+  static const more_vert = _MaterialSymbolsData(0xf107, "more_vert");
+  static const person_filled = _MaterialSymbolsData(0xf108, "person_filled");
+  static const search_filled = _MaterialSymbolsData(0xf109, "search_filled");
+  static const search_outlined = _MaterialSymbolsData(0xf10a, "search_outlined");
+  static const sync = _MaterialSymbolsData(0xf10b, "sync");
 
   static const all = <String, _MaterialSymbolsData>{
+    "add": add,
+    "check": check,
     "home_filled": home_filled,
     "home_outlined": home_outlined,
     "library_filled": library_filled,
@@ -36,5 +41,6 @@ class MaterialSymbols {
     "person_filled": person_filled,
     "search_filled": search_filled,
     "search_outlined": search_outlined,
+    "sync": sync,
   };
 }
