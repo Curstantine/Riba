@@ -4,8 +4,8 @@ import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/router.dart";
 
-class UserBar extends StatelessWidget {
-  const UserBar({super.key});
+class HomeUserBar extends StatelessWidget {
+  const HomeUserBar({super.key});
 
   @override
   Widget build(BuildContext context) {

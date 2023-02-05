@@ -26,7 +26,7 @@ class _HomeViewState extends State<HomeView> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(media.padding.top + 64),
-        child: const SafeArea(child: UserBar()),
+        child: const SafeArea(child: HomeUserBar()),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,

@@ -9,7 +9,7 @@ class HomeContent extends StatelessWidget {
     return SafeArea(
       child: ListView(
         primary: true,
-        children: const [HorizontalMangaList(title: "Seasonal")],
+        children: const [MangaHorizontalList(title: "Seasonal")],
       ),
     );
   }
