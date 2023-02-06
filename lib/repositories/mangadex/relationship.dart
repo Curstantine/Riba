@@ -83,8 +83,6 @@ enum MangaRelationType {
   factory MangaRelationType.fromJsonValue(String str) {
     return jsonValues.entries.firstWhere((element) => element.value == str).key;
   }
-
-  String toJsonValue() => jsonValues[this]!;
 }
 
 extension RelationshipList on List<Relationship> {

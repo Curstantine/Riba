@@ -11,14 +11,16 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 void main() async {
   await Isar.initializeIsarCore(download: true);
 
-  final database = await Database.init();
-  final tempDirectory = Directory("./tmp/mangadex");
+  final tempDirectory = Directory("./tmp");
+  final tempMdDirectory = Directory("${tempDirectory.path}/mangadex");
+
+  final database = await Database.init(directory: tempDirectory, testing: true);
   final mangaDex = MangaDex.instance;
 
   tearDown(() async {
     await database.local.writeTxn(() async => await database.local.clear());
     try {
-      await tempDirectory.delete(recursive: true);
+      await tempMdDirectory.delete(recursive: true);
     } on FileSystemException {
       log("Failed to delete the temp directory", name: "MangaDexTest", level: Level.SHOUT.value);
     }

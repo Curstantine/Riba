@@ -167,8 +167,6 @@ enum MangaStatus {
   factory MangaStatus.fromJsonValue(String str) {
     return jsonValues.entries.firstWhere((e) => e.value == str).key;
   }
-
-  String getJsonValue() => jsonValues[this]!;
 }
 
 enum MangaPublicationDemographic {
@@ -187,6 +185,4 @@ enum MangaPublicationDemographic {
   factory MangaPublicationDemographic.fromJsonValue(String str) {
     return jsonValues.entries.firstWhere((e) => e.value == str).key;
   }
-
-  String getJsonValue() => jsonValues[this]!;
 }
