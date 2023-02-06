@@ -16,7 +16,7 @@ class MangaHorizontalList extends StatelessWidget {
       children: [
         Padding(padding: Edges.leftMedium, child: Text(title, style: theme.textTheme.titleMedium)),
         SizedBox(
-          height: 250,
+          height: 275,
           child: ListView.separated(
               itemCount: 10,
               shrinkWrap: true,

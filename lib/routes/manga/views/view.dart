@@ -12,9 +12,9 @@ import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 
 class MangaView extends ConsumerStatefulWidget {
-  const MangaView({super.key});
+  const MangaView({super.key, required this.id});
 
-  final String id = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
+  final String id;
 
   @override
   ConsumerState<MangaView> createState() => _MangaViewState();
