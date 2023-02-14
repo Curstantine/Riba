@@ -21,7 +21,10 @@ class MangaView extends ConsumerStatefulWidget {
 }
 
 class _MangaViewState extends ConsumerState<MangaView> {
+  final expandedAppBarHeight = 350.0;
   final scrollController = ScrollController();
+  final preferredLocales = [Locale.en, Locale.ja];
+
   bool showAppBar = false;
 
   Future<MangaData>? mangaData;
@@ -88,22 +91,21 @@ class _MangaViewState extends ConsumerState<MangaView> {
 
           return CustomScrollView(controller: scrollController, slivers: [
             SliverAppBar(
-              floating: true,
-              title: Row(children: [
-                const Card(child: SizedBox(width: 40, height: 40, child: Placeholder())),
-                const SizedBox(width: 8),
-                Text(
-                  snapshot.data!.manga.titles.getPreferred([Locale.en, Locale.ja]),
-                  style: text.titleSmall,
-                ),
-              ]),
+              pinned: true,
+              expandedHeight: expandedAppBarHeight,
+              title: AnimatedOpacity(
+                opacity: showAppBar ? 1 : 0,
+                duration: Durations.normal,
+                child: Text(snapshot.data!.manga.titles.getPreferred(preferredLocales),
+                    style: text.titleMedium),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.pin,
+                background: detailsHeader(snapshot.data!),
+                titlePadding: Edges.allNone,
+              ),
             ),
-            SliverToBoxAdapter(
-              child: Column(children: [
-                detailsHeader(snapshot.data!),
-                const SizedBox(height: 1000),
-              ]),
-            ),
+            SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
           ]);
         },
       ),
@@ -115,7 +117,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
     final colors = theme.colorScheme;
     final media = MediaQuery.of(context);
 
-    final title = mangaData.manga.titles.getPreferred([Locale.en, Locale.ja]);
+    final title = mangaData.manga.titles.getPreferred(preferredLocales);
     final authorList = (mangaData.authors + mangaData.artists.whereNotIn(mangaData.authors))
         .map((e) => e.name)
         .join(", ");
@@ -124,7 +126,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
       children: [
         Container(
           width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 200, maxHeight: 450),
+          height: expandedAppBarHeight + media.padding.top,
           foregroundDecoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -155,38 +157,57 @@ class _MangaViewState extends ConsumerState<MangaView> {
                 return SizedBox(height: media.padding.top + 200, child: Center(child: child));
               }
 
-              return Image.file(snapshot.data!, fit: BoxFit.cover);
+              return Padding(
+                padding: Edges.bottomSmall,
+                child: Image.file(
+                  snapshot.data!,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                ),
+              );
             },
           ),
         ),
         Container(
           width: double.infinity,
-          padding: Edges.horizontalMedium.copyWith(
-            top: media.padding.top + 200,
-            bottom: Edges.large,
-          ),
-          constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: theme.textTheme.titleLarge),
-            Text(authorList, style: theme.textTheme.labelMedium?.withColorAlpha(0.5)),
-            const SizedBox(height: 25),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 40),
-              child: ListView(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                children: [
-                  buildFollowButton(),
-                  if (isFollowed) ...[const SizedBox(width: 8), buildTrackerButton()],
-                  const SizedBox(width: 8),
-                  OutlinedButton(onPressed: () => {}, child: const Text("Custom Lists")),
-                ],
+          height: expandedAppBarHeight + media.padding.top,
+          padding: Edges.horizontalMedium.copyWith(bottom: Edges.large),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleLarge),
+              Text(authorList, style: theme.textTheme.labelMedium?.withColorAlpha(0.5)),
+              const SizedBox(height: Edges.large),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 40),
+                child: ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    buildFollowButton(),
+                    if (isFollowed) ...[const SizedBox(width: 8), buildTrackerButton()],
+                    const SizedBox(width: 8),
+                    OutlinedButton(onPressed: () => {}, child: const Text("Custom Lists")),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  Widget buildContents(ThemeData theme, MangaData mangaData) {
+    return Column(children: [
+      Padding(
+        padding: Edges.horizontalMedium,
+        child: Text(mangaData.manga.description.getPreferred(preferredLocales),
+            style: theme.textTheme.bodyMedium),
+      ),
+      const SizedBox(height: 10000),
+    ]);
   }
 
   Widget buildFollowButton() {
@@ -223,7 +244,12 @@ class _MangaViewState extends ConsumerState<MangaView> {
   }
 
   void onScroll() {
-    if (showAppBar && scrollController.offset < 300) setState(() => showAppBar = false);
-    if (!showAppBar && scrollController.offset > 300) setState(() => showAppBar = true);
+    final height = expandedAppBarHeight - 52;
+
+    if (showAppBar && scrollController.offset < height) {
+      setState(() => showAppBar = false);
+    } else if (!showAppBar && scrollController.offset > height) {
+      setState(() => showAppBar = true);
+    }
   }
 }
