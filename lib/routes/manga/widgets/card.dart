@@ -11,9 +11,9 @@ import "package:riba/settings/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatelessWidget {
-  const MangaCard({super.key});
+  const MangaCard({super.key, required this.id});
 
-  final String id = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
+  final String id;
 
   @override
   Widget build(BuildContext context) {

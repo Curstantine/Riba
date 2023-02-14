@@ -3,9 +3,10 @@ import "package:riba/utils/constants.dart";
 import "package:riba/routes/manga/widgets/card.dart";
 
 class MangaHorizontalList extends StatelessWidget {
-  const MangaHorizontalList({super.key, required this.title});
+  const MangaHorizontalList({super.key, required this.title, required this.mangaIds});
 
   final String title;
+  final List<String> mangaIds;
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +19,15 @@ class MangaHorizontalList extends StatelessWidget {
         SizedBox(
           height: 275,
           child: ListView.separated(
-              itemCount: 10,
-              shrinkWrap: true,
-              padding: Edges.horizontalMedium,
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => const SizedBox(width: Edges.small),
-              itemBuilder: (_, __) => const MangaCard()),
+            shrinkWrap: true,
+            itemCount: mangaIds.length,
+            padding: Edges.horizontalMedium,
+            scrollDirection: Axis.horizontal,
+            separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
+            itemBuilder: (_, i) {
+              return MangaCard(key: Key(mangaIds[i]), id: mangaIds[i]);
+            },
+          ),
         )
       ],
     );

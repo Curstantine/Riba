@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "package:isar/isar.dart";
+import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/utils/hash.dart";
 import "localization.dart";
 
@@ -26,6 +27,15 @@ class Manga {
   late Locale originalLocale;
   late int version;
 
+  @Enumerated(EnumType.ordinal)
+  late MangaStatus status;
+
+  @Enumerated(EnumType.ordinal)
+  late MangaPublicationDemographic publicationDemographic;
+
+  @Enumerated(EnumType.ordinal)
+  late MangaContentRating contentRating;
+
   Manga({
     required this.id,
     required this.titles,
@@ -38,6 +48,9 @@ class Manga {
     required this.usedCover,
     required this.originalLocale,
     required this.version,
+    required this.status,
+    required this.publicationDemographic,
+    required this.contentRating,
   });
 
   /// Checks if the given [Manga] has the same [id] and the [version] as this.

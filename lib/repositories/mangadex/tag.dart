@@ -20,9 +20,9 @@ class TagAttributes {
 
   factory TagAttributes.fromMap(Map<String, dynamic> map) {
     return TagAttributes(
-      name: map["name"] as Map<String, String>,
+      name: (map["name"] as Map<String, dynamic>).cast(),
       group: TagGroup.fromJsonValue(map["group"]),
-      description: map["description"] as Map<String, String>,
+      description: (map["description"] as Map<String, dynamic>).cast(),
       version: map["version"] as int,
     );
   }
@@ -38,22 +38,21 @@ extension ToTag on MDResponseData<TagAttributes> {
       );
 }
 
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 enum TagGroup {
   content,
   format,
   genre,
   theme;
 
-  static Map<TagGroup, String> get jsonValues => {
-        content: "content",
-        format: "format",
-        genre: "genre",
-        theme: "theme",
+  static Map<String, TagGroup> get jsonValues => {
+        "content": TagGroup.content,
+        "format": TagGroup.format,
+        "genre": TagGroup.genre,
+        "theme": TagGroup.theme,
       };
 
   static TagGroup fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((e) => e.value == str).key;
+    return jsonValues[str]!;
   }
-
-  String toJsonValue() => jsonValues[this]!;
 }

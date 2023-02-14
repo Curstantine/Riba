@@ -21,7 +21,7 @@ class Database {
     instance = Database._internal(
       local: await Isar.open(
         [MangaSchema, AuthorSchema, CoverArtSchema, TagSchema, CustomListSchema],
-        directory: dir.path,
+        directory: testing ? null : dir.path,
       ),
     );
 

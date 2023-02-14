@@ -42,59 +42,83 @@ class MDMangaRepo {
     log("get($id)", name: "MDMangaRepo");
 
     final inDB = await database.manga.get(fastHash(id));
-    if (inDB != null) {
-      final data = await Future.wait([
-        database.authors.getAll(inDB.artists.map((e) => fastHash(e)).toList()),
-        database.authors.getAll(inDB.authors.map((e) => fastHash(e)).toList()),
-        database.tags.getAll(inDB.tags.map((e) => fastHash(e)).toList()),
-        inDB.usedCover != null
-            ? database.covers.get(fastHash(inDB.usedCover!))
-            : Future.value(null),
-      ]);
-
-      return MangaData(
-        manga: inDB,
-        authors: (data[0] as List<Author?>).cast(),
-        artists: (data[1] as List<Author?>).cast(),
-        tags: (data[2] as List<Tag?>).cast(),
-        cover: data[3] as CoverArt?,
-      );
-    }
+    if (inDB != null) return _collectMeta(inDB);
 
     await rateLimiter.wait("/manga:GET");
     final reqUrl = url.asRef().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
     final response = MDMangaEntity.fromJson(jsonDecode(request.body), url: reqUrl);
-
-    final internalMangaData = InternalMangaData(
-        manga: response.data.toManga(),
-        authors: response.data.relationships
-            .ofType<AuthorAttributes>(EntityType.author)
-            .map((e) => e.toAuthor())
-            .toList(),
-        artists: response.data.relationships
-            .ofType<AuthorAttributes>(EntityType.artist)
-            .map((e) => e.toAuthor())
-            .toList(),
-        covers: response.data.relationships
-            .ofType<CoverArtAttributes>(EntityType.coverArt)
-            .map((e) => e.toCoverArt())
-            .toList(),
-        tags: response.data.attributes.tags.map((e) => e.toTag()).toList());
-
-    insertMeta(internalMangaData);
+    final internalMangaData = response.data.toInternalMangaData();
+    _insertMeta(internalMangaData);
 
     return internalMangaData.toMangaData();
   }
 
-  void insertMeta(InternalMangaData internalMangaData) {
+  /// Get multiple manga at once.
+  Future<Map<String, MangaData>> getMany(List<String> ids) async {
+    log("getMany($ids)", name: "MDMangaRepo");
+
+    final Map<String, MangaData?> mapped = {for (var e in ids) e: null};
+
+    final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
+    for (final manga in inDB) {
+      if (manga == null) continue;
+      mapped[manga.id] = await _collectMeta(manga);
+    }
+
+    final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
+    if (missing.isEmpty) return mapped.cast();
+
+    // To go around the 100 limit, we split the request into multiple ones.
+    while (missing.isNotEmpty) {
+      await rateLimiter.wait("/manga:GET");
+      final reqUrl = url
+          .asRef()
+          .setParameter("ids[]", missing.take(100).toList())
+          .setParameter("includes[]", includes)
+          .setParameter("limit", 100);
+      final request = await client.get(reqUrl.toUri());
+
+      final response = MDMangaCollection.fromJson(jsonDecode(request.body), url: reqUrl);
+      for (final data in response.data) {
+        final internalMangaData = data.toInternalMangaData();
+        _insertMeta(internalMangaData);
+        mapped[data.id] = internalMangaData.toMangaData();
+      }
+
+      missing.removeWhere((e) => mapped[e] != null);
+    }
+
+    return mapped.cast();
+  }
+
+  void _insertMeta(InternalMangaData internalMangaData) {
     database.writeTxn(() async {
       database.authors.putAll(internalMangaData.authors + internalMangaData.artists);
       database.covers.putAll(internalMangaData.covers);
       database.tags.putAll(internalMangaData.tags);
       database.manga.put(internalMangaData.manga);
     });
+  }
+
+  Future<MangaData> _collectMeta(Manga manga) async {
+    final data = await Future.wait([
+      database.authors.getAll(manga.artists.map((e) => fastHash(e)).toList()),
+      database.authors.getAll(manga.authors.map((e) => fastHash(e)).toList()),
+      database.tags.getAll(manga.tags.map((e) => fastHash(e)).toList()),
+      manga.usedCover != null
+          ? database.covers.get(fastHash(manga.usedCover!))
+          : Future.value(null),
+    ]);
+
+    return MangaData(
+      manga: manga,
+      authors: (data[0] as List<Author?>).cast(),
+      artists: (data[1] as List<Author?>).cast(),
+      tags: (data[2] as List<Tag?>).cast(),
+      cover: data[3] as CoverArt?,
+    );
   }
 }
 
@@ -103,6 +127,9 @@ class MangaAttributes {
   final List<Map<String, String>> altTitles;
   final Map<String, String> description;
   final String originalLanguage;
+  final MangaPublicationDemographic? publicationDemographic;
+  final MangaStatus status;
+  final MangaContentRating contentRating;
   final List<MDResponseData<TagAttributes>> tags;
   final int version;
 
@@ -112,10 +139,15 @@ class MangaAttributes {
     required this.description,
     required this.tags,
     required this.originalLanguage,
+    required this.publicationDemographic,
+    required this.status,
+    required this.contentRating,
     required this.version,
   });
 
   factory MangaAttributes.fromMap(Map<String, dynamic> map) {
+    final demographic = map["publicationDemographic"] as String?;
+
     return MangaAttributes(
       title: (map["title"] as Map<String, dynamic>).cast(),
       altTitles: (map["altTitles"] as List)
@@ -123,6 +155,10 @@ class MangaAttributes {
           .toList(),
       description: (map["description"] as Map<String, dynamic>).cast(),
       originalLanguage: map["originalLanguage"] as String,
+      publicationDemographic:
+          demographic == null ? null : MangaPublicationDemographic.fromJsonValue(demographic),
+      status: MangaStatus.fromJsonValue(map["status"] as String),
+      contentRating: MangaContentRating.fromJsonValue(map["contentRating"] as String),
       tags: (map["tags"] as List<dynamic>)
           .map((e) => MDResponseData<TagAttributes>.fromMap(e))
           .toList(),
@@ -131,7 +167,65 @@ class MangaAttributes {
   }
 }
 
-extension ToManga on MDResponseData<MangaAttributes> {
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
+enum MangaStatus {
+  ongoing,
+  completed,
+  hiatus,
+  cancelled;
+
+  static Map<String, MangaStatus> get jsonValues => {
+        "ongoing": ongoing,
+        "completed": completed,
+        "hiatus": hiatus,
+        "cancelled": cancelled,
+      };
+
+  factory MangaStatus.fromJsonValue(String str) {
+    return jsonValues[str]!;
+  }
+}
+
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
+enum MangaPublicationDemographic {
+  unknown,
+  shounen,
+  shoujo,
+  josei,
+  seinen;
+
+  static Map<String, MangaPublicationDemographic> get jsonValues => {
+        "shounen": shounen,
+        "shoujo": shoujo,
+        "josei": josei,
+        "seinen": seinen,
+      };
+
+  factory MangaPublicationDemographic.fromJsonValue(String str) {
+    return jsonValues[str]!;
+  }
+}
+
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
+enum MangaContentRating {
+  safe,
+  suggestive,
+  erotica,
+  pornographic;
+
+  static Map<String, MangaContentRating> get jsonValues => {
+        "safe": safe,
+        "suggestive": suggestive,
+        "erotica": erotica,
+        "pornographic": pornographic,
+      };
+
+  factory MangaContentRating.fromJsonValue(String str) {
+    return jsonValues[str]!;
+  }
+}
+
+extension on MDResponseData<MangaAttributes> {
   Manga toManga() {
     final covers = relationships.ofType<CoverArtAttributes>(EntityType.coverArt).map((e) => e.id);
 
@@ -146,43 +240,30 @@ extension ToManga on MDResponseData<MangaAttributes> {
       usedCover: covers.isEmpty ? null : covers.first,
       tags: attributes.tags.map((e) => e.id).toList(),
       originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
+      contentRating: attributes.contentRating,
+      publicationDemographic:
+          attributes.publicationDemographic ?? MangaPublicationDemographic.seinen,
+      status: attributes.status,
       version: attributes.version,
     );
   }
-}
 
-enum MangaStatus {
-  ongoing,
-  completed,
-  hiatus,
-  cancelled;
-
-  static Map<MangaStatus, String> get jsonValues => {
-        ongoing: "ongoing",
-        completed: "completed",
-        hiatus: "hiatus",
-        cancelled: "cancelled",
-      };
-
-  factory MangaStatus.fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((e) => e.value == str).key;
-  }
-}
-
-enum MangaPublicationDemographic {
-  shounen,
-  shoujo,
-  josei,
-  seinen;
-
-  static Map<MangaPublicationDemographic, String> get jsonValues => {
-        shounen: "shounen",
-        shoujo: "shoujo",
-        josei: "josei",
-        seinen: "seinen",
-      };
-
-  factory MangaPublicationDemographic.fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((e) => e.value == str).key;
+  InternalMangaData toInternalMangaData() {
+    return InternalMangaData(
+      manga: toManga(),
+      authors: relationships
+          .ofType<AuthorAttributes>(EntityType.author)
+          .map((e) => e.toAuthor())
+          .toList(),
+      artists: relationships
+          .ofType<AuthorAttributes>(EntityType.artist)
+          .map((e) => e.toAuthor())
+          .toList(),
+      covers: relationships
+          .ofType<CoverArtAttributes>(EntityType.coverArt)
+          .map((e) => e.toCoverArt())
+          .toList(),
+      tags: attributes.tags.map((e) => e.toTag()).toList(),
+    );
   }
 }

@@ -33,6 +33,7 @@ void main() {
       "$apiStr/manga?ids%5B%5D=$id&ids%5B%5D=$id&sort%5Btitle%5D=asc&limit=100",
     );
   });
+
   test("Reference usage without modifying the original pointer.", () {
     final base = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
     expect(base.toString(), "$apiStr/manga");

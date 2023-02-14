@@ -22,7 +22,7 @@ class MangaView extends ConsumerStatefulWidget {
 
 class _MangaViewState extends ConsumerState<MangaView> {
   final scrollController = ScrollController();
-  bool isStatusBarDarkened = true;
+  bool showAppBar = false;
 
   Future<MangaData>? mangaData;
   Future<File>? coverArt;
@@ -34,22 +34,14 @@ class _MangaViewState extends ConsumerState<MangaView> {
   @override
   void initState() {
     super.initState();
-
-    ThemeManager.instance.preventSystemOverlaySync = true;
-    ThemeManager.instance.addListener(onThemeChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _darkenStatusBar());
-
-    scrollController.addListener(_changeSystemOverlayStyles);
+    scrollController.addListener(onScroll);
 
     fetchMangaData();
   }
 
   @override
   void dispose() {
-    ThemeManager.instance.preventSystemOverlaySync = false;
-    ThemeManager.instance.setSystemOverlayStyles();
-    ThemeManager.instance.removeListener(onThemeChange);
-
+    scrollController.removeListener(onScroll);
     scrollController.dispose();
     super.dispose();
   }
@@ -64,6 +56,10 @@ class _MangaViewState extends ConsumerState<MangaView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final media = MediaQuery.of(context);
+
+    final colors = theme.colorScheme;
+    final text = theme.textTheme;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -90,15 +86,25 @@ class _MangaViewState extends ConsumerState<MangaView> {
             );
           }
 
-          return SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              children: [
+          return CustomScrollView(controller: scrollController, slivers: [
+            SliverAppBar(
+              floating: true,
+              title: Row(children: [
+                const Card(child: SizedBox(width: 40, height: 40, child: Placeholder())),
+                const SizedBox(width: 8),
+                Text(
+                  snapshot.data!.manga.titles.getPreferred([Locale.en, Locale.ja]),
+                  style: text.titleSmall,
+                ),
+              ]),
+            ),
+            SliverToBoxAdapter(
+              child: Column(children: [
                 detailsHeader(snapshot.data!),
                 const SizedBox(height: 1000),
-              ],
+              ]),
             ),
-          );
+          ]);
         },
       ),
     );
@@ -216,24 +222,8 @@ class _MangaViewState extends ConsumerState<MangaView> {
     setState(() => hasTrackers = !hasTrackers);
   }
 
-  void onThemeChange() {
-    _changeSystemOverlayStyles(force: true);
-  }
-
-  void _changeSystemOverlayStyles({bool force = false}) {
-    if ((force || !isStatusBarDarkened) && scrollController.offset < 300) _darkenStatusBar();
-    if ((force || isStatusBarDarkened) && scrollController.offset > 300) _lightenStatusBar();
-  }
-
-  void _darkenStatusBar() {
-    var statusBarColor = ThemeManager.instance.scheme.background.withOpacity(0.75);
-
-    isStatusBarDarkened = true;
-    ThemeManager.instance.setSystemOverlayStyles(statusBarColor: statusBarColor);
-  }
-
-  void _lightenStatusBar() {
-    isStatusBarDarkened = false;
-    ThemeManager.instance.setSystemOverlayStyles();
+  void onScroll() {
+    if (showAppBar && scrollController.offset < 300) setState(() => showAppBar = false);
+    if (!showAppBar && scrollController.offset > 300) setState(() => showAppBar = true);
   }
 }

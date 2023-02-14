@@ -43,6 +43,7 @@ class Relationship<T> {
   }
 }
 
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 enum MangaRelationType {
   monochrome,
   colored,
@@ -53,7 +54,7 @@ enum MangaRelationType {
   doujinshi,
   mainStory,
   sideStory,
-  adoptedFrom,
+  adaptedFrom,
   spinOff,
   basedOn,
   sameFranchise,
@@ -61,27 +62,27 @@ enum MangaRelationType {
   alternateStory,
   alternateVersion;
 
-  static Map<MangaRelationType, String> get jsonValues => {
-        monochrome: "monochrome",
-        colored: "colored",
-        preserialization: "preserialization",
-        serialization: "serialization",
-        prequel: "prequel",
-        sequel: "sequel",
-        doujinshi: "doujinshi",
-        mainStory: "main_story",
-        sideStory: "side_story",
-        adoptedFrom: "adopted_from",
-        spinOff: "spin_off",
-        basedOn: "based_on",
-        sameFranchise: "same_franchise",
-        sharedUniverse: "shared_universe",
-        alternateStory: "alternate_story",
-        alternateVersion: "alternate_version",
+  static Map<String, MangaRelationType> get jsonValues => {
+        "monochrome": MangaRelationType.monochrome,
+        "colored": MangaRelationType.colored,
+        "preserialization": MangaRelationType.preserialization,
+        "serialization": MangaRelationType.serialization,
+        "prequel": MangaRelationType.prequel,
+        "sequel": MangaRelationType.sequel,
+        "doujinshi": MangaRelationType.doujinshi,
+        "main_story": MangaRelationType.mainStory,
+        "side_story": MangaRelationType.sideStory,
+        "adapted_from": MangaRelationType.adaptedFrom,
+        "spin_off": MangaRelationType.spinOff,
+        "based_on": MangaRelationType.basedOn,
+        "same_franchise": MangaRelationType.sameFranchise,
+        "shared_universe": MangaRelationType.sharedUniverse,
+        "alternate_story": MangaRelationType.alternateStory,
+        "alternate_version": MangaRelationType.alternateVersion,
       };
 
   factory MangaRelationType.fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((element) => element.value == str).key;
+    return jsonValues[str]!;
   }
 }
 

@@ -3,11 +3,11 @@ import "dart:convert";
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/custom_list.dart";
-import "package:riba/repositories/mangadex/relationship.dart";
 import "package:riba/repositories/rate_limiter.dart";
 
 import "general.dart";
 import "mangadex.dart";
+import "relationship.dart";
 
 typedef MDCustomListEntity = MDEntityResponse<CustomListAttributes>;
 typedef MDCustomListCollection = MDCollectionResponse<CustomListAttributes>;
@@ -26,13 +26,24 @@ class MDCustomListRepo {
     EntityType.user.toJsonValue(),
   ];
 
-  Future get(String id) async {
+  static const String seasonalListId = "4be9338a-3402-4f98-b467-43fb56663927";
+
+  Future<CustomList> get(String id) async {
     await rateLimiter.wait("/list:GET");
     final reqUrl = url.asRef().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
     final response = MDCustomListEntity.fromJson(jsonDecode(request.body), url: reqUrl);
+    final list = response.data.toCustomList();
+
+    database.writeTxn(() async {
+      await database.customLists.put(list);
+    });
+
+    return list;
   }
+
+  Future<CustomList> getSeasonal() => get(seasonalListId);
 }
 
 class CustomListAttributes {
@@ -55,6 +66,7 @@ class CustomListAttributes {
   }
 }
 
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
 enum CustomListVisibility {
   public,
   private;

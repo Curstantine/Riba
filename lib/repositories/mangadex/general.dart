@@ -1,11 +1,13 @@
-import "package:riba/repositories/mangadex/manga.dart";
-import "package:riba/repositories/mangadex/tag.dart";
 import "package:riba/repositories/url.dart";
 
 import "author.dart";
-import "cover_art.dart";
 import "error.dart";
+import "cover_art.dart";
+import "custom_list.dart";
+import "manga.dart";
 import "relationship.dart";
+import "tag.dart";
+import "user.dart";
 
 abstract class MDResponse {
   final String result;
@@ -71,9 +73,7 @@ class MDCollectionResponse<T> extends MDResponse {
     return MDCollectionResponse(
       result: result,
       response: responseType,
-      data: (json["data"] as List<Map<String, dynamic>>)
-          .map((e) => MDResponseData<T>.fromMap(e))
-          .toList(),
+      data: (json["data"] as List<dynamic>).map((e) => MDResponseData<T>.fromMap(e)).toList(),
     );
   }
 }
@@ -109,46 +109,64 @@ class MDResponseData<T> {
 enum EntityType {
   manga,
   chapter,
+  customList,
   author,
   artist,
   user,
   tag,
   coverArt,
-  scanlationGroup,
-  basedOn;
+  scanlationGroup;
 
-  static Map<EntityType, String> get jsonValues => {
-        manga: "manga",
-        chapter: "chapter",
-        author: "author",
-        artist: "artist",
-        user: "user",
-        tag: "tag",
-        coverArt: "cover_art",
-        scanlationGroup: "scanlation_group",
-        basedOn: "based_on",
+  static Map<String, EntityType> get jsonValues => {
+        "manga": manga,
+        "chapter": chapter,
+        "custom_list": customList,
+        "author": author,
+        "artist": artist,
+        "user": user,
+        "tag": tag,
+        "cover_art": coverArt,
+        "scanlation_group": scanlationGroup,
       };
 
   factory EntityType.fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((e) => e.value == str).key;
+    return jsonValues[str]!;
   }
 
-  String toJsonValue() => jsonValues[this]!;
+  String toJsonValue() => jsonValues.entries.firstWhere((e) => e.value == this).key;
 }
 
 T mapToEntity<T>(Map<String, dynamic> map, EntityType type) {
   late T attributes;
 
-  if (type == EntityType.manga) {
-    attributes = MangaAttributes.fromMap(map) as T;
-  } else if (type == EntityType.author || type == EntityType.artist) {
-    attributes = AuthorAttributes.fromMap(map) as T;
-  } else if (type == EntityType.tag) {
-    attributes = TagAttributes.fromMap(map) as T;
-  } else if (type == EntityType.coverArt) {
-    attributes = CoverArtAttributes.fromMap(map) as T;
-  } else {
-    throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
+  switch (type) {
+    case EntityType.manga:
+      attributes = MangaAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.customList:
+      attributes = CustomListAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.author:
+    case EntityType.artist:
+      attributes = AuthorAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.tag:
+      attributes = TagAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.coverArt:
+      attributes = CoverArtAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.user:
+      attributes = UserAttributes.fromMap(map) as T;
+      break;
+
+    default:
+      throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
   }
 
   return attributes;

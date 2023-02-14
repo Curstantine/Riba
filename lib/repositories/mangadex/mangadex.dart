@@ -9,6 +9,8 @@ import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/repositories/url.dart";
 
+import "custom_list.dart";
+
 class MangaDex {
   static late final MangaDex instance;
   MangaDex._internal({required this.database, required this.userAgent, required this.directory});
@@ -28,6 +30,7 @@ class MangaDex {
 
   late Client client = SelfClient(Client(), userAgent);
   late MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
+  late MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
   late MDCoverArtRepo covers = MDCoverArtRepo(
     client,
     rateLimiter,

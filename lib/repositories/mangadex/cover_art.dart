@@ -5,10 +5,11 @@ import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/error.dart";
-import "package:riba/repositories/mangadex/relationship.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/url.dart";
+
+import "error.dart";
+import "relationship.dart";
 
 class MDCoverArtRepo {
   final Client client;

@@ -46,7 +46,7 @@ class ThemeSettings extends SettingsController<ThemeSettingsData> {
 
 class ThemeManager with ChangeNotifier {
   static bool _initialized = false;
-  static get instance => Settings.instance.theme;
+  static ThemeManager get instance => Settings.instance.theme;
 
   ThemeManager._internal({required this.id, required this.mode, required this.settings}) {
     _initialized = true;
