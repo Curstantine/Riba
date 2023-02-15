@@ -3,10 +3,10 @@ import "dart:developer";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
-import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/tag.dart";
 import "package:riba/repositories/mangadex/author.dart";
 import "package:riba/repositories/rate_limiter.dart";
@@ -184,6 +184,8 @@ enum MangaStatus {
   factory MangaStatus.fromJsonValue(String str) {
     return jsonValues[str]!;
   }
+
+  String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
@@ -204,6 +206,8 @@ enum MangaPublicationDemographic {
   factory MangaPublicationDemographic.fromJsonValue(String str) {
     return jsonValues[str]!;
   }
+
+  String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
@@ -223,6 +227,8 @@ enum MangaContentRating {
   factory MangaContentRating.fromJsonValue(String str) {
     return jsonValues[str]!;
   }
+
+  String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
 }
 
 extension on MDResponseData<MangaAttributes> {

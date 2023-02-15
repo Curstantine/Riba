@@ -6,9 +6,11 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/routes/manga/widgets/content_rating_chip.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/widgets/material/chip.dart";
 
 class MangaView extends StatefulWidget {
   const MangaView({super.key, required this.id});
@@ -20,12 +22,12 @@ class MangaView extends StatefulWidget {
 }
 
 class _MangaViewState extends State<MangaView> {
-  final expandedAppBarHeight = 350.0;
+  final expandedAppBarHeight = 500.0;
   final scrollController = ScrollController();
   final preferredLocales = [Locale.en, Locale.ja];
 
   bool showAppBar = false;
-  bool expandedDescription = false;
+  bool expandDescription = false;
 
   Future<MangaData>? mangaData;
   Future<File>? coverArt;
@@ -179,6 +181,16 @@ class _MangaViewState extends State<MangaView> {
             children: [
               Text(title, style: theme.textTheme.titleLarge),
               Text(authorList, style: theme.textTheme.labelMedium?.withColorAlpha(0.5)),
+              const SizedBox(height: Edges.small),
+              Row(
+                children: [
+                  ContentRatingChip(contentRating: mangaData.manga.contentRating),
+                  const SizedBox(width: Edges.extraSmall),
+                  TinyChip(
+                      label: mangaData.manga.publicationDemographic.humanReadable,
+                      onPressed: () => {}),
+                ],
+              ),
               const SizedBox(height: Edges.large),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 40),
@@ -203,44 +215,85 @@ class _MangaViewState extends State<MangaView> {
   Widget buildDescription(ThemeData theme, Manga manga) {
     return Padding(
       padding: Edges.horizontalMedium,
-      child: Column(
-        children: [
-          AnimatedSize(
-            duration: Durations.slow,
-            alignment: Alignment.topCenter,
-            child: Container(
-              height: expandedDescription ? null : 100,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(),
-              foregroundDecoration: BoxDecoration(
-                color: theme.colorScheme.background,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [expandedDescription ? 1 : 0, 1],
-                  colors: [
-                    theme.colorScheme.background.withOpacity(0),
-                    theme.colorScheme.background,
-                  ],
+      child: LayoutBuilder(builder: (context, constraints) {
+        final span = TextSpan(
+            text: manga.description.getPreferred(preferredLocales),
+            style: theme.textTheme.bodyMedium);
+
+        final tp = TextPainter(maxLines: 3, textDirection: TextDirection.ltr, text: span)
+          ..layout(maxWidth: constraints.maxWidth);
+
+        final content = Padding(
+          padding: Edges.bottomExtraSmall,
+          child: Text(manga.description.getPreferred(preferredLocales)),
+        );
+
+        if (!tp.didExceedMaxLines) {
+          return content;
+        }
+
+        return Column(
+          children: [
+            AnimatedSize(
+              duration: Durations.slow,
+              alignment: Alignment.topCenter,
+              child: Container(
+                height: expandDescription ? null : 75,
+                clipBehavior: Clip.hardEdge,
+                decoration: const BoxDecoration(),
+                foregroundDecoration: BoxDecoration(
+                  color: theme.colorScheme.background,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [expandDescription ? 1 : 0, 1],
+                    colors: [
+                      theme.colorScheme.background.withOpacity(0),
+                      theme.colorScheme.background,
+                    ],
+                  ),
                 ),
+                child: content,
               ),
-              // TODO: Add markdown support.
-              child: Text(manga.description.getPreferred(preferredLocales)),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              isSelected: expandedDescription,
-              icon: const Icon(Icons.expand_more_rounded),
-              selectedIcon: const Icon(Icons.expand_less_rounded),
-              tooltip: expandedDescription ? "Collapse" : "Expand",
-              onPressed: () => setState(() => expandedDescription = !expandedDescription),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                isSelected: expandDescription,
+                icon: const Icon(Icons.expand_more_rounded),
+                selectedIcon: const Icon(Icons.expand_less_rounded),
+                tooltip: expandDescription ? "Collapse" : "Expand",
+                onPressed: () => setState(() => expandDescription = !expandDescription),
+              ),
             ),
-          ),
-        ],
+          ],
+        );
+      }),
+    );
+  }
+
+  LayoutBuilder buildTags(MangaData mangaData, ThemeData theme) {
+    final tags = mangaData.tags.map(
+      (tag) => SizedBox(
+        height: 32,
+        child: ActionChip(
+            padding: Edges.allNone,
+            labelStyle: theme.textTheme.labelSmall?.withColorAlpha(0.75),
+            label: Text(tag.name.getPreferred(preferredLocales)),
+            onPressed: () => {}),
       ),
     );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+        child: Wrap(
+          runSpacing: Edges.extraSmall,
+          spacing: Edges.extraSmall,
+          children: tags.toList(),
+        ),
+      );
+    });
   }
 
   Widget buildContents(ThemeData theme, MangaData mangaData) {
