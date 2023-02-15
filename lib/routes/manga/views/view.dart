@@ -1,31 +1,31 @@
 import "dart:io";
 
 import "package:flutter/material.dart" hide Locale;
-import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:riba/material_symbols.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/utils/errors.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
+import "package:riba/utils/errors.dart";
 
-class MangaView extends ConsumerStatefulWidget {
+class MangaView extends StatefulWidget {
   const MangaView({super.key, required this.id});
 
   final String id;
 
   @override
-  ConsumerState<MangaView> createState() => _MangaViewState();
+  State<MangaView> createState() => _MangaViewState();
 }
 
-class _MangaViewState extends ConsumerState<MangaView> {
+class _MangaViewState extends State<MangaView> {
   final expandedAppBarHeight = 350.0;
   final scrollController = ScrollController();
   final preferredLocales = [Locale.en, Locale.ja];
 
   bool showAppBar = false;
+  bool expandedDescription = false;
 
   Future<MangaData>? mangaData;
   Future<File>? coverArt;
@@ -105,6 +105,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
                 titlePadding: Edges.allNone,
               ),
             ),
+            SliverToBoxAdapter(child: buildDescription(theme, snapshot.data!.manga)),
             SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
           ]);
         },
@@ -199,14 +200,52 @@ class _MangaViewState extends ConsumerState<MangaView> {
     );
   }
 
-  Widget buildContents(ThemeData theme, MangaData mangaData) {
-    return Column(children: [
-      Padding(
-        padding: Edges.horizontalMedium,
-        child: Text(mangaData.manga.description.getPreferred(preferredLocales),
-            style: theme.textTheme.bodyMedium),
+  Widget buildDescription(ThemeData theme, Manga manga) {
+    return Padding(
+      padding: Edges.horizontalMedium,
+      child: Column(
+        children: [
+          AnimatedSize(
+            duration: Durations.slow,
+            alignment: Alignment.topCenter,
+            child: Container(
+              height: expandedDescription ? null : 100,
+              clipBehavior: Clip.hardEdge,
+              decoration: const BoxDecoration(),
+              foregroundDecoration: BoxDecoration(
+                color: theme.colorScheme.background,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [expandedDescription ? 1 : 0, 1],
+                  colors: [
+                    theme.colorScheme.background.withOpacity(0),
+                    theme.colorScheme.background,
+                  ],
+                ),
+              ),
+              // TODO: Add markdown support.
+              child: Text(manga.description.getPreferred(preferredLocales)),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              isSelected: expandedDescription,
+              icon: const Icon(Icons.expand_more_rounded),
+              selectedIcon: const Icon(Icons.expand_less_rounded),
+              tooltip: expandedDescription ? "Collapse" : "Expand",
+              onPressed: () => setState(() => expandedDescription = !expandedDescription),
+            ),
+          ),
+        ],
       ),
-      const SizedBox(height: 10000),
+    );
+  }
+
+  Widget buildContents(ThemeData theme, MangaData mangaData) {
+    return Column(children: const [
+      SizedBox(height: 10000),
     ]);
   }
 
@@ -218,11 +257,11 @@ class _MangaViewState extends ConsumerState<MangaView> {
       child: isFollowed
           ? FilledButton.icon(
               onPressed: () => changeFollowStatus(false),
-              icon: const Icon(MaterialSymbols.check),
+              icon: const Icon(Icons.check_rounded),
               label: const Text("Reading"))
           : FilledButton.icon(
               onPressed: () => changeFollowStatus(true),
-              icon: const Icon(MaterialSymbols.add),
+              icon: const Icon(Icons.add_rounded),
               label: const Text("Add to Library")),
     );
   }
@@ -230,7 +269,7 @@ class _MangaViewState extends ConsumerState<MangaView> {
   Widget buildTrackerButton() {
     return OutlinedButton.icon(
       onPressed: handleTrackerPress,
-      icon: hasTrackers ? const Icon(MaterialSymbols.sync) : const Icon(MaterialSymbols.add),
+      icon: hasTrackers ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
       label: hasTrackers ? const Text("Tracking") : const Text("Track"),
     );
   }

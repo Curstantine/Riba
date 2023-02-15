@@ -3,6 +3,9 @@
 	"prettier.printWidth": 100,
 	"prettier.useTabs": true,
 	"prettier.tabWidth": 4,
+	"xmlTools.enforcePrettySelfClosingTagOnFormat": true,
+	"xmlTools.splitAttributesOnFormat": true,
+	"xmlTools.splitXmlnsOnFormat": true,
 	"editor.rulers": [
 		{
 			"column": 100
@@ -28,6 +31,8 @@
 		"weibo"
 	],
 	"editor.codeActionsOnSave": {
-		"source.fixAll": true
+		"source.fixAll": true,
+		"source.organizeImports": true,
+		
 	}
 }

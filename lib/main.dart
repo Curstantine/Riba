@@ -1,10 +1,9 @@
 import "package:flutter/material.dart" hide Router;
 import "package:hive_flutter/hive_flutter.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:riba/repositories/database.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/router.dart";
-import "package:riba/settings/settings.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +12,7 @@ void main() async {
   await Database.init();
   await Settings.init();
 
-  runApp(const ProviderScope(child: App()));
+  runApp(const App());
 }
 
 class App extends StatefulWidget {

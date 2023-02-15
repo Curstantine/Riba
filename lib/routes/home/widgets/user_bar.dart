@@ -1,5 +1,4 @@
 import "package:flutter/material.dart" hide Router;
-import "package:riba/material_symbols.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/router.dart";
@@ -20,7 +19,7 @@ class HomeUserBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Curstantine",
+            Text("Guest",
                 style: theme.textTheme.titleMedium?.withColorAlpha(0.75).copyWith(
                     letterSpacing: 0,
                     fontWeight: FontWeight.w500,
@@ -34,7 +33,7 @@ class HomeUserBar extends StatelessWidget {
         ),
         const Spacer(),
         PopupMenuButton(
-          icon: const Icon(MaterialSymbols.more_vert),
+          icon: const Icon(Icons.more_vert_rounded),
           onSelected: (value) => Router.push(context, value),
           itemBuilder: (context) => [
             const PopupMenuItem(value: Router.settings, child: Text("Settings")),

@@ -1,6 +1,5 @@
-import "package:flutter/material.dart";
-import "package:riba/material_symbols.dart";
 import "package:animations/animations.dart";
+import "package:flutter/material.dart";
 import "package:riba/routes/home/views/library_content.dart";
 import "package:riba/routes/home/widgets/user_bar.dart";
 
@@ -33,17 +32,20 @@ class _HomeViewState extends State<HomeView> {
         onDestinationSelected: onDestinationSelected,
         destinations: const [
           NavigationDestination(
-              label: "Home",
-              icon: Icon(MaterialSymbols.home_outlined),
-              selectedIcon: Icon(MaterialSymbols.home_filled)),
+            label: "Home",
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+          ),
           NavigationDestination(
-              label: "Library",
-              icon: Icon(MaterialSymbols.library_outlined),
-              selectedIcon: Icon(MaterialSymbols.library_filled)),
+            label: "Library",
+            icon: Icon(Icons.library_books_outlined),
+            selectedIcon: Icon(Icons.library_books_rounded),
+          ),
           NavigationDestination(
-              label: "Search",
-              icon: Icon(MaterialSymbols.search_outlined),
-              selectedIcon: Icon(MaterialSymbols.search_filled)),
+            label: "Search",
+            icon: Icon(Icons.search_outlined),
+            selectedIcon: Icon(Icons.search_rounded),
+          ),
         ],
       ),
       body: PageTransitionSwitcher(

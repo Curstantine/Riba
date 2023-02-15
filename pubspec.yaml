@@ -12,8 +12,8 @@ dependencies:
 
     animations: ^2.0.7
     dynamic_color: ^1.5.4
+
     logging: ^1.1.0
-    package_info_plus: ^3.0.2
 
     http: ^0.13.5
     path_provider: ^2.0.11
@@ -24,7 +24,8 @@ dependencies:
     hive: ^2.2.3
     hive_flutter: ^1.1.0
 
-    flutter_riverpod: ^2.1.3
+    package_info_plus: ^3.0.2
+    url_launcher: ^6.1.9
 
 dev_dependencies:
     flutter_test:
@@ -36,19 +37,9 @@ dev_dependencies:
     isar_generator: ^3.0.5
     hive_generator: ^2.0.0
 
-    # Temporary Material Symbols support
-    fms:
-        git:
-            url: https://github.com/fujidaiti/fms
-            ref: master
-
 flutter:
     uses-material-design: true
     fonts:
-        - family: MaterialSymbols
-          fonts:
-              - asset: assets/fonts/material_symbols.ttf
-
         - family: Rubik
           fonts:
               - asset: assets/fonts/Rubik-Light.ttf
