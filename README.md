@@ -9,11 +9,6 @@ To generate required type adapters and such:
 flutter packages pub run build_runner build
 ```
 
-To generate Material Symbols specified in [fms_options.yaml](./fms_options.yaml):
-```
-flutter pub run fms build fms_options.yaml
-```
-
 ## Prerequisites
 
 - `flutter` version 3.7 or higher.
