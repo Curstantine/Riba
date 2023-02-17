@@ -317,8 +317,3 @@ class Durations {
   static const Duration normal = Duration(milliseconds: 150);
   static const Duration slow = Duration(milliseconds: 200);
 }
-
-class FontFamily {
-  static const String Rubik = "Rubik";
-  static const String MaterialSymbols = "MaterialSymbols";
-}

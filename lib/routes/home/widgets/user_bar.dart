@@ -20,15 +20,13 @@ class HomeUserBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Guest",
-                style: theme.textTheme.titleMedium?.withColorAlpha(0.75).copyWith(
-                    letterSpacing: 0,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: FontFamily.Rubik,
-                    height: 0)),
+                style: theme.textTheme.titleMedium
+                    ?.withColorOpacity(0.75)
+                    .copyWith(letterSpacing: 0, fontWeight: FontWeight.w500, height: 0)),
             Text("User",
                 style: theme.textTheme.bodySmall
-                    ?.withColorAlpha(0.5)
-                    .copyWith(letterSpacing: 0, fontFamily: FontFamily.Rubik, height: 0))
+                    ?.withColorOpacity(0.5)
+                    .copyWith(letterSpacing: 0, height: 0))
           ],
         ),
         const Spacer(),

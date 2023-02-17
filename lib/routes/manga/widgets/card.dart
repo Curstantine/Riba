@@ -1,13 +1,16 @@
-import "package:flutter/material.dart" hide Locale;
+import "dart:io";
+
 import "package:animations/animations.dart";
+import "package:flutter/material.dart" hide Locale;
 import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
+import "package:riba/settings/theme.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatelessWidget {
@@ -33,20 +36,34 @@ class MangaCard extends StatelessWidget {
           return buildCard(theme, child: buildError(theme, error: snapshot.error));
         }
 
+        final cover = snapshot.data!.cover;
+
         return buildCard(
           theme,
           onTap: () => Navigator.push(
               context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical)),
           title: snapshot.data!.manga.titles.getPreferred([Locale.en, Locale.ja]),
-          child: FutureBuilder(
-            future: MangaDex.instance.covers.get(id, snapshot.data!.cover!.fileName),
+          child: FutureBuilder<File?>(
+            future: cover == null
+                ? Future.value(null)
+                : MangaDex.instance.covers.getImage(id, cover, size: CoverSize.small),
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (snapshot.hasError || !snapshot.hasData) {
+              if (snapshot.hasError) {
                 return buildError(theme, error: snapshot.error);
+              }
+
+              if (!snapshot.hasData) {
+                return Center(
+                  child: Text(
+                    "Cover art not found.",
+                    style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
+                    textAlign: TextAlign.center,
+                  ),
+                );
               }
 
               return Image.file(snapshot.data!, fit: BoxFit.cover);
@@ -73,7 +90,7 @@ class MangaCard extends StatelessWidget {
               maxLines: 2,
               softWrap: true,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.withColorAlpha(0.85)),
+              style: theme.textTheme.labelSmall?.withColorOpacity(0.85)),
       ]),
     );
   }

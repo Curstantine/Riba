@@ -1,6 +1,7 @@
 import "package:dynamic_color/dynamic_color.dart" show CorePaletteToColorScheme, DynamicColorPlugin;
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:google_fonts/google_fonts.dart";
 import "package:hive/hive.dart";
 import "package:riba/utils/constants.dart";
 
@@ -95,11 +96,7 @@ class ThemeManager with ChangeNotifier {
       textTheme: textTheme,
       brightness: mode.toBrightness());
 
-  TextTheme get textTheme => const TextTheme(
-        titleLarge: TextStyle(fontFamily: FontFamily.Rubik),
-        titleMedium: TextStyle(fontFamily: FontFamily.Rubik),
-        titleSmall: TextStyle(fontFamily: FontFamily.Rubik),
-      );
+  TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme();
 
   Future<void> setTheme(ThemeId themeId) async {
     if (themeId == ThemeId.dynamic) {
@@ -195,11 +192,8 @@ extension ToBrightness on ThemeMode {
 }
 
 extension TextColor on TextStyle {
-  TextStyle withColorAlpha(double alpha) {
-    if (alpha < 0 || alpha > 1) {
-      throw Exception("alpha should be between 0 and 1");
-    }
-    return copyWith(color: color?.withAlpha((alpha * 255).round()));
+  TextStyle withColorOpacity(double alpha) {
+    return copyWith(color: color?.withOpacity(alpha));
   }
 }
 

@@ -1,4 +1,6 @@
+import "package:riba/repositories/local/user.dart";
 import "package:riba/repositories/mangadex/general.dart";
+import "package:riba/repositories/mangadex/relationship.dart";
 
 typedef MDUserEntity = MDEntityResponse<UserAttributes>;
 typedef MDUserCollection = MDCollectionResponse<UserAttributes>;
@@ -20,26 +22,47 @@ class UserAttributes {
   }
 }
 
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 enum UserRole {
   member,
   groupMember,
   groupLeader,
+  mdAtHome,
+  contributor,
   powerUploader,
+  staff,
   forumModerator,
   globalModerator,
+  developer,
   administrator;
 
   static Map<String, UserRole> get jsonValues => {
         "ROLE_MEMBER": UserRole.member,
         "ROLE_GROUP_MEMBER": UserRole.groupMember,
         "ROLE_GROUP_LEADER": UserRole.groupLeader,
+        "ROLE_MD_AT_HOME": UserRole.mdAtHome,
+        "ROLE_CONTRIBUTOR": UserRole.contributor,
         "ROLE_POWER_UPLOADER": UserRole.powerUploader,
+        "ROLE_STAFF": UserRole.staff,
         "ROLE_FORUM_MODERATOR": UserRole.forumModerator,
         "ROLE_GLOBAL_MODERATOR": UserRole.globalModerator,
+        "ROLE_DEVELOPER": UserRole.developer,
         "ROLE_ADMIN": UserRole.administrator,
       };
 
   static UserRole fromJsonValue(String value) {
     return jsonValues[value]!;
+  }
+}
+
+extension ToRelUser on Relationship<UserAttributes> {
+  User toUser() {
+    if (attributes == null) throw Exception("Attributes are null");
+    return User(
+      id: id,
+      username: attributes!.username,
+      roles: attributes!.roles,
+      version: attributes!.version,
+    );
   }
 }

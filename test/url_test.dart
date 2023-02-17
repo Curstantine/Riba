@@ -38,9 +38,9 @@ void main() {
     final base = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
     expect(base.toString(), "$apiStr/manga");
 
-    final onId = base.asRef().addPathSegment(id);
-    final onIncludes = base.asRef().setParameter("includes[]", ["chapters"]);
-    final onIdIncludes = base.asRef().addPathSegment(id).setParameter("includes[]", ["chapters"]);
+    final onId = base.copy().addPathSegment(id);
+    final onIncludes = base.copy().setParameter("includes[]", ["chapters"]);
+    final onIdIncludes = base.copy().addPathSegment(id).setParameter("includes[]", ["chapters"]);
 
     expect(base.toString(), "$apiStr/manga");
     expect(onId.toString(), "$apiStr/manga/$id");

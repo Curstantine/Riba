@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:riba/repositories/local/custom_list.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/routes/manga/widgets/horizontal_list.dart";
 
 class HomeContent extends StatefulWidget {
@@ -24,7 +24,7 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Widget buildSeasonal(BuildContext context) {
-    return FutureBuilder<CustomList>(
+    return FutureBuilder<CustomListData>(
       future: seasonalFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
@@ -35,7 +35,7 @@ class _HomeContentState extends State<HomeContent> {
           return const Center(child: Text("Error"));
         }
 
-        return MangaHorizontalList(title: "Seasonal", mangaIds: snapshot.data!.manga);
+        return MangaHorizontalList(title: "Seasonal", mangaIds: snapshot.data!.list.manga);
       },
     );
   }

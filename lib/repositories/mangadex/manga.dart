@@ -45,12 +45,12 @@ class MDMangaRepo {
     if (inDB != null) return _collectMeta(inDB);
 
     await rateLimiter.wait("/manga:GET");
-    final reqUrl = url.asRef().addPathSegment(id).setParameter("includes[]", includes);
+    final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
     final response = MDMangaEntity.fromJson(jsonDecode(request.body), url: reqUrl);
     final internalMangaData = response.data.toInternalMangaData();
-    _insertMeta(internalMangaData);
+    await _insertMeta(internalMangaData);
 
     return internalMangaData.toMangaData();
   }
@@ -60,7 +60,6 @@ class MDMangaRepo {
     log("getMany($ids)", name: "MDMangaRepo");
 
     final Map<String, MangaData?> mapped = {for (var e in ids) e: null};
-
     final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
     for (final manga in inDB) {
       if (manga == null) continue;
@@ -74,7 +73,7 @@ class MDMangaRepo {
     while (missing.isNotEmpty) {
       await rateLimiter.wait("/manga:GET");
       final reqUrl = url
-          .asRef()
+          .copy()
           .setParameter("ids[]", missing.take(100).toList())
           .setParameter("includes[]", includes)
           .setParameter("limit", 100);
@@ -93,12 +92,14 @@ class MDMangaRepo {
     return mapped.cast();
   }
 
-  void _insertMeta(InternalMangaData internalMangaData) {
-    database.writeTxn(() async {
-      database.authors.putAll(internalMangaData.authors + internalMangaData.artists);
-      database.covers.putAll(internalMangaData.covers);
-      database.tags.putAll(internalMangaData.tags);
-      database.manga.put(internalMangaData.manga);
+  Future<void> _insertMeta(InternalMangaData internalMangaData) async {
+    await database.writeTxn(() async {
+      await Future.wait([
+        database.authors.putAll(internalMangaData.authors + internalMangaData.artists),
+        database.covers.putAll(internalMangaData.covers),
+        database.tags.putAll(internalMangaData.tags),
+        database.manga.put(internalMangaData.manga),
+      ]);
     });
   }
 
@@ -267,7 +268,7 @@ extension on MDResponseData<MangaAttributes> {
           .toList(),
       covers: relationships
           .ofType<CoverArtAttributes>(EntityType.coverArt)
-          .map((e) => e.toCoverArt())
+          .map((e) => e.toCoverArt(id))
           .toList(),
       tags: attributes.tags.map((e) => e.toTag()).toList(),
     );

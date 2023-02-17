@@ -1,6 +1,8 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:riba/repositories/local/author.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
+
+import "constants.dart";
 
 void main() {
   group("Locale", () {
@@ -33,36 +35,10 @@ void main() {
       expect(localizations.localizations.length, localizations.values.length);
     });
   });
-
-  group("Author", () {
-    final author1 = Author(
-        id: "1",
-        name: "Author 1",
-        createdAt: DateTime.now(),
-        description: Localizations(localizations: [Locale.en], values: ["Author 1"]),
-        socials: [],
-        version: 1);
-
-    final author1Likely = Author(
-        id: "1",
-        name: "Author 1",
-        createdAt: DateTime.now(),
-        description: Localizations(localizations: [Locale.en], values: ["Author 1"]),
-        socials: [],
-        version: 1);
-
-    final author2 = Author(
-        id: "2",
-        name: "Author 2",
-        createdAt: DateTime.now(),
-        description: Localizations(localizations: [Locale.en], values: ["Author 2"]),
-        socials: [],
-        version: 1);
-
-    test("Equality", () {
-      expect(author1.isLooselyEqual(author1), isTrue);
-      expect(author1.isLooselyEqual(author1Likely), isTrue);
-      expect(author1.isLooselyEqual(author2), isFalse);
+  group("ImageFileType", () {
+    test("fromExtension", () {
+      final file = coverFile.split(".");
+      expect(ImageFileType.fromExtension(file.last), ImageFileType.png);
     });
   });
 }

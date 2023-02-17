@@ -3,11 +3,12 @@ import "dart:io";
 import "package:isar/isar.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:path_provider/path_provider.dart";
+import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/custom_list.dart";
 import "package:riba/repositories/local/manga.dart";
-import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/tag.dart";
+import "package:riba/repositories/local/user.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 
 class Database {
@@ -20,7 +21,7 @@ class Database {
 
     instance = Database._internal(
       local: await Isar.open(
-        [MangaSchema, AuthorSchema, CoverArtSchema, TagSchema, CustomListSchema],
+        [MangaSchema, AuthorSchema, CoverArtSchema, TagSchema, CustomListSchema, UserSchema],
         directory: testing ? null : dir.path,
       ),
     );

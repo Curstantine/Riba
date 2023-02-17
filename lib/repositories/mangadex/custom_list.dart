@@ -1,9 +1,14 @@
 import "dart:convert";
+import "dart:developer";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/custom_list.dart";
+import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/mangadex/user.dart";
 import "package:riba/repositories/rate_limiter.dart";
+import "package:riba/repositories/runtime/custom_list.dart";
+import "package:riba/utils/hash.dart";
 
 import "general.dart";
 import "mangadex.dart";
@@ -28,22 +33,38 @@ class MDCustomListRepo {
 
   static const String seasonalListId = "4be9338a-3402-4f98-b467-43fb56663927";
 
-  Future<CustomList> get(String id) async {
+  Future<CustomListData> get(String id) async {
+    log("get($id)", name: "MDCustomListRepo");
+
+    final inDB = await database.customLists.get(fastHash(id));
+    if (inDB != null) return _collectMeta(inDB);
+
     await rateLimiter.wait("/list:GET");
-    final reqUrl = url.asRef().addPathSegment(id).setParameter("includes[]", includes);
+    final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
     final response = MDCustomListEntity.fromJson(jsonDecode(request.body), url: reqUrl);
-    final list = response.data.toCustomList();
+    final listData = response.data.toCustomListData();
+    await _insertMeta(listData);
 
-    database.writeTxn(() async {
-      await database.customLists.put(list);
-    });
-
-    return list;
+    return listData;
   }
 
-  Future<CustomList> getSeasonal() => get(seasonalListId);
+  Future<CustomListData> getSeasonal() => get(seasonalListId);
+
+  Future<void> _insertMeta(CustomListData customListData) async {
+    await database.writeTxn(() async {
+      await database.customLists.put(customListData.list);
+      await database.users.put(customListData.user);
+    });
+  }
+
+  Future<CustomListData> _collectMeta(CustomList customList) async {
+    return CustomListData(
+      list: customList,
+      user: (await database.users.get(fastHash(customList.user)))!,
+    );
+  }
 }
 
 class CustomListAttributes {
@@ -90,6 +111,13 @@ extension ToCustomList on MDResponseData<CustomListAttributes> {
       version: attributes.version,
       manga: relationships.ofType(EntityType.manga).map((e) => e.id).toList(),
       user: relationships.ofType(EntityType.user).first.id,
+    );
+  }
+
+  CustomListData toCustomListData() {
+    return CustomListData(
+      list: toCustomList(),
+      user: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
     );
   }
 }

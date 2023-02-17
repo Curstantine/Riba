@@ -30,7 +30,7 @@ class _MangaViewState extends State<MangaView> {
   bool expandDescription = false;
 
   Future<MangaData>? mangaData;
-  Future<File>? coverArt;
+  Future<File?>? coverArt;
 
   bool isFollowed = false;
   bool hasTrackers = false;
@@ -54,7 +54,8 @@ class _MangaViewState extends State<MangaView> {
   void fetchMangaData() {
     mangaData = MangaDex.instance.manga.get(widget.id);
     coverArt = mangaData?.then((data) {
-      return MangaDex.instance.covers.get(widget.id, data.cover!.fileName);
+      if (data.cover == null) return Future.value(null);
+      return MangaDex.instance.covers.getImage(widget.id, data.cover!);
     });
   }
 
@@ -117,7 +118,6 @@ class _MangaViewState extends State<MangaView> {
 
   Widget detailsHeader(MangaData mangaData) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final media = MediaQuery.of(context);
 
     final title = mangaData.manga.titles.getPreferred(preferredLocales);
@@ -143,7 +143,7 @@ class _MangaViewState extends State<MangaView> {
               ],
             ),
           ),
-          child: FutureBuilder<File>(
+          child: FutureBuilder<File?>(
             future: coverArt,
             builder: (context, snapshot) {
               Widget? child;
@@ -154,6 +154,10 @@ class _MangaViewState extends State<MangaView> {
 
               if (snapshot.hasError) {
                 child = Text(snapshot.error.toString());
+              }
+
+              if (!snapshot.hasData && !snapshot.hasError) {
+                child = const Text("Cover art not found.");
               }
 
               if (child != null) {
@@ -180,7 +184,7 @@ class _MangaViewState extends State<MangaView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: theme.textTheme.titleLarge),
-              Text(authorList, style: theme.textTheme.labelMedium?.withColorAlpha(0.5)),
+              Text(authorList, style: theme.textTheme.labelMedium?.withColorOpacity(0.5)),
               const SizedBox(height: Edges.small),
               Row(
                 children: [
@@ -278,7 +282,7 @@ class _MangaViewState extends State<MangaView> {
         height: 32,
         child: ActionChip(
             padding: Edges.allNone,
-            labelStyle: theme.textTheme.labelSmall?.withColorAlpha(0.75),
+            labelStyle: theme.textTheme.labelSmall?.withColorOpacity(0.75),
             label: Text(tag.name.getPreferred(preferredLocales)),
             onPressed: () => {}),
       ),

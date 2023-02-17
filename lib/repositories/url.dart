@@ -50,7 +50,7 @@ class URL {
     return this;
   }
 
-  URL asRef() {
+  URL copy() {
     return copyWith(
       useHttps: useHttps,
       hostname: hostname,

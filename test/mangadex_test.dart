@@ -1,10 +1,11 @@
-import "dart:io";
 import "dart:developer";
+import "dart:io";
 
-import "package:isar/isar.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/database.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 
@@ -42,26 +43,40 @@ void main() async {
 
   group("MangaDex.CoverArt", () {
     test("CoverArt.getFileName", () {
-      final original = mangaDex.covers.getFileName(coverFile, CoverSize.original);
-      final medium = mangaDex.covers.getFileName(coverFile, CoverSize.medium);
-      final small = mangaDex.covers.getFileName(coverFile, CoverSize.small);
+      final file = coverFile.split(".");
+      final name = file.first;
+      final extension = ImageFileType.fromExtension(file.last);
+
+      final original = mangaDex.covers.getFileName(name, CoverSize.original, extension);
+      final medium = mangaDex.covers.getFileName(name, CoverSize.medium, extension);
+      final small = mangaDex.covers.getFileName(name, CoverSize.small, extension);
 
       expect(original, coverFile);
       expect(medium, "$coverFile.512.jpg");
       expect(small, "$coverFile.256.jpg");
     });
-    test("CoverArt.get", () async {
-      final cover = await mangaDex.covers.get(mangaId, coverFile);
 
-      final mediumCover = await mangaDex.covers.get(
+    test("CoverArt.get", () async {
+      final cover = await mangaDex.covers.get(coverId);
+
+      expect(cover, isNotNull);
+      expect(cover.cover.id, coverId);
+      expect(cover.user, isNotNull);
+      expect(cover.user!.id, cover.cover.user!);
+    });
+    test("CoverArt.getImage", () async {
+      final coverTemp = await mangaDex.covers.get(coverId);
+      final cover = await mangaDex.covers.getImage(mangaId, coverTemp.cover);
+
+      final mediumCover = await mangaDex.covers.getImage(
         mangaId,
-        coverFile,
+        coverTemp.cover,
         size: CoverSize.medium,
       );
 
-      final smallCover = await mangaDex.covers.get(
+      final smallCover = await mangaDex.covers.getImage(
         mangaId,
-        coverFile,
+        coverTemp.cover,
         size: CoverSize.small,
       );
 

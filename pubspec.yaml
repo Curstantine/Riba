@@ -26,6 +26,7 @@ dependencies:
 
     package_info_plus: ^3.0.2
     url_launcher: ^6.1.9
+    google_fonts: ^4.0.3
 
 dev_dependencies:
     flutter_test:
@@ -39,12 +40,3 @@ dev_dependencies:
 
 flutter:
     uses-material-design: true
-    fonts:
-        - family: Rubik
-          fonts:
-              - asset: assets/fonts/Rubik-Light.ttf
-                weight: 300
-              - asset: assets/fonts/Rubik-Regular.ttf
-                weight: 400
-              - asset: assets/fonts/Rubik-Medium.ttf
-                weight: 500
