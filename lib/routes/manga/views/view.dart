@@ -152,12 +152,12 @@ class _MangaViewState extends State<MangaView> {
                 child = const CircularProgressIndicator();
               }
 
-              if (snapshot.hasError) {
-                child = Text(snapshot.error.toString());
+              if (!snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
+                child = const Text("Cover art not found.");
               }
 
-              if (!snapshot.hasData && !snapshot.hasError) {
-                child = const Text("Cover art not found.");
+              if (snapshot.hasError) {
+                child = Text(snapshot.error.toString());
               }
 
               if (child != null) {

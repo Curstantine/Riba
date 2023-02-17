@@ -96,7 +96,7 @@ class ThemeManager with ChangeNotifier {
       textTheme: textTheme,
       brightness: mode.toBrightness());
 
-  TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme();
+  TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme(const TextTheme());
 
   Future<void> setTheme(ThemeId themeId) async {
     if (themeId == ThemeId.dynamic) {

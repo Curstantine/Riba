@@ -36,6 +36,33 @@ enum UserRole {
   developer,
   administrator;
 
+  String get human {
+    switch (this) {
+      case UserRole.member:
+        return "Member";
+      case UserRole.groupMember:
+        return "Group Member";
+      case UserRole.groupLeader:
+        return "Group Leader";
+      case UserRole.mdAtHome:
+        return "MD@Home";
+      case UserRole.contributor:
+        return "Contributor";
+      case UserRole.powerUploader:
+        return "Power Uploader";
+      case UserRole.staff:
+        return "Staff";
+      case UserRole.forumModerator:
+        return "Forum Moderator";
+      case UserRole.globalModerator:
+        return "Global Moderator";
+      case UserRole.developer:
+        return "Developer";
+      case UserRole.administrator:
+        return "Administrator";
+    }
+  }
+
   static Map<String, UserRole> get jsonValues => {
         "ROLE_MEMBER": UserRole.member,
         "ROLE_GROUP_MEMBER": UserRole.groupMember,

@@ -101,10 +101,11 @@ class MangaCard extends StatelessWidget {
     return Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(errorEx.title,
-            style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error),
+            style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error, height: 1),
             textAlign: TextAlign.center),
-        const SizedBox(height: 4),
-        Text(errorEx.description, style: theme.textTheme.bodySmall),
+        const SizedBox(height: Edges.small),
+        Text(errorEx.description,
+            style: theme.textTheme.bodySmall?.copyWith(height: 1), textAlign: TextAlign.center),
       ]),
     );
   }

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:riba/utils/constants.dart";
 import "package:riba/routes/manga/widgets/card.dart";
+import "package:riba/utils/constants.dart";
 
 class MangaHorizontalList extends StatelessWidget {
   const MangaHorizontalList({super.key, required this.title, required this.mangaIds});
@@ -24,6 +24,7 @@ class MangaHorizontalList extends StatelessWidget {
             padding: Edges.horizontalMedium,
             scrollDirection: Axis.horizontal,
             separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
+            cacheExtent: 25,
             itemBuilder: (_, i) {
               return MangaCard(key: Key(mangaIds[i]), id: mangaIds[i]);
             },
