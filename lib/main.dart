@@ -2,8 +2,8 @@ import "package:flutter/material.dart" hide Router;
 import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/settings/settings.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/utils/router.dart";
+import "package:riba/utils/theme.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +11,7 @@ void main() async {
   await Hive.initFlutter();
   await Database.init();
   await Settings.init();
+  await ThemeManager.init();
 
   runApp(const App());
 }
@@ -38,8 +39,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: Settings.instance.theme.mode,
-      theme: Settings.instance.theme.theme,
+      themeMode: ThemeManager.instance.mode,
+      theme: ThemeManager.instance.theme,
       debugShowCheckedModeBanner: false,
       initialRoute: Router.home,
       onGenerateRoute: Router.onGenerateRoute,

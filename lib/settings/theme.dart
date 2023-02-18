@@ -1,7 +1,4 @@
-import "package:dynamic_color/dynamic_color.dart" show CorePaletteToColorScheme, DynamicColorPlugin;
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
-import "package:google_fonts/google_fonts.dart";
 import "package:hive/hive.dart";
 import "package:riba/utils/constants.dart";
 
@@ -11,10 +8,10 @@ part "theme.g.dart";
 
 class ThemeSettings extends SettingsController<ThemeSettingsData> {
   @override
-  String id = "theme";
+  final String id = "theme";
 
   @override
-  late Box box;
+  late final Box box;
 
   @override
   ThemeSettingsData get defaultValue => ThemeSettingsData(
@@ -45,113 +42,6 @@ class ThemeSettings extends SettingsController<ThemeSettingsData> {
   }
 }
 
-class ThemeManager with ChangeNotifier {
-  static bool _initialized = false;
-  static ThemeManager get instance => Settings.instance.theme;
-
-  ThemeManager._internal({required this.id, required this.mode, required this.settings}) {
-    _initialized = true;
-    addListener(onChange);
-  }
-
-  @override
-  void dispose() {
-    removeListener(onChange);
-    super.dispose();
-  }
-
-  void onChange() {
-    if (!preventSystemOverlaySync) {
-      setSystemOverlayStyles();
-    }
-  }
-
-  static Future<ThemeManager> init() async {
-    if (_initialized) throw Exception("ThemeManager is already initialized.");
-
-    final settingsFactory = ThemeSettings();
-    await settingsFactory.init();
-
-    final manager = ThemeManager._internal(
-      id: settingsFactory.get().id,
-      mode: settingsFactory.get().mode,
-      settings: settingsFactory,
-    );
-
-    await manager.setTheme(manager.id);
-    return manager;
-  }
-
-  ThemeId id;
-  ThemeMode mode;
-  ThemeSettings settings;
-  late ColorScheme scheme;
-
-  /// Stops the changes done by [setSystemOverlayStyles] whenever [refresh] | [onChange] is called.
-  bool preventSystemOverlaySync = false;
-
-  ThemeData get theme => ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      textTheme: textTheme,
-      brightness: mode.toBrightness());
-
-  TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme(const TextTheme());
-
-  Future<void> setTheme(ThemeId themeId) async {
-    if (themeId == ThemeId.dynamic) {
-      scheme = await getDynamicColorScheme();
-    } else {
-      scheme = themes[themeId]!;
-    }
-
-    id = themeId;
-    notifyListeners();
-  }
-
-  Future<void> refresh() async {
-    if (mode == ThemeMode.system) {
-      if (id == ThemeId.dynamic) {
-        scheme = await getDynamicColorScheme();
-      }
-
-      notifyListeners();
-    }
-  }
-
-  Future<ColorScheme> getDynamicColorScheme() async {
-    final palette = await DynamicColorPlugin.getCorePalette();
-    final brightness = mode.toBrightness();
-
-    if (palette != null) {
-      return palette.toColorScheme(brightness: brightness)!;
-    } else {
-      if (brightness == Brightness.light) return const ColorScheme.light();
-      if (brightness == Brightness.dark) return const ColorScheme.dark();
-      throw Exception("Unknown brightness: $brightness");
-    }
-  }
-
-  /// Sets the system overlay styles used by the app.
-  ///
-  /// In case a relevant parameter is not passed, it will be set to a default value.
-  void setSystemOverlayStyles({
-    Color statusBarColor = Colors.transparent,
-    Brightness? statusBarBrightness,
-    Brightness? statusBarIconBrightness,
-  }) =>
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: statusBarColor,
-        statusBarBrightness: statusBarBrightness ?? mode.toBrightness(),
-        statusBarIconBrightness: statusBarIconBrightness ??
-            (mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light),
-      ));
-
-  static Map<ThemeId, ColorScheme> themes = {
-    ThemeId.lavender: ColorScheme.fromSeed(seedColor: Colors.purple.shade500)
-  };
-}
-
 @HiveType(typeId: TypeAdapterIds.themeIdAdapter)
 enum ThemeId {
   @HiveField(0)
@@ -170,9 +60,12 @@ class ThemeSettingsData {
 
 extension ToThemeMode on Brightness {
   ThemeMode toThemeMode() {
-    if (this == Brightness.light) return ThemeMode.light;
-    if (this == Brightness.dark) return ThemeMode.dark;
-    throw Exception("Unknown brightness: $this");
+    switch (this) {
+      case Brightness.light:
+        return ThemeMode.light;
+      case Brightness.dark:
+        return ThemeMode.dark;
+    }
   }
 }
 
@@ -185,8 +78,6 @@ extension ToBrightness on ThemeMode {
         return Brightness.dark;
       case ThemeMode.system:
         return WidgetsBinding.instance.window.platformBrightness;
-      default:
-        throw Exception("Unknown theme mode: $this");
     }
   }
 }

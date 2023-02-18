@@ -26,50 +26,53 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
       appBar: AppBar(title: const Text("Caching")),
       body: ListView(
         children: [
-          buildTitle(textTheme, colorScheme, "Covers"),
-          ListTile(
-            isThreeLine: true,
-            title: const Text("Cache Covers"),
-            subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
-            trailing: Switch(
-              value: cacheCovers,
-              onChanged: (value) => setState(() => cacheCovers = value),
-            ),
-          ),
-          ListTile(
-            title: const Text("Clear Covers Cache"),
-            subtitle: const Text("Delete all locally cached manga covers."),
-            onTap: () => deleteCoversCache(context),
-          ),
-          FutureBuilder(
-            future: coverDir,
-            builder: (context, AsyncSnapshot<DirectoryInfo> snapshot) {
-              if (!snapshot.hasData || snapshot.hasError) {
-                return const LinearProgressIndicator();
-              }
-
-              final info = snapshot.data!;
-              return Padding(
-                padding: Edges.leftMedium,
-                child: Text(
-                  "${info.files.length} covers, totaling ${info.humanSize}.",
-                  style: textTheme.bodySmall?.withColorOpacity(0.5),
-                ),
-              );
-            },
-          ),
+          ...buildCoversSegment(textTheme, colorScheme),
         ],
       ),
     );
   }
 
+  List<Widget> buildCoversSegment(TextTheme textTheme, ColorScheme colorScheme) {
+    return [
+      buildTitle(textTheme, colorScheme, "Covers"),
+      ListTile(
+        isThreeLine: true,
+        title: const Text("Cache Covers"),
+        subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
+        trailing: Switch(
+          value: cacheCovers,
+          onChanged: (value) => setState(() => cacheCovers = value),
+        ),
+      ),
+      ListTile(
+        title: const Text("Clear Covers Cache"),
+        subtitle: const Text("Delete all locally cached manga covers."),
+        onTap: () => deleteCoversCache(context),
+      ),
+      FutureBuilder(
+        future: coverDir,
+        builder: (context, AsyncSnapshot<DirectoryInfo> snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return const LinearProgressIndicator();
+          }
+
+          final info = snapshot.data!;
+          return Padding(
+            padding: Edges.leftMedium,
+            child: Text(
+              "${info.files.length} covers, totaling ${info.humanSize}.",
+              style: textTheme.bodySmall?.withColorOpacity(0.5),
+            ),
+          );
+        },
+      ),
+    ];
+  }
+
   Padding buildTitle(TextTheme textTheme, ColorScheme colorScheme, String title) {
     return Padding(
       padding: Edges.leftLarge,
-      child: Text(
-        title,
-        style: textTheme.titleSmall?.copyWith(color: colorScheme.primary),
-      ),
+      child: Text(title, style: textTheme.titleSmall?.copyWith(color: colorScheme.primary)),
     );
   }
 
