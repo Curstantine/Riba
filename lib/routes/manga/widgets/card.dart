@@ -26,10 +26,7 @@ class MangaCard extends StatelessWidget {
       future: MangaDex.instance.manga.get(id),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return SizedBox(
-            height: 225,
-            child: buildCard(theme, child: const Center(child: CircularProgressIndicator())),
-          );
+          return buildCard(theme, child: const Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
@@ -66,7 +63,7 @@ class MangaCard extends StatelessWidget {
                 );
               }
 
-              return Image.file(snapshot.data!, fit: BoxFit.cover);
+              return Image.file(snapshot.data!, fit: BoxFit.fill);
             },
           ),
         );
@@ -74,24 +71,34 @@ class MangaCard extends StatelessWidget {
     );
   }
 
-  Widget buildCard(ThemeData theme, {Function()? onTap, Widget? child, String? title}) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 275, minWidth: 150, maxWidth: 150),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 225),
-          child: OutlinedCard(
-              clipBehavior: Clip.hardEdge,
-              margin: Edges.verticalExtraSmall,
-              child: InkWell(onTap: onTap, child: child ?? const Placeholder())),
-        ),
-        if (title != null)
-          Text(title,
-              maxLines: 2,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.withColorOpacity(0.85)),
-      ]),
+  Widget buildCard(ThemeData theme, {void Function()? onTap, Widget? child, String? title}) {
+    return Container(
+      width: 150,
+      constraints: const BoxConstraints(maxHeight: 275),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 150,
+            constraints: const BoxConstraints(maxHeight: 225),
+            child: OutlinedCard(
+                clipBehavior: Clip.hardEdge,
+                margin: Edges.verticalExtraSmall,
+                child: InkWell(onTap: onTap, child: child ?? const Placeholder())),
+          ),
+          SizedBox(
+            height: 50,
+            child: title == null
+                ? null
+                : Text(title,
+                    maxLines: 2,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ),
     );
   }
 

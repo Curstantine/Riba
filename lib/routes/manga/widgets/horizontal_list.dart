@@ -19,12 +19,12 @@ class MangaHorizontalList extends StatelessWidget {
         SizedBox(
           height: 275,
           child: ListView.separated(
+            cacheExtent: 25,
             shrinkWrap: true,
             itemCount: mangaIds.length,
             padding: Edges.horizontalMedium,
             scrollDirection: Axis.horizontal,
             separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-            cacheExtent: 25,
             itemBuilder: (_, i) {
               return MangaCard(key: Key(mangaIds[i]), id: mangaIds[i]);
             },
