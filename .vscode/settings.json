@@ -11,6 +11,11 @@
 			"column": 100
 		}
 	],
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": true,
+		"source.organizeImports": true,	
+	},
 	"cSpell.words": [
 		"doujinshi",
 		"fantia",
@@ -31,9 +36,4 @@
 		"tappable",
 		"weibo"
 	],
-	"editor.codeActionsOnSave": {
-		"source.fixAll": true,
-		"source.organizeImports": true,
-		
-	}
 }
