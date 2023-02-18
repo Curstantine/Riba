@@ -33,13 +33,7 @@ class HomeUserBar extends StatelessWidget {
           onSelected: (value) => Router.push(context, value),
           offset: const Offset(-10, 56),
           itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: Router.settings,
-              child: ListTile(
-                leading: Icon(Icons.settings_rounded),
-                contentPadding: Edges.allNone,
-              ),
-            ),
+            const PopupMenuItem(value: Router.settings, child: Text("Settings")),
           ],
         ),
       ]),
