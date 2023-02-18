@@ -5,16 +5,18 @@ class TinyChip extends StatelessWidget {
   const TinyChip({
     super.key,
     required this.label,
-    this.surfaceTintColor,
-    this.labelColor,
     this.elevation,
+    this.labelColor,
+    this.surfaceTintColor,
+    this.outlineColor,
     this.onPressed,
   });
 
   final String label;
-  final Color? surfaceTintColor;
-  final Color? labelColor;
   final double? elevation;
+  final Color? labelColor;
+  final Color? surfaceTintColor;
+  final Color? outlineColor;
   final void Function()? onPressed;
 
   @override
@@ -31,7 +33,9 @@ class TinyChip extends StatelessWidget {
         surfaceTintColor: surfaceTintColor,
         label: Text(label),
         labelStyle: textTheme.labelSmall?.copyWith(color: labelColor),
-        side: BorderSide(color: surfaceTintColor?.withOpacity(0.5) ?? color.outline),
+        side: BorderSide(
+          color: outlineColor ?? (surfaceTintColor?.withOpacity(0.5) ?? color.outline),
+        ),
         onPressed: onPressed,
       ),
     );

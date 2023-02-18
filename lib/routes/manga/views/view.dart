@@ -6,11 +6,10 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/manga/widgets/content_rating_chip.dart";
+import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/widgets/material/chip.dart";
 
 class MangaView extends StatefulWidget {
   const MangaView({super.key, required this.id});
@@ -62,9 +61,6 @@ class _MangaViewState extends State<MangaView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final media = MediaQuery.of(context);
-
-    final colors = theme.colorScheme;
     final text = theme.textTheme;
 
     return Scaffold(
@@ -186,13 +182,14 @@ class _MangaViewState extends State<MangaView> {
               Text(title, style: theme.textTheme.titleLarge),
               Text(authorList, style: theme.textTheme.labelMedium?.withColorOpacity(0.5)),
               const SizedBox(height: Edges.small),
-              Row(
+              Wrap(
+                spacing: Edges.extraSmall,
+                runSpacing: Edges.small,
                 children: [
                   ContentRatingChip(contentRating: mangaData.manga.contentRating),
-                  const SizedBox(width: Edges.extraSmall),
-                  TinyChip(
-                      label: mangaData.manga.publicationDemographic.humanReadable,
-                      onPressed: () => {}),
+                  DemographicChip(demographic: mangaData.manga.publicationDemographic),
+                  for (final tag in mangaData.tags)
+                    TagChip(tag: tag, preferredLocales: preferredLocales),
                 ],
               ),
               const SizedBox(height: Edges.large),
