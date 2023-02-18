@@ -1,7 +1,10 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import "dart:developer";
+
 import "package:hive/hive.dart";
 import "package:riba/settings/settings.dart";
 
-class CachingSettingsController extends SettingsController<CachingSettingsData> {
+class CachingSettings extends SettingsController<CachingSettingsData> {
   @override
   final String id = "caching";
 
@@ -9,7 +12,7 @@ class CachingSettingsController extends SettingsController<CachingSettingsData> 
   late final Box box;
 
   @override
-  CachingSettingsData get defaultValue => CachingSettingsData(cacheCovers: true);
+  CachingSettingsData get defaultValue => const CachingSettingsData(cacheCovers: true);
 
   @override
   Future<void> init() async {
@@ -25,6 +28,7 @@ class CachingSettingsController extends SettingsController<CachingSettingsData> 
 
   @override
   void save(CachingSettingsData data) {
+    log("Saving caching settings: $data", name: "CachingSettings");
     box.put("cacheCovers", data.cacheCovers);
   }
 }
@@ -32,5 +36,16 @@ class CachingSettingsController extends SettingsController<CachingSettingsData> 
 class CachingSettingsData {
   final bool cacheCovers;
 
-  CachingSettingsData({required this.cacheCovers});
+  const CachingSettingsData({required this.cacheCovers});
+
+  CachingSettingsData copyWith({bool? cacheCovers}) {
+    return CachingSettingsData(
+      cacheCovers: cacheCovers ?? this.cacheCovers,
+    );
+  }
+
+  @override
+  String toString() {
+    return "CachingSettingsData(cacheCovers: $cacheCovers)";
+  }
 }

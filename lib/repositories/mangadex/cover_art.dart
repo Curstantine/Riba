@@ -74,7 +74,7 @@ class MDCoverArtRepo {
     CoverArt coverArt, {
     CoverSize size = CoverSize.original,
   }) async {
-    log("get($mangaId, ${coverArt.id}, $size)", name: "MDCoverArtRepo");
+    log("getImage($mangaId, ${coverArt.id}, $size)", name: "MDCoverArtRepo");
 
     final file = getFile(mangaId, coverArt.fileId, coverArt.fileType, size);
     if (await file.exists()) return file;

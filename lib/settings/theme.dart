@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import "package:flutter/material.dart";
 import "package:hive/hive.dart";
 import "package:riba/utils/constants.dart";
@@ -37,6 +39,7 @@ class ThemeSettings extends SettingsController<ThemeSettingsData> {
 
   @override
   void save(ThemeSettingsData data) {
+    log("Saving theme settings: $data", name: "ThemeSettings");
     box.put("id", data.id);
     box.put("mode", data.mode);
   }

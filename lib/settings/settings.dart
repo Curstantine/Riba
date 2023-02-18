@@ -8,7 +8,7 @@ class Settings {
   Settings._internal();
 
   final ThemeSettings theme = ThemeSettings();
-  final CachingSettingsController caching = CachingSettingsController();
+  final CachingSettings caching = CachingSettings();
 
   static Future<void> init() async {
     instance = Settings._internal();

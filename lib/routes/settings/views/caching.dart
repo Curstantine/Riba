@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/external.dart";
@@ -13,7 +14,9 @@ class SettingsCachingView extends StatefulWidget {
 }
 
 class _SettingsCachingViewState extends State<SettingsCachingView> {
-  bool cacheCovers = false;
+  final settings = Settings.instance.caching;
+
+  late bool cacheCovers = settings.get().cacheCovers;
   Future<DirectoryInfo> coverDir = getDirectoryInfo(MangaDex.instance.covers.directory);
 
   @override
@@ -41,7 +44,10 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
         subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
         trailing: Switch(
           value: cacheCovers,
-          onChanged: (value) => setState(() => cacheCovers = value),
+          onChanged: (value) {
+            settings.save(settings.get().copyWith(cacheCovers: value));
+            setState(() => cacheCovers = value);
+          },
         ),
       ),
       ListTile(
@@ -72,7 +78,13 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
   Padding buildTitle(TextTheme textTheme, ColorScheme colorScheme, String title) {
     return Padding(
       padding: Edges.leftLarge,
-      child: Text(title, style: textTheme.titleSmall?.copyWith(color: colorScheme.primary)),
+      child: Text(
+        title,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
