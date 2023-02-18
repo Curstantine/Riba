@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
@@ -17,6 +18,8 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
   final settings = Settings.instance.caching;
 
   late bool cacheCovers = settings.get().cacheCovers;
+  late CoverSize previewSize = settings.get().previewSize;
+  late CoverSize fullSize = settings.get().fullSize;
   Future<DirectoryInfo> coverDir = getDirectoryInfo(MangaDex.instance.covers.directory);
 
   @override
@@ -49,6 +52,30 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
             setState(() => cacheCovers = value);
           },
         ),
+      ),
+      ListTile(
+        enabled: cacheCovers,
+        title: const Text("Preview Cover Size"),
+        subtitle: const Text("Cover size to display in previews."),
+        trailing: Text(previewSize.human,
+            style: textTheme.labelSmall?.withColorOpacity(cacheCovers ? 1 : 0.38)),
+        onTap: () => showCoverSizeDialog(true, (value) {
+          if (value == null) return;
+          settings.save(settings.get().copyWith(previewSize: value));
+          setState(() => previewSize = value);
+        }),
+      ),
+      ListTile(
+        enabled: cacheCovers,
+        title: const Text("Full Cover Size"),
+        subtitle: const Text("Cover size to display on big surfaces."),
+        trailing: Text(fullSize.human,
+            style: textTheme.labelSmall?.withColorOpacity(cacheCovers ? 1 : 0.38)),
+        onTap: () => showCoverSizeDialog(false, (value) {
+          if (value == null) return;
+          settings.save(settings.get().copyWith(fullSize: value));
+          setState(() => fullSize = value);
+        }),
       ),
       ListTile(
         title: const Text("Clear Covers Cache"),
@@ -87,6 +114,47 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
       ),
     );
   }
+
+  void showCoverSizeDialog(
+    bool isPreview,
+    ValueChanged<CoverSize?> onChanged,
+  ) =>
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          final textTheme = Theme.of(context).textTheme;
+
+          return SizedBox(
+            child: Padding(
+              padding: Edges.verticalMedium,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: Edges.horizontalExtraLarge.copyWithSelf(Edges.verticalLarge),
+                    child: Text(isPreview ? "Preview Cover Size" : "Full Cover Size",
+                        style: textTheme.titleMedium),
+                  ),
+                  for (final size in CoverSize.values)
+                    RadioListTile<CoverSize>(
+                      value: size,
+                      groupValue: isPreview ? previewSize : fullSize,
+                      title: Text(size.human),
+                      secondary: size.size == null
+                          ? null
+                          : Text("${size.size}x", style: textTheme.labelSmall),
+                      onChanged: (value) {
+                        Navigator.pop(context, value);
+                        onChanged(value);
+                      },
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
 
   Future<void> deleteCoversCache(BuildContext context) async {
     final bool? prompt = await showDialog(

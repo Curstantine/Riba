@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 class TypeAdapterIds {
   static const int themeIdAdapter = 0;
   static const int themeModeAdapter = 1;
+  static const int coverSizeAdapter = 2;
 }
 
 /// Contains [EdgeInsets] constants with `all`, `top`, `right`, `bottom`, `left` variants.
