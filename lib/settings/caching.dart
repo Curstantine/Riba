@@ -1,7 +1,7 @@
 import "dart:developer";
 
 import "package:hive/hive.dart";
-import "package:riba/repositories/mangadex/cover_art.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/settings/settings.dart";
 
 class CachingSettings extends SettingsController<CachingSettingsData> {

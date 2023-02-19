@@ -1,4 +1,6 @@
+import "package:hive/hive.dart";
 import "package:isar/isar.dart";
+import "package:riba/utils/constants.dart";
 import "package:riba/utils/hash.dart";
 
 import "localization.dart";
@@ -97,4 +99,21 @@ enum ImageFileType {
         throw Exception("Unknown image file type: $value");
     }
   }
+}
+
+@HiveType(typeId: TypeAdapterIds.coverSizeAdapter)
+enum CoverSize {
+  @HiveField(0)
+  original(null),
+
+  @HiveField(1)
+  medium(512),
+
+  @HiveField(2)
+  small(256);
+
+  final int? size;
+  const CoverSize(this.size);
+
+  String get human => name.substring(0, 1).toUpperCase() + name.substring(1);
 }

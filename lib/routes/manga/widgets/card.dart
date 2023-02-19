@@ -2,8 +2,8 @@ import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";

@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:riba/repositories/mangadex/cover_art.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";

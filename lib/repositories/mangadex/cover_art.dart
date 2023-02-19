@@ -2,7 +2,6 @@ import "dart:convert";
 import "dart:developer";
 import "dart:io";
 
-import "package:hive_flutter/hive_flutter.dart";
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/cover_art.dart";
@@ -13,14 +12,11 @@ import "package:riba/repositories/mangadex/user.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/url.dart";
-import "package:riba/utils/constants.dart";
 import "package:riba/utils/hash.dart";
 
 import "error.dart";
 import "mangadex.dart";
 import "relationship.dart";
-
-part "cover_art.g.dart";
 
 typedef MDCoverArtEntity = MDEntityResponse<CoverArtAttributes>;
 typedef MDCoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
@@ -226,21 +222,4 @@ extension ToRelCoverArt on Relationship<CoverArtAttributes> {
       manga: mangaId,
     );
   }
-}
-
-@HiveType(typeId: TypeAdapterIds.coverSizeAdapter)
-enum CoverSize {
-  @HiveField(0)
-  original(null),
-
-  @HiveField(1)
-  medium(512),
-
-  @HiveField(2)
-  small(256);
-
-  final int? size;
-  const CoverSize(this.size);
-
-  String get human => name.substring(0, 1).toUpperCase() + name.substring(1);
 }
