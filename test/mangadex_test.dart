@@ -63,6 +63,12 @@ void main() async {
       expect(cover.user, isNotNull);
       expect(cover.user!.id, cover.cover.user!);
     });
+    test("CoverArt.getMany", () async {
+      final covers = await mangaDex.covers.getMany([coverId]);
+
+      expect(covers, isNotNull);
+      expect(covers.length, 1);
+    });
     test("CoverArt.getImage", () async {
       final coverTemp = await mangaDex.covers.get(coverId);
       final cover = await mangaDex.covers.getImage(mangaId, coverTemp.cover);

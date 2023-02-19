@@ -82,7 +82,7 @@ class MDMangaRepo {
       final response = MDMangaCollection.fromJson(jsonDecode(request.body), url: reqUrl);
       for (final data in response.data) {
         final internalMangaData = data.toInternalMangaData();
-        _insertMeta(internalMangaData);
+        await _insertMeta(internalMangaData);
         mapped[data.id] = internalMangaData.toMangaData();
       }
 

@@ -55,6 +55,42 @@ class MDCoverArtRepo {
     return coverArtData;
   }
 
+  Future<Map<String, CoverArtData>> getMany(List<String> ids) async {
+    log("getMany($ids)", name: "MDMangaRepo");
+
+    final Map<String, CoverArtData?> mapped = {for (var e in ids) e: null};
+    final inDB = await database.covers.getAll(ids.map((e) => fastHash(e)).toList());
+    for (final cover in inDB) {
+      if (cover == null) continue;
+      mapped[cover.id] = await _collectMeta(cover);
+    }
+
+    final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
+    if (missing.isEmpty) return mapped.cast();
+
+    // To go around the 100 limit, we split the request into multiple ones.
+    while (missing.isNotEmpty) {
+      await rateLimiter.wait("/covers:GET");
+      final reqUrl = url
+          .copy()
+          .setParameter("ids[]", missing.take(100).toList())
+          .setParameter("includes[]", includes)
+          .setParameter("limit", 100);
+      final request = await client.get(reqUrl.toUri());
+
+      final response = MDCoverArtCollection.fromJson(jsonDecode(request.body), url: reqUrl);
+      for (final data in response.data) {
+        final coverArtData = data.toCoverArtData();
+        await _insertMeta(coverArtData);
+        mapped[data.id] = coverArtData;
+      }
+
+      missing.removeWhere((e) => mapped[e] != null);
+    }
+
+    return mapped.cast();
+  }
+
   Future<void> _insertMeta(CoverArtData coverData) async {
     await database.writeTxn(() async {
       await Future.wait([
