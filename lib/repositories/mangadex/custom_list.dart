@@ -43,7 +43,7 @@ class MDCustomListRepo {
     final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDCustomListEntity.fromJson(jsonDecode(request.body), url: reqUrl);
+    final response = MDCustomListEntity.fromMap(jsonDecode(request.body), url: reqUrl);
     final listData = response.data.toCustomListData();
     await _insertMeta(listData);
 

@@ -1,9 +1,9 @@
 import "package:riba/repositories/url.dart";
 
 import "author.dart";
-import "error.dart";
 import "cover_art.dart";
 import "custom_list.dart";
+import "error.dart";
 import "manga.dart";
 import "relationship.dart";
 import "tag.dart";
@@ -25,7 +25,7 @@ class MDEntityResponse<T> extends MDResponse {
     required this.data,
   });
 
-  factory MDEntityResponse.fromJson(Map<String, dynamic> json, {URL? url}) {
+  factory MDEntityResponse.fromMap(Map<String, dynamic> json, {URL? url}) {
     final result = json["result"] as String;
 
     if (result == "error") {
@@ -56,7 +56,7 @@ class MDCollectionResponse<T> extends MDResponse {
     required this.data,
   });
 
-  factory MDCollectionResponse.fromJson(Map<String, dynamic> json, {URL? url}) {
+  factory MDCollectionResponse.fromMap(Map<String, dynamic> json, {URL? url}) {
     final result = json["result"] as String;
 
     if (result == "error") {
@@ -100,12 +100,13 @@ class MDResponseData<T> {
       type: type,
       attributes: attributes,
       relationships: (map["relationships"] as List<dynamic>)
-          .map((e) => Relationship.fromJson(e as Map<String, dynamic>))
+          .map((e) => Relationship.fromMap(e as Map<String, dynamic>))
           .toList(),
     );
   }
 }
 
+// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 enum EntityType {
   manga,
   chapter,

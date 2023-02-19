@@ -48,7 +48,7 @@ class MDCoverArtRepo {
     final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDCoverArtEntity.fromJson(jsonDecode(request.body), url: reqUrl);
+    final response = MDCoverArtEntity.fromMap(jsonDecode(request.body), url: reqUrl);
     final coverArtData = response.data.toCoverArtData();
 
     await _insertMeta(coverArtData);
@@ -78,7 +78,7 @@ class MDCoverArtRepo {
           .setParameter("limit", 100);
       final request = await client.get(reqUrl.toUri());
 
-      final response = MDCoverArtCollection.fromJson(jsonDecode(request.body), url: reqUrl);
+      final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
       for (final data in response.data) {
         final coverArtData = data.toCoverArtData();
         await _insertMeta(coverArtData);

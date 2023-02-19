@@ -7,6 +7,7 @@ import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
+import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
 import "package:riba/repositories/mangadex/author.dart";
 import "package:riba/repositories/rate_limiter.dart";
@@ -17,6 +18,7 @@ import "cover_art.dart";
 import "general.dart";
 import "mangadex.dart";
 import "relationship.dart";
+import "statistics.dart";
 import "tag.dart";
 
 typedef MDMangaEntity = MDEntityResponse<MangaAttributes>;
@@ -29,26 +31,31 @@ class MDMangaRepo {
 
   MDMangaRepo(this.client, this.rateLimiter, this.database) {
     rateLimiter.rates["/manga:GET"] = const Rate(4, Duration(seconds: 1));
+    rateLimiter.rates["/statistics/manga:GET"] = const Rate(4, Duration(seconds: 1));
   }
 
   final url = MangaDex.url.copyWith(pathSegments: ["manga"]);
+  final statisticUrl = MangaDex.url.copyWith(pathSegments: ["statistics", "manga"]);
+
   final includes = [
     EntityType.artist.toJsonValue(),
     EntityType.author.toJsonValue(),
     EntityType.coverArt.toJsonValue(),
   ];
 
-  Future<MangaData> get(String id) async {
-    log("get($id)", name: "MDMangaRepo");
+  Future<MangaData> get(String id, {bool checkDB = true}) async {
+    log("get($id, $checkDB)", name: "MDMangaRepo");
 
-    final inDB = await database.manga.get(fastHash(id));
-    if (inDB != null) return _collectMeta(inDB);
+    if (checkDB) {
+      final inDB = await database.manga.get(fastHash(id));
+      if (inDB != null) return _collectMeta(inDB);
+    }
 
     await rateLimiter.wait("/manga:GET");
     final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDMangaEntity.fromJson(jsonDecode(request.body), url: reqUrl);
+    final response = MDMangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
     final internalMangaData = response.data.toInternalMangaData();
     await _insertMeta(internalMangaData);
 
@@ -56,14 +63,17 @@ class MDMangaRepo {
   }
 
   /// Get multiple manga at once.
-  Future<Map<String, MangaData>> getMany(List<String> ids) async {
-    log("getMany($ids)", name: "MDMangaRepo");
+  Future<Map<String, MangaData>> getMany(List<String> ids, {bool checkDB = true}) async {
+    log("getMany($ids, $checkDB)", name: "MDMangaRepo");
 
     final Map<String, MangaData?> mapped = {for (var e in ids) e: null};
-    final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
-    for (final manga in inDB) {
-      if (manga == null) continue;
-      mapped[manga.id] = await _collectMeta(manga);
+
+    if (checkDB) {
+      final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
+      for (final manga in inDB) {
+        if (manga == null) continue;
+        mapped[manga.id] = await _collectMeta(manga);
+      }
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
@@ -79,7 +89,7 @@ class MDMangaRepo {
           .setParameter("limit", 100);
       final request = await client.get(reqUrl.toUri());
 
-      final response = MDMangaCollection.fromJson(jsonDecode(request.body), url: reqUrl);
+      final response = MDMangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
       for (final data in response.data) {
         final internalMangaData = data.toInternalMangaData();
         await _insertMeta(internalMangaData);
@@ -120,6 +130,29 @@ class MDMangaRepo {
       tags: (data[2] as List<Tag?>).cast(),
       cover: data[3] as CoverArt?,
     );
+  }
+
+  /// While this method will save the manga to the database,
+  /// it will not read from the database. This ensures that
+  /// the data is always up to date since statistic data
+  /// has a high cardinality.
+  Future<Statistics> getStatistic(String id) async {
+    log("getStatistic($id)", name: "MDMangaRepo");
+
+    await rateLimiter.wait("/statistics/manga:GET");
+    final reqUrl = statisticUrl.copy().addPathSegment(id);
+    final request = await client.get(reqUrl.toUri());
+
+    final response = MDStatistics.fromMap(
+      jsonDecode(request.body),
+      type: EntityType.manga,
+      url: reqUrl,
+    );
+
+    final statistic = response.statistics[id]!.toStatistics();
+    database.statistics.put(statistic);
+
+    return statistic;
   }
 }
 

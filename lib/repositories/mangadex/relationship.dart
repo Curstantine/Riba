@@ -17,7 +17,7 @@ class Relationship<T> {
     this.attributes,
   });
 
-  factory Relationship.fromJson(Map<String, dynamic> json) {
+  factory Relationship.fromMap(Map<String, dynamic> json) {
     final type = EntityType.fromJsonValue(json["type"] as String);
     final jsonAttr = json["attributes"];
     final related =
