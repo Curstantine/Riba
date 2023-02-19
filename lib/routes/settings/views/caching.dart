@@ -37,76 +37,69 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
   }
 
   Widget buildCoversSegment(TextTheme textTheme, ColorScheme colorScheme) {
-    return ValueListenableBuilder(
-      valueListenable: settings.box.listenable(),
-      builder: (context, _, __) {
-        final cacheCovers = settings.cacheCovers;
-        final disableLeading = textTheme.labelSmall?.withColorOpacity(cacheCovers ? 1 : 0.38);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildTitle(textTheme, colorScheme, "Covers"),
+        ListTile(
+          isThreeLine: true,
+          title: const Text("Cache Covers"),
+          subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
+          trailing: ValueListenableBuilder(
+            valueListenable: settings.box.listenable(),
+            builder: (context, _, __) => Switch(
+                value: settings.cacheCovers,
+                onChanged: (value) => settings.box.put(CacheSettingKeys.cacheCovers, value)),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: settings.box.listenable(keys: [CacheSettingKeys.previewSize]),
+          builder: (context, _, __) => ListTile(
+            title: const Text("Preview Cover Size"),
+            subtitle: const Text("Cover size to display in previews."),
+            trailing: Text(settings.previewSize.human),
+            onTap: () => showCoverSizeDialog(true, (value) {
+              if (value == null) return;
+              settings.box.put(CacheSettingKeys.previewSize, value);
+            }),
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: settings.box.listenable(keys: [CacheSettingKeys.fullSize]),
+          builder: (context, _, __) => ListTile(
+            title: const Text("Full Cover Size"),
+            subtitle: const Text("Cover size to display on big surfaces."),
+            trailing: Text(settings.fullSize.human),
+            onTap: () => showCoverSizeDialog(false, (value) {
+              if (value == null) return;
+              settings.box.put(CacheSettingKeys.fullSize, value);
+            }),
+          ),
+        ),
+        ListTile(
+          title: const Text("Clear Cover Cache"),
+          subtitle: const Text("Delete all locally cached manga covers."),
+          onTap: () => deleteCoversCache(context),
+        ),
+        FutureBuilder(
+          future: coverDir,
+          builder: (context, AsyncSnapshot<DirectoryInfo> snapshot) {
+            if (!snapshot.hasData || snapshot.hasError) {
+              return const LinearProgressIndicator();
+            }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildTitle(textTheme, colorScheme, "Covers"),
-            ListTile(
-              isThreeLine: true,
-              title: const Text("Cache Covers"),
-              subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
-              trailing: Switch(
-                  value: cacheCovers,
-                  onChanged: (value) => settings.box.put(CacheSettingKeys.cacheCovers, value)),
-            ),
-            ValueListenableBuilder(
-              valueListenable: settings.box.listenable(keys: [CacheSettingKeys.previewSize]),
-              builder: (context, _, __) => ListTile(
-                enabled: cacheCovers,
-                title: const Text("Preview Cover Size"),
-                subtitle: const Text("Cover size to display in previews."),
-                trailing: Text(settings.previewSize.human, style: disableLeading),
-                onTap: () => showCoverSizeDialog(true, (value) {
-                  if (value == null) return;
-                  settings.box.put(CacheSettingKeys.previewSize, value);
-                }),
+            final info = snapshot.data!;
+            return Padding(
+              padding: Edges.leftMedium,
+              child: Text(
+                "${info.files.length} covers, totaling ${info.humanSize}.",
+                style: textTheme.bodySmall?.withColorOpacity(0.5),
               ),
-            ),
-            ValueListenableBuilder(
-              valueListenable: settings.box.listenable(keys: [CacheSettingKeys.fullSize]),
-              builder: (context, _, __) => ListTile(
-                enabled: cacheCovers,
-                title: const Text("Full Cover Size"),
-                subtitle: const Text("Cover size to display on big surfaces."),
-                trailing: Text(settings.fullSize.human, style: disableLeading),
-                onTap: () => showCoverSizeDialog(false, (value) {
-                  if (value == null) return;
-                  settings.box.put(CacheSettingKeys.fullSize, value);
-                }),
-              ),
-            ),
-            ListTile(
-              title: const Text("Clear Covers Cache"),
-              subtitle: const Text("Delete all locally cached manga covers."),
-              onTap: () => deleteCoversCache(context),
-            ),
-            FutureBuilder(
-              future: coverDir,
-              builder: (context, AsyncSnapshot<DirectoryInfo> snapshot) {
-                if (!snapshot.hasData || snapshot.hasError) {
-                  return const LinearProgressIndicator();
-                }
-
-                final info = snapshot.data!;
-                return Padding(
-                  padding: Edges.leftMedium,
-                  child: Text(
-                    "${info.files.length} covers, totaling ${info.humanSize}.",
-                    style: textTheme.bodySmall?.withColorOpacity(0.5),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 
