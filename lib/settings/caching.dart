@@ -4,7 +4,9 @@ import "package:hive/hive.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/settings/settings.dart";
 
-class CachingSettings extends SettingsController<CachingSettingsData> {
+class CacheSettings extends SettingsController<CacheSettingsData> {
+  static final CacheSettings instance = Settings.instance.caching;
+
   @override
   final String id = "caching";
 
@@ -12,7 +14,7 @@ class CachingSettings extends SettingsController<CachingSettingsData> {
   late final Box box;
 
   @override
-  CachingSettingsData get defaultValue => const CachingSettingsData(
+  CacheSettingsData get defaultValue => const CacheSettingsData(
         cacheCovers: true,
         fullSize: CoverSize.original,
         previewSize: CoverSize.small,
@@ -25,41 +27,43 @@ class CachingSettings extends SettingsController<CachingSettingsData> {
   }
 
   @override
-  CachingSettingsData get() {
-    return CachingSettingsData(
-      cacheCovers: box.get("cacheCovers", defaultValue: defaultValue.cacheCovers),
-      fullSize: box.get("fullSize", defaultValue: defaultValue.fullSize),
-      previewSize: box.get("previewSize", defaultValue: defaultValue.previewSize),
+  CacheSettingsData get() {
+    return CacheSettingsData(
+      cacheCovers: box.get(CacheSettingKeys.cacheCovers, defaultValue: defaultValue.cacheCovers),
+      fullSize: box.get(CacheSettingKeys.fullSize, defaultValue: defaultValue.fullSize),
+      previewSize: box.get(CacheSettingKeys.previewSize, defaultValue: defaultValue.previewSize),
     );
   }
 
   @override
-  void save(CachingSettingsData data) {
+  Future<void> save(CacheSettingsData data) async {
     log("Saving caching settings: $data", name: "CachingSettings");
 
-    box.put("cacheCovers", data.cacheCovers);
-    box.put("fullSize", data.fullSize);
-    box.put("previewSize", data.previewSize);
+    await Future.wait([
+      box.put(CacheSettingKeys.cacheCovers, data.cacheCovers),
+      box.put(CacheSettingKeys.fullSize, data.fullSize),
+      box.put(CacheSettingKeys.previewSize, data.previewSize),
+    ]);
   }
 }
 
-class CachingSettingsData {
+class CacheSettingsData {
   final bool cacheCovers;
   final CoverSize previewSize;
   final CoverSize fullSize;
 
-  const CachingSettingsData({
+  const CacheSettingsData({
     required this.cacheCovers,
     required this.previewSize,
     required this.fullSize,
   });
 
-  CachingSettingsData copyWith({
+  CacheSettingsData copyWith({
     bool? cacheCovers,
     CoverSize? previewSize,
     CoverSize? fullSize,
   }) {
-    return CachingSettingsData(
+    return CacheSettingsData(
       cacheCovers: cacheCovers ?? this.cacheCovers,
       previewSize: previewSize ?? this.previewSize,
       fullSize: fullSize ?? this.fullSize,
@@ -68,5 +72,11 @@ class CachingSettingsData {
 
   @override
   String toString() =>
-      "CachingSettingsData(cacheCovers: $cacheCovers, previewSize: $previewSize, fullSize: $fullSize)";
+      "CacheSettingsData(cacheCovers: $cacheCovers, previewSize: $previewSize, fullSize: $fullSize)";
+}
+
+class CacheSettingKeys {
+  static const cacheCovers = "cacheCovers";
+  static const fullSize = "fullSize";
+  static const previewSize = "previewSize";
 }

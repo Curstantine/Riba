@@ -7,9 +7,9 @@ import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/utils/theme.dart";
 
 class MangaView extends StatefulWidget {
   const MangaView({super.key, required this.id});

@@ -1,8 +1,8 @@
 import "package:flutter/material.dart" hide Router;
 import "package:riba/repositories/mangadex/user.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/router.dart";
+import "package:riba/utils/theme.dart";
 
 class HomeUserBar extends StatelessWidget {
   const HomeUserBar({super.key});

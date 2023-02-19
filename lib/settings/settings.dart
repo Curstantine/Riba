@@ -8,7 +8,7 @@ class Settings {
   Settings._internal();
 
   final ThemeSettings theme = ThemeSettings();
-  final CachingSettings caching = CachingSettings();
+  final CacheSettings caching = CacheSettings();
 
   static Future<void> init() async {
     instance = Settings._internal();
@@ -28,5 +28,5 @@ abstract class SettingsController<T> {
 
   Future<void> init();
   T get();
-  void save(T data);
+  Future<void> save(T data);
 }

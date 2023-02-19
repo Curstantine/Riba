@@ -2,15 +2,17 @@ import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
+import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
-import "package:riba/settings/theme.dart";
+import "package:riba/settings/caching.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatelessWidget {
@@ -22,53 +24,60 @@ class MangaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FutureBuilder<MangaData>(
-      future: MangaDex.instance.manga.get(id),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return buildCard(theme, child: const Center(child: CircularProgressIndicator()));
-        }
-
-        if (snapshot.hasError || !snapshot.hasData) {
-          return buildCard(theme, child: buildError(theme, error: snapshot.error));
-        }
-
-        final cover = snapshot.data!.cover;
-
-        return buildCard(
-          theme,
-          onTap: () => Navigator.push(
-              context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical)),
-          title: snapshot.data!.manga.titles.getPreferred([Locale.en, Locale.ja]),
-          child: FutureBuilder<File?>(
-            future: cover == null
-                ? Future.value(null)
-                : MangaDex.instance.covers.getImage(id, cover, size: CoverSize.small),
+    return ValueListenableBuilder(
+        valueListenable:
+            CacheSettings.instance.box.listenable(keys: [CacheSettingKeys.previewSize]),
+        builder: (context, box, child) {
+          return FutureBuilder<MangaData>(
+            future: MangaDex.instance.manga.get(id),
             builder: (context, snapshot) {
+              final previewCoverSize = box.get(CacheSettingKeys.previewSize)! as CoverSize;
+
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return buildCard(theme, child: const Center(child: CircularProgressIndicator()));
               }
 
-              if (snapshot.hasError) {
-                return buildError(theme, error: snapshot.error);
+              if (snapshot.hasError || !snapshot.hasData) {
+                return buildCard(theme, child: buildError(theme, error: snapshot.error));
               }
 
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Text(
-                    "Cover art not found.",
-                    style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
+              final cover = snapshot.data!.cover;
 
-              return Image.file(snapshot.data!, fit: BoxFit.fill);
+              return buildCard(
+                theme,
+                onTap: () => Navigator.push(context,
+                    sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical)),
+                title: snapshot.data!.manga.titles.getPreferred([Locale.en, Locale.ja]),
+                child: FutureBuilder<File?>(
+                  future: cover == null
+                      ? Future.value(null)
+                      : MangaDex.instance.covers.getImage(id, cover, size: previewCoverSize),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return buildError(theme, error: snapshot.error);
+                    }
+
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: Text(
+                          "Cover art not found.",
+                          style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+
+                    return Image.file(snapshot.data!, fit: BoxFit.fill);
+                  },
+                ),
+              );
             },
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   Widget buildCard(ThemeData theme, {void Function()? onTap, Widget? child, String? title}) {

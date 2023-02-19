@@ -9,6 +9,8 @@ import "settings.dart";
 part "theme.g.dart";
 
 class ThemeSettings extends SettingsController<ThemeSettingsData> {
+  static final ThemeSettings instance = Settings.instance.theme;
+
   @override
   final String id = "theme";
 
@@ -32,16 +34,19 @@ class ThemeSettings extends SettingsController<ThemeSettingsData> {
   @override
   ThemeSettingsData get() {
     return ThemeSettingsData(
-      id: box.get("id", defaultValue: defaultValue.id),
-      mode: box.get("mode", defaultValue: defaultValue.mode),
+      id: box.get(ThemeSettingKeys.id, defaultValue: defaultValue.id),
+      mode: box.get(ThemeSettingKeys.mode, defaultValue: defaultValue.mode),
     );
   }
 
   @override
-  void save(ThemeSettingsData data) {
+  Future<void> save(ThemeSettingsData data) async {
     log("Saving theme settings: $data", name: "ThemeSettings");
-    box.put("id", data.id);
-    box.put("mode", data.mode);
+
+    await Future.wait([
+      box.put(ThemeSettingKeys.id, data.id),
+      box.put(ThemeSettingKeys.mode, data.mode),
+    ]);
   }
 }
 
@@ -61,34 +66,9 @@ class ThemeSettingsData {
   ThemeMode mode;
 }
 
-extension ToThemeMode on Brightness {
-  ThemeMode toThemeMode() {
-    switch (this) {
-      case Brightness.light:
-        return ThemeMode.light;
-      case Brightness.dark:
-        return ThemeMode.dark;
-    }
-  }
-}
-
-extension ToBrightness on ThemeMode {
-  Brightness toBrightness() {
-    switch (this) {
-      case ThemeMode.light:
-        return Brightness.light;
-      case ThemeMode.dark:
-        return Brightness.dark;
-      case ThemeMode.system:
-        return WidgetsBinding.instance.window.platformBrightness;
-    }
-  }
-}
-
-extension TextColor on TextStyle {
-  TextStyle withColorOpacity(double alpha) {
-    return copyWith(color: color?.withOpacity(alpha));
-  }
+class ThemeSettingKeys {
+  static const String id = "id";
+  static const String mode = "mode";
 }
 
 // Hive adapter for ThemeMode enum

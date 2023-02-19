@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/settings/settings.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/external.dart";
 import "package:riba/utils/lazy.dart";
+import "package:riba/utils/theme.dart";
 
 class SettingsCachingView extends StatefulWidget {
   const SettingsCachingView({super.key});

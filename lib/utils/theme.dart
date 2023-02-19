@@ -111,3 +111,33 @@ class ThemeManager with ChangeNotifier {
     ThemeId.lavender: ColorScheme.fromSeed(seedColor: Colors.purple.shade500)
   };
 }
+
+extension ToThemeMode on Brightness {
+  ThemeMode toThemeMode() {
+    switch (this) {
+      case Brightness.light:
+        return ThemeMode.light;
+      case Brightness.dark:
+        return ThemeMode.dark;
+    }
+  }
+}
+
+extension ToBrightness on ThemeMode {
+  Brightness toBrightness() {
+    switch (this) {
+      case ThemeMode.light:
+        return Brightness.light;
+      case ThemeMode.dark:
+        return Brightness.dark;
+      case ThemeMode.system:
+        return WidgetsBinding.instance.window.platformBrightness;
+    }
+  }
+}
+
+extension TextColor on TextStyle {
+  TextStyle withColorOpacity(double alpha) {
+    return copyWith(color: color?.withOpacity(alpha));
+  }
+}
