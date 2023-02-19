@@ -6,6 +6,7 @@ class TypeAdapterIds {
   static const int themeIdAdapter = 0;
   static const int themeModeAdapter = 1;
   static const int coverSizeAdapter = 2;
+  static const int cacheAdapter = 3;
 }
 
 /// Contains [EdgeInsets] constants with `all`, `top`, `right`, `bottom`, `left` variants.

@@ -52,7 +52,7 @@ class DirectoryInfo {
 Future<DirectoryInfo> getDirectoryInfo(Directory directory) async {
   if (!await directory.exists()) return const DirectoryInfo(0, []);
 
-  final files = await directory.list().toList();
+  final files = await directory.list(recursive: true).toList();
   final size = await Future.wait(files.map((file) => file.stat())).then((stats) {
     return stats.fold<int>(0, (prev, e) => prev + e.size);
   });

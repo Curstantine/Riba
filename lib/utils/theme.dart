@@ -2,7 +2,6 @@ import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:google_fonts/google_fonts.dart";
-import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
 
 class ThemeManager with ChangeNotifier {
@@ -17,12 +16,11 @@ class ThemeManager with ChangeNotifier {
   static Future<void> init() async {
     if (_initialized) throw Exception("ThemeManager is already initialized.");
 
-    final settings = Settings.instance.theme;
-    final settingsData = settings.get();
+    final settings = ThemeSettings.instance;
 
     final manager = ThemeManager._internal(
-      id: settingsData.id,
-      mode: settingsData.mode,
+      id: settings.themeId,
+      mode: settings.mode,
       settings: settings,
     );
 
@@ -66,6 +64,8 @@ class ThemeManager with ChangeNotifier {
     }
 
     id = themeId;
+    settings.box.put(ThemeSettingKeys.id, id);
+
     notifyListeners();
   }
 

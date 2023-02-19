@@ -130,8 +130,7 @@ class MDCoverArtRepo {
     }
 
     await file.create(recursive: true);
-    await file.writeAsBytes(response.bodyBytes);
-    return file;
+    return await file.writeAsBytes(response.bodyBytes);
   }
 
   /// Returns the local file name for the given [fileId], [type] and [size].

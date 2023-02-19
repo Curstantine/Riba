@@ -1,6 +1,6 @@
 import "package:hive/hive.dart";
 
-import "caching.dart";
+import "cache.dart";
 import "theme.dart";
 
 class Settings {
@@ -27,6 +27,4 @@ abstract class SettingsController<T> {
   T get defaultValue;
 
   Future<void> init();
-  T get();
-  Future<void> save(T data);
 }

@@ -1,5 +1,3 @@
-import "dart:developer";
-
 import "package:hive/hive.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/settings/settings.dart";
@@ -8,7 +6,7 @@ class CacheSettings extends SettingsController<CacheSettingsData> {
   static final CacheSettings instance = Settings.instance.caching;
 
   @override
-  final String id = "caching";
+  final String id = "cache";
 
   @override
   late final Box box;
@@ -26,25 +24,20 @@ class CacheSettings extends SettingsController<CacheSettingsData> {
     box = await Hive.openBox(id);
   }
 
-  @override
-  CacheSettingsData get() {
-    return CacheSettingsData(
-      cacheCovers: box.get(CacheSettingKeys.cacheCovers, defaultValue: defaultValue.cacheCovers),
-      fullSize: box.get(CacheSettingKeys.fullSize, defaultValue: defaultValue.fullSize),
-      previewSize: box.get(CacheSettingKeys.previewSize, defaultValue: defaultValue.previewSize),
-    );
-  }
+  bool get cacheCovers => box.get(
+        CacheSettingKeys.cacheCovers,
+        defaultValue: defaultValue.cacheCovers,
+      );
 
-  @override
-  Future<void> save(CacheSettingsData data) async {
-    log("Saving caching settings: $data", name: "CachingSettings");
+  CoverSize get previewSize => box.get(
+        CacheSettingKeys.previewSize,
+        defaultValue: defaultValue.previewSize,
+      );
 
-    await Future.wait([
-      box.put(CacheSettingKeys.cacheCovers, data.cacheCovers),
-      box.put(CacheSettingKeys.fullSize, data.fullSize),
-      box.put(CacheSettingKeys.previewSize, data.previewSize),
-    ]);
-  }
+  CoverSize get fullSize => box.get(
+        CacheSettingKeys.fullSize,
+        defaultValue: defaultValue.fullSize,
+      );
 }
 
 class CacheSettingsData {

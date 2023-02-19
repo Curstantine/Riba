@@ -1,5 +1,3 @@
-import "dart:developer";
-
 import "package:flutter/material.dart";
 import "package:hive/hive.dart";
 import "package:riba/utils/constants.dart";
@@ -31,23 +29,15 @@ class ThemeSettings extends SettingsController<ThemeSettingsData> {
     box = await Hive.openBox(id);
   }
 
-  @override
-  ThemeSettingsData get() {
-    return ThemeSettingsData(
-      id: box.get(ThemeSettingKeys.id, defaultValue: defaultValue.id),
-      mode: box.get(ThemeSettingKeys.mode, defaultValue: defaultValue.mode),
-    );
-  }
+  ThemeId get themeId => box.get(
+        ThemeSettingKeys.id,
+        defaultValue: defaultValue.id,
+      );
 
-  @override
-  Future<void> save(ThemeSettingsData data) async {
-    log("Saving theme settings: $data", name: "ThemeSettings");
-
-    await Future.wait([
-      box.put(ThemeSettingKeys.id, data.id),
-      box.put(ThemeSettingKeys.mode, data.mode),
-    ]);
-  }
+  ThemeMode get mode => box.get(
+        ThemeSettingKeys.mode,
+        defaultValue: defaultValue.mode,
+      );
 }
 
 @HiveType(typeId: TypeAdapterIds.themeIdAdapter)
