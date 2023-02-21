@@ -25,3 +25,5 @@ class MDException implements Exception {
   @override
   String toString() => "MDException: ${response.title}";
 }
+
+const placeholderError = MDException(MDError(title: "Test", status: 404));

@@ -57,7 +57,7 @@ class MDMangaRepo {
 
     final response = MDMangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
     final internalMangaData = response.data.toInternalMangaData();
-    await _insertMeta(internalMangaData);
+    _insertMeta(internalMangaData);
 
     return internalMangaData.toMangaData();
   }
@@ -92,7 +92,7 @@ class MDMangaRepo {
       final response = MDMangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
       for (final data in response.data) {
         final internalMangaData = data.toInternalMangaData();
-        await _insertMeta(internalMangaData);
+        _insertMeta(internalMangaData);
         mapped[data.id] = internalMangaData.toMangaData();
       }
 
@@ -132,12 +132,13 @@ class MDMangaRepo {
     );
   }
 
-  /// While this method will save the manga to the database,
-  /// it will not read from the database. This ensures that
-  /// the data is always up to date since statistic data
-  /// has a high cardinality.
-  Future<Statistics> getStatistic(String id) async {
-    log("getStatistic($id)", name: "MDMangaRepo");
+  Future<Statistics> getStatistics(String id, {bool checkDB = true}) async {
+    log("getStatistics($id)", name: "MDMangaRepo");
+
+    if (checkDB) {
+      final inDB = await database.statistics.get(fastHash(id));
+      if (inDB != null) return inDB;
+    }
 
     await rateLimiter.wait("/statistics/manga:GET");
     final reqUrl = statisticUrl.copy().addPathSegment(id);
@@ -150,7 +151,7 @@ class MDMangaRepo {
     );
 
     final statistic = response.statistics[id]!.toStatistics();
-    database.statistics.put(statistic);
+    database.writeTxn(() async => await database.statistics.put(statistic));
 
     return statistic;
   }

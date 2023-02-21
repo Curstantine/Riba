@@ -59,15 +59,17 @@ class StatisticAttributes {
         : RatingStatistics(
             average: ratingMap["average"] as double,
             bayesian: ratingMap["bayesian"] as double,
-            distribution:
-                (ratingMap["distribution"] as List<dynamic>).map((e) => e as int).toList(),
+            distribution: (ratingMap["distribution"] as Map<String, dynamic>)
+                .values
+                .map((e) => e as int)
+                .toList(),
           );
 
     final comments = commentsMap == null
         ? null
         : CommentStatistics(
-            id: commentsMap["id"] as int,
-            total: commentsMap["total"] as int,
+            id: commentsMap["threadId"] as int,
+            total: commentsMap["repliesCount"] as int,
           );
 
     return StatisticAttributes(

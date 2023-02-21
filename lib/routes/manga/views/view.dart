@@ -1,14 +1,17 @@
 import "dart:io";
 
 import "package:flutter/material.dart" hide Locale;
+import "package:flutter/services.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
+import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/utils/lazy.dart";
 import "package:riba/utils/theme.dart";
 
 class MangaView extends StatefulWidget {
@@ -28,8 +31,9 @@ class _MangaViewState extends State<MangaView> {
   bool showAppBar = false;
   bool expandDescription = false;
 
-  Future<MangaData>? mangaData;
-  Future<File?>? coverArt;
+  Future<MangaData>? mangaFuture;
+  Future<Statistics>? statisticsFuture;
+  Future<File?>? coverFuture;
 
   bool isFollowed = false;
   bool hasTrackers = false;
@@ -51,8 +55,9 @@ class _MangaViewState extends State<MangaView> {
   }
 
   void fetchMangaData() {
-    mangaData = MangaDex.instance.manga.get(widget.id);
-    coverArt = mangaData?.then((data) {
+    mangaFuture = MangaDex.instance.manga.get(widget.id);
+    statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id);
+    coverFuture = mangaFuture?.then((data) {
       if (data.cover == null) return Future.value(null);
       return MangaDex.instance.covers.getImage(widget.id, data.cover!);
     });
@@ -66,7 +71,7 @@ class _MangaViewState extends State<MangaView> {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: FutureBuilder<MangaData>(
-        future: mangaData,
+        future: mangaFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
@@ -79,7 +84,7 @@ class _MangaViewState extends State<MangaView> {
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text(error.title, style: theme.textTheme.titleLarge),
                 Text(error.description, style: theme.textTheme.bodyMedium),
-                const SizedBox(height: 24),
+                const SizedBox(height: Edges.large),
                 ElevatedButton(
                   onPressed: () => setState(() => fetchMangaData()),
                   child: const Text("Retry"),
@@ -115,6 +120,8 @@ class _MangaViewState extends State<MangaView> {
   Widget detailsHeader(MangaData mangaData) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
+    final text = theme.textTheme;
+    final colors = theme.colorScheme;
 
     final title = mangaData.manga.titles.getPreferred(preferredLocales);
     final authorList = (mangaData.authors + mangaData.artists.whereNotIn(mangaData.authors))
@@ -140,24 +147,36 @@ class _MangaViewState extends State<MangaView> {
             ),
           ),
           child: FutureBuilder<File?>(
-            future: coverArt,
+            future: coverFuture,
             builder: (context, snapshot) {
-              Widget? child;
+              List<Widget>? children;
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                child = const CircularProgressIndicator();
-              }
-
-              if (!snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
-                child = const Text("Cover art not found.");
+                children = [const CircularProgressIndicator()];
               }
 
               if (snapshot.hasError) {
-                child = Text(snapshot.error.toString());
+                final error = handleError(snapshot.error!);
+                children = [
+                  Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
+                  Text(error.description)
+                ];
               }
 
-              if (child != null) {
-                return SizedBox(height: media.padding.top + 200, child: Center(child: child));
+              if (!snapshot.hasData &&
+                  !snapshot.hasError &&
+                  snapshot.connectionState == ConnectionState.done) {
+                children = [Icon(Icons.broken_image_outlined, size: 72, color: colors.secondary)];
+              }
+
+              if (children != null) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    height: expandedAppBarHeight - 100 + media.padding.top,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
+                  ),
+                );
               }
 
               return Padding(
@@ -179,8 +198,61 @@ class _MangaViewState extends State<MangaView> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleLarge),
-              Text(authorList, style: theme.textTheme.labelMedium?.withColorOpacity(0.5)),
+              Text(title, style: text.titleLarge),
+              Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
+              const SizedBox(height: Edges.small),
+              SizedBox(
+                height: 25,
+                child: FutureBuilder<Statistics>(
+                  future: statisticsFuture,
+                  builder: (context, snapshot) {
+                    late List<Widget> children;
+
+                    if (snapshot.hasError) {
+                      final error = handleError(snapshot.error!);
+                      final label = text.bodyMedium?.copyWith(color: colors.error);
+
+                      children = [
+                        InkWell(
+                          child: Text(error.title, style: label),
+                          onLongPress: () {
+                            Clipboard.setData(ClipboardData(text: error.toString()));
+                            showLazyBar(context, "Error copied to clipboard.");
+                          },
+                        ),
+                        const SizedBox(width: Edges.small),
+                        Text(error.description, style: label?.withColorOpacity(0.75)),
+                      ];
+                    }
+
+                    if ((snapshot.connectionState != ConnectionState.done || snapshot.hasData) &&
+                        !snapshot.hasError) {
+                      final primary = colors.primary.withOpacity(snapshot.hasData ? 1 : 0.33);
+                      final label = text.labelLarge?.copyWith(color: primary);
+
+                      final rating = snapshot.data?.rating?.bayesian ?? 0.0;
+                      final follows = snapshot.data?.follows ?? 0;
+                      final comments = snapshot.data?.comments?.total ?? 0;
+
+                      children = [
+                        Icon(Icons.star_border_rounded, size: 20, color: primary),
+                        const SizedBox(width: Edges.extraSmall),
+                        Text(rating.toStringAsFixed(2), style: label),
+                        const SizedBox(width: Edges.small),
+                        Icon(Icons.bookmark_border_rounded, size: 20, color: primary),
+                        const SizedBox(width: Edges.extraSmall),
+                        Text(follows.toString(), style: label),
+                        const SizedBox(width: Edges.small),
+                        Icon(Icons.comment_outlined, size: 20, color: primary),
+                        const SizedBox(width: Edges.extraSmall),
+                        Text(comments.toString(), style: label),
+                      ];
+                    }
+
+                    return Row(children: children);
+                  },
+                ),
+              ),
               const SizedBox(height: Edges.small),
               Wrap(
                 spacing: Edges.extraSmall,
@@ -193,8 +265,8 @@ class _MangaViewState extends State<MangaView> {
                 ],
               ),
               const SizedBox(height: Edges.large),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 40),
+              SizedBox(
+                height: 40,
                 child: ListView(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,

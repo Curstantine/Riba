@@ -5,6 +5,9 @@ class ErrorState {
   final String description;
 
   const ErrorState({required this.title, required this.description});
+
+  @override
+  String toString() => "$title: $description";
 }
 
 ErrorState handleError(Object error) {
