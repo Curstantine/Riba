@@ -27,7 +27,7 @@ class RatingDetailsSheet extends StatelessWidget {
         children: [
           Text("Ratings", style: textTheme.titleLarge),
           const SizedBox(height: Edges.small),
-          SizedBox(height: 250, child: buildChart(textTheme, totalRateCount, colorScheme)),
+          SizedBox(height: 250, child: buildChart(textTheme, colorScheme, totalRateCount)),
           const SizedBox(height: Edges.large),
           SizedBox(
             height: 50,
@@ -42,12 +42,20 @@ class RatingDetailsSheet extends StatelessWidget {
     );
   }
 
-  BarChart buildChart(TextTheme textTheme, int totalRateCount, ColorScheme colorScheme) {
+  Widget buildChart(TextTheme textTheme, ColorScheme colorScheme, int totalRateCount) {
+    final maxValue = rating.distribution.reduce(max).toDouble();
+
+    if (maxValue == 0) {
+      return Center(
+        child: Text("No data available yet!", style: textTheme.bodyMedium?.withColorOpacity(0.5)),
+      );
+    }
+
     return BarChart(
       BarChartData(
+        maxY: maxValue,
         gridData: FlGridData(show: false),
         borderData: FlBorderData(show: false),
-        maxY: rating.distribution.reduce(max).toDouble(),
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(

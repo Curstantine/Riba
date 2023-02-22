@@ -208,56 +208,49 @@ class _MangaViewState extends State<MangaView> {
                 child: FutureBuilder<Statistics>(
                   future: statisticsFuture,
                   builder: (context, snapshot) {
-                    late List<Widget> children;
-
                     if (snapshot.hasError) {
                       final error = handleError(snapshot.error!);
                       final label = text.bodyMedium?.copyWith(color: colors.error);
 
-                      children = [
-                        InkWell(
-                          child: Text(error.title, style: label),
-                          onLongPress: () {
-                            Clipboard.setData(ClipboardData(text: error.toString()));
-                            showLazyBar(context, "Error copied to clipboard.");
-                          },
-                        ),
-                        const SizedBox(width: Edges.small),
-                        Text(error.description, style: label?.withColorOpacity(0.75)),
-                      ];
+                      return InkWell(
+                        onLongPress: () {
+                          Clipboard.setData(ClipboardData(text: error.toString()));
+                          showLazyBar(context, "Error copied to clipboard.");
+                        },
+                        child: ListView(scrollDirection: Axis.horizontal, children: [
+                          Text(error.title, style: label),
+                          const SizedBox(width: Edges.small),
+                          Text(error.description, style: label?.withColorOpacity(0.75)),
+                        ]),
+                      );
                     }
 
-                    if ((snapshot.connectionState != ConnectionState.done || snapshot.hasData) &&
-                        !snapshot.hasError) {
-                      final rating = snapshot.data?.rating?.bayesian ?? 0.0;
-                      final follows = snapshot.data?.follows ?? 0;
-                      final comments = snapshot.data?.comments?.total ?? 0;
+                    final rating = snapshot.data?.rating?.bayesian ?? 0.0;
+                    final follows = snapshot.data?.follows ?? 0;
+                    final comments = snapshot.data?.comments?.total ?? 0;
 
-                      children = [
-                        TinyButton(
-                          enabled: snapshot.data?.rating != null,
-                          text: rating.toStringAsFixed(2),
-                          icon: Icons.star_border_rounded,
-                          onPressed: () => snapshot.data?.rating == null
-                              ? null
-                              : showRatingStatisticSheet(snapshot.data!.rating!),
-                        ),
-                        const SizedBox(width: Edges.small),
-                        TinyButton(
-                          enabled: snapshot.data?.follows != null,
-                          text: follows.toString(),
-                          icon: Icons.bookmark_border_rounded,
-                        ),
-                        const SizedBox(width: Edges.small),
-                        TinyButton(
-                          enabled: snapshot.data?.comments != null,
-                          text: comments.toString(),
-                          icon: Icons.comment_outlined,
-                        ),
-                      ];
-                    }
-
-                    return Row(children: children);
+                    return Row(children: [
+                      TinyButton(
+                        enabled: snapshot.data?.rating != null,
+                        text: rating.toStringAsFixed(2),
+                        icon: Icons.star_border_rounded,
+                        onPressed: () => snapshot.data?.rating == null
+                            ? null
+                            : showRatingStatisticSheet(snapshot.data!.rating!),
+                      ),
+                      const SizedBox(width: Edges.small),
+                      TinyButton(
+                        enabled: snapshot.data?.follows != null,
+                        text: follows.toString(),
+                        icon: Icons.bookmark_border_rounded,
+                      ),
+                      const SizedBox(width: Edges.small),
+                      TinyButton(
+                        enabled: snapshot.data?.comments != null,
+                        text: comments.toString(),
+                        icon: Icons.comment_outlined,
+                      ),
+                    ]);
                   },
                 ),
               ),
