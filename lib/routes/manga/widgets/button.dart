@@ -5,9 +5,9 @@ class TinyButton extends StatelessWidget {
   final bool enabled;
   final String text;
   final IconData? icon;
-  final GestureTapCallback? onPressed;
+  final GestureTapCallback? onTap;
 
-  const TinyButton({super.key, this.enabled = true, required this.text, this.icon, this.onPressed});
+  const TinyButton({super.key, this.enabled = true, required this.text, this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class TinyButton extends StatelessWidget {
     final label = textTheme.labelLarge?.copyWith(color: primary);
 
     return InkWell(
-      onTap: onPressed,
+      onTap: onTap,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (icon != null) ...[
           Icon(icon, color: primary, size: 20),

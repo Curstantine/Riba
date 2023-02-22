@@ -239,7 +239,7 @@ class _MangaViewState extends State<MangaView> {
                         enabled: snapshot.data?.rating != null,
                         text: rating.toStringAsFixed(2),
                         icon: Icons.star_border_rounded,
-                        onPressed: () => snapshot.data?.rating == null
+                        onTap: () => snapshot.data?.rating == null
                             ? null
                             : showRatingStatisticSheet(snapshot.data!.rating!),
                       ),
