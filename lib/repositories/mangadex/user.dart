@@ -24,12 +24,14 @@ class UserAttributes {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 enum UserRole {
+  user,
   member,
   groupMember,
   groupLeader,
   mdAtHome,
   contributor,
   powerUploader,
+  vip,
   staff,
   forumModerator,
   globalModerator,
@@ -38,6 +40,8 @@ enum UserRole {
 
   String get human {
     switch (this) {
+      case UserRole.user:
+        return "User";
       case UserRole.member:
         return "Member";
       case UserRole.groupMember:
@@ -50,6 +54,8 @@ enum UserRole {
         return "Contributor";
       case UserRole.powerUploader:
         return "Power Uploader";
+      case UserRole.vip:
+        return "VIP";
       case UserRole.staff:
         return "Staff";
       case UserRole.forumModerator:
@@ -64,12 +70,14 @@ enum UserRole {
   }
 
   static Map<String, UserRole> get jsonValues => {
+        "ROLE_USER": UserRole.user,
         "ROLE_MEMBER": UserRole.member,
         "ROLE_GROUP_MEMBER": UserRole.groupMember,
         "ROLE_GROUP_LEADER": UserRole.groupLeader,
         "ROLE_MD_AT_HOME": UserRole.mdAtHome,
         "ROLE_CONTRIBUTOR": UserRole.contributor,
         "ROLE_POWER_UPLOADER": UserRole.powerUploader,
+        "ROLE_VIP": UserRole.vip,
         "ROLE_STAFF": UserRole.staff,
         "ROLE_FORUM_MODERATOR": UserRole.forumModerator,
         "ROLE_GLOBAL_MODERATOR": UserRole.globalModerator,

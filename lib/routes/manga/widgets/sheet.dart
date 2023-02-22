@@ -3,7 +3,12 @@ import "dart:math";
 import "package:fl_chart/fl_chart.dart";
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
+import "package:isar/isar.dart";
+import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/statistics.dart";
+import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/runtime/cover_art.dart";
+import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/theme.dart";
 
@@ -112,5 +117,67 @@ class RatingDetailsSheet extends StatelessWidget {
       Text(title, style: textTheme.labelLarge),
       Text(value, style: textTheme.labelSmall?.withColorOpacity(0.75)),
     ]);
+  }
+}
+
+class CoverSheet extends StatefulWidget {
+  const CoverSheet({super.key, required this.mangaData});
+
+  final MangaData mangaData;
+
+  @override
+  State<CoverSheet> createState() => _CoverSheetState();
+}
+
+class _CoverSheetState extends State<CoverSheet> {
+  Future<List<CoverArtData>>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+  void initialize() async {
+    final localCovers = await MangaDex.instance.database.covers
+        .filter()
+        .mangaEqualTo(widget.mangaData.manga.id)
+        .findAll();
+
+    if (localCovers.length >= 2) {
+      _future = MangaDex.instance.covers
+          .getMany(localCovers.map((e) => e.id).toList())
+          .then((e) => e.values.toList());
+    } else {
+      _future = MangaDex.instance.covers.getForManga(widget.mangaData.manga.id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    return FutureBuilder<List<CoverArtData>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
+
+        return ListView(
+          padding: Edges.allLarge,
+          children: [
+            Text("Covers", style: textTheme.titleLarge),
+            const SizedBox(height: Edges.small),
+          ],
+        );
+      },
+    );
   }
 }

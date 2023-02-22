@@ -38,31 +38,17 @@ class MDCoverArtRepo {
     EntityType.user.toJsonValue(),
   ];
 
-  Future<CoverArtData> get(String id) async {
-    log("get($id)", name: "MDCoverArtRepo");
-
-    final inDB = await database.covers.get(fastHash(id));
-    if (inDB != null) return _collectMeta(inDB);
-
-    await rateLimiter.wait("/covers:GET");
-    final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
-    final request = await client.get(reqUrl.toUri());
-
-    final response = MDCoverArtEntity.fromMap(jsonDecode(request.body), url: reqUrl);
-    final coverArtData = response.data.toCoverArtData();
-
-    await _insertMeta(coverArtData);
-    return coverArtData;
-  }
-
-  Future<Map<String, CoverArtData>> getMany(List<String> ids) async {
-    log("getMany($ids)", name: "MDMangaRepo");
+  Future<Map<String, CoverArtData>> getMany(List<String> ids, {bool checkDb = true}) async {
+    log("getMany($ids, $checkDb)", name: "MDMangaRepo");
 
     final Map<String, CoverArtData?> mapped = {for (var e in ids) e: null};
-    final inDB = await database.covers.getAll(ids.map((e) => fastHash(e)).toList());
-    for (final cover in inDB) {
-      if (cover == null) continue;
-      mapped[cover.id] = await _collectMeta(cover);
+
+    if (checkDb) {
+      final inDB = await database.covers.getAll(ids.map((e) => fastHash(e)).toList());
+      for (final cover in inDB) {
+        if (cover == null) continue;
+        mapped[cover.id] = await _collectMeta(cover);
+      }
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
@@ -77,11 +63,17 @@ class MDCoverArtRepo {
           .setParameter("includes[]", includes)
           .setParameter("limit", 100);
       final request = await client.get(reqUrl.toUri());
-
       final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+
       for (final data in response.data) {
         final coverArtData = data.toCoverArtData();
-        await _insertMeta(coverArtData);
+
+        if (coverArtData == null) {
+          mapped.remove(data.id);
+          continue;
+        }
+
+        _insertMeta(coverArtData);
         mapped[data.id] = coverArtData;
       }
 
@@ -91,11 +83,39 @@ class MDCoverArtRepo {
     return mapped.cast();
   }
 
+  Future<List<CoverArtData>> getForManga(String id) async {
+    log("getForManga($id)", name: "MDCoverArtRepo");
+
+    await rateLimiter.wait("/covers:GET");
+    final reqUrl = url
+        .copy()
+        .setParameter("manga[]", id)
+        .setParameter("includes[]", includes)
+        .setParameter("limit", 100);
+    final request = await client.get(reqUrl.toUri());
+
+    final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+    final coverArtData =
+        response.data.map((e) => e.toCoverArtData()).whereType<CoverArtData>().toList();
+
+    _insertManyMeta(coverArtData);
+    return coverArtData;
+  }
+
   Future<void> _insertMeta(CoverArtData coverData) async {
     await database.writeTxn(() async {
       await Future.wait([
         database.covers.put(coverData.cover),
         if (coverData.user != null) database.users.put(coverData.user!),
+      ]);
+    });
+  }
+
+  Future<void> _insertManyMeta(List<CoverArtData> coverData) async {
+    await database.writeTxn(() async {
+      await Future.wait([
+        database.covers.putAll(coverData.map((e) => e.cover).toList()),
+        database.users.putAll(coverData.map((e) => e.user).whereType<User>().toList()),
       ]);
     });
   }
@@ -213,8 +233,18 @@ class CoverArtAttributes {
 }
 
 extension ToCoverArt on MDResponseData<CoverArtAttributes> {
-  CoverArt toCoverArt(String mangaId) {
+  CoverArt? toCoverArt(String mangaId) {
     final file = attributes.fileName.split(".");
+    Locale? locale;
+
+    if (attributes.locale != null) {
+      try {
+        locale = Locale.fromJsonValue(attributes.locale!);
+      } on FormatException {
+        log("${attributes.locale} is not supported, returning null.", name: "ToCoverArt");
+        return null;
+      }
+    }
 
     return CoverArt(
       id: id,
@@ -222,7 +252,7 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
       fileId: file.first,
       fileType: ImageFileType.fromExtension(file.last),
       description: attributes.description,
-      locale: attributes.locale != null ? Locale.fromJsonValue(attributes.locale!) : null,
+      locale: locale,
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,
       version: attributes.version,
@@ -231,9 +261,12 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
     );
   }
 
-  CoverArtData toCoverArtData() {
+  CoverArtData? toCoverArtData() {
+    final cover = toCoverArt(relationships.ofType(EntityType.manga).first.id);
+    if (cover == null) return null;
+
     return CoverArtData(
-      cover: toCoverArt(relationships.ofType(EntityType.manga).first.id),
+      cover: cover,
       user: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
     );
   }

@@ -54,23 +54,18 @@ void main() async {
       expect(medium, "$coverFile.512.jpg");
       expect(small, "$coverFile.256.jpg");
     });
-
-    test("CoverArt.get", () async {
-      final cover = await mangaDex.covers.get(coverId);
-
-      expect(cover, isNotNull);
-      expect(cover.cover.id, coverId);
-      expect(cover.user, isNotNull);
-      expect(cover.user!.id, cover.cover.user!);
-    });
     test("CoverArt.getMany", () async {
       final covers = await mangaDex.covers.getMany([coverId]);
 
       expect(covers, isNotNull);
       expect(covers.length, 1);
     });
+    test("CoverArt.getForManga", () async {
+      final covers = await mangaDex.covers.getForManga(mangaId);
+      expect(covers, isNotEmpty);
+    });
     test("CoverArt.getImage", () async {
-      final coverTemp = await mangaDex.covers.get(coverId);
+      final coverTemp = (await mangaDex.covers.getMany([coverId])).values.first;
       final cover = await mangaDex.covers.getImage(mangaId, coverTemp.cover);
 
       final mediumCover = await mangaDex.covers.getImage(

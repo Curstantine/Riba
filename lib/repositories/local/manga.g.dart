@@ -39,58 +39,53 @@ const MangaSchema = CollectionSchema(
       type: IsarType.byte,
       enumMap: _MangacontentRatingEnumValueMap,
     ),
-    r"covers": PropertySchema(
-      id: 4,
-      name: r"covers",
-      type: IsarType.stringList,
-    ),
     r"description": PropertySchema(
-      id: 5,
+      id: 4,
       name: r"description",
       type: IsarType.object,
       target: r"Localizations",
     ),
     r"id": PropertySchema(
-      id: 6,
+      id: 5,
       name: r"id",
       type: IsarType.string,
     ),
     r"originalLocale": PropertySchema(
-      id: 7,
+      id: 6,
       name: r"originalLocale",
       type: IsarType.object,
       target: r"Locale",
     ),
     r"publicationDemographic": PropertySchema(
-      id: 8,
+      id: 7,
       name: r"publicationDemographic",
       type: IsarType.byte,
       enumMap: _MangapublicationDemographicEnumValueMap,
     ),
     r"status": PropertySchema(
-      id: 9,
+      id: 8,
       name: r"status",
       type: IsarType.byte,
       enumMap: _MangastatusEnumValueMap,
     ),
     r"tags": PropertySchema(
-      id: 10,
+      id: 9,
       name: r"tags",
       type: IsarType.stringList,
     ),
     r"titles": PropertySchema(
-      id: 11,
+      id: 10,
       name: r"titles",
       type: IsarType.object,
       target: r"Localizations",
     ),
     r"usedCover": PropertySchema(
-      id: 12,
+      id: 11,
       name: r"usedCover",
       type: IsarType.string,
     ),
     r"version": PropertySchema(
-      id: 13,
+      id: 12,
       name: r"version",
       type: IsarType.long,
     )
@@ -141,13 +136,6 @@ int _mangaEstimateSize(
       bytesCount += value.length * 3;
     }
   }
-  bytesCount += 3 + object.covers.length * 3;
-  {
-    for (var i = 0; i < object.covers.length; i++) {
-      final value = object.covers[i];
-      bytesCount += value.length * 3;
-    }
-  }
   bytesCount += 3 +
       LocalizationsSchema.estimateSize(
           object.description, allOffsets[Localizations]!, allOffsets);
@@ -189,31 +177,30 @@ void _mangaSerialize(
   writer.writeStringList(offsets[1], object.artists);
   writer.writeStringList(offsets[2], object.authors);
   writer.writeByte(offsets[3], object.contentRating.index);
-  writer.writeStringList(offsets[4], object.covers);
   writer.writeObject<Localizations>(
-    offsets[5],
+    offsets[4],
     allOffsets,
     LocalizationsSchema.serialize,
     object.description,
   );
-  writer.writeString(offsets[6], object.id);
+  writer.writeString(offsets[5], object.id);
   writer.writeObject<Locale>(
-    offsets[7],
+    offsets[6],
     allOffsets,
     LocaleSchema.serialize,
     object.originalLocale,
   );
-  writer.writeByte(offsets[8], object.publicationDemographic.index);
-  writer.writeByte(offsets[9], object.status.index);
-  writer.writeStringList(offsets[10], object.tags);
+  writer.writeByte(offsets[7], object.publicationDemographic.index);
+  writer.writeByte(offsets[8], object.status.index);
+  writer.writeStringList(offsets[9], object.tags);
   writer.writeObject<Localizations>(
-    offsets[11],
+    offsets[10],
     allOffsets,
     LocalizationsSchema.serialize,
     object.titles,
   );
-  writer.writeString(offsets[12], object.usedCover);
-  writer.writeLong(offsets[13], object.version);
+  writer.writeString(offsets[11], object.usedCover);
+  writer.writeLong(offsets[12], object.version);
 }
 
 Manga _mangaDeserialize(
@@ -235,34 +222,33 @@ Manga _mangaDeserialize(
     contentRating:
         _MangacontentRatingValueEnumMap[reader.readByteOrNull(offsets[3])] ??
             MangaContentRating.safe,
-    covers: reader.readStringList(offsets[4]) ?? [],
     description: reader.readObjectOrNull<Localizations>(
-          offsets[5],
+          offsets[4],
           LocalizationsSchema.deserialize,
           allOffsets,
         ) ??
         Localizations(),
-    id: reader.readString(offsets[6]),
+    id: reader.readString(offsets[5]),
     originalLocale: reader.readObjectOrNull<Locale>(
-          offsets[7],
+          offsets[6],
           LocaleSchema.deserialize,
           allOffsets,
         ) ??
         Locale(),
     publicationDemographic: _MangapublicationDemographicValueEnumMap[
-            reader.readByteOrNull(offsets[8])] ??
+            reader.readByteOrNull(offsets[7])] ??
         MangaPublicationDemographic.unknown,
-    status: _MangastatusValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+    status: _MangastatusValueEnumMap[reader.readByteOrNull(offsets[8])] ??
         MangaStatus.ongoing,
-    tags: reader.readStringList(offsets[10]) ?? [],
+    tags: reader.readStringList(offsets[9]) ?? [],
     titles: reader.readObjectOrNull<Localizations>(
-          offsets[11],
+          offsets[10],
           LocalizationsSchema.deserialize,
           allOffsets,
         ) ??
         Localizations(),
-    usedCover: reader.readStringOrNull(offsets[12]),
-    version: reader.readLong(offsets[13]),
+    usedCover: reader.readStringOrNull(offsets[11]),
+    version: reader.readLong(offsets[12]),
   );
   return object;
 }
@@ -290,42 +276,40 @@ P _mangaDeserializeProp<P>(
       return (_MangacontentRatingValueEnumMap[reader.readByteOrNull(offset)] ??
           MangaContentRating.safe) as P;
     case 4:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 5:
       return (reader.readObjectOrNull<Localizations>(
             offset,
             LocalizationsSchema.deserialize,
             allOffsets,
           ) ??
           Localizations()) as P;
-    case 6:
+    case 5:
       return (reader.readString(offset)) as P;
-    case 7:
+    case 6:
       return (reader.readObjectOrNull<Locale>(
             offset,
             LocaleSchema.deserialize,
             allOffsets,
           ) ??
           Locale()) as P;
-    case 8:
+    case 7:
       return (_MangapublicationDemographicValueEnumMap[
               reader.readByteOrNull(offset)] ??
           MangaPublicationDemographic.unknown) as P;
-    case 9:
+    case 8:
       return (_MangastatusValueEnumMap[reader.readByteOrNull(offset)] ??
           MangaStatus.ongoing) as P;
-    case 10:
+    case 9:
       return (reader.readStringList(offset) ?? []) as P;
-    case 11:
+    case 10:
       return (reader.readObjectOrNull<Localizations>(
             offset,
             LocalizationsSchema.deserialize,
             allOffsets,
           ) ??
           Localizations()) as P;
-    case 12:
+    case 11:
       return (reader.readStringOrNull(offset)) as P;
-    case 13:
+    case 12:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
@@ -1019,220 +1003,6 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r"covers",
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r"covers",
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r"covers",
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"covers",
-        value: "",
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"covers",
-        value: "",
-      ));
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> coversLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r"covers",
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
     });
   }
 
@@ -2149,12 +1919,6 @@ extension MangaQueryWhereDistinct on QueryBuilder<Manga, Manga, QDistinct> {
     });
   }
 
-  QueryBuilder<Manga, Manga, QDistinct> distinctByCovers() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"covers");
-    });
-  }
-
   QueryBuilder<Manga, Manga, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2224,12 +1988,6 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
       contentRatingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"contentRating");
-    });
-  }
-
-  QueryBuilder<Manga, List<String>, QQueryOperations> coversProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"covers");
     });
   }
 

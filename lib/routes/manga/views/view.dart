@@ -205,6 +205,7 @@ class _MangaViewState extends State<MangaView> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Expanded(child: InkWell(onTap: () => showCoverSheet(mangaData))),
               Text(title, style: text.titleLarge),
               Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
               const SizedBox(height: Edges.small),
@@ -410,6 +411,13 @@ class _MangaViewState extends State<MangaView> {
     showModalBottomSheet(
       context: context,
       builder: (context) => RatingDetailsSheet(rating: rating),
+    );
+  }
+
+  void showCoverSheet(MangaData mangaData) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => CoverSheet(mangaData: mangaData),
     );
   }
 

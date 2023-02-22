@@ -852,9 +852,10 @@ CommentStatistics _commentStatisticsDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = CommentStatistics();
-  object.id = reader.readLong(offsets[0]);
-  object.total = reader.readLong(offsets[1]);
+  final object = CommentStatistics(
+    id: reader.readLongOrNull(offsets[0]) ?? 0,
+    total: reader.readLongOrNull(offsets[1]) ?? 0,
+  );
   return object;
 }
 
@@ -866,9 +867,9 @@ P _commentStatisticsDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
@@ -1048,10 +1049,11 @@ RatingStatistics _ratingStatisticsDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = RatingStatistics();
-  object.average = reader.readDouble(offsets[0]);
-  object.bayesian = reader.readDouble(offsets[1]);
-  object.distribution = reader.readLongList(offsets[2]) ?? [];
+  final object = RatingStatistics(
+    average: reader.readDoubleOrNull(offsets[0]) ?? 0.0,
+    bayesian: reader.readDoubleOrNull(offsets[1]) ?? 0.0,
+    distribution: reader.readLongList(offsets[2]) ?? const [],
+  );
   return object;
 }
 
@@ -1063,11 +1065,11 @@ P _ratingStatisticsDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 1:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 2:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readLongList(offset) ?? const []) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }

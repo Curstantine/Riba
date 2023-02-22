@@ -2,6 +2,7 @@
 import "package:isar/isar.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/utils/hash.dart";
+
 import "localization.dart";
 
 part "manga.g.dart";
@@ -22,7 +23,6 @@ class Manga {
   late List<String> authors;
   late List<String> artists;
   late List<String> tags;
-  late List<String> covers;
   late String? usedCover;
   late Locale originalLocale;
   late int version;
@@ -44,7 +44,6 @@ class Manga {
     required this.authors,
     required this.artists,
     required this.tags,
-    required this.covers,
     required this.usedCover,
     required this.originalLocale,
     required this.version,

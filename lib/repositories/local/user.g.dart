@@ -87,7 +87,7 @@ User _userDeserialize(
     id: reader.readString(offsets[0]),
     roles: reader
             .readByteList(offsets[1])
-            ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.member)
+            ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.user)
             .toList() ??
         [],
     username: reader.readString(offsets[2]),
@@ -108,7 +108,7 @@ P _userDeserializeProp<P>(
     case 1:
       return (reader
               .readByteList(offset)
-              ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.member)
+              ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.user)
               .toList() ??
           []) as P;
     case 2:
@@ -121,30 +121,34 @@ P _userDeserializeProp<P>(
 }
 
 const _UserrolesEnumValueMap = {
-  "member": 0,
-  "groupMember": 1,
-  "groupLeader": 2,
-  "mdAtHome": 3,
-  "contributor": 4,
-  "powerUploader": 5,
-  "staff": 6,
-  "forumModerator": 7,
-  "globalModerator": 8,
-  "developer": 9,
-  "administrator": 10,
+  "user": 0,
+  "member": 1,
+  "groupMember": 2,
+  "groupLeader": 3,
+  "mdAtHome": 4,
+  "contributor": 5,
+  "powerUploader": 6,
+  "vip": 7,
+  "staff": 8,
+  "forumModerator": 9,
+  "globalModerator": 10,
+  "developer": 11,
+  "administrator": 12,
 };
 const _UserrolesValueEnumMap = {
-  0: UserRole.member,
-  1: UserRole.groupMember,
-  2: UserRole.groupLeader,
-  3: UserRole.mdAtHome,
-  4: UserRole.contributor,
-  5: UserRole.powerUploader,
-  6: UserRole.staff,
-  7: UserRole.forumModerator,
-  8: UserRole.globalModerator,
-  9: UserRole.developer,
-  10: UserRole.administrator,
+  0: UserRole.user,
+  1: UserRole.member,
+  2: UserRole.groupMember,
+  3: UserRole.groupLeader,
+  4: UserRole.mdAtHome,
+  5: UserRole.contributor,
+  6: UserRole.powerUploader,
+  7: UserRole.vip,
+  8: UserRole.staff,
+  9: UserRole.forumModerator,
+  10: UserRole.globalModerator,
+  11: UserRole.developer,
+  12: UserRole.administrator,
 };
 
 Id _userGetId(User object) {

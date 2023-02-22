@@ -267,8 +267,11 @@ enum MangaContentRating {
 }
 
 extension on MDResponseData<MangaAttributes> {
-  Manga toManga() {
-    final covers = relationships.ofType<CoverArtAttributes>(EntityType.coverArt).map((e) => e.id);
+  Manga toManga({String? usedCoverId}) {
+    final String usedCover = relationships
+        .ofType<CoverArtAttributes>(EntityType.coverArt)
+        .map((e) => e.id)
+        .firstWhere((e) => usedCoverId != null ? e == usedCoverId : true, orElse: () => "");
 
     return Manga(
       id: id,
@@ -277,13 +280,12 @@ extension on MDResponseData<MangaAttributes> {
       description: Localizations.fromMap(attributes.description),
       authors: relationships.ofType(EntityType.author).map((e) => e.id).toList(),
       artists: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
-      covers: covers.toList(),
-      usedCover: covers.isEmpty ? null : covers.first,
+      usedCover: usedCover.isEmpty ? null : usedCover,
       tags: attributes.tags.map((e) => e.id).toList(),
       originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
       contentRating: attributes.contentRating,
       publicationDemographic:
-          attributes.publicationDemographic ?? MangaPublicationDemographic.seinen,
+          attributes.publicationDemographic ?? MangaPublicationDemographic.unknown,
       status: attributes.status,
       version: attributes.version,
     );
