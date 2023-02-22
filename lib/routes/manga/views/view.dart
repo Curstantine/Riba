@@ -95,25 +95,30 @@ class _MangaViewState extends State<MangaView> {
             );
           }
 
-          return CustomScrollView(controller: scrollController, slivers: [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: expandedAppBarHeight,
-              title: AnimatedOpacity(
-                opacity: showAppBar ? 1 : 0,
-                duration: Durations.normal,
-                child: Text(snapshot.data!.manga.titles.getPreferred(preferredLocales),
-                    style: text.titleMedium),
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() => fetchMangaData());
+            },
+            child: CustomScrollView(controller: scrollController, slivers: [
+              SliverAppBar(
+                pinned: true,
+                expandedHeight: expandedAppBarHeight,
+                title: AnimatedOpacity(
+                  opacity: showAppBar ? 1 : 0,
+                  duration: Durations.normal,
+                  child: Text(snapshot.data!.manga.titles.getPreferred(preferredLocales),
+                      style: text.titleMedium),
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.pin,
+                  background: detailsHeader(snapshot.data!),
+                  titlePadding: Edges.allNone,
+                ),
               ),
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.pin,
-                background: detailsHeader(snapshot.data!),
-                titlePadding: Edges.allNone,
-              ),
-            ),
-            SliverToBoxAdapter(child: buildDescription(theme, snapshot.data!.manga)),
-            SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
-          ]);
+              SliverToBoxAdapter(child: buildDescription(theme, snapshot.data!.manga)),
+              SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
+            ]),
+          );
         },
       ),
     );
