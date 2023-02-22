@@ -27,6 +27,7 @@ dependencies:
     package_info_plus: ^3.0.2
     url_launcher: ^6.1.9
     google_fonts: ^4.0.3
+    fl_chart: ^0.61.0
 
 dev_dependencies:
     flutter_test:

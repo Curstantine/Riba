@@ -10,6 +10,7 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
+import "package:riba/routes/manga/widgets/sheet.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";
@@ -410,10 +411,7 @@ class _MangaViewState extends State<MangaView> {
   void showRatingStatisticSheet(RatingStatistics rating) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Padding(
-        padding: Edges.allMedium,
-        child: Column(mainAxisSize: MainAxisSize.min, children: const []),
-      ),
+      builder: (context) => RatingDetailsSheet(rating: rating),
     );
   }
 
