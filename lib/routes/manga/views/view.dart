@@ -8,6 +8,7 @@ import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
@@ -227,25 +228,31 @@ class _MangaViewState extends State<MangaView> {
 
                     if ((snapshot.connectionState != ConnectionState.done || snapshot.hasData) &&
                         !snapshot.hasError) {
-                      final primary = colors.primary.withOpacity(snapshot.hasData ? 1 : 0.33);
-                      final label = text.labelLarge?.copyWith(color: primary);
-
                       final rating = snapshot.data?.rating?.bayesian ?? 0.0;
                       final follows = snapshot.data?.follows ?? 0;
                       final comments = snapshot.data?.comments?.total ?? 0;
 
                       children = [
-                        Icon(Icons.star_border_rounded, size: 20, color: primary),
-                        const SizedBox(width: Edges.extraSmall),
-                        Text(rating.toStringAsFixed(2), style: label),
+                        TinyButton(
+                          enabled: snapshot.data?.rating != null,
+                          text: rating.toStringAsFixed(2),
+                          icon: Icons.star_border_rounded,
+                          onPressed: () => snapshot.data?.rating == null
+                              ? null
+                              : showRatingStatisticSheet(snapshot.data!.rating!),
+                        ),
                         const SizedBox(width: Edges.small),
-                        Icon(Icons.bookmark_border_rounded, size: 20, color: primary),
-                        const SizedBox(width: Edges.extraSmall),
-                        Text(follows.toString(), style: label),
+                        TinyButton(
+                          enabled: snapshot.data?.follows != null,
+                          text: follows.toString(),
+                          icon: Icons.bookmark_border_rounded,
+                        ),
                         const SizedBox(width: Edges.small),
-                        Icon(Icons.comment_outlined, size: 20, color: primary),
-                        const SizedBox(width: Edges.extraSmall),
-                        Text(comments.toString(), style: label),
+                        TinyButton(
+                          enabled: snapshot.data?.comments != null,
+                          text: comments.toString(),
+                          icon: Icons.comment_outlined,
+                        ),
                       ];
                     }
 
@@ -397,6 +404,16 @@ class _MangaViewState extends State<MangaView> {
       onPressed: handleTrackerPress,
       icon: hasTrackers ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
       label: hasTrackers ? const Text("Tracking") : const Text("Track"),
+    );
+  }
+
+  void showRatingStatisticSheet(RatingStatistics rating) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: Edges.allMedium,
+        child: Column(mainAxisSize: MainAxisSize.min, children: const []),
+      ),
     );
   }
 
