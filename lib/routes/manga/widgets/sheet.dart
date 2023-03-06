@@ -1,3 +1,4 @@
+import "dart:io";
 import "dart:math";
 
 import "package:fl_chart/fl_chart.dart";
@@ -10,7 +11,9 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/constants.dart";
+import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
+import "package:riba/widgets/material/card.dart";
 
 class RatingDetailsSheet extends StatelessWidget {
   const RatingDetailsSheet({super.key, required this.rating});
@@ -130,7 +133,10 @@ class CoverSheet extends StatefulWidget {
 }
 
 class _CoverSheetState extends State<CoverSheet> {
-  Future<List<CoverArtData>>? _future;
+  Future<List<CoverArtData>>? coverDataFuture;
+  Future<File?>? coverFileFuture;
+
+  late String? selectedCoverId = widget.mangaData.manga.usedCover;
 
   @override
   void initState() {
@@ -138,46 +144,161 @@ class _CoverSheetState extends State<CoverSheet> {
     initialize();
   }
 
-  void initialize() async {
-    final localCovers = await MangaDex.instance.database.covers
+  void initialize() {
+    final localCovers = MangaDex.instance.database.covers
         .filter()
         .mangaEqualTo(widget.mangaData.manga.id)
-        .findAll();
+        .findAllSync();
 
     if (localCovers.length >= 2) {
-      _future = MangaDex.instance.covers
+      coverDataFuture = MangaDex.instance.covers
           .getMany(localCovers.map((e) => e.id).toList())
           .then((e) => e.values.toList());
     } else {
-      _future = MangaDex.instance.covers.getForManga(widget.mangaData.manga.id);
+      coverDataFuture = MangaDex.instance.covers.getForManga(widget.mangaData.manga.id);
+    }
+
+    if (selectedCoverId != null && coverDataFuture != null) {
+      coverDataFuture?.then((value) {
+        final selected = value.firstWhere((e) => e.cover.id == selectedCoverId);
+        coverFileFuture =
+            MangaDex.instance.covers.getImage(widget.mangaData.manga.id, selected.cover);
+        // coverFileFuture = Future.value(null);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
+    final text = theme.textTheme;
+    final colors = theme.colorScheme;
 
     return FutureBuilder<List<CoverArtData>>(
-      future: _future,
+      future: coverDataFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
+        if (snapshot.hasError || !snapshot.hasData) {
+          final error = handleError(snapshot.error ?? "Data was null without errors.");
+
+          return Center(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text(error.title, style: theme.textTheme.titleLarge),
+              Text(error.description, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: Edges.large),
+              ElevatedButton(
+                onPressed: () => setState(() => initialize()),
+                child: const Text("Retry"),
+              ),
+            ]),
+          );
         }
 
         return ListView(
           padding: Edges.allLarge,
           children: [
-            Text("Covers", style: textTheme.titleLarge),
-            const SizedBox(height: Edges.small),
+            Text("Covers", style: text.titleLarge),
+            const SizedBox(height: Edges.large),
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 150, maxHeight: 350),
+                child: OutlinedCard(
+                  child: AnimatedSize(
+                    duration: Durations.slow,
+                    child: buildSelectedPreview(text, colors),
+                  ),
+                ),
+              ),
+            ),
+            const Text("Select a cover"),
           ],
         );
       },
+    );
+  }
+
+  Widget buildSelectedPreview(TextTheme text, ColorScheme colors) {
+    return Stack(
+      children: [
+        FutureBuilder<File?>(
+          future: coverFileFuture,
+          builder: (context, snapshot) {
+            List<Widget>? children;
+
+            if (snapshot.connectionState != ConnectionState.done) {
+              children = [const CircularProgressIndicator()];
+            }
+
+            if (snapshot.hasError) {
+              final error = handleError(snapshot.error!);
+              children = [
+                Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
+                Text(error.description)
+              ];
+            }
+
+            if (!snapshot.hasData &&
+                !snapshot.hasError &&
+                snapshot.connectionState == ConnectionState.done) {
+              children = [
+                Icon(Icons.broken_image_outlined, size: 56, color: colors.onSurfaceVariant),
+                const SizedBox(height: Edges.small),
+                Text("No cover available!", style: text.bodyMedium),
+              ];
+            }
+
+            if (children != null) {
+              return SizedBox(
+                width: 250,
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
+              );
+            }
+
+            return InkWell(
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => buildZoomablePreview(context, snapshot.data!),
+              ),
+              child: Image.file(
+                snapshot.data!,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
+            );
+          },
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: Edges.allSmall,
+            child: Wrap(
+              spacing: Edges.small,
+              children: [
+                ActionChip(label: const Text("Vol 2"), onPressed: () {}),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  InteractiveViewer buildZoomablePreview(BuildContext context, File image) {
+    return InteractiveViewer(
+      maxScale: 2,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.pop(context),
+        child: Container(
+          alignment: Alignment.center,
+          margin: Edges.horizontalMedium,
+          child: Image.file(image, fit: BoxFit.fitWidth, filterQuality: FilterQuality.high),
+        ),
+      ),
     );
   }
 }

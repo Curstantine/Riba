@@ -18,13 +18,13 @@ class OutlinedCard extends StatelessWidget {
   const OutlinedCard({
     super.key,
     required this.child,
-    this.clipBehavior = Clip.antiAlias,
     this.margin,
+    this.clipBehavior = Clip.antiAlias,
   });
 
-  final Clip clipBehavior;
   final Widget child;
   final EdgeInsets? margin;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {

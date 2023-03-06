@@ -57,7 +57,7 @@ class StatisticAttributes {
     final ratings = ratingMap == null
         ? null
         : RatingStatistics(
-            average: ratingMap["average"] as double? ?? 0,
+            average: ratingMap["average"]?.toDouble() ?? 0,
             bayesian: ratingMap["bayesian"] as double,
             distribution: (ratingMap["distribution"] as Map<String, dynamic>)
                 .values

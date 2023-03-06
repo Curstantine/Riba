@@ -158,7 +158,7 @@ class _MangaViewState extends State<MangaView> {
             builder: (context, snapshot) {
               List<Widget>? children;
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState != ConnectionState.done) {
                 children = [const CircularProgressIndicator()];
               }
 

@@ -14,8 +14,11 @@
 	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll": true,
-		"source.organizeImports": true,	
+		"source.organizeImports": true
 	},
+	"licenser.author": "Curstantine",
+	"licenser.license": "GPLv3",
+	"licenser.disableAutoHeaderInsertion": true,
 	"cSpell.words": [
 		"doujinshi",
 		"fantia",
@@ -34,6 +37,7 @@
 		"shounen",
 		"skeb",
 		"tappable",
-		"weibo"
-	],
+		"weibo",
+		"Zoomable"
+	]
 }
