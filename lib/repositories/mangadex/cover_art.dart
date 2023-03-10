@@ -91,6 +91,7 @@ class MDCoverArtRepo {
         .copy()
         .setParameter("manga[]", id)
         .setParameter("includes[]", includes)
+        .setParameter("order[volume]", "desc")
         .setParameter("limit", 100);
     final request = await client.get(reqUrl.toUri());
 

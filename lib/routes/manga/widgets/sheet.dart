@@ -5,6 +5,7 @@ import "package:fl_chart/fl_chart.dart";
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:isar/isar.dart";
+import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
@@ -14,6 +15,7 @@ import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/cache.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/utils/lazy.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 import "package:riba/widgets/material/chip.dart";
@@ -136,10 +138,10 @@ class CoverSheet extends StatefulWidget {
 }
 
 class _CoverSheetState extends State<CoverSheet> {
+  final logger = Logger("MangaCoverSheet");
+  final selectedCoverId = ValueNotifier<String?>(null);
+
   Future<List<CoverArtData>>? coverDataFuture;
-
-  late String? selectedCoverId = widget.mangaData.manga.usedCover;
-
   Manga get manga => widget.mangaData.manga;
 
   @override
@@ -149,15 +151,18 @@ class _CoverSheetState extends State<CoverSheet> {
   }
 
   void initialize() async {
-    final localCovers =
-        await MangaDex.instance.database.covers.filter().mangaEqualTo(manga.id).findAll();
+    selectedCoverId.value = manga.usedCover;
 
-    if (localCovers.isNotEmpty) {
+    try {
+      final covers = await MangaDex.instance.covers.getForManga(manga.id);
+      coverDataFuture = Future.value(covers);
+    } catch (e) {
+      final localCovers =
+          await MangaDex.instance.database.covers.filter().mangaEqualTo(manga.id).findAll();
+
       coverDataFuture = MangaDex.instance.covers
           .getMany(localCovers.map((e) => e.id).toList())
           .then((e) => e.values.toList());
-    } else {
-      coverDataFuture = MangaDex.instance.covers.getForManga(manga.id);
     }
 
     setState(() => {});
@@ -166,6 +171,22 @@ class _CoverSheetState extends State<CoverSheet> {
   void reloadData() => setState(() {
         coverDataFuture = MangaDex.instance.covers.getForManga(manga.id);
       });
+
+  void setUsedCover() async {
+    final id = selectedCoverId.value;
+
+    try {
+      await MangaDex.instance.database.writeTxn(() async {
+        await MangaDex.instance.database.manga.put(manga..usedCover = id);
+      });
+
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      final message = "Failed to set cover for manga ${manga.id}";
+      logger.severe(message, e);
+      if (mounted) showLazyBar(context, message);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,8 +234,6 @@ class _CoverSheetState extends State<CoverSheet> {
           return SizedBox(height: 300, child: child);
         }
 
-        final selectedCover = snapshot.data!.firstWhere((e) => e.cover.id == selectedCoverId);
-
         return ListView(
           padding: Edges.allLarge,
           shrinkWrap: true,
@@ -224,85 +243,186 @@ class _CoverSheetState extends State<CoverSheet> {
             OutlinedCard(
               child: AnimatedSize(
                 duration: Durations.normal,
-                child: buildSelectedPreview(text, colors, selectedCover),
+                curve: Curves.easeInOut,
+                child: buildBigPicture(text, colors, snapshot.requireData),
               ),
             ),
-            const SizedBox(height: Edges.small),
-            Text("Select a cover", style: text.labelLarge),
-            const SizedBox(height: Edges.small),
-            OutlinedButton(onPressed: reloadData, child: const Text("Reload")),
+            const SizedBox(height: Edges.medium),
+            if (snapshot.data!.length > 1) ...[
+              Text("Select a cover", style: text.titleMedium),
+              const SizedBox(height: Edges.small),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: snapshot.data!.length,
+                  separatorBuilder: (context, _) => const SizedBox(width: Edges.medium),
+                  itemBuilder: (context, i) {
+                    return buildPreview(text, colors, snapshot.requireData[i]);
+                  },
+                ),
+              ),
+            ],
+            LayoutBuilder(
+              builder: (context, constraints) => ValueListenableBuilder(
+                valueListenable: selectedCoverId,
+                builder: (context, selectedId, _) {
+                  final isDifferent = selectedId != manga.usedCover;
+
+                  return Row(children: [
+                    AnimatedContainer(
+                      duration: Durations.normal,
+                      width: isDifferent ? 100 : constraints.maxWidth,
+                      curve: Curves.easeInOutCubic,
+                      child: OutlinedButton(onPressed: reloadData, child: const Text("Reload")),
+                    ),
+                    if (isDifferent) ...[
+                      const SizedBox(width: Edges.small),
+                      Expanded(
+                        child:
+                            FilledButton.tonal(onPressed: setUsedCover, child: const Text("Apply")),
+                      )
+                    ]
+                  ]);
+                },
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  Widget buildSelectedPreview(TextTheme text, ColorScheme colors, CoverArtData coverData) {
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        FutureBuilder<File?>(
-          future: MangaDex.instance.covers
-              .getImage(manga.id, coverData.cover, size: CacheSettings.instance.fullSize),
-          builder: (context, snapshot) {
-            List<Widget>? children;
+  Widget buildBigPicture(TextTheme text, ColorScheme colors, List<CoverArtData> covers) {
+    return ValueListenableBuilder(
+      valueListenable: selectedCoverId,
+      builder: (context, selectedId, _) {
+        final selectedCover = covers.firstWhere((e) => e.cover.id == selectedId).cover;
 
-            if (snapshot.connectionState != ConnectionState.done) {
-              children = [const CircularProgressIndicator()];
-            }
+        return Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            FutureBuilder<File?>(
+              future: MangaDex.instance.covers
+                  .getImage(manga.id, selectedCover, size: CacheSettings.instance.fullSize),
+              builder: (context, snapshot) {
+                List<Widget>? children;
 
-            if (snapshot.hasError) {
-              final error = handleError(snapshot.error!);
-              children = [
-                Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
-                Text(error.description)
-              ];
-            }
+                if (snapshot.connectionState != ConnectionState.done) {
+                  children = [const CircularProgressIndicator()];
+                }
 
-            if (!snapshot.hasData &&
-                !snapshot.hasError &&
-                snapshot.connectionState == ConnectionState.done) {
-              children = [
-                Icon(Icons.image_not_supported_rounded, size: 48, color: colors.onSurfaceVariant),
+                if (snapshot.hasError) {
+                  final error = handleError(snapshot.error!);
+                  children = [
+                    Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
+                    Text(error.description)
+                  ];
+                }
+
+                if (!snapshot.hasData &&
+                    !snapshot.hasError &&
+                    snapshot.connectionState == ConnectionState.done) {
+                  children = [
+                    Icon(Icons.image_not_supported_rounded,
+                        size: 48, color: colors.onSurfaceVariant),
+                    const SizedBox(height: Edges.small),
+                    Text("No cover available!", style: text.bodyMedium),
+                  ];
+                }
+
+                if (children != null) {
+                  return SizedBox(
+                    height: 300,
+                    width: double.infinity,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
+                  );
+                }
+
+                return InkWell(
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (context) => buildZoomablePreview(context, snapshot.data!),
+                  ),
+                  child: Image.file(snapshot.data!, fit: BoxFit.fitWidth, width: double.infinity),
+                );
+              },
+            ),
+            Padding(
+              padding: Edges.horizontalSmall.copyWithSelf(Edges.verticalMedium),
+              child: Wrap(
+                spacing: Edges.extraSmall,
+                children: [
+                  if (selectedCover.volume != null)
+                    TinyChip(label: "Vol ${selectedCover.volume}", onPressed: () => {}),
+                  if (selectedCover.locale != null)
+                    TinyChip(label: selectedCover.locale!.language.human, onPressed: () => {}),
+                ],
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildPreview(TextTheme text, ColorScheme colors, CoverArtData coverData) {
+    return SizedBox(
+      width: 100,
+      child: FutureBuilder<File>(
+        future: MangaDex.instance.covers
+            .getImage(manga.id, coverData.cover, size: CacheSettings.instance.previewSize),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            final error = handleError(snapshot.error!);
+            return Center(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
                 const SizedBox(height: Edges.small),
-                Text("No cover available!", style: text.bodyMedium),
-              ];
-            }
-
-            if (children != null) {
-              return SizedBox(
-                height: 300,
-                width: double.infinity,
-                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
-              );
-            }
-
-            return InkWell(
-              onTap: () => showDialog(
-                context: context,
-                builder: (context) => buildZoomablePreview(context, snapshot.data!),
-              ),
-              child: Image.file(
-                snapshot.data!,
-                fit: BoxFit.fitWidth,
-                width: double.infinity,
-                filterQuality: FilterQuality.high,
-              ),
+                Text(error.description, style: text.bodySmall)
+              ]),
             );
-          },
-        ),
-        Padding(
-          padding: Edges.allSmall.copyWith(bottom: Edges.medium),
-          child: Wrap(
-            children: [
-              if (coverData.cover.volume != null)
-                TinyChip(label: "Vol ${coverData.cover.volume}", onPressed: () => {}),
-              if (coverData.cover.locale != null)
-                TinyChip(label: coverData.cover.locale!.language.human, onPressed: () => {}),
-            ],
-          ),
-        )
-      ],
+          }
+
+          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            ValueListenableBuilder(
+              valueListenable: selectedCoverId,
+              builder: (context, selectedId, child) {
+                final isMain = coverData.cover.id == manga.usedCover;
+                final isSelected = selectedId == coverData.cover.id;
+
+                return Card(
+                  margin: Edges.allNone,
+                  clipBehavior: Clip.antiAlias,
+                  elevation: isSelected ? 4 : 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: Corners.allMedium,
+                    side: isMain ? BorderSide(width: 2, color: colors.primary) : BorderSide.none,
+                  ),
+                  child: child!,
+                );
+              },
+              child: InkWell(
+                onTap: () => selectedCoverId.value = coverData.cover.id,
+                child: Image.file(
+                  snapshot.data!,
+                  fit: BoxFit.fitWidth,
+                  width: double.infinity,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+            ),
+            if (coverData.cover.volume != null) ...[
+              const SizedBox(height: Edges.extraSmall),
+              Text("Vol ${coverData.cover.volume}", style: text.labelSmall),
+            ]
+          ]);
+        },
+      ),
     );
   }
 
