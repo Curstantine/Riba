@@ -11,6 +11,7 @@ import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
@@ -241,7 +242,8 @@ class _CoverSheetState extends State<CoverSheet> {
       alignment: Alignment.bottomRight,
       children: [
         FutureBuilder<File?>(
-          future: MangaDex.instance.covers.getImage(manga.id, coverData.cover),
+          future: MangaDex.instance.covers
+              .getImage(manga.id, coverData.cover, size: CacheSettings.instance.fullSize),
           builder: (context, snapshot) {
             List<Widget>? children;
 

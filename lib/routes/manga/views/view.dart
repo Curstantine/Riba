@@ -11,6 +11,7 @@ import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/routes/manga/widgets/sheet.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";
@@ -61,7 +62,8 @@ class _MangaViewState extends State<MangaView> {
     statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id);
     coverFuture = mangaFuture?.then((data) {
       if (data.cover == null) return Future.value(null);
-      return MangaDex.instance.covers.getImage(widget.id, data.cover!);
+      return MangaDex.instance.covers
+          .getImage(widget.id, data.cover!, size: CacheSettings.instance.fullSize);
     });
   }
 
