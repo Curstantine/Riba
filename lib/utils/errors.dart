@@ -15,7 +15,7 @@ ErrorState handleError(Object error) {
   late String description;
 
   if (error is MDException) {
-    title = "Failed to reach MangaDex!";
+    title = "Failed to reach Mangadex!";
     description = error.title;
   } else {
     title = "Came across an unknown error!";

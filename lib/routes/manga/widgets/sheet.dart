@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
@@ -14,6 +15,7 @@ import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
+import "package:riba/widgets/material/chip.dart";
 
 class RatingDetailsSheet extends StatelessWidget {
   const RatingDetailsSheet({super.key, required this.rating});
@@ -134,9 +136,10 @@ class CoverSheet extends StatefulWidget {
 
 class _CoverSheetState extends State<CoverSheet> {
   Future<List<CoverArtData>>? coverDataFuture;
-  Future<File?>? coverFileFuture;
 
   late String? selectedCoverId = widget.mangaData.manga.usedCover;
+
+  Manga get manga => widget.mangaData.manga;
 
   @override
   void initState() {
@@ -144,29 +147,24 @@ class _CoverSheetState extends State<CoverSheet> {
     initialize();
   }
 
-  void initialize() {
-    final localCovers = MangaDex.instance.database.covers
-        .filter()
-        .mangaEqualTo(widget.mangaData.manga.id)
-        .findAllSync();
+  void initialize() async {
+    final localCovers =
+        await MangaDex.instance.database.covers.filter().mangaEqualTo(manga.id).findAll();
 
-    if (localCovers.length >= 2) {
+    if (localCovers.isNotEmpty) {
       coverDataFuture = MangaDex.instance.covers
           .getMany(localCovers.map((e) => e.id).toList())
           .then((e) => e.values.toList());
     } else {
-      coverDataFuture = MangaDex.instance.covers.getForManga(widget.mangaData.manga.id);
+      coverDataFuture = MangaDex.instance.covers.getForManga(manga.id);
     }
 
-    if (selectedCoverId != null && coverDataFuture != null) {
-      coverDataFuture?.then((value) {
-        final selected = value.firstWhere((e) => e.cover.id == selectedCoverId);
-        coverFileFuture =
-            MangaDex.instance.covers.getImage(widget.mangaData.manga.id, selected.cover);
-        // coverFileFuture = Future.value(null);
-      });
-    }
+    setState(() => {});
   }
+
+  void reloadData() => setState(() {
+        coverDataFuture = MangaDex.instance.covers.getForManga(manga.id);
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -177,19 +175,22 @@ class _CoverSheetState extends State<CoverSheet> {
     return FutureBuilder<List<CoverArtData>>(
       future: coverDataFuture,
       builder: (context, snapshot) {
+        Widget? child;
+
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          child = const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError || !snapshot.hasData) {
+        if ((snapshot.hasError || !snapshot.hasData) &&
+            snapshot.connectionState == ConnectionState.done) {
           final error = handleError(snapshot.error ?? "Data was null without errors.");
 
-          return Center(
+          child = Center(
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(error.title, style: theme.textTheme.titleLarge),
               Text(error.description, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: Edges.large),
-              ElevatedButton(
+              const SizedBox(height: Edges.small),
+              OutlinedButton(
                 onPressed: () => setState(() => initialize()),
                 child: const Text("Retry"),
               ),
@@ -197,35 +198,50 @@ class _CoverSheetState extends State<CoverSheet> {
           );
         }
 
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          child = Center(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Icon(Icons.image_search_rounded, size: 36),
+              const SizedBox(height: Edges.small),
+              Text("Couldn't find any covers for this title!", style: theme.textTheme.titleMedium),
+            ]),
+          );
+        }
+
+        if (child != null) {
+          return SizedBox(height: 300, child: child);
+        }
+
+        final selectedCover = snapshot.data!.firstWhere((e) => e.cover.id == selectedCoverId);
+
         return ListView(
           padding: Edges.allLarge,
+          shrinkWrap: true,
           children: [
             Text("Covers", style: text.titleLarge),
-            const SizedBox(height: Edges.large),
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 150, maxHeight: 350),
-                child: OutlinedCard(
-                  child: AnimatedSize(
-                    duration: Durations.slow,
-                    child: buildSelectedPreview(text, colors),
-                  ),
-                ),
+            const SizedBox(height: Edges.small),
+            OutlinedCard(
+              child: AnimatedSize(
+                duration: Durations.normal,
+                child: buildSelectedPreview(text, colors, selectedCover),
               ),
             ),
-            const Text("Select a cover"),
+            const SizedBox(height: Edges.small),
+            Text("Select a cover", style: text.labelLarge),
+            const SizedBox(height: Edges.small),
+            OutlinedButton(onPressed: reloadData, child: const Text("Reload")),
           ],
         );
       },
     );
   }
 
-  Widget buildSelectedPreview(TextTheme text, ColorScheme colors) {
+  Widget buildSelectedPreview(TextTheme text, ColorScheme colors, CoverArtData coverData) {
     return Stack(
+      alignment: Alignment.bottomRight,
       children: [
         FutureBuilder<File?>(
-          future: coverFileFuture,
+          future: MangaDex.instance.covers.getImage(manga.id, coverData.cover),
           builder: (context, snapshot) {
             List<Widget>? children;
 
@@ -245,7 +261,7 @@ class _CoverSheetState extends State<CoverSheet> {
                 !snapshot.hasError &&
                 snapshot.connectionState == ConnectionState.done) {
               children = [
-                Icon(Icons.broken_image_outlined, size: 56, color: colors.onSurfaceVariant),
+                Icon(Icons.image_not_supported_rounded, size: 48, color: colors.onSurfaceVariant),
                 const SizedBox(height: Edges.small),
                 Text("No cover available!", style: text.bodyMedium),
               ];
@@ -253,7 +269,8 @@ class _CoverSheetState extends State<CoverSheet> {
 
             if (children != null) {
               return SizedBox(
-                width: 250,
+                height: 300,
+                width: double.infinity,
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
               );
             }
@@ -265,22 +282,22 @@ class _CoverSheetState extends State<CoverSheet> {
               ),
               child: Image.file(
                 snapshot.data!,
-                fit: BoxFit.cover,
+                fit: BoxFit.fitWidth,
+                width: double.infinity,
                 filterQuality: FilterQuality.high,
               ),
             );
           },
         ),
-        Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: Edges.allSmall,
-            child: Wrap(
-              spacing: Edges.small,
-              children: [
-                ActionChip(label: const Text("Vol 2"), onPressed: () {}),
-              ],
-            ),
+        Padding(
+          padding: Edges.allSmall.copyWith(bottom: Edges.medium),
+          child: Wrap(
+            children: [
+              if (coverData.cover.volume != null)
+                TinyChip(label: "Vol ${coverData.cover.volume}", onPressed: () => {}),
+              if (coverData.cover.locale != null)
+                TinyChip(label: coverData.cover.locale!.language.human, onPressed: () => {}),
+            ],
           ),
         )
       ],

@@ -124,4 +124,15 @@ enum Language {
 
   final String isoCode;
   const Language(this.isoCode);
+
+  static Map<Language, String> humanNames = {
+    Language.none: "None",
+    Language.english: "English",
+    Language.japanese: "Japanese",
+    Language.simpleChinese: "Simplified Chinese",
+    Language.traditionalChinese: "Traditional Chinese",
+    Language.korean: "Korean",
+  };
+
+  String get human => humanNames[this]!;
 }
