@@ -11,6 +11,7 @@ class ThemeManager with ChangeNotifier {
   ThemeManager._internal({required this.id, required this.mode, required this.settings}) {
     _initialized = true;
     addListener(onChange);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   static Future<void> init() async {
@@ -33,9 +34,6 @@ class ThemeManager with ChangeNotifier {
   late ColorScheme scheme;
   final ThemeSettings settings;
 
-  /// Stops the changes done by [setSystemOverlayStyles] whenever [refresh] | [onChange] is called.
-  bool preventSystemOverlaySync = false;
-
   ThemeData get theme => ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -45,9 +43,7 @@ class ThemeManager with ChangeNotifier {
   TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme(const TextTheme());
 
   void onChange() {
-    if (!preventSystemOverlaySync) {
-      setSystemOverlayStyles();
-    }
+    SystemChrome.setSystemUIOverlayStyle(getOverlayStyles());
   }
 
   @override
@@ -92,20 +88,24 @@ class ThemeManager with ChangeNotifier {
     }
   }
 
-  /// Sets the system overlay styles used by the app.
-  ///
-  /// In case a relevant parameter is not passed, it will be set to a default value.
-  void setSystemOverlayStyles({
+  /// Returns a [SystemUiOverlayStyle] with the given options while applying preferred defaults.
+  SystemUiOverlayStyle getOverlayStyles({
     Color statusBarColor = Colors.transparent,
+    Color systemNavigationBarColor = Colors.transparent,
     Brightness? statusBarBrightness,
     Brightness? statusBarIconBrightness,
-  }) =>
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: statusBarColor,
-        statusBarBrightness: statusBarBrightness ?? mode.toBrightness(),
-        statusBarIconBrightness: statusBarIconBrightness ??
-            (mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light),
-      ));
+    Brightness? systemNavigationBarIconBrightness,
+  }) {
+    return SystemUiOverlayStyle(
+      statusBarColor: statusBarColor,
+      statusBarBrightness: statusBarBrightness ?? mode.toBrightness(),
+      statusBarIconBrightness: statusBarIconBrightness ??
+          (mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light),
+      systemNavigationBarColor: systemNavigationBarColor,
+      systemNavigationBarDividerColor: systemNavigationBarColor,
+      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? mode.toBrightness(),
+    );
+  }
 
   static Map<ThemeId, ColorScheme> themes = {
     ThemeId.lavender: ColorScheme.fromSeed(seedColor: Colors.purple.shade500)

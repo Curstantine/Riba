@@ -21,9 +21,10 @@ import "package:riba/widgets/material/card.dart";
 import "package:riba/widgets/material/chip.dart";
 
 class RatingDetailsSheet extends StatelessWidget {
-  const RatingDetailsSheet({super.key, required this.rating});
+  const RatingDetailsSheet({super.key, required this.rating, this.padding = Edges.allNone});
 
   final RatingStatistics rating;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class RatingDetailsSheet extends StatelessWidget {
     final totalRateCount = rating.distribution.reduce((x, y) => x + y);
 
     return Padding(
-      padding: Edges.allLarge,
+      padding: Edges.allLarge.add(padding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +130,10 @@ class RatingDetailsSheet extends StatelessWidget {
 }
 
 class CoverSheet extends StatefulWidget {
-  const CoverSheet({super.key, required this.mangaData});
+  const CoverSheet({super.key, required this.mangaData, this.padding = Edges.allNone});
 
   final MangaData mangaData;
+  final EdgeInsets padding;
 
   @override
   State<CoverSheet> createState() => _CoverSheetState();
@@ -235,7 +237,7 @@ class _CoverSheetState extends State<CoverSheet> {
         }
 
         return ListView(
-          padding: Edges.allLarge,
+          padding: Edges.allLarge.add(widget.padding),
           shrinkWrap: true,
           children: [
             Text("Covers", style: text.titleLarge),

@@ -302,7 +302,10 @@ class _MangaViewState extends State<MangaView> {
             text: manga.description.getPreferred(preferredLocales),
             style: theme.textTheme.bodyMedium);
 
-        final tp = TextPainter(maxLines: 3, textDirection: TextDirection.ltr, text: span)
+        final minTp = TextPainter(maxLines: 3, textDirection: TextDirection.ltr, text: span)
+          ..layout(maxWidth: constraints.maxWidth);
+
+        final maxTp = TextPainter(textDirection: TextDirection.ltr, text: span)
           ..layout(maxWidth: constraints.maxWidth);
 
         final content = Padding(
@@ -310,43 +313,39 @@ class _MangaViewState extends State<MangaView> {
           child: Text(manga.description.getPreferred(preferredLocales)),
         );
 
-        if (!tp.didExceedMaxLines) {
+        if (!minTp.didExceedMaxLines) {
           return content;
         }
 
-        return Column(
+        return Stack(
+          alignment: Alignment.bottomRight,
           children: [
-            AnimatedSize(
+            AnimatedContainer(
+              height: expandDescription ? maxTp.height : 75,
+              clipBehavior: Clip.hardEdge,
+              decoration: const BoxDecoration(),
               duration: Durations.slow,
-              alignment: Alignment.topCenter,
-              child: Container(
-                height: expandDescription ? null : 75,
-                clipBehavior: Clip.hardEdge,
-                decoration: const BoxDecoration(),
-                foregroundDecoration: BoxDecoration(
-                  color: theme.colorScheme.background,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [expandDescription ? 1 : 0, 1],
-                    colors: [
-                      theme.colorScheme.background.withOpacity(0),
-                      theme.colorScheme.background,
-                    ],
-                  ),
+              curve: Curves.easeOut,
+              foregroundDecoration: BoxDecoration(
+                color: theme.colorScheme.background,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [expandDescription ? 1 : 0, 1],
+                  colors: [
+                    theme.colorScheme.background.withOpacity(0),
+                    theme.colorScheme.background,
+                  ],
                 ),
-                child: content,
               ),
+              child: content,
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                isSelected: expandDescription,
-                icon: const Icon(Icons.expand_more_rounded),
-                selectedIcon: const Icon(Icons.expand_less_rounded),
-                tooltip: expandDescription ? "Collapse" : "Expand",
-                onPressed: () => setState(() => expandDescription = !expandDescription),
-              ),
+            IconButton(
+              isSelected: expandDescription,
+              icon: const Icon(Icons.expand_more_rounded),
+              selectedIcon: const Icon(Icons.expand_less_rounded),
+              tooltip: expandDescription ? "Collapse" : "Expand",
+              onPressed: () => setState(() => expandDescription = !expandDescription),
             ),
           ],
         );
@@ -410,18 +409,24 @@ class _MangaViewState extends State<MangaView> {
   }
 
   void showRatingStatisticSheet(RatingStatistics rating) {
+    final media = MediaQuery.of(context);
+
     showModalBottomSheet(
       context: context,
-      builder: (context) => RatingDetailsSheet(rating: rating),
+      builder: (context) => RatingDetailsSheet(
+          rating: rating, padding: EdgeInsets.only(bottom: media.padding.bottom)),
     );
   }
 
   void showCoverSheet(MangaData mangaData) {
+    final media = MediaQuery.of(context);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
-      builder: (context) => CoverSheet(mangaData: mangaData),
+      builder: (context) => CoverSheet(
+          mangaData: mangaData,
+          padding: EdgeInsets.only(top: media.padding.top, bottom: media.padding.bottom)),
     );
   }
 

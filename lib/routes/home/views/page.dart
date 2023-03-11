@@ -22,7 +22,6 @@ class _HomeViewState extends State<HomeView> {
     final media = MediaQuery.of(context);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(media.padding.top + 64),
         child: const SafeArea(child: HomeUserBar()),
@@ -51,14 +50,12 @@ class _HomeViewState extends State<HomeView> {
       body: PageTransitionSwitcher(
         duration: const Duration(milliseconds: 300),
         reverse: currentPageIndex < 1,
-        transitionBuilder: (child, animation, secondaryAnimation) {
-          return SharedAxisTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            transitionType: SharedAxisTransitionType.horizontal,
-            child: child,
-          );
-        },
+        transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          transitionType: SharedAxisTransitionType.horizontal,
+          child: child,
+        ),
         child: buildPageView(),
       ),
     );
