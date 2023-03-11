@@ -80,7 +80,7 @@ class ThemeManager with ChangeNotifier {
     final brightness = mode.toBrightness();
 
     if (palette != null) {
-      return palette.toColorScheme(brightness: brightness)!;
+      return palette.toColorScheme(brightness: brightness);
     } else {
       if (brightness == Brightness.light) return const ColorScheme.light();
       if (brightness == Brightness.dark) return const ColorScheme.dark();
