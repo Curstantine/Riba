@@ -12,6 +12,7 @@ import "package:riba/repositories/mangadex/user.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/url.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/utils/hash.dart";
 
 import "error.dart";
@@ -21,22 +22,49 @@ import "relationship.dart";
 typedef MDCoverArtEntity = MDEntityResponse<CoverArtAttributes>;
 typedef MDCoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 
+/// Handles retrieving cover art data and images from MangaDex.
+///
+/// This derives two types of base directories based on their persistence relative to the passed [root] directory.
+///
+/// - [persistentCoverDir]
+///   - is the directory where all cover arts are stored when [CacheSettings.cacheCovers] is true.
+///   - cleared when [deleteAll] is called.
+///
+/// - [temporaryCoverDir]
+///   - is the directory where all cover arts are stored when [CacheSettings.cacheCovers] is false.
+///   - cleared when [deleteAllTemp] is called, which is called on initialization of this class.
+///
+/// [getFile] will resolve the correct directory based on the passed [persistent] parameter.
 class MDCoverArtRepo {
-  final Client client;
-  final RateLimiter rateLimiter;
-  final Isar database;
-  final Directory directory;
-
-  MDCoverArtRepo(this.client, this.rateLimiter, this.database, this.directory) {
+  MDCoverArtRepo._internal(this.client, this.rateLimiter, this.database, this.root) {
     rateLimiter.rates["/covers:GET"] = const Rate(4, Duration(seconds: 1));
     rateLimiter.rates["/covers/image:GET"] = const Rate(2, Duration(seconds: 1));
   }
+
+  static Future<MDCoverArtRepo> init({
+    required Client client,
+    required RateLimiter rateLimiter,
+    required Isar database,
+    required Directory root,
+  }) async {
+    final instance = MDCoverArtRepo._internal(client, rateLimiter, database, root);
+    await instance.deleteAllTemp();
+    return instance;
+  }
+
+  final Client client;
+  final RateLimiter rateLimiter;
+  final Isar database;
+  final Directory root;
 
   final url = MangaDex.url.copyWith(pathSegments: ["cover"]);
   final cdnUrl = URL(hostname: "uploads.mangadex.org", pathSegments: ["covers"]);
   final includes = [
     EntityType.user.toJsonValue(),
   ];
+
+  late Directory persistentCoverDir = Directory("${root.path}/persistent");
+  late Directory temporaryCoverDir = Directory("${root.path}/temporary");
 
   Future<Map<String, CoverArtData>> getMany(List<String> ids, {bool checkDb = true}) async {
     log("getMany($ids, $checkDb)", name: "MDMangaRepo");
@@ -126,6 +154,12 @@ class MDCoverArtRepo {
     return CoverArtData(cover: coverArt, user: user);
   }
 
+  /// Downloads a cover art based on the passed [mangaId], [coverArt] and [size].
+  ///
+  /// When [CacheSettings.cacheCovers] is true, the cover art will be stored in [persistentCoverDir],
+  /// else the cover art will be stored in [temporaryCoverDir].
+  ///
+  /// Returns the handle to the downloaded cover art.
   Future<File> getImage(
     String mangaId,
     CoverArt coverArt, {
@@ -133,7 +167,14 @@ class MDCoverArtRepo {
   }) async {
     log("getImage($mangaId, ${coverArt.id}, $size)", name: "MDCoverArtRepo");
 
-    final file = getFile(mangaId, coverArt.fileId, coverArt.fileType, size);
+    final file = getFile(
+      mangaId,
+      coverArt.fileId,
+      coverArt.fileType,
+      size,
+      CacheSettings.instance.cacheCovers,
+    );
+
     if (await file.exists()) return file;
 
     await rateLimiter.wait("/covers/image:GET");
@@ -182,22 +223,27 @@ class MDCoverArtRepo {
     return "$fileId.${type.extension}$sizeSuffix$typeSuffix";
   }
 
-  /// Returns the file for the given [mangaId], [fileId], [type] and [size].
+  /// Returns the file for the given [mangaId], [fileId], [type], [size] and persistence type.
   ///
   /// This method does not check whether the file exists or not.
   ///
   /// If [size] is anything other than [CoverSize.original], the file type will
   /// always be [ImageFileType.jpeg]. Check [getFileName] for more info.
-  File getFile(String mangaId, String fileId, ImageFileType type, CoverSize size) =>
-      File("${directory.path}/$mangaId/${getFileName(fileId, size, type)}");
+  File getFile(String mangaId, String fileId, ImageFileType type, CoverSize size, bool persist) {
+    final name = getFileName(fileId, size, type);
+    final base = persist ? persistentCoverDir : temporaryCoverDir;
 
-  Future<void> delete(String mangaId, CoverArt coverArt, CoverSize size) async {
-    final file = getFile(mangaId, coverArt.fileId, coverArt.fileType, size);
-    if (await file.exists()) await file.delete();
+    return File("${base.path}/$mangaId/$name");
   }
 
+  /// Deletes the [root] directory that contains all the cover art files.
   Future<void> deleteAll() async {
-    if (await directory.exists()) await directory.delete(recursive: true);
+    if (await root.exists()) await root.delete(recursive: true);
+  }
+
+  /// Deletes the [persistentCoverDir] directory that contains all the temporary cover art files.
+  Future<void> deleteAllTemp() async {
+    if (await temporaryCoverDir.exists()) await temporaryCoverDir.delete(recursive: true);
   }
 }
 
