@@ -321,31 +321,43 @@ class _MangaViewState extends State<MangaView> {
           alignment: Alignment.bottomRight,
           children: [
             AnimatedContainer(
-              height: expandDescription ? maxTp.height : 75,
+              height: expandDescription ? maxTp.height + Edges.extraLarge : 75,
+              curve: Curves.easeInOutCubic,
+              duration: Durations.slow,
               clipBehavior: Clip.hardEdge,
               decoration: const BoxDecoration(),
-              duration: Durations.slow,
-              curve: Curves.easeOut,
-              foregroundDecoration: BoxDecoration(
-                color: theme.colorScheme.background,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [expandDescription ? 1 : 0, 1],
-                  colors: [
-                    theme.colorScheme.background.withOpacity(0),
-                    theme.colorScheme.background,
-                  ],
-                ),
-              ),
+              foregroundDecoration: expandDescription
+                  ? null
+                  : BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0, 0.5, 0.75, 1],
+                        colors: [
+                          theme.colorScheme.background.withOpacity(0),
+                          theme.colorScheme.background.withOpacity(0.75),
+                          theme.colorScheme.background.withOpacity(0.95),
+                          theme.colorScheme.background,
+                        ],
+                      ),
+                    ),
               child: content,
             ),
             IconButton(
               isSelected: expandDescription,
-              icon: const Icon(Icons.expand_more_rounded),
-              selectedIcon: const Icon(Icons.expand_less_rounded),
+              icon: AnimatedRotation(
+                duration: Durations.slow,
+                turns: expandDescription ? 0.5 : 0,
+                curve: Curves.easeInOutCubic,
+                child: const Icon(Icons.expand_more_rounded),
+              ),
+              visualDensity: VisualDensity.compact,
               tooltip: expandDescription ? "Collapse" : "Expand",
               onPressed: () => setState(() => expandDescription = !expandDescription),
+              style: IconButton.styleFrom(
+                backgroundColor: expandDescription ? theme.colorScheme.primaryContainer : null,
+                foregroundColor: expandDescription ? theme.colorScheme.onPrimaryContainer : null,
+              ),
             ),
           ],
         );
