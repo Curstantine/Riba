@@ -435,6 +435,7 @@ class _MangaViewState extends State<MangaView> {
 
     showModalBottomSheet(
       context: context,
+      shape: Shapes.none,
       isScrollControlled: true,
       builder: (context) => CoverSheet(
           mangaData: mangaData,

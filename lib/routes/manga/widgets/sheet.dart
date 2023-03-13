@@ -196,102 +196,116 @@ class _CoverSheetState extends State<CoverSheet> {
     final text = theme.textTheme;
     final colors = theme.colorScheme;
 
-    return FutureBuilder<List<CoverArtData>>(
-      future: coverDataFuture,
-      builder: (context, snapshot) {
-        Widget? child;
-
-        if (snapshot.connectionState != ConnectionState.done) {
-          child = const Center(child: CircularProgressIndicator());
-        }
-
-        if ((snapshot.hasError || !snapshot.hasData) &&
-            snapshot.connectionState == ConnectionState.done) {
-          final error = handleError(snapshot.error ?? "Data was null without errors.");
-
-          child = Center(
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(error.title, style: theme.textTheme.titleLarge),
-              Text(error.description, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: Edges.small),
-              OutlinedButton(
-                onPressed: () => setState(() => initialize()),
-                child: const Text("Retry"),
-              ),
-            ]),
-          );
-        }
-
-        if (snapshot.hasData && snapshot.data!.isEmpty) {
-          child = Center(
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Icon(Icons.image_search_rounded, size: 36),
-              const SizedBox(height: Edges.small),
-              Text("Couldn't find any covers for this title!", style: theme.textTheme.titleMedium),
-            ]),
-          );
-        }
-
-        if (child != null) {
-          return SizedBox(height: 300, child: child);
-        }
-
-        return ListView(
-          padding: Edges.allLarge.add(widget.padding),
-          shrinkWrap: true,
-          children: [
-            Text("Covers", style: text.titleLarge),
-            const SizedBox(height: Edges.small),
-            OutlinedCard(
-              child: AnimatedSize(
-                duration: Durations.normal,
-                curve: Curves.easeInOut,
-                child: buildBigPicture(text, colors, snapshot.requireData),
-              ),
-            ),
-            const SizedBox(height: Edges.medium),
-            if (snapshot.data!.length > 1) ...[
-              Text("Select a cover", style: text.titleMedium),
-              const SizedBox(height: Edges.small),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 200),
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: snapshot.data!.length,
-                  separatorBuilder: (context, _) => const SizedBox(width: Edges.medium),
-                  itemBuilder: (context, i) {
-                    return buildPreview(text, colors, snapshot.requireData[i]);
-                  },
-                ),
-              ),
-            ],
-            LayoutBuilder(
-              builder: (context, constraints) => ValueListenableBuilder(
-                valueListenable: selectedCoverId,
-                builder: (context, selectedId, _) {
-                  final isDifferent = selectedId != manga.usedCover;
-
-                  return Row(children: [
-                    AnimatedContainer(
-                      duration: Durations.normal,
-                      width: isDifferent ? 100 : constraints.maxWidth,
-                      curve: Curves.easeInOutCubic,
-                      child: OutlinedButton(onPressed: reloadData, child: const Text("Reload")),
-                    ),
-                    if (isDifferent) ...[
-                      const SizedBox(width: Edges.small),
-                      Expanded(
-                        child:
-                            FilledButton.tonal(onPressed: setUsedCover, child: const Text("Apply")),
-                      )
-                    ]
-                  ]);
-                },
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(padding: widget.padding),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Covers"),
+          actions: [
+            IconButton(icon: const Icon(Icons.refresh), onPressed: reloadData),
+            ValueListenableBuilder<String?>(
+              valueListenable: selectedCoverId,
+              builder: (context, selectedId, child) => IconButton(
+                icon: const Icon(Icons.check_rounded),
+                onPressed: selectedId != manga.usedCover ? setUsedCover : null,
               ),
             ),
           ],
-        );
-      },
+        ),
+        body: FutureBuilder<List<CoverArtData>>(
+          future: coverDataFuture,
+          builder: (context, snapshot) {
+            Widget? child;
+
+            if (snapshot.connectionState != ConnectionState.done) {
+              child = const Center(child: CircularProgressIndicator());
+            }
+
+            if ((snapshot.hasError || !snapshot.hasData) &&
+                snapshot.connectionState == ConnectionState.done) {
+              final error = handleError(snapshot.error ?? "Data was null without errors.");
+
+              child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(error.title, style: theme.textTheme.titleLarge),
+                Text(error.description, style: theme.textTheme.bodyMedium),
+                const SizedBox(height: Edges.small),
+                OutlinedButton(
+                  onPressed: () => setState(() => initialize()),
+                  child: const Text("Retry"),
+                ),
+              ]);
+            }
+
+            if (snapshot.hasData && snapshot.data!.isEmpty) {
+              child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.image_search_rounded, size: 36),
+                const SizedBox(height: Edges.small),
+                Text("Couldn't find any covers for this title!",
+                    style: theme.textTheme.titleMedium),
+              ]);
+            }
+
+            if (child != null) {
+              return Center(child: child);
+            }
+
+            return ListView(
+              shrinkWrap: true,
+              padding: Edges.allLarge.add(EdgeInsets.only(bottom: widget.padding.bottom)),
+              children: [
+                OutlinedCard(
+                  child: AnimatedSize(
+                    duration: Durations.normal,
+                    curve: Curves.easeInOut,
+                    child: buildBigPicture(text, colors, snapshot.requireData),
+                  ),
+                ),
+                const SizedBox(height: Edges.medium),
+                Text("Select a cover", style: text.titleMedium),
+                const SizedBox(height: Edges.small),
+                if (snapshot.data!.length > 1)
+                  SizedBox(
+                    height: 175,
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.length,
+                      separatorBuilder: (context, _) => const SizedBox(width: Edges.medium),
+                      itemBuilder: (context, i) {
+                        return buildPreview(text, colors, snapshot.requireData[i]);
+                      },
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 200,
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Icon(Icons.image_search_rounded, size: 32, color: colors.onSurfaceVariant),
+                      const SizedBox(height: Edges.small),
+                      Text("No other covers found!",
+                          style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
+                    ]),
+                  ),
+                const SizedBox(height: Edges.medium),
+                Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, size: 24, color: colors.primary),
+                    const SizedBox(width: Edges.large),
+                    Expanded(
+                      child: Text(
+                        "Selecting a cover and applying it will update the cover used for this title throughout the app.\n"
+                        "This update will be only be reflected after either the app or the title is reloaded.",
+                        softWrap: true,
+                        style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -371,6 +385,7 @@ class _CoverSheetState extends State<CoverSheet> {
   Widget buildPreview(TextTheme text, ColorScheme colors, CoverArtData coverData) {
     return SizedBox(
       width: 100,
+      height: 175,
       child: FutureBuilder<File>(
         future: MangaDex.instance.covers
             .getImage(manga.id, coverData.cover, size: CacheSettings.instance.previewSize),

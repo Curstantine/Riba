@@ -176,6 +176,9 @@ class Corners {
   /// 4 dp
   static const extraSmall = Radius.circular(Edges.extraSmall);
 
+  /// 0 dp
+  static const none = Radius.zero;
+
   /// 28 dp all corners
   static const allExtraLarge = BorderRadius.all(extraLarge);
 
@@ -190,6 +193,9 @@ class Corners {
 
   /// 4 dp all corners
   static const allExtraSmall = BorderRadius.all(extraSmall);
+
+  /// 0 dp all corners
+  static const allNone = BorderRadius.all(none);
 
   /// 28 dp top left and top right
   static const topExtraLarge = BorderRadius.only(
@@ -211,6 +217,9 @@ class Corners {
     topRight: extraSmall,
     topLeft: extraSmall,
   );
+
+  /// 0 dp top left and top right
+  static const topNone = BorderRadius.only(topRight: none, topLeft: none);
 
   /// 28 dp bottom left and bottom right
   static const bottomExtraLarge = BorderRadius.only(
@@ -236,6 +245,9 @@ class Corners {
     bottomLeft: extraSmall,
   );
 
+  /// 0 dp bottom left and bottom right
+  static const bottomNone = BorderRadius.only(bottomRight: none, bottomLeft: none);
+
   /// 28 dp top left and top right
   static const BorderRadius leftExtraLarge = BorderRadius.only(
     topLeft: extraLarge,
@@ -257,6 +269,9 @@ class Corners {
     bottomLeft: extraSmall,
   );
 
+  /// 0 dp top left and bottom left
+  static const BorderRadius leftNone = BorderRadius.only(topLeft: none, bottomLeft: none);
+
   /// 28 dp top right and bottom right
   static const BorderRadius rightExtraLarge = BorderRadius.only(
     topRight: extraLarge,
@@ -277,6 +292,9 @@ class Corners {
     topRight: extraSmall,
     bottomRight: extraSmall,
   );
+
+  /// 0 dp top right and bottom right
+  static const BorderRadius rightNone = BorderRadius.only(topRight: none, bottomRight: none);
 }
 
 extension EscapePadding on EdgeInsets {
@@ -293,6 +311,11 @@ extension EscapePadding on EdgeInsets {
 }
 
 class Shapes {
+  static const none = RoundedRectangleBorder(
+    side: BorderSide.none,
+    borderRadius: Corners.allNone,
+  );
+
   static outlinedCard(ThemeData theme) => RoundedRectangleBorder(
         side: BorderSide(color: theme.colorScheme.outline),
         borderRadius: Corners.allMedium,
