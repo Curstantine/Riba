@@ -39,5 +39,7 @@ dev_dependencies:
     isar_generator: ^3.0.5
     hive_generator: ^2.0.0
 
+    flutter_launcher_icons: "^0.12.0"
+
 flutter:
     uses-material-design: true

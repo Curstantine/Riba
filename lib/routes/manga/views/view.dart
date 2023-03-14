@@ -295,41 +295,45 @@ class _MangaViewState extends State<MangaView> {
   }
 
   Widget buildDescription(ThemeData theme, Manga manga) {
+    final span = TextSpan(
+      text: manga.description.getPreferred(preferredLocales),
+      style: theme.textTheme.bodyMedium,
+    );
+
     return Padding(
       padding: Edges.horizontalMedium,
       child: LayoutBuilder(builder: (context, constraints) {
-        final span = TextSpan(
-            text: manga.description.getPreferred(preferredLocales),
-            style: theme.textTheme.bodyMedium);
+        final minTp = TextPainter(
+            text: span,
+            maxLines: 5,
+            textDirection: TextDirection.ltr,
+            strutStyle: StrutStyle.fromTextStyle(span.style!))
+          ..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
-        final minTp = TextPainter(maxLines: 3, textDirection: TextDirection.ltr, text: span)
-          ..layout(maxWidth: constraints.maxWidth);
+        final maxTp = TextPainter(
+          text: span,
+          textDirection: TextDirection.ltr,
+          strutStyle: StrutStyle.fromTextStyle(span.style!),
+        )..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
-        final maxTp = TextPainter(textDirection: TextDirection.ltr, text: span)
-          ..layout(maxWidth: constraints.maxWidth);
-
-        final content = Padding(
-          padding: Edges.bottomExtraSmall,
-          child: Text(manga.description.getPreferred(preferredLocales)),
-        );
+        final content = Text.rich(span);
 
         if (!minTp.didExceedMaxLines) {
           return content;
         }
 
         return Stack(
-          alignment: Alignment.bottomRight,
           children: [
             AnimatedContainer(
-              height: expandDescription ? maxTp.height + Edges.extraLarge : 75,
+              height: expandDescription ? maxTp.height + 100 : minTp.height,
               curve: Curves.easeInOutCubic,
               duration: Durations.slow,
               clipBehavior: Clip.hardEdge,
               decoration: const BoxDecoration(),
-              foregroundDecoration: expandDescription
-                  ? null
-                  : BoxDecoration(
-                      gradient: LinearGradient(
+              foregroundDecoration: BoxDecoration(
+                gradient: expandDescription
+                    ? null
+                    : LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         stops: const [0, 0.5, 0.75, 1],
@@ -340,23 +344,29 @@ class _MangaViewState extends State<MangaView> {
                           theme.colorScheme.background,
                         ],
                       ),
-                    ),
-              child: content,
-            ),
-            IconButton(
-              isSelected: expandDescription,
-              icon: AnimatedRotation(
-                duration: Durations.slow,
-                turns: expandDescription ? 0.5 : 0,
-                curve: Curves.easeInOutCubic,
-                child: const Icon(Icons.expand_more_rounded),
               ),
-              visualDensity: VisualDensity.compact,
-              tooltip: expandDescription ? "Collapse" : "Expand",
-              onPressed: () => setState(() => expandDescription = !expandDescription),
-              style: IconButton.styleFrom(
-                backgroundColor: expandDescription ? theme.colorScheme.primaryContainer : null,
-                foregroundColor: expandDescription ? theme.colorScheme.onPrimaryContainer : null,
+              child: content,
+              // child: Text("${maxTp.height} ${minTp.height}"),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: IconButton(
+                isSelected: expandDescription,
+                icon: AnimatedRotation(
+                  duration: Durations.slow,
+                  turns: expandDescription ? 0.5 : 0,
+                  curve: Curves.easeInOutCubic,
+                  child: const Icon(Icons.expand_more_rounded),
+                ),
+                visualDensity: VisualDensity.compact,
+                tooltip: expandDescription ? "Collapse" : "Expand",
+                onPressed: () => setState(() => expandDescription = !expandDescription),
+                style: IconButton.styleFrom(
+                    backgroundColor: expandDescription ? theme.colorScheme.primaryContainer : null,
+                    foregroundColor:
+                        expandDescription ? theme.colorScheme.onPrimaryContainer : null,
+                    highlightColor: theme.colorScheme.surfaceTint),
               ),
             ),
           ],
