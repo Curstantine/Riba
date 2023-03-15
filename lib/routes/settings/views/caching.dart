@@ -18,7 +18,8 @@ class SettingsCachingView extends StatefulWidget {
 
 class _SettingsCachingViewState extends State<SettingsCachingView> {
   final settings = Settings.instance.caching;
-  Future<DirectoryInfo> coverDir = getDirectoryInfo(MangaDex.instance.covers.root);
+  Future<DirectoryInfo> coverDir = Future.delayed(
+      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.covers.root));
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +83,7 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
           subtitle: const Text("Delete all locally cached manga covers."),
           onTap: () => deleteCoversCache(context),
         ),
-        FutureBuilder(
+        FutureBuilder<DirectoryInfo>(
           future: coverDir,
           builder: (context, AsyncSnapshot<DirectoryInfo> snapshot) {
             if (!snapshot.hasData || snapshot.hasError) {
