@@ -307,7 +307,7 @@ class _MangaViewState extends State<MangaView> {
       child: LayoutBuilder(builder: (context, constraints) {
         final minTp = TextPainter(
             text: span,
-            maxLines: 5,
+            maxLines: 4,
             textDirection: TextDirection.ltr,
             textScaleFactor: textScaleFactor,
             strutStyle: StrutStyle.fromTextStyle(span.style!))
@@ -329,7 +329,7 @@ class _MangaViewState extends State<MangaView> {
         return Stack(
           children: [
             AnimatedContainer(
-              height: expandDescription ? maxTp.height : minTp.height,
+              height: expandDescription ? maxTp.height + Edges.extraLarge : minTp.height,
               curve: Curves.easeInOutCubic,
               duration: Durations.slow,
               clipBehavior: Clip.hardEdge,
@@ -368,8 +368,7 @@ class _MangaViewState extends State<MangaView> {
                 style: IconButton.styleFrom(
                     backgroundColor: expandDescription ? theme.colorScheme.primaryContainer : null,
                     foregroundColor:
-                        expandDescription ? theme.colorScheme.onPrimaryContainer : null,
-                    highlightColor: theme.colorScheme.surfaceTint),
+                        expandDescription ? theme.colorScheme.onPrimaryContainer : null),
               ),
             ),
           ],
