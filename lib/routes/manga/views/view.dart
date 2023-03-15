@@ -70,6 +70,7 @@ class _MangaViewState extends State<MangaView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final media = MediaQuery.of(context);
     final text = theme.textTheme;
 
     return Scaffold(
@@ -117,7 +118,8 @@ class _MangaViewState extends State<MangaView> {
                   titlePadding: Edges.allNone,
                 ),
               ),
-              SliverToBoxAdapter(child: buildDescription(theme, snapshot.data!.manga)),
+              SliverToBoxAdapter(
+                  child: buildDescription(theme, media.textScaleFactor, snapshot.data!.manga)),
               SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
             ]),
           );
@@ -294,7 +296,7 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  Widget buildDescription(ThemeData theme, Manga manga) {
+  Widget buildDescription(ThemeData theme, double textScaleFactor, Manga manga) {
     final span = TextSpan(
       text: manga.description.getPreferred(preferredLocales),
       style: theme.textTheme.bodyMedium,
@@ -307,6 +309,7 @@ class _MangaViewState extends State<MangaView> {
             text: span,
             maxLines: 5,
             textDirection: TextDirection.ltr,
+            textScaleFactor: textScaleFactor,
             strutStyle: StrutStyle.fromTextStyle(span.style!))
           ..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
@@ -314,6 +317,7 @@ class _MangaViewState extends State<MangaView> {
           text: span,
           textDirection: TextDirection.ltr,
           strutStyle: StrutStyle.fromTextStyle(span.style!),
+          textScaleFactor: textScaleFactor,
         )..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
         final content = Text.rich(span);
@@ -325,7 +329,7 @@ class _MangaViewState extends State<MangaView> {
         return Stack(
           children: [
             AnimatedContainer(
-              height: expandDescription ? maxTp.height + 100 : minTp.height,
+              height: expandDescription ? maxTp.height : minTp.height,
               curve: Curves.easeInOutCubic,
               duration: Durations.slow,
               clipBehavior: Clip.hardEdge,
@@ -346,7 +350,6 @@ class _MangaViewState extends State<MangaView> {
                       ),
               ),
               child: content,
-              // child: Text("${maxTp.height} ${minTp.height}"),
             ),
             Positioned(
               bottom: 0,
