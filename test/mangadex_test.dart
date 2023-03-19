@@ -6,6 +6,7 @@ import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 
 import "constants.dart";
@@ -37,6 +38,17 @@ void main() async {
     test("Manga.getMany", () async {
       final manga = await mangaDex.manga.getMany(mangaIds);
       expect(manga.length, mangaIds.length);
+    });
+    test("Manga.aggregate", () async {
+      final aggregated = await mangaDex.manga.aggregate(mangaId, translatedLanguages: [Locale.en]);
+      expect(aggregated, isNotNull);
+    });
+  });
+
+  group("MangaDex.Chapter", () {
+    test("Chapter.getMany", () {
+      final chapters = mangaDex.chapter.getMany(chapterIds);
+      expect(chapters, isNotNull);
     });
   });
 

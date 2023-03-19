@@ -58,3 +58,16 @@ final mangaIds = [
   "801513ba-a712-498c-8f57-cae55b38cc92",
   "239d6260-d71f-43b0-afff-074e3619e3de"
 ];
+
+final chapterIds = [
+  "0aaf8b27-0013-4ae0-8935-91a089466874",
+  "bbf176a0-ea53-4b8b-8e23-8aa192e838d5",
+  "aff0e720-88f2-45c5-8d9e-817f84d4c306",
+  "dfc5a5cc-8b36-4f0c-a272-ae69802c91f8",
+  "68b3cde2-0acd-4e4b-9842-780c301852c1",
+  "da9e3b05-c2b6-430d-b97f-0c825098a22c",
+  "a321ba6c-f723-434f-8119-5b898e86980a",
+  "96ce3263-6e8d-42c7-8c70-9871cc7365d4",
+  "317f6c2f-095d-4de4-aee1-111224db8f22",
+  "7c03d00c-55f5-4370-bb00-8bc3dafee36c"
+];

@@ -10,6 +10,7 @@ import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
 import "package:riba/repositories/mangadex/author.dart";
+import "package:riba/repositories/mangadex/chapter.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/hash.dart";
@@ -60,6 +61,23 @@ class MDMangaRepo {
     _insertMeta(internalMangaData);
 
     return internalMangaData.toMangaData();
+  }
+
+  Future<Aggregated> aggregate(
+    String mangaId, {
+    List<Locale> translatedLanguages = const [],
+  }) async {
+    log("aggregate($mangaId, $translatedLanguages)", name: "MDMangaRepo");
+
+    await rateLimiter.wait("/manga:GET");
+    final reqUrl = url
+        .copy()
+        .addPathSegment(mangaId)
+        .addPathSegment("aggregate")
+        .setParameter("translatedLanguage[]", translatedLanguages.map((e) => e.code).toList());
+    final request = await client.get(reqUrl.toUri());
+
+    return Aggregated.fromJson(request.body);
   }
 
   /// Get multiple manga at once.

@@ -27,14 +27,17 @@ class URL {
   ///
   /// Adding a single value to a key will append it to the list of values.
   /// But adding a list of values will replace the existing list.
+  ///
+  /// If the value is a list, and it is empty, it will be ignored.
   URL setParameter(String key, dynamic value) {
-    if (value is List<String>) {
-      queryParameters[key] = value;
-    } else if (value is String || value is int || value is double) {
+    assert(value is List<String> || value is String || value is int || value is double);
+
+    if (value is List && value.isEmpty) return this;
+    if (value is List<String>) queryParameters[key] = value;
+
+    if (value is String || value is int || value is double) {
       final old = queryParameters.containsKey(key) ? queryParameters[key] : [];
       queryParameters[key] = [...old!, value.toString()];
-    } else {
-      throw ArgumentError("Invalid type for URL parameter: ${value.runtimeType}");
     }
 
     return this;

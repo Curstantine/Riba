@@ -79,17 +79,15 @@ class Locale {
 
   Locale({this.language = Language.none, this.romanized = false});
 
+  String get code => romanized ? "${language.isoCode}-ro" : language.isoCode;
+
   /// Returns a locale based on a string.
   ///
   /// Throws an exception if the language is not supported.
   factory Locale.fromJsonValue(String locale) {
-    final isRomanized = locale.endsWith("-ro");
-    final language = Language.values.firstWhere(
-      (e) => isRomanized ? e.isoCode == locale.replaceFirst("-ro", "") : e.isoCode == locale,
-      orElse: () => throw Exception("Language $locale is not supported."),
-    );
-
-    return Locale(language: language, romanized: isRomanized);
+    final roman = locale.endsWith("-ro");
+    final language = Language.fromIsoCode(roman ? locale.substring(0, locale.length - 3) : locale);
+    return Locale(language: language, romanized: roman);
   }
 
   @override
@@ -124,6 +122,13 @@ enum Language {
 
   final String isoCode;
   const Language(this.isoCode);
+
+  static Language fromIsoCode(String isoCode) {
+    return values.firstWhere(
+      (e) => e.isoCode == isoCode,
+      orElse: () => throw Exception("Language $isoCode is not supported."),
+    );
+  }
 
   static Map<Language, String> humanNames = {
     Language.none: "None",

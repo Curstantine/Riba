@@ -445,19 +445,24 @@ const LocaleSchema = Schema(
   name: r"Locale",
   id: -6418009249489833142,
   properties: {
-    r"hashCode": PropertySchema(
+    r"code": PropertySchema(
       id: 0,
+      name: r"code",
+      type: IsarType.string,
+    ),
+    r"hashCode": PropertySchema(
+      id: 1,
       name: r"hashCode",
       type: IsarType.long,
     ),
     r"language": PropertySchema(
-      id: 1,
+      id: 2,
       name: r"language",
       type: IsarType.byte,
       enumMap: _LocalelanguageEnumValueMap,
     ),
     r"romanized": PropertySchema(
-      id: 2,
+      id: 3,
       name: r"romanized",
       type: IsarType.bool,
     )
@@ -474,6 +479,7 @@ int _localeEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.code.length * 3;
   return bytesCount;
 }
 
@@ -483,9 +489,10 @@ void _localeSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.hashCode);
-  writer.writeByte(offsets[1], object.language.index);
-  writer.writeBool(offsets[2], object.romanized);
+  writer.writeString(offsets[0], object.code);
+  writer.writeLong(offsets[1], object.hashCode);
+  writer.writeByte(offsets[2], object.language.index);
+  writer.writeBool(offsets[3], object.romanized);
 }
 
 Locale _localeDeserialize(
@@ -495,9 +502,9 @@ Locale _localeDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Locale(
-    language: _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+    language: _LocalelanguageValueEnumMap[reader.readByteOrNull(offsets[2])] ??
         Language.none,
-    romanized: reader.readBoolOrNull(offsets[2]) ?? false,
+    romanized: reader.readBoolOrNull(offsets[3]) ?? false,
   );
   return object;
 }
@@ -510,11 +517,13 @@ P _localeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
       return (_LocalelanguageValueEnumMap[reader.readByteOrNull(offset)] ??
           Language.none) as P;
-    case 2:
+    case 3:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
@@ -539,6 +548,135 @@ const _LocalelanguageValueEnumMap = {
 };
 
 extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"code",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r"code",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r"code",
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"code",
+        value: "",
+      ));
+    });
+  }
+
+  QueryBuilder<Locale, Locale, QAfterFilterCondition> codeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r"code",
+        value: "",
+      ));
+    });
+  }
+
   QueryBuilder<Locale, Locale, QAfterFilterCondition> hashCodeEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {

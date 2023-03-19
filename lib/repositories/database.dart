@@ -4,8 +4,10 @@ import "package:isar/isar.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:path_provider/path_provider.dart";
 import "package:riba/repositories/local/author.dart";
+import "package:riba/repositories/local/chapter.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/custom_list.dart";
+import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
@@ -26,7 +28,9 @@ class Database {
       TagSchema,
       CustomListSchema,
       UserSchema,
-      StatisticsSchema
+      StatisticsSchema,
+      GroupSchema,
+      ChapterSchema,
     ];
 
     instance = Database._internal(

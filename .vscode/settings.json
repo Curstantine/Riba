@@ -19,6 +19,10 @@
 	"licenser.author": "Curstantine",
 	"licenser.license": "GPLv3",
 	"licenser.disableAutoHeaderInsertion": true,
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.patterns": {
+		"*.dart": "${capture}.g.dart"
+	},
 	"cSpell.words": [
 		"doujinshi",
 		"fantia",

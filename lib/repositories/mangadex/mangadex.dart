@@ -4,6 +4,7 @@ import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:riba/repositories/client.dart";
+import "package:riba/repositories/mangadex/chapter.dart";
 import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/repositories/rate_limiter.dart";
@@ -24,6 +25,7 @@ class MangaDex {
 
   late final Client client = SelfClient(Client(), userAgent);
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
+  late final MDChapterRepo chapter = MDChapterRepo(client, rateLimiter, database);
   late final MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
   late final MDCoverArtRepo covers;
 

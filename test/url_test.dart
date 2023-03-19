@@ -16,6 +16,7 @@ void main() {
   test("URL creation with arrayed values.", () {
     final url = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
     url.setParameter("ids[]", [id, id]);
+    url.setParameter("includes[]", []);
 
     final uri = url.toUri();
     expect(uri.toString(), "$apiStr/manga?ids%5B%5D=$id&ids%5B%5D=$id");

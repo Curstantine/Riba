@@ -34,6 +34,7 @@ app.*.map.json
 
 # Isar related
 isar.dll
+libisar.so
 
 # Test related
 tmp/
