@@ -1,7 +1,10 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:riba/repositories/url.dart";
+import "package:riba/utils/logging.dart";
 
 void main() {
+  Logging.init();
+
   const apiStr = "https://api.mangadex.org";
   const id = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
 

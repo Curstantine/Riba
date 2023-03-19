@@ -8,11 +8,13 @@ import "package:riba/repositories/database.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/utils/logging.dart";
 
 import "constants.dart";
 
 void main() async {
   await Isar.initializeIsarCore(download: true);
+  Logging.init();
 
   final tempDirectory = Directory("./tmp");
   final database = await Database.init(directory: tempDirectory, testing: true);

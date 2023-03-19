@@ -1,8 +1,9 @@
 import "dart:convert";
-import "dart:developer";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:logging/logging.dart";
+import "package:riba/repositories/enumerate.dart";
 import "package:riba/repositories/local/chapter.dart";
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/localization.dart";
@@ -25,6 +26,7 @@ class MDChapterRepo {
   final Client client;
   final RateLimiter rateLimiter;
   final Isar database;
+  final logger = Logger("MDChapterRepo");
 
   MDChapterRepo(this.client, this.rateLimiter, this.database) {
     rateLimiter.rates["/chapter:GET"] = const Rate(4, Duration(seconds: 1));
@@ -38,7 +40,7 @@ class MDChapterRepo {
   ];
 
   Future<Map<String, ChapterData>> getMany(List<String> ids, {bool checkDB = true}) async {
-    log("getMany($ids, $checkDB)", name: "MDChapterRepo");
+    logger.info("getMany($ids, $checkDB)");
 
     final Map<String, ChapterData?> mapped = {for (var e in ids) e: null};
 
@@ -53,26 +55,31 @@ class MDChapterRepo {
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
     if (missing.isEmpty) return mapped.cast();
 
-    // To go around the 100 limit, we split the request into multiple ones.
-    while (missing.isNotEmpty) {
-      await rateLimiter.wait("/chapter:GET");
-      final reqUrl = url
-          .copy()
-          .setParameter("ids[]", missing.take(100).toList())
-          .setParameter("includes[]", includes)
-          .setParameter("limit", 100);
-      final request = await client.get(reqUrl.toUri());
+    final block = Enumerate<String, ChapterData>(
+      perStep: 100,
+      items: missing,
+      onStep: (resolved) async {
+        await rateLimiter.wait("/chapter:GET");
+        final reqUrl = url
+            .copy()
+            .setParameter("ids[]", resolved.keys.toList())
+            .setParameter("includes[]", includes)
+            .setParameter("limit", 100);
+        final request = await client.get(reqUrl.toUri());
+        final response = MDChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-      final response = MDChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
-      for (final data in response.data) {
-        final chapter = data.toChapterData();
-        _insertMeta(chapter);
-        mapped[data.id] = chapter;
-      }
+        for (final data in response.data) {
+          final chapter = data.toChapterData();
+          _insertMeta(chapter);
+          resolved[data.id] = chapter;
+        }
+      },
+      onMismatch: (missedIds) {
+        logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+      },
+    );
 
-      missing.removeWhere((e) => mapped[e] != null);
-    }
-
+    mapped.addAll(await block.run());
     return mapped.cast();
   }
 

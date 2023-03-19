@@ -5,6 +5,8 @@ const coverFile = "c18da525-e34f-4128-a696-4477b6ce6827.png";
 final mangaIds = [
   "d473d946-e086-454a-9cb4-62d14f8491da",
   "fed16739-b4fc-447a-9e2f-36cf61ea1908",
+  // This title is pornographic, and should be empty for
+  // requests that don't include the pornographic filter.
   "9fd3b55f-7646-41fa-be01-55086c0b562d",
   "0d115e4f-a1b9-467d-a99b-d551254c3fd7",
   "89393959-9749-4b7d-b199-cf25f1a52d86",

@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:riba/repositories/enumerate.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
@@ -82,32 +83,30 @@ class MDCoverArtRepo {
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
     if (missing.isEmpty) return mapped.cast();
 
-    // To go around the 100 limit, we split the request into multiple ones.
-    while (missing.isNotEmpty) {
-      await rateLimiter.wait("/covers:GET");
-      final reqUrl = url
-          .copy()
-          .setParameter("ids[]", missing.take(100).toList())
-          .setParameter("includes[]", includes)
-          .setParameter("limit", 100);
-      final request = await client.get(reqUrl.toUri());
-      final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+    final block = Enumerate<String, CoverArtData>(
+      perStep: 100,
+      items: missing,
+      onStep: (resolved) async {
+        await rateLimiter.wait("/covers:GET");
+        final reqUrl = url
+            .copy()
+            .setParameter("ids[]", resolved.keys.toList())
+            .setParameter("includes[]", includes)
+            .setParameter("limit", 100);
+        final request = await client.get(reqUrl.toUri());
+        final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-      for (final data in response.data) {
-        final coverArtData = data.toCoverArtData();
+        for (final data in response.data) {
+          final coverArtData = data.toCoverArtData();
+          if (coverArtData == null) continue;
 
-        if (coverArtData == null) {
-          mapped.remove(data.id);
-          continue;
+          _insertMeta(coverArtData);
+          resolved[data.id] = coverArtData;
         }
+      },
+    );
 
-        _insertMeta(coverArtData);
-        mapped[data.id] = coverArtData;
-      }
-
-      missing.removeWhere((e) => mapped[e] != null);
-    }
-
+    mapped.addAll(await block.run());
     return mapped.cast();
   }
 

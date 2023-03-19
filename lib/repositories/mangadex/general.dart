@@ -49,11 +49,17 @@ class MDEntityResponse<T> extends MDResponse {
 
 class MDCollectionResponse<T> extends MDResponse {
   final List<MDResponseData<T>> data;
+  final int limit;
+  final int offset;
+  final int total;
 
   const MDCollectionResponse({
     required super.result,
     required super.response,
     required this.data,
+    required this.limit,
+    required this.offset,
+    required this.total,
   });
 
   factory MDCollectionResponse.fromMap(Map<String, dynamic> json, {URL? url}) {
@@ -74,6 +80,9 @@ class MDCollectionResponse<T> extends MDResponse {
       result: result,
       response: responseType,
       data: (json["data"] as List<dynamic>).map((e) => MDResponseData<T>.fromMap(e)).toList(),
+      limit: json["limit"] as int,
+      offset: json["offset"] as int,
+      total: json["total"] as int,
     );
   }
 }

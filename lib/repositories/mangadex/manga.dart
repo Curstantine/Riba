@@ -3,6 +3,8 @@ import "dart:developer";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:logging/logging.dart";
+import "package:riba/repositories/enumerate.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
@@ -29,6 +31,7 @@ class MDMangaRepo {
   final Client client;
   final RateLimiter rateLimiter;
   final Isar database;
+  final logger = Logger("MDMangaRepo");
 
   MDMangaRepo(this.client, this.rateLimiter, this.database) {
     rateLimiter.rates["/manga:GET"] = const Rate(4, Duration(seconds: 1));
@@ -45,7 +48,7 @@ class MDMangaRepo {
   ];
 
   Future<MangaData> get(String id, {bool checkDB = true}) async {
-    log("get($id, $checkDB)", name: "MDMangaRepo");
+    logger.info("get($id, $checkDB)");
 
     if (checkDB) {
       final inDB = await database.manga.get(fastHash(id));
@@ -67,7 +70,7 @@ class MDMangaRepo {
     String mangaId, {
     List<Locale> translatedLanguages = const [],
   }) async {
-    log("aggregate($mangaId, $translatedLanguages)", name: "MDMangaRepo");
+    logger.info("aggregate($mangaId, $translatedLanguages)");
 
     await rateLimiter.wait("/manga:GET");
     final reqUrl = url
@@ -82,7 +85,7 @@ class MDMangaRepo {
 
   /// Get multiple manga at once.
   Future<Map<String, MangaData>> getMany(List<String> ids, {bool checkDB = true}) async {
-    log("getMany($ids, $checkDB)", name: "MDMangaRepo");
+    logger.info("getMany($ids, $checkDB)");
 
     final Map<String, MangaData?> mapped = {for (var e in ids) e: null};
 
@@ -97,26 +100,31 @@ class MDMangaRepo {
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
     if (missing.isEmpty) return mapped.cast();
 
-    // To go around the 100 limit, we split the request into multiple ones.
-    while (missing.isNotEmpty) {
-      await rateLimiter.wait("/manga:GET");
-      final reqUrl = url
-          .copy()
-          .setParameter("ids[]", missing.take(100).toList())
-          .setParameter("includes[]", includes)
-          .setParameter("limit", 100);
-      final request = await client.get(reqUrl.toUri());
+    final block = Enumerate<String, MangaData>(
+      perStep: 100,
+      items: missing,
+      onStep: (resolved) async {
+        await rateLimiter.wait("/manga:GET");
+        final reqUrl = url
+            .copy()
+            .setParameter("ids[]", resolved.keys.toList())
+            .setParameter("includes[]", includes)
+            .setParameter("limit", 100);
+        final request = await client.get(reqUrl.toUri());
+        final response = MDMangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-      final response = MDMangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
-      for (final data in response.data) {
-        final internalMangaData = data.toInternalMangaData();
-        _insertMeta(internalMangaData);
-        mapped[data.id] = internalMangaData.toMangaData();
-      }
+        for (final data in response.data) {
+          final internalMangaData = data.toInternalMangaData();
+          _insertMeta(internalMangaData);
+          resolved[data.id] = internalMangaData.toMangaData();
+        }
+      },
+      onMismatch: (missedIds) {
+        logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+      },
+    );
 
-      missing.removeWhere((e) => mapped[e] != null);
-    }
-
+    mapped.addAll(await block.run());
     return mapped.cast();
   }
 

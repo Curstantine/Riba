@@ -2,12 +2,14 @@ import "package:flutter/material.dart" hide Router;
 import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/settings/settings.dart";
+import "package:riba/utils/logging.dart";
 import "package:riba/utils/router.dart";
 import "package:riba/utils/theme.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  Logging.init();
   await Hive.initFlutter();
   await Database.init();
   await Settings.init();
