@@ -1,6 +1,6 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/author.dart";
 import "package:riba/utils/hash.dart";
 
 part "author.g.dart";
@@ -17,7 +17,7 @@ class Author {
 
   late String name;
   late Localizations description;
-  late List<AuthorSocial> socials;
+  late AuthorSocial socials;
   late DateTime createdAt;
   late int version;
 
@@ -44,60 +44,35 @@ class Author {
 
 @embedded
 class AuthorSocial {
-  @Enumerated(EnumType.ordinal)
-  late AuthorSocialType type;
-  late String value;
+  late String? twitter;
+  late String? pixiv;
+  late String? melonBook;
+  late String? fanBox;
+  late String? booth;
+  late String? nicoVideo;
+  late String? skeb;
+  late String? fantia;
+  late String? tumblr;
+  late String? youtube;
+  late String? weibo;
+  late String? naver;
+  late String? website;
 
-  AuthorSocial({this.type = AuthorSocialType.none, this.value = ""});
-
-  @override
-  int get hashCode => type.hashCode ^ value.hashCode;
-
-  @override
-  operator ==(Object other) =>
-      identical(this, other) ||
-      (other is AuthorSocial &&
-          runtimeType == other.runtimeType &&
-          type == other.type &&
-          value == other.value);
-}
-
-// CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
-enum AuthorSocialType {
-  none,
-  twitter,
-  pixiv,
-  melonBook,
-  fanBox,
-  booth,
-  nicoVideo,
-  skeb,
-  fantia,
-  tumblr,
-  youtube,
-  weibo,
-  naver,
-  website,
-}
-
-extension ToAuthorSocials on AuthorAttributes {
-  List<AuthorSocial> toAuthorSocials() {
-    return [
-      if (twitter != null) AuthorSocial(type: AuthorSocialType.twitter, value: twitter!),
-      if (pixiv != null) AuthorSocial(type: AuthorSocialType.pixiv, value: pixiv!),
-      if (melonBook != null) AuthorSocial(type: AuthorSocialType.melonBook, value: melonBook!),
-      if (fanBox != null) AuthorSocial(type: AuthorSocialType.fanBox, value: fanBox!),
-      if (booth != null) AuthorSocial(type: AuthorSocialType.booth, value: booth!),
-      if (nicoVideo != null) AuthorSocial(type: AuthorSocialType.nicoVideo, value: nicoVideo!),
-      if (skeb != null) AuthorSocial(type: AuthorSocialType.skeb, value: skeb!),
-      if (fantia != null) AuthorSocial(type: AuthorSocialType.fantia, value: fantia!),
-      if (tumblr != null) AuthorSocial(type: AuthorSocialType.tumblr, value: tumblr!),
-      if (youtube != null) AuthorSocial(type: AuthorSocialType.youtube, value: youtube!),
-      if (weibo != null) AuthorSocial(type: AuthorSocialType.weibo, value: weibo!),
-      if (naver != null) AuthorSocial(type: AuthorSocialType.naver, value: naver!),
-      if (website != null) AuthorSocial(type: AuthorSocialType.website, value: website!),
-    ];
-  }
+  AuthorSocial({
+    this.twitter,
+    this.pixiv,
+    this.melonBook,
+    this.fanBox,
+    this.booth,
+    this.nicoVideo,
+    this.skeb,
+    this.fantia,
+    this.tumblr,
+    this.youtube,
+    this.weibo,
+    this.naver,
+    this.website,
+  });
 }
 
 extension FilterAuthors on List<Author> {

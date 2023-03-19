@@ -150,7 +150,8 @@ class MDCoverArtRepo {
   }
 
   Future<CoverArtData> _collectMeta(CoverArt coverArt) async {
-    final user = coverArt.user != null ? await database.users.get(fastHash(coverArt.user!)) : null;
+    final user =
+        coverArt.userId != null ? await database.users.get(fastHash(coverArt.userId!)) : null;
     return CoverArtData(cover: coverArt, user: user);
   }
 
@@ -303,8 +304,8 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,
       version: attributes.version,
-      manga: mangaId,
-      user: relationships.ofType(EntityType.user).first.id,
+      mangaId: mangaId,
+      userId: relationships.ofType(EntityType.user).first.id,
     );
   }
 
@@ -334,7 +335,7 @@ extension ToRelCoverArt on Relationship<CoverArtAttributes> {
       createdAt: attributes!.createdAt,
       updatedAt: attributes!.updatedAt,
       version: attributes!.version,
-      manga: mangaId,
+      mangaId: mangaId,
     );
   }
 }

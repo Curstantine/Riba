@@ -153,14 +153,14 @@ class _CoverSheetState extends State<CoverSheet> {
   }
 
   void initialize() async {
-    selectedCoverId.value = manga.usedCover;
+    selectedCoverId.value = manga.usedCoverId;
 
     try {
       final covers = await MangaDex.instance.covers.getForManga(manga.id);
       coverDataFuture = Future.value(covers);
     } catch (e) {
       final localCovers =
-          await MangaDex.instance.database.covers.filter().mangaEqualTo(manga.id).findAll();
+          await MangaDex.instance.database.covers.filter().mangaIdEqualTo(manga.id).findAll();
 
       coverDataFuture = MangaDex.instance.covers
           .getMany(localCovers.map((e) => e.id).toList())
@@ -179,7 +179,7 @@ class _CoverSheetState extends State<CoverSheet> {
 
     try {
       await MangaDex.instance.database.writeTxn(() async {
-        await MangaDex.instance.database.manga.put(manga..usedCover = id);
+        await MangaDex.instance.database.manga.put(manga..usedCoverId = id);
       });
 
       if (mounted) Navigator.pop(context);
@@ -207,7 +207,7 @@ class _CoverSheetState extends State<CoverSheet> {
               valueListenable: selectedCoverId,
               builder: (context, selectedId, child) => IconButton(
                 icon: const Icon(Icons.check_rounded),
-                onPressed: selectedId != manga.usedCover ? setUsedCover : null,
+                onPressed: selectedId != manga.usedCoverId ? setUsedCover : null,
               ),
             ),
           ],
@@ -409,7 +409,7 @@ class _CoverSheetState extends State<CoverSheet> {
             ValueListenableBuilder(
               valueListenable: selectedCoverId,
               builder: (context, selectedId, child) {
-                final isMain = coverData.cover.id == manga.usedCover;
+                final isMain = coverData.cover.id == manga.usedCoverId;
                 final isSelected = selectedId == coverData.cover.id;
 
                 return Card(

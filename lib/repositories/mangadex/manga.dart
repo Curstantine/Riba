@@ -133,11 +133,11 @@ class MDMangaRepo {
 
   Future<MangaData> _collectMeta(Manga manga) async {
     final data = await Future.wait([
-      database.authors.getAll(manga.artists.map((e) => fastHash(e)).toList()),
-      database.authors.getAll(manga.authors.map((e) => fastHash(e)).toList()),
-      database.tags.getAll(manga.tags.map((e) => fastHash(e)).toList()),
-      manga.usedCover != null
-          ? database.covers.get(fastHash(manga.usedCover!))
+      database.authors.getAll(manga.artistIds.map((e) => fastHash(e)).toList()),
+      database.authors.getAll(manga.authorIds.map((e) => fastHash(e)).toList()),
+      database.tags.getAll(manga.tagsIds.map((e) => fastHash(e)).toList()),
+      manga.usedCoverId != null
+          ? database.covers.get(fastHash(manga.usedCoverId!))
           : Future.value(null),
     ]);
 
@@ -296,10 +296,10 @@ extension on MDResponseData<MangaAttributes> {
       titles: Localizations.fromMap(attributes.title),
       altTitles: attributes.altTitles.map(Localizations.fromMap).toList(),
       description: Localizations.fromMap(attributes.description),
-      authors: relationships.ofType(EntityType.author).map((e) => e.id).toList(),
-      artists: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
-      usedCover: usedCover.isEmpty ? null : usedCover,
-      tags: attributes.tags.map((e) => e.id).toList(),
+      authorIds: relationships.ofType(EntityType.author).map((e) => e.id).toList(),
+      artistIds: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
+      usedCoverId: usedCover.isEmpty ? null : usedCover,
+      tagsIds: attributes.tags.map((e) => e.id).toList(),
       originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
       contentRating: attributes.contentRating,
       publicationDemographic:

@@ -69,6 +69,26 @@ class AuthorAttributes {
   }
 }
 
+extension ToAuthorSocials on AuthorAttributes {
+  AuthorSocial toAuthorSocials() {
+    return AuthorSocial(
+      twitter: twitter,
+      pixiv: pixiv,
+      melonBook: melonBook,
+      fanBox: fanBox,
+      booth: booth,
+      nicoVideo: nicoVideo,
+      skeb: skeb,
+      fantia: fantia,
+      tumblr: tumblr,
+      youtube: youtube,
+      weibo: weibo,
+      naver: naver,
+      website: website,
+    );
+  }
+}
+
 extension ToAuthor on MDResponseData<AuthorAttributes> {
   Author toAuthor() => Author(
         id: id,

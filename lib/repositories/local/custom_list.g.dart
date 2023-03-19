@@ -22,9 +22,9 @@ const CustomListSchema = CollectionSchema(
       name: r"id",
       type: IsarType.string,
     ),
-    r"manga": PropertySchema(
+    r"mangaIds": PropertySchema(
       id: 1,
-      name: r"manga",
+      name: r"mangaIds",
       type: IsarType.stringList,
     ),
     r"name": PropertySchema(
@@ -32,9 +32,9 @@ const CustomListSchema = CollectionSchema(
       name: r"name",
       type: IsarType.string,
     ),
-    r"user": PropertySchema(
+    r"userId": PropertySchema(
       id: 3,
-      name: r"user",
+      name: r"userId",
       type: IsarType.string,
     ),
     r"version": PropertySchema(
@@ -70,15 +70,15 @@ int _customListEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.id.length * 3;
-  bytesCount += 3 + object.manga.length * 3;
+  bytesCount += 3 + object.mangaIds.length * 3;
   {
-    for (var i = 0; i < object.manga.length; i++) {
-      final value = object.manga[i];
+    for (var i = 0; i < object.mangaIds.length; i++) {
+      final value = object.mangaIds[i];
       bytesCount += value.length * 3;
     }
   }
   bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.user.length * 3;
+  bytesCount += 3 + object.userId.length * 3;
   return bytesCount;
 }
 
@@ -89,9 +89,9 @@ void _customListSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.id);
-  writer.writeStringList(offsets[1], object.manga);
+  writer.writeStringList(offsets[1], object.mangaIds);
   writer.writeString(offsets[2], object.name);
-  writer.writeString(offsets[3], object.user);
+  writer.writeString(offsets[3], object.userId);
   writer.writeLong(offsets[4], object.version);
   writer.writeByte(offsets[5], object.visibility.index);
 }
@@ -104,9 +104,9 @@ CustomList _customListDeserialize(
 ) {
   final object = CustomList(
     id: reader.readString(offsets[0]),
-    manga: reader.readStringList(offsets[1]) ?? [],
+    mangaIds: reader.readStringList(offsets[1]) ?? [],
     name: reader.readString(offsets[2]),
-    user: reader.readString(offsets[3]),
+    userId: reader.readString(offsets[3]),
     version: reader.readLong(offsets[4]),
     visibility:
         _CustomListvisibilityValueEnumMap[reader.readByteOrNull(offsets[5])] ??
@@ -427,13 +427,13 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementEqualTo(
+      mangaIdsElementEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -441,7 +441,7 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementGreaterThan(
+      mangaIdsElementGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -449,7 +449,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -457,7 +457,7 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementLessThan(
+      mangaIdsElementLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -465,7 +465,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -473,7 +473,7 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementBetween(
+      mangaIdsElementBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -482,7 +482,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"manga",
+        property: r"mangaIds",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -493,13 +493,13 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementStartsWith(
+      mangaIdsElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -507,13 +507,13 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementEndsWith(
+      mangaIdsElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -521,10 +521,10 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementContains(String value, {bool caseSensitive = true}) {
+      mangaIdsElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"manga",
+        property: r"mangaIds",
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -532,10 +532,10 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementMatches(String pattern, {bool caseSensitive = true}) {
+      mangaIdsElementMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"manga",
+        property: r"mangaIds",
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -543,30 +543,30 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementIsEmpty() {
+      mangaIdsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"manga",
+        property: r"mangaIds",
         value: "",
       ));
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaElementIsNotEmpty() {
+      mangaIdsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"manga",
+        property: r"mangaIds",
         value: "",
       ));
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaLengthEqualTo(int length) {
+      mangaIdsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         length,
         true,
         length,
@@ -575,10 +575,11 @@ extension CustomListQueryFilter
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> mangaIsEmpty() {
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
+      mangaIdsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         0,
         true,
         0,
@@ -588,10 +589,10 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaIsNotEmpty() {
+      mangaIdsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         0,
         false,
         999999,
@@ -601,13 +602,13 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaLengthLessThan(
+      mangaIdsLengthLessThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         0,
         true,
         length,
@@ -617,13 +618,13 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaLengthGreaterThan(
+      mangaIdsLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         length,
         include,
         999999,
@@ -633,7 +634,7 @@ extension CustomListQueryFilter
   }
 
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
-      mangaLengthBetween(
+      mangaIdsLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -641,7 +642,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"manga",
+        r"mangaIds",
         lower,
         includeLower,
         upper,
@@ -780,20 +781,20 @@ extension CustomListQueryFilter
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userEqualTo(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userGreaterThan(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -801,14 +802,14 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userLessThan(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -816,14 +817,14 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userBetween(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -832,7 +833,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"user",
+        property: r"userId",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -842,69 +843,70 @@ extension CustomListQueryFilter
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userStartsWith(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userEndsWith(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userContains(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"user",
+        property: r"userId",
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userMatches(
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"user",
+        property: r"userId",
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIsEmpty() {
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"user",
+        property: r"userId",
         value: "",
       ));
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIsNotEmpty() {
+  QueryBuilder<CustomList, CustomList, QAfterFilterCondition>
+      userIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"user",
+        property: r"userId",
         value: "",
       ));
     });
@@ -1052,15 +1054,15 @@ extension CustomListQuerySortBy
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUser() {
+  QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"user", Sort.asc);
+      return query.addSortBy(r"userId", Sort.asc);
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUserDesc() {
+  QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"user", Sort.desc);
+      return query.addSortBy(r"userId", Sort.desc);
     });
   }
 
@@ -1127,15 +1129,15 @@ extension CustomListQuerySortThenBy
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUser() {
+  QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"user", Sort.asc);
+      return query.addSortBy(r"userId", Sort.asc);
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUserDesc() {
+  QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"user", Sort.desc);
+      return query.addSortBy(r"userId", Sort.desc);
     });
   }
 
@@ -1173,9 +1175,9 @@ extension CustomListQueryWhereDistinct
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QDistinct> distinctByManga() {
+  QueryBuilder<CustomList, CustomList, QDistinct> distinctByMangaIds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"manga");
+      return query.addDistinctBy(r"mangaIds");
     });
   }
 
@@ -1186,10 +1188,10 @@ extension CustomListQueryWhereDistinct
     });
   }
 
-  QueryBuilder<CustomList, CustomList, QDistinct> distinctByUser(
+  QueryBuilder<CustomList, CustomList, QDistinct> distinctByUserId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"user", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r"userId", caseSensitive: caseSensitive);
     });
   }
 
@@ -1220,9 +1222,9 @@ extension CustomListQueryProperty
     });
   }
 
-  QueryBuilder<CustomList, List<String>, QQueryOperations> mangaProperty() {
+  QueryBuilder<CustomList, List<String>, QQueryOperations> mangaIdsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"manga");
+      return query.addPropertyName(r"mangaIds");
     });
   }
 
@@ -1232,9 +1234,9 @@ extension CustomListQueryProperty
     });
   }
 
-  QueryBuilder<CustomList, String, QQueryOperations> userProperty() {
+  QueryBuilder<CustomList, String, QQueryOperations> userIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"user");
+      return query.addPropertyName(r"userId");
     });
   }
 

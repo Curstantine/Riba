@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "package:isar/isar.dart";
 import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/utils/hash.dart";
@@ -20,10 +19,10 @@ class Manga {
   late Localizations titles;
   late Localizations description;
   late List<Localizations> altTitles;
-  late List<String> authors;
-  late List<String> artists;
-  late List<String> tags;
-  late String? usedCover;
+  late List<String> authorIds;
+  late List<String> artistIds;
+  late List<String> tagsIds;
+  late String? usedCoverId;
   late Locale originalLocale;
   late int version;
 
@@ -41,10 +40,10 @@ class Manga {
     required this.titles,
     required this.description,
     required this.altTitles,
-    required this.authors,
-    required this.artists,
-    required this.tags,
-    required this.usedCover,
+    required this.authorIds,
+    required this.artistIds,
+    required this.tagsIds,
+    required this.usedCoverId,
     required this.originalLocale,
     required this.version,
     required this.status,

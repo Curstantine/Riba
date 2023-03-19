@@ -35,7 +35,7 @@ class _HomeContentState extends State<HomeContent> {
           return const Center(child: Text("Error"));
         }
 
-        return MangaHorizontalList(title: "Seasonal", mangaIds: snapshot.data!.list.manga);
+        return MangaHorizontalList(title: "Seasonal", mangaIds: snapshot.data!.list.mangaIds);
       },
     );
   }

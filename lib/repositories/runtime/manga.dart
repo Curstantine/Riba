@@ -41,7 +41,7 @@ class InternalMangaData {
       artists: artists,
       tags: tags,
       cover: covers.firstWhere(
-        (element) => element.id == manga.usedCover,
+        (element) => element.id == manga.usedCoverId,
         orElse: () => covers.first,
       ),
     );

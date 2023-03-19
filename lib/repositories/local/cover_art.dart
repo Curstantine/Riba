@@ -17,16 +17,18 @@ class CoverArt {
   late String id;
   Id get isarId => fastHash(id);
 
-  late String? volume;
   late String fileId;
+
+  late String? volume;
   late String? description;
   late Locale? locale;
+
+  late String mangaId;
+  late String? userId;
+
   late DateTime createdAt;
   late DateTime updatedAt;
   late int version;
-
-  late String manga;
-  late String? user;
 
   @Enumerated(EnumType.ordinal)
   late ImageFileType fileType;
@@ -41,8 +43,8 @@ class CoverArt {
     required this.createdAt,
     required this.updatedAt,
     required this.version,
-    required this.manga,
-    this.user,
+    required this.mangaId,
+    this.userId,
   });
 
   /// Checks if the given [CoverArt] has the same [id], [fileId], [version] as this.

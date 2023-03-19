@@ -62,7 +62,7 @@ class MDCustomListRepo {
   Future<CustomListData> _collectMeta(CustomList customList) async {
     return CustomListData(
       list: customList,
-      user: (await database.users.get(fastHash(customList.user)))!,
+      user: (await database.users.get(fastHash(customList.userId)))!,
     );
   }
 }
@@ -109,8 +109,8 @@ extension ToCustomList on MDResponseData<CustomListAttributes> {
       name: attributes.name,
       visibility: attributes.visibility,
       version: attributes.version,
-      manga: relationships.ofType(EntityType.manga).map((e) => e.id).toList(),
-      user: relationships.ofType(EntityType.user).first.id,
+      mangaIds: relationships.ofType(EntityType.manga).map((e) => e.id).toList(),
+      userId: relationships.ofType(EntityType.user).first.id,
     );
   }
 

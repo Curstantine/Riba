@@ -10,18 +10,19 @@ class CustomList {
   Id get isarId => fastHash(id);
 
   late String name;
-  late String user;
-  late List<String> manga;
-  late int version;
-
   @Enumerated(EnumType.ordinal)
   late CustomListVisibility visibility;
+
+  late String userId;
+  late List<String> mangaIds;
+
+  late int version;
 
   CustomList({
     required this.id,
     required this.name,
-    required this.user,
-    required this.manga,
+    required this.userId,
+    required this.mangaIds,
     required this.version,
     required this.visibility,
   });
