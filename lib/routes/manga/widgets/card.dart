@@ -18,12 +18,13 @@ class MangaCard extends StatelessWidget {
   MangaCard({super.key, required this.id});
 
   final String id;
-
   final cacheSettings = CacheSettings.instance;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final listenable = cacheSettings.box
+        .listenable(keys: [CacheSettingKeys.previewSize, CacheSettingKeys.cacheCovers]);
 
     return FutureBuilder<MangaData>(
       future: MangaDex.instance.manga.get(id),
@@ -45,12 +46,15 @@ class MangaCard extends StatelessWidget {
               context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical)),
           title: manga.titles.getPreferred([Locale.en, Locale.ja]),
           child: ValueListenableBuilder(
-            valueListenable: cacheSettings.box.listenable(keys: [CacheSettingKeys.previewSize]),
+            valueListenable: listenable,
             builder: (context, _, __) {
+              final coverFuture = cover == null
+                  ? Future.value(null)
+                  : MangaDex.instance.covers.getImage(id, cover,
+                      size: cacheSettings.previewSize, cache: cacheSettings.cacheCovers);
+
               return FutureBuilder<File?>(
-                future: cover == null
-                    ? Future.value(null)
-                    : MangaDex.instance.covers.getImage(id, cover, size: cacheSettings.previewSize),
+                future: coverFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const Center(child: CircularProgressIndicator());

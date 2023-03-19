@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
+import "package:logging/logging.dart";
 import "package:riba/repositories/enumerate.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
@@ -13,7 +14,6 @@ import "package:riba/repositories/mangadex/user.dart";
 import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/url.dart";
-import "package:riba/settings/cache.dart";
 import "package:riba/utils/hash.dart";
 
 import "error.dart";
@@ -28,15 +28,21 @@ typedef MDCoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 /// This derives two types of base directories based on their persistence relative to the passed [root] directory.
 ///
 /// - [persistentCoverDir]
-///   - is the directory where all cover arts are stored when [CacheSettings.cacheCovers] is true.
+///   - is the directory where all cover arts are stored when [cache] is true.
 ///   - cleared when [deleteAll] is called.
 ///
 /// - [temporaryCoverDir]
-///   - is the directory where all cover arts are stored when [CacheSettings.cacheCovers] is false.
+///   - is the directory where all cover arts are stored when [cache] is false.
 ///   - cleared when [deleteAllTemp] is called, which is called on initialization of this class.
 ///
 /// [getFile] will resolve the correct directory based on the passed [persistent] parameter.
 class MDCoverArtRepo {
+  final Client client;
+  final RateLimiter rateLimiter;
+  final Isar database;
+  final Directory root;
+  final logger = Logger("MDCoverArtRepo");
+
   MDCoverArtRepo._internal(this.client, this.rateLimiter, this.database, this.root) {
     rateLimiter.rates["/covers:GET"] = const Rate(4, Duration(seconds: 1));
     rateLimiter.rates["/covers/image:GET"] = const Rate(2, Duration(seconds: 1));
@@ -53,11 +59,6 @@ class MDCoverArtRepo {
     return instance;
   }
 
-  final Client client;
-  final RateLimiter rateLimiter;
-  final Isar database;
-  final Directory root;
-
   final url = MangaDex.url.copyWith(pathSegments: ["cover"]);
   final cdnUrl = URL(hostname: "uploads.mangadex.org", pathSegments: ["covers"]);
   final includes = [
@@ -68,7 +69,7 @@ class MDCoverArtRepo {
   late Directory temporaryCoverDir = Directory("${root.path}/temporary");
 
   Future<Map<String, CoverArtData>> getMany(List<String> ids, {bool checkDb = true}) async {
-    log("getMany($ids, $checkDb)", name: "MDMangaRepo");
+    logger.info("getMany($ids, $checkDb)");
 
     final Map<String, CoverArtData?> mapped = {for (var e in ids) e: null};
 
@@ -104,6 +105,9 @@ class MDCoverArtRepo {
           resolved[data.id] = coverArtData;
         }
       },
+      onMismatch: (missedIds) {
+        logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+      },
     );
 
     mapped.addAll(await block.run());
@@ -111,7 +115,7 @@ class MDCoverArtRepo {
   }
 
   Future<List<CoverArtData>> getForManga(String id) async {
-    log("getForManga($id)", name: "MDCoverArtRepo");
+    logger.info("getForManga($id)");
 
     await rateLimiter.wait("/covers:GET");
     final reqUrl = url
@@ -156,7 +160,7 @@ class MDCoverArtRepo {
 
   /// Downloads a cover art based on the passed [mangaId], [coverArt] and [size].
   ///
-  /// When [CacheSettings.cacheCovers] is true, the cover art will be stored in [persistentCoverDir],
+  /// When [cache] is true, the cover art will be stored in [persistentCoverDir],
   /// else the cover art will be stored in [temporaryCoverDir].
   ///
   /// Returns the handle to the downloaded cover art.
@@ -164,17 +168,11 @@ class MDCoverArtRepo {
     String mangaId,
     CoverArt coverArt, {
     CoverSize size = CoverSize.original,
+    bool cache = true,
   }) async {
-    log("getImage($mangaId, ${coverArt.id}, $size)", name: "MDCoverArtRepo");
+    logger.info("getImage($mangaId, ${coverArt.id}, $size, $cache)");
 
-    final file = getFile(
-      mangaId,
-      coverArt.fileId,
-      coverArt.fileType,
-      size,
-      CacheSettings.instance.cacheCovers,
-    );
-
+    final file = getFile(mangaId, coverArt.fileId, coverArt.fileType, size, cache);
     if (await file.exists()) return file;
 
     await rateLimiter.wait("/covers/image:GET");

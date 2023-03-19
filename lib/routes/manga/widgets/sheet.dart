@@ -142,6 +142,7 @@ class CoverSheet extends StatefulWidget {
 class _CoverSheetState extends State<CoverSheet> {
   final logger = Logger("MangaCoverSheet");
   final selectedCoverId = ValueNotifier<String?>(null);
+  final cacheSettings = CacheSettings.instance;
 
   Future<List<CoverArtData>>? coverDataFuture;
   Manga get manga => widget.mangaData.manga;
@@ -319,8 +320,8 @@ class _CoverSheetState extends State<CoverSheet> {
           alignment: Alignment.bottomRight,
           children: [
             FutureBuilder<File?>(
-              future: MangaDex.instance.covers
-                  .getImage(manga.id, selectedCover, size: CacheSettings.instance.fullSize),
+              future: MangaDex.instance.covers.getImage(manga.id, selectedCover,
+                  size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers),
               builder: (context, snapshot) {
                 List<Widget>? children;
 

@@ -30,6 +30,7 @@ class _MangaViewState extends State<MangaView> {
   final expandedAppBarHeight = 500.0;
   final scrollController = ScrollController();
   final preferredLocales = [Locale.en, Locale.ja];
+  final cacheSettings = CacheSettings.instance;
 
   bool showAppBar = false;
   bool expandDescription = false;
@@ -62,8 +63,9 @@ class _MangaViewState extends State<MangaView> {
     statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id);
     coverFuture = mangaFuture?.then((data) {
       if (data.cover == null) return Future.value(null);
-      return MangaDex.instance.covers
-          .getImage(widget.id, data.cover!, size: CacheSettings.instance.fullSize);
+
+      return MangaDex.instance.covers.getImage(widget.id, data.cover!,
+          size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers);
     });
   }
 
