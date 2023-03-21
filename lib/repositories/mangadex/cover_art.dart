@@ -6,6 +6,7 @@ import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/enumerate.dart";
+import "package:riba/repositories/exception.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";

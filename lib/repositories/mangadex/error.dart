@@ -1,5 +1,3 @@
-import "package:riba/repositories/url.dart";
-
 class MDError {
   final String title;
   final int status;
@@ -13,17 +11,3 @@ class MDError {
     );
   }
 }
-
-class MDException implements Exception {
-  const MDException(this.response, {this.url});
-  final MDError response;
-  final URL? url;
-
-  get title => response.title;
-  get status => response.status;
-
-  @override
-  String toString() => "MDException: ${response.title}";
-}
-
-const placeholderError = MDException(MDError(title: "Test", status: 404));

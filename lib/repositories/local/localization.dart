@@ -1,6 +1,6 @@
-import "dart:developer";
-
 import "package:isar/isar.dart";
+import "package:logging/logging.dart";
+import "package:riba/repositories/exception.dart";
 
 part "localization.g.dart";
 
@@ -26,6 +26,8 @@ class Localizations {
 
   Localizations({this.localizations = const [], this.values = const []});
 
+  static final logger = Logger("Localizations");
+
   String? get(Locale locale) {
     final index = localizations.indexOf(locale);
     if (index == -1) return null;
@@ -48,14 +50,17 @@ class Localizations {
     final List<Locale> localizations = [];
     final List<String> values = [];
 
-    map.forEach((key, value) {
+    for (final i in map.entries) {
+      final value = i.value;
+      final key = i.key;
+
       try {
         localizations.add(Locale.fromJsonValue(key));
         values.add(value);
-      } catch (e) {
-        log("Ignoring $key: ${e.toString()}", name: "Localizations.toLocalizations");
+      } on LanguageNotSupportedException catch (e) {
+        logger.warning("Ignoring $key: ${e.toString()}");
       }
-    });
+    }
 
     if (localizations.length != values.length) {
       throw Exception("The length of localizations and values are not the same.");
@@ -123,10 +128,13 @@ enum Language {
   final String isoCode;
   const Language(this.isoCode);
 
+  /// Returns a language based on an ISO code.
+  ///
+  /// Throws a [LanguageNotSupportedException] if the language is not supported.
   static Language fromIsoCode(String isoCode) {
     return values.firstWhere(
       (e) => e.isoCode == isoCode,
-      orElse: () => throw Exception("Language $isoCode is not supported."),
+      orElse: () => throw LanguageNotSupportedException(isoCode),
     );
   }
 

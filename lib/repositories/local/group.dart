@@ -12,7 +12,7 @@ class Group {
 
   late String name;
   late List<Localizations> altNames;
-  late String description;
+  late String? description;
   late GroupSocials socials;
 
   @Enumerated(EnumType.ordinal)

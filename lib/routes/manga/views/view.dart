@@ -7,6 +7,7 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
@@ -32,12 +33,13 @@ class _MangaViewState extends State<MangaView> {
   final preferredLocales = [Locale.en, Locale.ja];
   final cacheSettings = CacheSettings.instance;
 
-  bool showAppBar = false;
-  bool expandDescription = false;
+  final showAppBar = ValueNotifier(false);
+  final expandDescription = ValueNotifier(false);
 
   Future<MangaData>? mangaFuture;
   Future<Statistics>? statisticsFuture;
   Future<File?>? coverFuture;
+  Future<List<ChapterData>>? chapterFuture;
 
   bool isFollowed = false;
   bool hasTrackers = false;
@@ -58,14 +60,19 @@ class _MangaViewState extends State<MangaView> {
     super.dispose();
   }
 
-  void fetchMangaData() {
-    mangaFuture = MangaDex.instance.manga.get(widget.id);
-    statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id);
+  void fetchMangaData({bool reload = false}) {
+    mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
+    statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
+    chapterFuture = MangaDex.instance.chapter.getFeed(widget.id, checkDB: !reload);
     coverFuture = mangaFuture?.then((data) {
       if (data.cover == null) return Future.value(null);
 
-      return MangaDex.instance.covers.getImage(widget.id, data.cover!,
-          size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers);
+      return MangaDex.instance.covers.getImage(
+        widget.id,
+        data.cover!,
+        size: cacheSettings.fullSize,
+        cache: cacheSettings.cacheCovers,
+      );
     });
   }
 
@@ -74,11 +81,14 @@ class _MangaViewState extends State<MangaView> {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
     final text = theme.textTheme;
+    final colors = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
-      body: FutureBuilder<MangaData>(
-        future: mangaFuture,
+      body: FutureBuilder(
+        // Lol. Don't setState for anything other that fetchMangaData.
+        // Shit will break, badly.
+        future: Future.wait([mangaFuture!, chapterFuture!]),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
@@ -93,36 +103,45 @@ class _MangaViewState extends State<MangaView> {
                 Text(error.description, style: theme.textTheme.bodyMedium),
                 const SizedBox(height: Edges.large),
                 ElevatedButton(
-                  onPressed: () => setState(() => fetchMangaData()),
+                  onPressed: () => setState(() => fetchMangaData(reload: true)),
                   child: const Text("Retry"),
                 ),
               ]),
             );
           }
 
+          final data = snapshot.requireData;
+          final mangaData = data[0] as MangaData;
+          final chapterData = data[1] as List<ChapterData>;
+
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() => fetchMangaData());
+              setState(() => fetchMangaData(reload: true));
             },
             child: CustomScrollView(controller: scrollController, slivers: [
               SliverAppBar(
                 pinned: true,
                 expandedHeight: expandedAppBarHeight,
-                title: AnimatedOpacity(
-                  opacity: showAppBar ? 1 : 0,
-                  duration: Durations.normal,
-                  child: Text(snapshot.data!.manga.titles.getPreferred(preferredLocales),
+                title: ValueListenableBuilder(
+                  valueListenable: showAppBar,
+                  child: Text(mangaData.manga.titles.getPreferred(preferredLocales),
                       style: text.titleMedium),
+                  builder: (context, value, child) => AnimatedOpacity(
+                    opacity: value ? 1 : 0,
+                    duration: Durations.normal,
+                    child: child,
+                  ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
-                  background: detailsHeader(snapshot.data!),
+                  background: detailsHeader(mangaData),
                   titlePadding: Edges.allNone,
                 ),
               ),
               SliverToBoxAdapter(
-                  child: buildDescription(theme, media.textScaleFactor, snapshot.data!.manga)),
-              SliverToBoxAdapter(child: buildContents(theme, snapshot.data!))
+                child: buildDescription(theme, media.textScaleFactor, mangaData.manga),
+              ),
+              buildChapters(colors, text, chapterData),
             ]),
           );
         },
@@ -328,52 +347,56 @@ class _MangaViewState extends State<MangaView> {
           return content;
         }
 
-        return Stack(
-          children: [
-            AnimatedContainer(
-              height: expandDescription ? maxTp.height + Edges.extraLarge : minTp.height,
-              curve: Curves.easeInOutCubic,
-              duration: Durations.slow,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(),
-              foregroundDecoration: BoxDecoration(
-                gradient: expandDescription
-                    ? null
-                    : LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0, 0.5, 0.75, 1],
-                        colors: [
-                          theme.colorScheme.background.withOpacity(0),
-                          theme.colorScheme.background.withOpacity(0.75),
-                          theme.colorScheme.background.withOpacity(0.95),
-                          theme.colorScheme.background,
-                        ],
-                      ),
-              ),
-              child: content,
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: IconButton(
-                isSelected: expandDescription,
-                icon: AnimatedRotation(
-                  duration: Durations.slow,
-                  turns: expandDescription ? 0.5 : 0,
+        return ValueListenableBuilder(
+          valueListenable: expandDescription,
+          builder: (context, value, child) {
+            return Stack(
+              children: [
+                AnimatedContainer(
+                  height: value ? maxTp.height + Edges.extraLarge : minTp.height,
                   curve: Curves.easeInOutCubic,
-                  child: const Icon(Icons.expand_more_rounded),
+                  duration: Durations.slow,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: const BoxDecoration(),
+                  foregroundDecoration: BoxDecoration(
+                    gradient: value
+                        ? null
+                        : LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0, 0.5, 0.75, 1],
+                            colors: [
+                              theme.colorScheme.background.withOpacity(0),
+                              theme.colorScheme.background.withOpacity(0.75),
+                              theme.colorScheme.background.withOpacity(0.95),
+                              theme.colorScheme.background,
+                            ],
+                          ),
+                  ),
+                  child: content,
                 ),
-                visualDensity: VisualDensity.compact,
-                tooltip: expandDescription ? "Collapse" : "Expand",
-                onPressed: () => setState(() => expandDescription = !expandDescription),
-                style: IconButton.styleFrom(
-                    backgroundColor: expandDescription ? theme.colorScheme.primaryContainer : null,
-                    foregroundColor:
-                        expandDescription ? theme.colorScheme.onPrimaryContainer : null),
-              ),
-            ),
-          ],
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: IconButton(
+                    isSelected: value,
+                    icon: AnimatedRotation(
+                      duration: Durations.slow,
+                      turns: value ? 0.5 : 0,
+                      curve: Curves.easeInOutCubic,
+                      child: const Icon(Icons.expand_more_rounded),
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: value ? "Collapse" : "Expand",
+                    onPressed: () => expandDescription.value = !expandDescription.value,
+                    style: IconButton.styleFrom(
+                        backgroundColor: value ? theme.colorScheme.primaryContainer : null,
+                        foregroundColor: value ? theme.colorScheme.onPrimaryContainer : null),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       }),
     );
@@ -403,10 +426,55 @@ class _MangaViewState extends State<MangaView> {
     });
   }
 
-  Widget buildContents(ThemeData theme, MangaData mangaData) {
-    return Column(children: const [
-      SizedBox(height: 10000),
-    ]);
+  Widget buildChapters(ColorScheme colors, TextTheme text, List<ChapterData> chapters) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        childCount: chapters.length,
+        (context, index) {
+          final data = chapters[index];
+
+          return ListTile(
+            title: Text(data.chapter.title ?? "Chapter ${data.chapter.chapter}"),
+          );
+        },
+      ),
+    );
+    // return FutureBuilder<List<ChapterData>>(
+    //   future: chapterFuture,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState != ConnectionState.done) {
+    //       return Container(
+    //         padding: Edges.topMedium,
+    //         height: 10,
+    //         child: const LinearProgressIndicator(),
+    //       );
+    //     }
+
+    //     if (snapshot.hasError || !snapshot.hasData) {
+    //       final error = handleError(snapshot.error ?? "Data was null without errors.");
+
+    //       return SizedBox(
+    //         height: 150,
+    //         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+    //           Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
+    //           Text(error.description, style: text.bodyMedium),
+    //         ]),
+    //       );
+    //     }
+
+    //     final chapters = snapshot.requireData;
+
+    //     return ListView.builder(
+    //       itemCount: chapters.length,
+    //       itemBuilder: (context, index) {
+    //         final chapter = chapters[index];
+    //         return ListTile(
+    //           title: Text(chapter.chapter.title ?? "Chapter ${chapter.chapter.chapter}"),
+    //         );
+    //       },
+    //     );
+    //   },
+    // );
   }
 
   Widget buildFollowButton() {
@@ -466,12 +534,12 @@ class _MangaViewState extends State<MangaView> {
   }
 
   void onScroll() {
-    final height = expandedAppBarHeight - 52;
+    final height = expandedAppBarHeight - kToolbarHeight;
 
-    if (showAppBar && scrollController.offset < height) {
-      setState(() => showAppBar = false);
-    } else if (!showAppBar && scrollController.offset > height) {
-      setState(() => showAppBar = true);
+    if (showAppBar.value && scrollController.offset < height) {
+      showAppBar.value = false;
+    } else if (!showAppBar.value && scrollController.offset > height) {
+      showAppBar.value = true;
     }
   }
 }

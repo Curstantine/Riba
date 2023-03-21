@@ -10,7 +10,11 @@ class FilledCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(elevation: 0, color: theme.colorScheme.surfaceVariant, child: child);
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceVariant,
+      child: child,
+    );
   }
 }
 

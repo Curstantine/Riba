@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import "package:riba/repositories/exception.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/general.dart";
 import "package:riba/repositories/url.dart";

@@ -7,15 +7,15 @@ import "package:riba/repositories/mangadex/relationship.dart";
 class GroupAttributes {
   final String name;
   final List<Map<String, String>> altNames;
-  final String description;
+  final String? description;
 
-  final String website;
-  final String discord;
-  final String ircServer;
-  final String ircChannel;
-  final String contactEmail;
-  final String twitter;
-  final String mangaUpdates;
+  final String? website;
+  final String? discord;
+  final String? ircServer;
+  final String? ircChannel;
+  final String? contactEmail;
+  final String? twitter;
+  final String? mangaUpdates;
 
   final List<String> focusedLanguages;
   final bool official;
@@ -53,15 +53,15 @@ class GroupAttributes {
       altNames: (map["altNames"] as List)
           .map((e) => (e as Map<String, dynamic>).cast<String, String>())
           .toList(),
-      description: map["description"] as String,
-      website: map["website"] as String,
-      discord: map["discord"] as String,
-      ircServer: map["ircServer"] as String,
-      ircChannel: map["ircChannel"] as String,
-      contactEmail: map["contactEmail"] as String,
-      twitter: map["twitter"] as String,
-      mangaUpdates: map["mangaUpdates"] as String,
-      focusedLanguages: List<String>.from((map["focusedLanguages"] as List<String>)),
+      description: map["description"] as String?,
+      website: map["website"] as String?,
+      discord: map["discord"] as String?,
+      ircServer: map["ircServer"] as String?,
+      ircChannel: map["ircChannel"] as String?,
+      contactEmail: map["contactEmail"] as String?,
+      twitter: map["twitter"] as String?,
+      mangaUpdates: map["mangaUpdates"] as String?,
+      focusedLanguages: (map["focusedLanguages"] as List).cast(),
       official: map["official"] as bool,
       inactive: map["inactive"] as bool,
       createdAt: DateTime.parse(map["createdAt"] as String),

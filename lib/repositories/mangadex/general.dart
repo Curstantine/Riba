@@ -1,6 +1,9 @@
+import "package:riba/repositories/exception.dart";
+import "package:riba/repositories/mangadex/group.dart";
 import "package:riba/repositories/url.dart";
 
 import "author.dart";
+import "chapter.dart";
 import "cover_art.dart";
 import "custom_list.dart";
 import "error.dart";
@@ -154,6 +157,10 @@ T mapToEntity<T>(Map<String, dynamic> map, EntityType type) {
       attributes = MangaAttributes.fromMap(map) as T;
       break;
 
+    case EntityType.chapter:
+      attributes = ChapterAttributes.fromMap(map) as T;
+      break;
+
     case EntityType.customList:
       attributes = CustomListAttributes.fromMap(map) as T;
       break;
@@ -173,6 +180,10 @@ T mapToEntity<T>(Map<String, dynamic> map, EntityType type) {
 
     case EntityType.user:
       attributes = UserAttributes.fromMap(map) as T;
+      break;
+
+    case EntityType.scanlationGroup:
+      attributes = GroupAttributes.fromMap(map) as T;
       break;
 
     default:

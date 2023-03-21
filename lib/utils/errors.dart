@@ -1,4 +1,4 @@
-import "package:riba/repositories/mangadex/error.dart";
+import "package:riba/repositories/exception.dart";
 
 class ErrorState {
   final String title;

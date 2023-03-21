@@ -109,7 +109,12 @@ int _groupEstimateSize(
           LocalizationsSchema.estimateSize(value, offsets, allOffsets);
     }
   }
-  bytesCount += 3 + object.description.length * 3;
+  {
+    final value = object.description;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.focusedLanguages.length;
   bytesCount += 3 + object.id.length * 3;
   bytesCount += 3 + object.name.length * 3;
@@ -164,7 +169,7 @@ Group _groupDeserialize(
         ) ??
         [],
     createdAt: reader.readDateTime(offsets[1]),
-    description: reader.readString(offsets[2]),
+    description: reader.readStringOrNull(offsets[2]),
     focusedLanguages: reader
             .readByteList(offsets[3])
             ?.map((e) => _GroupfocusedLanguagesValueEnumMap[e] ?? Language.none)
@@ -204,7 +209,7 @@ P _groupDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
       return (reader
               .readByteList(offset)
@@ -476,8 +481,24 @@ extension GroupQueryFilter on QueryBuilder<Group, Group, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Group, Group, QAfterFilterCondition> descriptionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r"description",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> descriptionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r"description",
+      ));
+    });
+  }
+
   QueryBuilder<Group, Group, QAfterFilterCondition> descriptionEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -490,7 +511,7 @@ extension GroupQueryFilter on QueryBuilder<Group, Group, QFilterCondition> {
   }
 
   QueryBuilder<Group, Group, QAfterFilterCondition> descriptionGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -505,7 +526,7 @@ extension GroupQueryFilter on QueryBuilder<Group, Group, QFilterCondition> {
   }
 
   QueryBuilder<Group, Group, QAfterFilterCondition> descriptionLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -520,8 +541,8 @@ extension GroupQueryFilter on QueryBuilder<Group, Group, QFilterCondition> {
   }
 
   QueryBuilder<Group, Group, QAfterFilterCondition> descriptionBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1489,7 +1510,7 @@ extension GroupQueryProperty on QueryBuilder<Group, Group, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Group, String, QQueryOperations> descriptionProperty() {
+  QueryBuilder<Group, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"description");
     });
