@@ -266,7 +266,7 @@ class _CoverSheetState extends State<CoverSheet> {
                 const SizedBox(height: Edges.small),
                 if (snapshot.data!.length > 1)
                   SizedBox(
-                    height: 175,
+                    height: 200,
                     child: ListView.separated(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -287,7 +287,6 @@ class _CoverSheetState extends State<CoverSheet> {
                           style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
                     ]),
                   ),
-                const SizedBox(height: Edges.medium),
                 Row(
                   children: [
                     Icon(Icons.info_outline_rounded, size: 24, color: colors.primary),
@@ -386,7 +385,7 @@ class _CoverSheetState extends State<CoverSheet> {
   Widget buildPreview(TextTheme text, ColorScheme colors, CoverArtData coverData) {
     return SizedBox(
       width: 100,
-      height: 175,
+      height: 200,
       child: FutureBuilder<File>(
         future: MangaDex.instance.covers
             .getImage(manga.id, coverData.cover, size: CacheSettings.instance.previewSize),
