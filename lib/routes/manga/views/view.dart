@@ -37,6 +37,7 @@ class _MangaViewState extends State<MangaView> {
 
   final showAppBar = ValueNotifier(false);
   final expandDescription = ValueNotifier(false);
+  final filtersApplied = ValueNotifier(false);
 
   Future<MangaData>? mangaFuture;
   Future<Statistics>? statisticsFuture;
@@ -87,13 +88,15 @@ class _MangaViewState extends State<MangaView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
+
     final text = theme.textTheme;
     final colors = theme.colorScheme;
+    final textScale = media.textScaleFactor;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: FutureBuilder(
-        // Lol. Don't setState for anything other that fetchMangaData.
+        // Lol. Don't setState for anything other than fetchMangaData.
         // Shit will break, badly.
         future: Future.wait([mangaFuture!, chapterFuture!]),
         builder: (context, snapshot) {
@@ -126,28 +129,9 @@ class _MangaViewState extends State<MangaView> {
               setState(() => fetchMangaData(reload: true));
             },
             child: CustomScrollView(controller: scrollController, slivers: [
-              SliverAppBar(
-                pinned: true,
-                expandedHeight: expandedAppBarHeight,
-                title: ValueListenableBuilder(
-                  valueListenable: showAppBar,
-                  child: Text(mangaData.manga.titles.getPreferred(preferredLocales),
-                      style: text.titleMedium),
-                  builder: (context, value, child) => AnimatedOpacity(
-                    opacity: value ? 1 : 0,
-                    duration: Durations.normal,
-                    child: child,
-                  ),
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.pin,
-                  background: detailsHeader(mangaData),
-                  titlePadding: Edges.allNone,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: buildDescription(theme, media.textScaleFactor, mangaData.manga),
-              ),
+              buildAppBar(text, colors, media, mangaData),
+              SliverToBoxAdapter(child: buildDescription(theme, textScale, mangaData.manga)),
+              SliverToBoxAdapter(child: buildChapterHeader(colors, text, chapterData.length)),
               buildChapters(colors, text, chapterData),
             ]),
           );
@@ -156,12 +140,30 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  Widget detailsHeader(MangaData mangaData) {
-    final theme = Theme.of(context);
-    final media = MediaQuery.of(context);
-    final text = theme.textTheme;
-    final colors = theme.colorScheme;
+  Widget buildAppBar(
+      TextTheme text, ColorScheme colors, MediaQueryData media, MangaData mangaData) {
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: expandedAppBarHeight,
+      title: ValueListenableBuilder(
+        valueListenable: showAppBar,
+        child: Text(mangaData.manga.titles.getPreferred(preferredLocales), style: text.titleMedium),
+        builder: (context, value, child) => AnimatedOpacity(
+          opacity: value ? 1 : 0,
+          duration: Durations.normal,
+          child: child,
+        ),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        collapseMode: CollapseMode.pin,
+        background: buildDetailsHeader(text, colors, media, mangaData),
+        titlePadding: Edges.allNone,
+      ),
+    );
+  }
 
+  Widget buildDetailsHeader(
+      TextTheme text, ColorScheme colors, MediaQueryData media, MangaData mangaData) {
     final title = mangaData.manga.titles.getPreferred(preferredLocales);
     final authorList = (mangaData.authors + mangaData.artists.whereNotIn(mangaData.authors))
         .map((e) => e.name)
@@ -178,10 +180,10 @@ class _MangaViewState extends State<MangaView> {
               end: Alignment.bottomCenter,
               stops: const [0, 0.5, 0.65, 1],
               colors: [
-                theme.colorScheme.background.withOpacity(0),
-                theme.colorScheme.background.withOpacity(0.85),
-                theme.colorScheme.background.withOpacity(0.95),
-                theme.colorScheme.background,
+                colors.background.withOpacity(0),
+                colors.background.withOpacity(0.85),
+                colors.background.withOpacity(0.95),
+                colors.background,
               ],
             ),
           ),
@@ -431,6 +433,20 @@ class _MangaViewState extends State<MangaView> {
         ),
       );
     });
+  }
+
+  Widget buildChapterHeader(ColorScheme colors, TextTheme text, int chapterCount) {
+    return Padding(
+      padding: Edges.horizontalMedium,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text("$chapterCount Chapters", style: text.titleMedium),
+        IconButton(
+          onPressed: () {},
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.filter_list_rounded),
+        )
+      ]),
+    );
   }
 
   Widget buildChapters(ColorScheme colors, TextTheme text, List<ChapterData> chapters) {
