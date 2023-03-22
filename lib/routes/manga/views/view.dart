@@ -1,7 +1,9 @@
 import "dart:io";
 
+import "package:dash_flags/dash_flags.dart" as flags;
 import "package:flutter/material.dart" hide Locale;
 import "package:flutter/services.dart";
+import "package:intl/intl.dart" show DateFormat;
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
@@ -64,7 +66,11 @@ class _MangaViewState extends State<MangaView> {
   void fetchMangaData({bool reload = false}) {
     mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
     statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-    chapterFuture = MangaDex.instance.chapter.getFeed(widget.id, checkDB: !reload);
+    chapterFuture = MangaDex.instance.chapter.getFeed(
+      widget.id,
+      checkDB: !reload,
+      langs: preferredLocales,
+    );
     coverFuture = mangaFuture?.then((data) {
       if (data.cover == null) return Future.value(null);
 
@@ -435,21 +441,45 @@ class _MangaViewState extends State<MangaView> {
           final data = chapters[index];
 
           late String title;
+          final groups =
+              data.groups.isEmpty ? "No group" : data.groups.map((e) => e.name).join(", ");
 
           if (data.chapter.chapter != null && data.chapter.volume != null) {
             title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
           } else if (data.chapter.chapter != null) {
-            title = "Ch. ${data.chapter.chapter} ";
+            title = "Chapter ${data.chapter.chapter}";
           } else {
             title = "Oneshot";
           }
 
           if (data.chapter.title != null) {
-            title += data.chapter.title!;
+            title += "- ${data.chapter.title!}";
           }
 
           return ListTile(
-            title: Text(title),
+            onTap: () {},
+            title: Text(title, style: text.bodyMedium),
+            leading: SizedBox.square(
+              dimension: 40,
+              child: Center(
+                child: flags.LanguageFlag(
+                  height: 18,
+                  language: data.chapter.translatedLanguage.language.flagLanguage,
+                ),
+              ),
+            ),
+            subtitle: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
+                  const TextSpan(text: "  -  "),
+                  TextSpan(text: data.uploader.username),
+                  const TextSpan(text: " • "),
+                  TextSpan(text: groups),
+                ],
+                style: text.bodySmall?.withColorOpacity(0.75),
+              ),
+            ),
           );
         },
       ),

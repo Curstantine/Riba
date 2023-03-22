@@ -1,3 +1,4 @@
+import "package:dash_flags/dash_flags.dart" as flag;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/exception.dart";
@@ -138,7 +139,7 @@ enum Language {
     );
   }
 
-  static Map<Language, String> humanNames = {
+  static Map<Language, String> _humanNames = {
     Language.none: "None",
     Language.english: "English",
     Language.japanese: "Japanese",
@@ -147,5 +148,14 @@ enum Language {
     Language.korean: "Korean",
   };
 
-  String get human => humanNames[this]!;
+  static Map<Language, flag.Language> _flagLanguages = {
+    Language.english: flag.Language.en,
+    Language.japanese: flag.Language.ja,
+    Language.simpleChinese: flag.Language.zh,
+    Language.traditionalChinese: flag.Language.zh_TW,
+    Language.korean: flag.Language.ko,
+  };
+
+  String get human => _humanNames[this]!;
+  flag.Language get flagLanguage => _flagLanguages[this]!;
 }

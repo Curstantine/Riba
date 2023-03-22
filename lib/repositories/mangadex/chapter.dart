@@ -87,11 +87,19 @@ class MDChapterRepo {
     return mapped.cast();
   }
 
-  Future<List<ChapterData>> getFeed(String id, {bool checkDB = true}) async {
+  Future<List<ChapterData>> getFeed(
+    String id, {
+    bool checkDB = true,
+    List<Locale> langs = const [],
+  }) async {
     logger.info("getFeed($id, $checkDB)");
 
     if (checkDB) {
-      final inDB = await database.chapters.filter().mangaIdEqualTo(id).findAll();
+      final inDB = await database.chapters
+          .filter()
+          .mangaIdEqualTo(id)
+          .translatedLanguage((q) => q.anyOf(langs, (q, element) => q.codeEqualTo(element.code)))
+          .findAll();
       inDB.sortAsDescending();
 
       if (inDB.isNotEmpty) {
@@ -110,6 +118,7 @@ class MDChapterRepo {
         .addPathSegment(id)
         .addPathSegment("feed")
         .setParameter("order[chapter]", "desc")
+        .setParameter("translatedLanguage[]", langs.map((e) => e.code).toList())
         .setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
     final response = MDChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
