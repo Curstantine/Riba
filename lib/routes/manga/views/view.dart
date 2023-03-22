@@ -41,6 +41,7 @@ class _MangaViewState extends State<MangaView> {
   Future<File?>? coverFuture;
   Future<List<ChapterData>>? chapterFuture;
 
+  /// TODO: migrate to ValueNotifier with user login and etc.
   bool isFollowed = false;
   bool hasTrackers = false;
   bool hasCustomLists = false;
@@ -433,48 +434,26 @@ class _MangaViewState extends State<MangaView> {
         (context, index) {
           final data = chapters[index];
 
+          late String title;
+
+          if (data.chapter.chapter != null && data.chapter.volume != null) {
+            title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
+          } else if (data.chapter.chapter != null) {
+            title = "Ch. ${data.chapter.chapter} ";
+          } else {
+            title = "Oneshot";
+          }
+
+          if (data.chapter.title != null) {
+            title += data.chapter.title!;
+          }
+
           return ListTile(
-            title: Text(data.chapter.title ?? "Chapter ${data.chapter.chapter}"),
+            title: Text(title),
           );
         },
       ),
     );
-    // return FutureBuilder<List<ChapterData>>(
-    //   future: chapterFuture,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.connectionState != ConnectionState.done) {
-    //       return Container(
-    //         padding: Edges.topMedium,
-    //         height: 10,
-    //         child: const LinearProgressIndicator(),
-    //       );
-    //     }
-
-    //     if (snapshot.hasError || !snapshot.hasData) {
-    //       final error = handleError(snapshot.error ?? "Data was null without errors.");
-
-    //       return SizedBox(
-    //         height: 150,
-    //         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-    //           Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
-    //           Text(error.description, style: text.bodyMedium),
-    //         ]),
-    //       );
-    //     }
-
-    //     final chapters = snapshot.requireData;
-
-    //     return ListView.builder(
-    //       itemCount: chapters.length,
-    //       itemBuilder: (context, index) {
-    //         final chapter = chapters[index];
-    //         return ListTile(
-    //           title: Text(chapter.chapter.title ?? "Chapter ${chapter.chapter.chapter}"),
-    //         );
-    //       },
-    //     );
-    //   },
-    // );
   }
 
   Widget buildFollowButton() {

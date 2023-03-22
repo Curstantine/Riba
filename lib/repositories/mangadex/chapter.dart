@@ -91,7 +91,8 @@ class MDChapterRepo {
     logger.info("getFeed($id, $checkDB)");
 
     if (checkDB) {
-      final inDB = await database.chapters.filter().mangaIdEqualTo(id).sortByChapter().findAll();
+      final inDB = await database.chapters.filter().mangaIdEqualTo(id).findAll();
+      inDB.sortAsDescending();
 
       if (inDB.isNotEmpty) {
         final chapterFuture = <Future<ChapterData>>[];
@@ -108,6 +109,7 @@ class MDChapterRepo {
         .copy()
         .addPathSegment(id)
         .addPathSegment("feed")
+        .setParameter("order[chapter]", "desc")
         .setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
     final response = MDChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);

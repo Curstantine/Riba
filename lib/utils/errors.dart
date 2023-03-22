@@ -10,16 +10,19 @@ class ErrorState {
   String toString() => "$title: $description";
 }
 
-ErrorState handleError(Object error) {
+ErrorState handleError(Object object) {
   late String title;
   late String description;
 
-  if (error is MDException) {
-    title = "Failed to reach Mangadex!";
-    description = error.title;
-  } else {
-    title = "Came across an unknown error!";
-    description = error.toString();
+  switch (object.runtimeType) {
+    case MDException:
+      object as MDException;
+      title = object.status.toString();
+      description = object.title;
+      break;
+    default:
+      title = "Came across an unknown error!";
+      description = object.toString();
   }
 
   return ErrorState(title: title, description: description);

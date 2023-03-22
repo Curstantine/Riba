@@ -57,3 +57,31 @@ class Chapter {
     throw UnimplementedError();
   }
 }
+
+extension SortChapter on List<Chapter> {
+  // TODO: Handle edge cases where chapter number is repated every volume and etc.
+  /// Sorts in the desired descending order.
+  ///
+  /// If [chapter] is not null, it will be sorted by [chapter].
+  /// If [chapter] is null, it will be sorted by [volume].
+  /// If both [chapter] and [volume] are null, it will not be sorted.
+  void sortAsDescending() {
+    sort((a, b) {
+      if (a.chapter != null && b.chapter != null) {
+        final aChapter = double.parse(a.chapter!);
+        final bChapter = double.parse(b.chapter!);
+
+        return bChapter.compareTo(aChapter);
+      }
+
+      if (a.volume != null && b.volume != null) {
+        final aVolume = double.parse(a.volume!);
+        final bVolume = double.parse(b.volume!);
+
+        return bVolume.compareTo(aVolume);
+      }
+
+      return 0;
+    });
+  }
+}

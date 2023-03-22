@@ -11,8 +11,8 @@ class MDException implements Exception {
   /// Exception thrown when a [MDError] was serialized from a request to the server.
   const MDException(this.response, {this.url});
 
-  get title => response.title;
-  get status => response.status;
+  String get title => response.title;
+  int get status => response.status;
 
   @override
   String toString() => "MDException: ${response.title}";
@@ -22,7 +22,7 @@ class LanguageNotSupportedException implements Exception {
   final String languageCode;
 
   /// Exception thrown when a [Language] is not found.
-  LanguageNotSupportedException(this.languageCode);
+  const LanguageNotSupportedException(this.languageCode);
 
   @override
   String toString() => "Language $languageCode not found.";
