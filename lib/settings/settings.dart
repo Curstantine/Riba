@@ -1,4 +1,5 @@
 import "package:hive/hive.dart";
+import "package:riba/settings/filter.dart";
 
 import "cache.dart";
 import "theme.dart";
@@ -9,6 +10,7 @@ class Settings {
 
   final ThemeSettings theme = ThemeSettings();
   final CacheSettings caching = CacheSettings();
+  final FilterSettings filter = FilterSettings();
 
   static Future<void> init() async {
     instance = Settings._internal();
@@ -16,6 +18,7 @@ class Settings {
     await Future.wait([
       instance.theme.init(),
       instance.caching.init(),
+      instance.filter.init(),
     ]);
   }
 }

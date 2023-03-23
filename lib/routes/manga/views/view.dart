@@ -1,9 +1,12 @@
+import "dart:async";
 import "dart:io";
 
 import "package:dash_flags/dash_flags.dart" as flags;
 import "package:flutter/material.dart" hide Locale;
 import "package:flutter/services.dart";
+import "package:hive_flutter/hive_flutter.dart";
 import "package:intl/intl.dart" show DateFormat;
+import "package:logging/logging.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
@@ -15,6 +18,7 @@ import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/routes/manga/widgets/sheet.dart";
 import "package:riba/settings/cache.dart";
+import "package:riba/settings/filter.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";
@@ -31,23 +35,33 @@ class MangaView extends StatefulWidget {
 
 class _MangaViewState extends State<MangaView> {
   final expandedAppBarHeight = 500.0;
+  final logger = Logger("MangaView");
   final scrollController = ScrollController();
   final preferredLocales = [Locale.en, Locale.ja];
   final cacheSettings = CacheSettings.instance;
+  final filterSettings = FilterSettings.instance;
 
   final showAppBar = ValueNotifier(false);
   final expandDescription = ValueNotifier(false);
   final filtersApplied = ValueNotifier(false);
 
-  Future<MangaData>? mangaFuture;
-  Future<Statistics>? statisticsFuture;
-  Future<File?>? coverFuture;
-  Future<List<ChapterData>>? chapterFuture;
+  late Future<MangaData> mangaFuture;
+  late Future<Statistics> statisticsFuture;
+  late Future<File?> coverFuture;
+
+  late StreamController<List<ChapterData>> chapterStreamController =
+      StreamController<List<ChapterData>>.broadcast(
+    onListen: () => logger.info("Chapter stream opened"),
+  );
+  Stream<List<ChapterData>> get chapterStream => chapterStreamController.stream;
 
   /// TODO: migrate to ValueNotifier with user login and etc.
   bool isFollowed = false;
   bool hasTrackers = false;
   bool hasCustomLists = false;
+
+  late final colors = Theme.of(context).colorScheme;
+  late final text = Theme.of(context).textTheme;
 
   @override
   void initState() {
@@ -59,6 +73,7 @@ class _MangaViewState extends State<MangaView> {
 
   @override
   void dispose() {
+    chapterStreamController.close();
     scrollController.removeListener(onScroll);
     scrollController.dispose();
     super.dispose();
@@ -67,12 +82,7 @@ class _MangaViewState extends State<MangaView> {
   void fetchMangaData({bool reload = false}) {
     mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
     statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-    chapterFuture = MangaDex.instance.chapter.getFeed(
-      widget.id,
-      checkDB: !reload,
-      langs: preferredLocales,
-    );
-    coverFuture = mangaFuture?.then((data) {
+    coverFuture = mangaFuture.then((data) {
       if (data.cover == null) return Future.value(null);
 
       return MangaDex.instance.covers.getImage(
@@ -82,15 +92,26 @@ class _MangaViewState extends State<MangaView> {
         cache: cacheSettings.cacheCovers,
       );
     });
+
+    chapterStreamController.addStream(fetchChapters(reload: reload).asStream().asBroadcastStream());
+  }
+
+  Future<List<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
+    final filters = await filterSettings.mangaFilters.get(widget.id) ?? MangaFilterData.defaults();
+    final data = await MangaDex.instance.chapter.getFeed(
+      widget.id,
+      checkDB: !reload,
+      langs: preferredLocales,
+      excludedGroups: filters.excludedGroupIds,
+    );
+
+    return data;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context);
-
-    final text = theme.textTheme;
-    final colors = theme.colorScheme;
     final textScale = media.textScaleFactor;
 
     return Scaffold(
@@ -98,7 +119,7 @@ class _MangaViewState extends State<MangaView> {
       body: FutureBuilder(
         // Lol. Don't setState for anything other than fetchMangaData.
         // Shit will break, badly.
-        future: Future.wait([mangaFuture!, chapterFuture!]),
+        future: mangaFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
@@ -120,9 +141,7 @@ class _MangaViewState extends State<MangaView> {
             );
           }
 
-          final data = snapshot.requireData;
-          final mangaData = data[0] as MangaData;
-          final chapterData = data[1] as List<ChapterData>;
+          final mangaData = snapshot.requireData;
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -130,9 +149,10 @@ class _MangaViewState extends State<MangaView> {
             },
             child: CustomScrollView(controller: scrollController, slivers: [
               buildAppBar(text, colors, media, mangaData),
-              SliverToBoxAdapter(child: buildDescription(theme, textScale, mangaData.manga)),
-              SliverToBoxAdapter(child: buildChapterHeader(colors, text, chapterData.length)),
-              buildChapters(colors, text, chapterData),
+              SliverToBoxAdapter(child: buildDescription(textScale, mangaData.manga)),
+              SliverToBoxAdapter(child: buildReadButton()),
+              SliverToBoxAdapter(child: buildChapterHeader()),
+              buildChapters(),
             ]),
           );
         },
@@ -158,6 +178,16 @@ class _MangaViewState extends State<MangaView> {
         collapseMode: CollapseMode.pin,
         background: buildDetailsHeader(text, colors, media, mangaData),
         titlePadding: Edges.allNone,
+      ),
+    );
+  }
+
+  Widget buildReadButton() {
+    return Padding(
+      padding: Edges.horizontalLarge.copyWithSelf(Edges.verticalMedium),
+      child: FilledButton.tonal(
+        onPressed: () {},
+        child: const Text("Start Reading"),
       ),
     );
   }
@@ -326,10 +356,10 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  Widget buildDescription(ThemeData theme, double textScaleFactor, Manga manga) {
+  Widget buildDescription(double textScaleFactor, Manga manga) {
     final span = TextSpan(
       text: manga.description.getPreferred(preferredLocales),
-      style: theme.textTheme.bodyMedium,
+      style: text.bodyMedium,
     );
 
     return Padding(
@@ -375,10 +405,10 @@ class _MangaViewState extends State<MangaView> {
                             end: Alignment.bottomCenter,
                             stops: const [0, 0.5, 0.75, 1],
                             colors: [
-                              theme.colorScheme.background.withOpacity(0),
-                              theme.colorScheme.background.withOpacity(0.75),
-                              theme.colorScheme.background.withOpacity(0.95),
-                              theme.colorScheme.background,
+                              colors.background.withOpacity(0),
+                              colors.background.withOpacity(0.75),
+                              colors.background.withOpacity(0.95),
+                              colors.background,
                             ],
                           ),
                   ),
@@ -399,8 +429,8 @@ class _MangaViewState extends State<MangaView> {
                     tooltip: value ? "Collapse" : "Expand",
                     onPressed: () => expandDescription.value = !expandDescription.value,
                     style: IconButton.styleFrom(
-                        backgroundColor: value ? theme.colorScheme.primaryContainer : null,
-                        foregroundColor: value ? theme.colorScheme.onPrimaryContainer : null),
+                        backgroundColor: value ? colors.primaryContainer : null,
+                        foregroundColor: value ? colors.onPrimaryContainer : null),
                   ),
                 ),
               ],
@@ -411,13 +441,13 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  LayoutBuilder buildTags(MangaData mangaData, ThemeData theme) {
+  LayoutBuilder buildTags(MangaData mangaData) {
     final tags = mangaData.tags.map(
       (tag) => SizedBox(
         height: 32,
         child: ActionChip(
             padding: Edges.allNone,
-            labelStyle: theme.textTheme.labelSmall?.withColorOpacity(0.75),
+            labelStyle: text.labelSmall?.withColorOpacity(0.75),
             label: Text(tag.name.getPreferred(preferredLocales)),
             onPressed: () => {}),
       ),
@@ -435,70 +465,144 @@ class _MangaViewState extends State<MangaView> {
     });
   }
 
-  Widget buildChapterHeader(ColorScheme colors, TextTheme text, int chapterCount) {
-    return Padding(
-      padding: Edges.horizontalMedium,
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text("$chapterCount Chapters", style: text.titleMedium),
-        IconButton(
-          onPressed: () {},
-          visualDensity: VisualDensity.compact,
-          icon: const Icon(Icons.filter_list_rounded),
-        )
-      ]),
-    );
+  /// Handles both the filter and loading indicator for chapters.
+  Widget buildChapterHeader() {
+    return StreamBuilder<List<ChapterData>>(
+        stream: chapterStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.none) {
+            return const SizedBox.shrink();
+          }
+
+          final chapters = snapshot.data;
+          final chapterCount = chapters?.length ?? 0;
+
+          return Container(
+            height: 40,
+            padding: Edges.horizontalMedium,
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text("$chapterCount Chapters",
+                  style: text.titleMedium?.withColorOpacity(chapters != null ? 1 : 0.5)),
+              ValueListenableBuilder(
+                valueListenable: filterSettings.mangaFilters.listenable(keys: [widget.id]),
+                child: const SizedBox.square(
+                  dimension: 24,
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
+                ),
+                builder: (context, value, loadingChild) {
+                  return FutureBuilder<MangaFilterData?>(
+                    future: value.get(widget.id),
+                    builder: (context, filterSnapshot) {
+                      if (!snapshot.hasData ||
+                          filterSnapshot.connectionState != ConnectionState.done) {
+                        return loadingChild!;
+                      }
+
+                      final filterData = filterSnapshot.data ?? MangaFilterData.defaults();
+
+                      return IconButton(
+                        isSelected: !filterData.isDefault,
+                        icon: const Icon(Icons.filter_list_rounded),
+                        selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
+                        visualDensity: VisualDensity.comfortable,
+                        onPressed: () =>
+                            chapters == null ? null : showFilterSheet(chapters, filterData),
+                      );
+                    },
+                  );
+                },
+              )
+            ]),
+          );
+        });
   }
 
-  Widget buildChapters(ColorScheme colors, TextTheme text, List<ChapterData> chapters) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: chapters.length,
-        (context, index) {
-          final data = chapters[index];
+  Widget buildChapters() {
+    return StreamBuilder<List<ChapterData>>(
+      stream: chapterStream,
+      builder: (context, snapshot) {
+        // Since the loading indicator is in the header, we don't need to handle other states here.
+        if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
 
-          late String title;
-          final groups =
-              data.groups.isEmpty ? "No group" : data.groups.map((e) => e.name).join(", ");
+        if (snapshot.hasError) {
+          final error = handleError(snapshot.error!);
 
-          if (data.chapter.chapter != null && data.chapter.volume != null) {
-            title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
-          } else if (data.chapter.chapter != null) {
-            title = "Chapter ${data.chapter.chapter}";
-          } else {
-            title = "Oneshot";
-          }
-
-          if (data.chapter.title != null) {
-            title += "- ${data.chapter.title!}";
-          }
-
-          return ListTile(
-            onTap: () {},
-            title: Text(title, style: text.bodyMedium),
-            leading: SizedBox.square(
-              dimension: 40,
-              child: Center(
-                child: flags.LanguageFlag(
-                  height: 18,
-                  language: data.chapter.translatedLanguage.language.flagLanguage,
-                ),
-              ),
-            ),
-            subtitle: Text.rich(
-              TextSpan(
+          return SliverToBoxAdapter(
+            child: SizedBox(
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
-                  const TextSpan(text: "  -  "),
-                  TextSpan(text: data.uploader.username),
-                  const TextSpan(text: " • "),
-                  TextSpan(text: groups),
+                  Text(error.title, style: text.titleLarge?.copyWith(color: colors.error)),
+                  const SizedBox(height: 8),
+                  Text(error.description, style: text.bodySmall),
                 ],
-                style: text.bodySmall?.withColorOpacity(0.75),
               ),
             ),
           );
-        },
-      ),
+        }
+
+        if (snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(
+            child: SizedBox(height: 100, child: Center(child: Text("No chapters found"))),
+          );
+        }
+
+        final chapters = snapshot.requireData;
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            childCount: chapters.length,
+            (context, index) {
+              final data = chapters[index];
+
+              late String title;
+              final groups =
+                  data.groups.isEmpty ? "No group" : data.groups.map((e) => e.name).join(", ");
+
+              if (data.chapter.chapter != null && data.chapter.volume != null) {
+                title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
+              } else if (data.chapter.chapter != null) {
+                title = "Chapter ${data.chapter.chapter}";
+              } else {
+                title = "Oneshot";
+              }
+
+              if (data.chapter.title != null) {
+                title += "- ${data.chapter.title!}";
+              }
+
+              return ListTile(
+                onTap: () {},
+                title: Text(title, style: text.bodyMedium),
+                leading: SizedBox.square(
+                  dimension: 40,
+                  child: Center(
+                    child: flags.LanguageFlag(
+                      height: 18,
+                      language: data.chapter.translatedLanguage.language.flagLanguage,
+                    ),
+                  ),
+                ),
+                subtitle: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
+                      const TextSpan(text: "  -  "),
+                      TextSpan(text: data.uploader.username),
+                      const TextSpan(text: " • "),
+                      TextSpan(text: groups),
+                    ],
+                    style: text.bodySmall?.withColorOpacity(0.75),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -547,6 +651,29 @@ class _MangaViewState extends State<MangaView> {
       builder: (context) => CoverSheet(
           mangaData: mangaData,
           padding: EdgeInsets.only(top: media.padding.top, bottom: media.padding.bottom)),
+    );
+  }
+
+  void showFilterSheet(List<ChapterData> chapters, MangaFilterData filterData) {
+    final media = MediaQuery.of(context);
+    final groupMap = {for (final e in chapters.map((e) => e.groups).expand((e) => e)) e.id: e};
+    final dedupedGroupIds = groupMap.keys.toSet();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => ChapterFilterSheet(
+        onApply: (newFilter) {
+          filterSettings.mangaFilters.put(widget.id, newFilter);
+          Navigator.pop(context);
+        },
+        padding: EdgeInsets.only(bottom: media.padding.bottom),
+        data: ChapterFilterSheetData(
+          mangaId: widget.id,
+          filter: filterData,
+          groups: dedupedGroupIds.map((e) => groupMap[e]!).toList(),
+        ),
+      ),
     );
   }
 

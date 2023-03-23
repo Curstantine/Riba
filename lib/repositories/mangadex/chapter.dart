@@ -91,6 +91,7 @@ class MDChapterRepo {
     String id, {
     bool checkDB = true,
     List<Locale> langs = const [],
+    List<String> excludedGroups = const [],
   }) async {
     logger.info("getFeed($id, $checkDB)");
 
@@ -99,6 +100,7 @@ class MDChapterRepo {
           .filter()
           .mangaIdEqualTo(id)
           .translatedLanguage((q) => q.anyOf(langs, (q, element) => q.codeEqualTo(element.code)))
+          .group((q) => q.anyOf(excludedGroups, (q, element) => q.groupIdsElementContains(element)))
           .findAll();
       inDB.sortAsDescending();
 
@@ -119,6 +121,7 @@ class MDChapterRepo {
         .addPathSegment("feed")
         .setParameter("order[chapter]", "desc")
         .setParameter("translatedLanguage[]", langs.map((e) => e.code).toList())
+        .setParameter("excludedGroups[]", excludedGroups)
         .setParameter("includes[]", includes);
     final request = await client.get(reqUrl.toUri());
     final response = MDChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);

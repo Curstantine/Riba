@@ -24,6 +24,7 @@
 		"*.dart": "${capture}.g.dart"
 	},
 	"cSpell.words": [
+		"deduped",
 		"doujinshi",
 		"fantia",
 		"josei",

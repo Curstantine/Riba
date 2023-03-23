@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:io";
 import "dart:math";
 
@@ -7,12 +8,14 @@ import "package:google_fonts/google_fonts.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/cache.dart";
+import "package:riba/settings/filter.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";
@@ -27,19 +30,19 @@ class RatingDetailsSheet extends StatelessWidget {
   final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final totalRateCount = rating.distribution.reduce((x, y) => x + y);
 
     return Padding(
-      padding: Edges.allLarge.add(padding),
+      padding: Edges.allLarge.copyWith(top: Edges.extraLarge).add(padding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Ratings", style: textTheme.titleLarge),
+          Text("Ratings", style: textTheme.titleMedium),
           const SizedBox(height: Edges.small),
           SizedBox(height: 250, child: buildChart(textTheme, colorScheme, totalRateCount)),
           const SizedBox(height: Edges.large),
@@ -457,4 +460,81 @@ class _CoverSheetState extends State<CoverSheet> {
       ),
     );
   }
+}
+
+class ChapterFilterSheet extends StatelessWidget {
+  ChapterFilterSheet({
+    super.key,
+    required this.padding,
+    required this.data,
+    required this.onApply,
+  });
+
+  final EdgeInsets padding;
+  final ChapterFilterSheetData data;
+  final void Function(MangaFilterData) onApply;
+  final logger = Logger("ChapterFilterSheet");
+
+  late final Map<String, ValueNotifier<bool>> _groupValues = {
+    for (final group in data.groups) group.id: ValueNotifier(true)
+  };
+
+  @override
+  Widget build(context) {
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
+    final colors = theme.colorScheme;
+
+    return ListView(
+      padding: Edges.horizontalLarge.copyWith(top: Edges.extraLarge).add(padding),
+      shrinkWrap: true,
+      children: [
+        Text("Chapter Groups", style: text.titleMedium),
+        Text("Select which groups to include in the chapter list",
+            style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+        const SizedBox(height: Edges.small),
+        for (final group in data.groups)
+          ValueListenableBuilder(
+            valueListenable: _groupValues[group.id]!,
+            builder: (context, value, _) {
+              return CheckboxListTile(
+                value: value,
+                dense: true,
+                onChanged: (value) => _groupValues[group.id]!.value = value!,
+                title: Text(group.name, style: text.bodyMedium),
+              );
+            },
+          ),
+        const SizedBox(height: Edges.large),
+        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          FilledButton.tonal(onPressed: apply, child: const Text("Apply")),
+        ])
+      ],
+    );
+  }
+
+  void apply() {
+    logger.info("Applying manga filter changes. (${data.mangaId})");
+
+    final newFilter = data.filter.copyWith(
+      excludedGroupIds: _groupValues.entries
+          .where((entry) => !entry.value.value)
+          .map((entry) => entry.key)
+          .toList(),
+    );
+
+    onApply.call(newFilter);
+  }
+}
+
+class ChapterFilterSheetData {
+  final String mangaId;
+  final List<Group> groups;
+  final MangaFilterData filter;
+
+  const ChapterFilterSheetData({
+    required this.filter,
+    required this.groups,
+    required this.mangaId,
+  });
 }
