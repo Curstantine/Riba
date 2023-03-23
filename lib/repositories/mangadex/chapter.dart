@@ -99,8 +99,8 @@ class MDChapterRepo {
       final inDB = await database.chapters
           .filter()
           .mangaIdEqualTo(id)
-          .translatedLanguage((q) => q.anyOf(langs, (q, element) => q.codeEqualTo(element.code)))
-          .group((q) => q.anyOf(excludedGroups, (q, element) => q.groupIdsElementContains(element)))
+          .translatedLanguage((q) => q.anyOf(langs, (q, e) => q.codeEqualTo(e.code)))
+          .group((q) => q.anyOf(excludedGroups, (q, e) => q.not().groupIdsElementContains(e)))
           .findAll();
       inDB.sortAsDescending();
 
