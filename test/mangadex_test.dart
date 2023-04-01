@@ -102,4 +102,11 @@ void main() async {
       expect(smallCover.statSync().type, FileSystemEntityType.file);
     });
   });
+  group("MangaDex.Group", () {
+    test("Group.getSimpleMany", () async {
+      final groups = await mangaDex.group.getSimpleMany(groupIds);
+      expect(groups, isNotNull);
+      expect(groups.length, groupIds.length);
+    });
+  });
 }

@@ -2,7 +2,7 @@ const mangaId = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
 const coverId = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f";
 const coverFile = "c18da525-e34f-4128-a696-4477b6ce6827.png";
 
-final mangaIds = [
+const mangaIds = [
   "d473d946-e086-454a-9cb4-62d14f8491da",
   "fed16739-b4fc-447a-9e2f-36cf61ea1908",
   // This title is pornographic, and should be empty for
@@ -61,7 +61,7 @@ final mangaIds = [
   "239d6260-d71f-43b0-afff-074e3619e3de"
 ];
 
-final chapterIds = [
+const chapterIds = [
   "0aaf8b27-0013-4ae0-8935-91a089466874",
   "bbf176a0-ea53-4b8b-8e23-8aa192e838d5",
   "aff0e720-88f2-45c5-8d9e-817f84d4c306",
@@ -72,4 +72,9 @@ final chapterIds = [
   "96ce3263-6e8d-42c7-8c70-9871cc7365d4",
   "317f6c2f-095d-4de4-aee1-111224db8f22",
   "7c03d00c-55f5-4370-bb00-8bc3dafee36c"
+];
+
+const groupIds = [
+  "a408e049-2d88-429f-8c03-f0cc8ab2325c",
+  "1adb76cd-dead-4f15-831b-dd7a793c42f5",
 ];

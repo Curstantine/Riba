@@ -111,6 +111,7 @@ class Locale {
   static Locale ja = Locale(language: Language.japanese, romanized: false);
   static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
   static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
+  static Locale fr = Locale(language: Language.french, romanized: false);
 
   static Locale jaRo = Locale(language: Language.japanese, romanized: true);
   static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
@@ -124,7 +125,8 @@ enum Language {
   japanese("ja"),
   simpleChinese("zh"),
   traditionalChinese("zh-hk"),
-  korean("ko");
+  korean("ko"),
+  french("fr");
 
   final String isoCode;
   const Language(this.isoCode);
@@ -146,6 +148,7 @@ enum Language {
     Language.simpleChinese: "Simplified Chinese",
     Language.traditionalChinese: "Traditional Chinese",
     Language.korean: "Korean",
+    Language.french: "French",
   };
 
   static Map<Language, flag.Language> _flagLanguages = {
@@ -154,6 +157,7 @@ enum Language {
     Language.simpleChinese: flag.Language.zh,
     Language.traditionalChinese: flag.Language.zh_TW,
     Language.korean: flag.Language.ko,
+    Language.french: flag.Language.fr,
   };
 
   String get human => _humanNames[this]!;
