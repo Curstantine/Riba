@@ -93,7 +93,7 @@ class _MangaViewState extends State<MangaView> {
       );
     });
 
-    chapterStreamController.addStream(fetchChapters(reload: reload).asStream().asBroadcastStream());
+    chapterStreamController.addStream(fetchChapters(reload: reload).asStream());
   }
 
   Future<List<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
