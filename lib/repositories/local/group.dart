@@ -25,6 +25,18 @@ class Group {
 
   late int version;
 
+  /// The [User.id] of the leader of this group.
+  ///
+  /// This could be null if the leader is not retrieved yet, or if a leader does not exist.
+  late String? leaderId;
+
+  /// The [User.id]s of the members of this group.
+  ///
+  /// Contains the leader as well.
+  ///
+  /// This could only be null if the members are not retrieved yet.
+  late List<String>? memberIds;
+
   Group({
     required this.id,
     required this.name,
@@ -37,6 +49,8 @@ class Group {
     required this.createdAt,
     required this.updatedAt,
     required this.version,
+    this.leaderId,
+    this.memberIds,
   });
 
   /// Checks if the given [CustomList] has the same [id] and the [version] as this.

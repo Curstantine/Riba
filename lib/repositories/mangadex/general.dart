@@ -128,7 +128,13 @@ enum EntityType {
   user,
   tag,
   coverArt,
-  scanlationGroup;
+  scanlationGroup,
+
+  /// Special entity type for group relationships, stored here for convenience.
+  leader,
+
+  /// Special entity type for group relationships, stored here for convenience.
+  member;
 
   static Map<String, EntityType> get jsonValues => {
         "manga": manga,
@@ -140,6 +146,8 @@ enum EntityType {
         "tag": tag,
         "cover_art": coverArt,
         "scanlation_group": scanlationGroup,
+        "leader": leader,
+        "member": member,
       };
 
   factory EntityType.fromJsonValue(String str) {
@@ -179,6 +187,8 @@ T mapToEntity<T>(Map<String, dynamic> map, EntityType type) {
       break;
 
     case EntityType.user:
+    case EntityType.leader:
+    case EntityType.member:
       attributes = UserAttributes.fromMap(map) as T;
       break;
 

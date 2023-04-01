@@ -1,19 +1,19 @@
 import "dart:async";
 
-/// Enumerates over a list of items, while handing them over to [onStep] as batches of [perStep].
-/// Useful for repeating the same operation on a list of items without worrying about the
-/// logic.
-///
-/// T can only be either [String] or [int].
-///
-/// [onStep] should manipulate the given [Map] and resolve their values, or leave them as `null`
-/// which will be later marked as mismatched.
 class Enumerate<T, R> {
   final List<T> items;
   final int perStep;
   final FutureOr<void> Function(Map<T, R?>) onStep;
   final void Function(List<T>)? onMismatch;
 
+  /// Enumerates over a list of items, while handing them over to [onStep] as batches of [perStep].
+  /// Useful for repeating the same operation on a list of items without worrying about the
+  /// logic.
+  ///
+  /// T can only be either [String] or [int].
+  ///
+  /// [onStep] should manipulate the given [Map] and resolve their values, or leave them as `null`
+  /// which will be later marked as mismatched.
   Enumerate({
     required this.items,
     required this.perStep,

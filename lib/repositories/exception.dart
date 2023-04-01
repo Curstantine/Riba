@@ -27,3 +27,13 @@ class LanguageNotSupportedException implements Exception {
   @override
   String toString() => "Language $languageCode not found.";
 }
+
+class IncompleteDataException implements Exception {
+  final String message;
+
+  /// Exception thrown when a ser/de or a collector is missing required data.
+  const IncompleteDataException(this.message);
+
+  @override
+  String toString() => "IncompleteDataException: $message";
+}

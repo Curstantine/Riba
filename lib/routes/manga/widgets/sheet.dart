@@ -8,7 +8,6 @@ import "package:google_fonts/google_fonts.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
@@ -462,8 +461,8 @@ class _CoverSheetState extends State<CoverSheet> {
   }
 }
 
-class ChapterFilterSheet extends StatelessWidget {
-  ChapterFilterSheet({
+class ChapterFilterSheet extends StatefulWidget {
+  const ChapterFilterSheet({
     super.key,
     required this.padding,
     required this.data,
@@ -473,10 +472,17 @@ class ChapterFilterSheet extends StatelessWidget {
   final EdgeInsets padding;
   final ChapterFilterSheetData data;
   final void Function(MangaFilterData) onApply;
+
+  @override
+  State<ChapterFilterSheet> createState() => _ChapterFilterSheetState();
+}
+
+class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
   final logger = Logger("ChapterFilterSheet");
 
   late final Map<String, ValueNotifier<bool>> _groupValues = {
-    for (final group in data.groups) group.id: ValueNotifier(true)
+    for (final id in widget.data.groupIds)
+      id: ValueNotifier(!widget.data.filter.excludedGroupIds.contains(id))
   };
 
   @override
@@ -486,25 +492,10 @@ class ChapterFilterSheet extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return ListView(
-      padding: Edges.horizontalLarge.copyWith(top: Edges.extraLarge).add(padding),
+      padding: Edges.horizontalLarge.copyWith(top: Edges.extraLarge).add(widget.padding),
       shrinkWrap: true,
       children: [
-        Text("Chapter Groups", style: text.titleMedium),
-        Text("Select which groups to include in the chapter list",
-            style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
-        const SizedBox(height: Edges.small),
-        for (final group in data.groups)
-          ValueListenableBuilder(
-            valueListenable: _groupValues[group.id]!,
-            builder: (context, value, _) {
-              return CheckboxListTile(
-                value: value,
-                dense: true,
-                onChanged: (value) => _groupValues[group.id]!.value = value!,
-                title: Text(group.name, style: text.bodyMedium),
-              );
-            },
-          ),
+        ...buildChapterGroups(text, colors),
         const SizedBox(height: Edges.large),
         Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           FilledButton.tonal(onPressed: apply, child: const Text("Apply")),
@@ -513,28 +504,76 @@ class ChapterFilterSheet extends StatelessWidget {
     );
   }
 
-  void apply() {
-    logger.info("Applying manga filter changes. (${data.mangaId})");
+  List<Widget> buildChapterGroups(TextTheme text, ColorScheme colors) {
+    return [
+      Text("Chapter Groups", style: text.titleMedium),
+      Text("Select which groups to include in the chapter list",
+          style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+      const SizedBox(height: Edges.small),
+      FutureBuilder(
+        future: MangaDex.instance.group.getSimpleMany(widget.data.groupIds),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-    final newFilter = data.filter.copyWith(
+          if (snapshot.hasError) {
+            final error = handleError(snapshot.error!);
+            return Center(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+                const SizedBox(height: Edges.small),
+                Text(error.description, style: text.bodySmall)
+              ]),
+            );
+          }
+
+          final groups = snapshot.requireData;
+
+          return Column(mainAxisSize: MainAxisSize.min, children: [
+            for (final group in groups.values)
+              ValueListenableBuilder(
+                valueListenable: _groupValues[group.id]!,
+                builder: (context, value, _) {
+                  return CheckboxListTile(
+                    dense: true,
+                    value: value,
+                    onChanged: (value) => _groupValues[group.id]!.value = value!,
+                    title: Text(group.name, style: text.bodyMedium),
+                  );
+                },
+              ),
+          ]);
+        },
+      ),
+    ];
+  }
+
+  void apply() {
+    logger.info("Applying manga filter changes. (${widget.data.mangaId})");
+
+    final newFilter = widget.data.filter.copyWith(
       excludedGroupIds: _groupValues.entries
           .where((entry) => !entry.value.value)
           .map((entry) => entry.key)
           .toList(),
     );
 
-    onApply.call(newFilter);
+    widget.onApply.call(newFilter);
   }
 }
 
 class ChapterFilterSheetData {
   final String mangaId;
-  final List<Group> groups;
+
+  /// Group IDs belonging to the chapter list.
+  /// Regardless of whether they are excluded or not.
+  final List<String> groupIds;
   final MangaFilterData filter;
 
   const ChapterFilterSheetData({
     required this.filter,
-    required this.groups,
+    required this.groupIds,
     required this.mangaId,
   });
 }

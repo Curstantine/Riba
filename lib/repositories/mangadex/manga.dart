@@ -69,7 +69,7 @@ class MDMangaRepo {
   Future<Map<String, MangaData>> getMany(List<String> ids, {bool checkDB = true}) async {
     logger.info("getMany($ids, $checkDB)");
 
-    final Map<String, MangaData?> mapped = {for (var e in ids) e: null};
+    final Map<String, MangaData?> mapped = {for (final e in ids) e: null};
 
     if (checkDB) {
       final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
@@ -299,9 +299,9 @@ extension on MDResponseData<MangaAttributes> {
     );
   }
 
-  InternalMangaData toInternalMangaData() {
+  InternalMangaData toInternalMangaData({String? usedCoverId}) {
     return InternalMangaData(
-      manga: toManga(),
+      manga: toManga(usedCoverId: usedCoverId),
       authors: relationships
           .ofType<AuthorAttributes>(EntityType.author)
           .map((e) => e.toAuthor())

@@ -11,6 +11,7 @@ import "package:riba/repositories/rate_limiter.dart";
 import "package:riba/repositories/url.dart";
 
 import "custom_list.dart";
+import "group.dart";
 
 class MangaDex {
   static late final MangaDex instance;
@@ -25,6 +26,7 @@ class MangaDex {
 
   late final Client client = SelfClient(Client(), userAgent);
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
+  late final MDGroupRepo group = MDGroupRepo(client, rateLimiter, database);
   late final MDChapterRepo chapter = MDChapterRepo(client, rateLimiter, database);
   late final MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
   late final MDCoverArtRepo covers;
