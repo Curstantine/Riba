@@ -49,11 +49,9 @@ class _MangaViewState extends State<MangaView> {
   late Future<Statistics> statisticsFuture;
   late Future<File?> coverFuture;
 
-  late StreamController<List<ChapterData>> chapterStreamController =
-      StreamController<List<ChapterData>>.broadcast(
-    onListen: () => logger.info("Chapter stream opened"),
-  );
+  late StreamController<List<ChapterData>> chapterStreamController = StreamController.broadcast();
   Stream<List<ChapterData>> get chapterStream => chapterStreamController.stream;
+  StreamSink<List<ChapterData>> get chapterSink => chapterStreamController.sink;
 
   /// TODO: migrate to ValueNotifier with user login and etc.
   bool isFollowed = false;
@@ -93,7 +91,7 @@ class _MangaViewState extends State<MangaView> {
       );
     });
 
-    chapterStreamController.addStream(fetchChapters(reload: reload).asStream());
+    fetchChapters(reload: reload).then((value) => chapterSink.add(value));
   }
 
   Future<List<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
@@ -656,23 +654,28 @@ class _MangaViewState extends State<MangaView> {
 
   void showFilterSheet(List<ChapterData> chapters, MangaFilterData filterData) {
     final media = MediaQuery.of(context);
-    final groupMap = {for (final e in chapters.map((e) => e.groups).expand((e) => e)) e.id: e};
-    final dedupedGroupIds = groupMap.keys.toSet();
+    final groupIds =
+        chapters.map((e) => e.groups).expand((e) => e).map((e) => e.id).toSet().toList() +
+            filterData.excludedGroupIds;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => ChapterFilterSheet(
-        onApply: (newFilter) {
-          filterSettings.mangaFilters.put(widget.id, newFilter);
-          Navigator.pop(context);
-        },
         padding: EdgeInsets.only(bottom: media.padding.bottom),
         data: ChapterFilterSheetData(
           mangaId: widget.id,
           filter: filterData,
-          groups: dedupedGroupIds.map((e) => groupMap[e]!).toList(),
+          groupIds: groupIds,
         ),
+        onApply: (newFilter) async {
+          await filterSettings.mangaFilters.put(widget.id, newFilter);
+
+          if (mounted) {
+            Navigator.pop(context);
+            fetchChapters().then((value) => setState(() => chapterSink.add(value)));
+          }
+        },
       ),
     );
   }
