@@ -10,7 +10,7 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
-import "package:riba/repositories/mangadex/mangadex.dart";
+import 'package:riba/repositories/mangadex.dart';
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/cache.dart";

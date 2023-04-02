@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:riba/repositories/url.dart";
+import 'package:riba/repositories/utils/url.dart';
 import "package:riba/utils/logging.dart";
 
 void main() {

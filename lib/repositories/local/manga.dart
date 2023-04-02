@@ -1,5 +1,5 @@
 import "package:isar/isar.dart";
-import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/utils/hash.dart";
 
 import "localization.dart";

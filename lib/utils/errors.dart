@@ -1,4 +1,4 @@
-import "package:riba/repositories/exception.dart";
+import "package:riba/repositories/utils/exception.dart";
 
 class ErrorState {
   final String title;

@@ -12,7 +12,7 @@ import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex.dart";
 
 class Database {
   static late final Database instance;

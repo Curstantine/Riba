@@ -1,5 +1,5 @@
 import "package:isar/isar.dart";
-import "package:riba/repositories/mangadex/custom_list.dart";
+import "package:riba/repositories/mangadex/models/custom_list.dart";
 import "package:riba/utils/hash.dart";
 
 part "custom_list.g.dart";

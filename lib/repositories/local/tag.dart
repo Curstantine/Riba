@@ -1,6 +1,6 @@
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/tag.dart";
+import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/utils/hash.dart";
 
 part "tag.g.dart";

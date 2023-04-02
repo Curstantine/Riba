@@ -1,6 +1,6 @@
 import "package:isar/isar.dart";
+import "package:riba/repositories/mangadex/models/user.dart";
 import "package:riba/utils/hash.dart";
-import "package:riba/repositories/mangadex/user.dart";
 
 part "user.g.dart";
 

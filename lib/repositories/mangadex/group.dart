@@ -3,20 +3,15 @@ import "dart:convert";
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/enumerate.dart";
-import "package:riba/repositories/exception.dart";
+import 'package:riba/repositories/utils/enumerate.dart';
+import 'package:riba/repositories/utils/exception.dart';
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex/general.dart";
-import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/relationship.dart";
-import "package:riba/repositories/mangadex/user.dart";
-import "package:riba/repositories/rate_limiter.dart";
+import 'package:riba/repositories/mangadex.dart';
+import 'package:riba/repositories/utils/rate_limiter.dart';
 import "package:riba/repositories/runtime/group.dart";
 import "package:riba/utils/hash.dart";
-
-typedef MDGroupCollection = MDCollectionResponse<GroupAttributes>;
 
 class MDGroupRepo {
   final Client client;

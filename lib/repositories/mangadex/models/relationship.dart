@@ -1,3 +1,5 @@
+import "package:riba/repositories/mangadex/utils/transformer.dart";
+
 import "general.dart";
 
 class Relationship<T> {
@@ -23,7 +25,7 @@ class Relationship<T> {
     final related =
         json["related"] == null ? null : MangaRelationType.fromJsonValue(json["related"] as String);
 
-    T? attributes = jsonAttr == null ? null : mapToEntity(jsonAttr, type);
+    T? attributes = jsonAttr == null ? null : transformToEntity(jsonAttr, type);
 
     return Relationship(
       id: json["id"] as String,

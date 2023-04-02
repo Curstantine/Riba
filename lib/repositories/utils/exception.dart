@@ -1,6 +1,5 @@
-import "package:riba/repositories/mangadex/error.dart";
-
-import "url.dart";
+import "package:riba/repositories/mangadex/models/error.dart";
+import "package:riba/repositories/utils/url.dart";
 
 const placeholderError = MDException(MDError(title: "Test", status: 404));
 

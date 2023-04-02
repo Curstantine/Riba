@@ -1,7 +1,7 @@
 import "package:dash_flags/dash_flags.dart" as flag;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/exception.dart";
+import "package:riba/repositories/utils/exception.dart";
 
 part "localization.g.dart";
 

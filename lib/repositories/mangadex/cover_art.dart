@@ -1,28 +1,20 @@
 import "dart:convert";
-import "dart:developer";
 import "dart:io";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/enumerate.dart";
-import "package:riba/repositories/exception.dart";
 import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex/general.dart";
-import "package:riba/repositories/mangadex/user.dart";
-import "package:riba/repositories/rate_limiter.dart";
+import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/models/error.dart";
+import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
-import "package:riba/repositories/url.dart";
+import "package:riba/repositories/utils/enumerate.dart";
+import "package:riba/repositories/utils/exception.dart";
+import "package:riba/repositories/utils/rate_limiter.dart";
+import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
-
-import "error.dart";
-import "mangadex.dart";
-import "relationship.dart";
-
-typedef MDCoverArtEntity = MDEntityResponse<CoverArtAttributes>;
-typedef MDCoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 
 /// Handles retrieving cover art data and images from MangaDex.
 ///
@@ -243,97 +235,5 @@ class MDCoverArtRepo {
   /// Deletes the [persistentCoverDir] directory that contains all the temporary cover art files.
   Future<void> deleteAllTemp() async {
     if (await temporaryCoverDir.exists()) await temporaryCoverDir.delete(recursive: true);
-  }
-}
-
-class CoverArtAttributes {
-  final String? volume;
-  final String fileName;
-  final String? description;
-  final String? locale;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final int version;
-
-  const CoverArtAttributes({
-    required this.volume,
-    required this.fileName,
-    required this.description,
-    required this.locale,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.version,
-  });
-
-  factory CoverArtAttributes.fromMap(Map<String, dynamic> map) {
-    return CoverArtAttributes(
-      volume: map["volume"] as String?,
-      fileName: map["fileName"] as String,
-      description: map["description"] as String?,
-      locale: map["locale"] as String?,
-      createdAt: DateTime.parse(map["createdAt"] as String),
-      updatedAt: DateTime.parse(map["updatedAt"] as String),
-      version: map["version"] as int,
-    );
-  }
-}
-
-extension ToCoverArt on MDResponseData<CoverArtAttributes> {
-  CoverArt? toCoverArt(String mangaId) {
-    final file = attributes.fileName.split(".");
-    Locale? locale;
-
-    if (attributes.locale != null) {
-      try {
-        locale = Locale.fromJsonValue(attributes.locale!);
-      } on FormatException {
-        log("${attributes.locale} is not supported, returning null.", name: "ToCoverArt");
-        return null;
-      }
-    }
-
-    return CoverArt(
-      id: id,
-      volume: attributes.volume,
-      fileId: file.first,
-      fileType: ImageFileType.fromExtension(file.last),
-      description: attributes.description,
-      locale: locale,
-      createdAt: attributes.createdAt,
-      updatedAt: attributes.updatedAt,
-      version: attributes.version,
-      mangaId: mangaId,
-      userId: relationships.ofType(EntityType.user).first.id,
-    );
-  }
-
-  CoverArtData? toCoverArtData() {
-    final cover = toCoverArt(relationships.ofType(EntityType.manga).first.id);
-    if (cover == null) return null;
-
-    return CoverArtData(
-      cover: cover,
-      user: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
-    );
-  }
-}
-
-extension ToRelCoverArt on Relationship<CoverArtAttributes> {
-  CoverArt toCoverArt(String mangaId) {
-    if (attributes == null) throw Exception("Attributes are null");
-    final file = attributes!.fileName.split(".");
-
-    return CoverArt(
-      id: id,
-      volume: attributes!.volume,
-      fileId: file.first,
-      fileType: ImageFileType.fromExtension(file.last),
-      description: attributes!.description,
-      locale: attributes!.locale != null ? Locale.fromJsonValue(attributes!.locale!) : null,
-      createdAt: attributes!.createdAt,
-      updatedAt: attributes!.updatedAt,
-      version: attributes!.version,
-      mangaId: mangaId,
-    );
   }
 }

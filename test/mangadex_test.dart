@@ -6,7 +6,7 @@ import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/mangadex/mangadex.dart";
+import 'package:riba/repositories/mangadex.dart';
 import "package:riba/utils/logging.dart";
 
 import "constants.dart";
