@@ -55,35 +55,35 @@ void main() async {
       final name = file.first;
       final extension = ImageFileType.fromExtension(file.last);
 
-      final original = mangaDex.covers.getFileName(name, CoverSize.original, extension);
-      final medium = mangaDex.covers.getFileName(name, CoverSize.medium, extension);
-      final small = mangaDex.covers.getFileName(name, CoverSize.small, extension);
+      final original = mangaDex.cover.getFileName(name, CoverSize.original, extension);
+      final medium = mangaDex.cover.getFileName(name, CoverSize.medium, extension);
+      final small = mangaDex.cover.getFileName(name, CoverSize.small, extension);
 
       expect(original, coverFile);
       expect(medium, "$coverFile.512.jpg");
       expect(small, "$coverFile.256.jpg");
     });
     test("CoverArt.getMany", () async {
-      final covers = await mangaDex.covers.getMany([coverId]);
+      final covers = await mangaDex.cover.getMany([coverId]);
 
       expect(covers, isNotNull);
       expect(covers.length, 1);
     });
     test("CoverArt.getForManga", () async {
-      final covers = await mangaDex.covers.getForManga(mangaId);
+      final covers = await mangaDex.cover.getForManga(mangaId);
       expect(covers, isNotEmpty);
     });
     test("CoverArt.getImage", () async {
-      final coverTemp = (await mangaDex.covers.getMany([coverId])).values.first;
-      final cover = await mangaDex.covers.getImage(mangaId, coverTemp.cover);
+      final coverTemp = (await mangaDex.cover.getMany([coverId])).values.first;
+      final cover = await mangaDex.cover.getImage(mangaId, coverTemp.cover);
 
-      final mediumCover = await mangaDex.covers.getImage(
+      final mediumCover = await mangaDex.cover.getImage(
         mangaId,
         coverTemp.cover,
         size: CoverSize.medium,
       );
 
-      final smallCover = await mangaDex.covers.getImage(
+      final smallCover = await mangaDex.cover.getImage(
         mangaId,
         coverTemp.cover,
         size: CoverSize.small,

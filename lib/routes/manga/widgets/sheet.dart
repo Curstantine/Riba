@@ -159,13 +159,13 @@ class _CoverSheetState extends State<CoverSheet> {
     selectedCoverId.value = manga.usedCoverId;
 
     try {
-      final covers = await MangaDex.instance.covers.getForManga(manga.id);
+      final covers = await MangaDex.instance.cover.getForManga(manga.id);
       coverDataFuture = Future.value(covers);
     } catch (e) {
       final localCovers =
           await MangaDex.instance.database.covers.filter().mangaIdEqualTo(manga.id).findAll();
 
-      coverDataFuture = MangaDex.instance.covers
+      coverDataFuture = MangaDex.instance.cover
           .getMany(localCovers.map((e) => e.id).toList())
           .then((e) => e.values.toList());
     }
@@ -174,7 +174,7 @@ class _CoverSheetState extends State<CoverSheet> {
   }
 
   void reloadData() => setState(() {
-        coverDataFuture = MangaDex.instance.covers.getForManga(manga.id);
+        coverDataFuture = MangaDex.instance.cover.getForManga(manga.id);
       });
 
   void setUsedCover() async {
@@ -321,7 +321,7 @@ class _CoverSheetState extends State<CoverSheet> {
           alignment: Alignment.bottomRight,
           children: [
             FutureBuilder<File?>(
-              future: MangaDex.instance.covers.getImage(manga.id, selectedCover,
+              future: MangaDex.instance.cover.getImage(manga.id, selectedCover,
                   size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers),
               builder: (context, snapshot) {
                 List<Widget>? children;
@@ -389,7 +389,7 @@ class _CoverSheetState extends State<CoverSheet> {
       width: 100,
       height: 200,
       child: FutureBuilder<File>(
-        future: MangaDex.instance.covers
+        future: MangaDex.instance.cover
             .getImage(manga.id, coverData.cover, size: CacheSettings.instance.previewSize),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {

@@ -50,7 +50,7 @@ class MangaCard extends StatelessWidget {
             builder: (context, _, __) {
               final coverFuture = cover == null
                   ? Future.value(null)
-                  : MangaDex.instance.covers.getImage(id, cover,
+                  : MangaDex.instance.cover.getImage(id, cover,
                       size: cacheSettings.previewSize, cache: cacheSettings.cacheCovers);
 
               return FutureBuilder<File?>(

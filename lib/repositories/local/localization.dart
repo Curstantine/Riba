@@ -89,7 +89,7 @@ class Locale {
 
   /// Returns a locale based on a string.
   ///
-  /// Throws an exception if the language is not supported.
+  /// Throws a [LanguageNotSupportedException] if the language is not supported.
   factory Locale.fromJsonValue(String locale) {
     final roman = locale.endsWith("-ro");
     final language = Language.fromIsoCode(roman ? locale.substring(0, locale.length - 3) : locale);

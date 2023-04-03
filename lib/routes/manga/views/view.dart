@@ -83,7 +83,7 @@ class _MangaViewState extends State<MangaView> {
     coverFuture = mangaFuture.then((data) {
       if (data.cover == null) return Future.value(null);
 
-      return MangaDex.instance.covers.getImage(
+      return MangaDex.instance.cover.getImage(
         widget.id,
         data.cover!,
         size: cacheSettings.fullSize,

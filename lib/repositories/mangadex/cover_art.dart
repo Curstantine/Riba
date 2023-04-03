@@ -1,14 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
 import "dart:io";
 
-import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
 import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/models/cover_art.dart";
 import "package:riba/repositories/mangadex/models/error.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/utils/exception.dart";
@@ -16,85 +19,104 @@ import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-/// Handles retrieving cover art data and images from MangaDex.
-///
-/// This derives two types of base directories based on their persistence relative to the passed [root] directory.
-///
-/// - [persistentCoverDir]
-///   - is the directory where all cover arts are stored when [cache] is true.
-///   - cleared when [deleteAll] is called.
-///
-/// - [temporaryCoverDir]
-///   - is the directory where all cover arts are stored when [cache] is false.
-///   - cleared when [deleteAllTemp] is called, which is called on initialization of this class.
-///
-/// [getFile] will resolve the correct directory based on the passed [persistent] parameter.
-class MDCoverArtRepo {
-  final Client client;
-  final RateLimiter rateLimiter;
-  final Isar database;
-  final Directory root;
-  final logger = Logger("MDCoverArtRepo");
+class MangaDexCoverService
+    extends MangaDexService<CoverArtAttributes, CoverArt, CoverArtData, MangaDexCoverQueryFilter> {
+  MangaDexCoverService({
+    required super.client,
+    required super.rateLimiter,
+    required super.database,
+    required super.rootUrl,
+    required super.cache,
+  }) : assert(cache != null, "Cache directory must be set for the cover art service.");
 
-  MDCoverArtRepo._internal(this.client, this.rateLimiter, this.database, this.root) {
-    rateLimiter.rates["/covers:GET"] = const Rate(4, Duration(seconds: 1));
-    rateLimiter.rates["/covers/image:GET"] = const Rate(2, Duration(seconds: 1));
-  }
+  @override
+  final logger = Logger("MangaDexCoverService");
 
-  static Future<MDCoverArtRepo> init({
-    required Client client,
-    required RateLimiter rateLimiter,
-    required Isar database,
-    required Directory root,
-  }) async {
-    final instance = MDCoverArtRepo._internal(client, rateLimiter, database, root);
-    await instance.deleteAllTemp();
-    return instance;
-  }
+  @override
+  final rates = {
+    "/cover:GET": const Rate(4, Duration(seconds: 1)),
+    "/cover/image:GET": const Rate(4, Duration(seconds: 1)),
+  };
 
-  final url = MangaDex.url.copyWith(pathSegments: ["cover"]);
+  @override
+  late final baseUrl = rootUrl.copyWith(pathSegments: ["cover"]);
   final cdnUrl = URL(hostname: "uploads.mangadex.org", pathSegments: ["covers"]);
-  final includes = [
-    EntityType.user.toJsonValue(),
-  ];
 
-  late Directory persistentCoverDir = Directory("${root.path}/persistent");
-  late Directory temporaryCoverDir = Directory("${root.path}/temporary");
+  late Directory persistentCoverDir = Directory("${cache!.path}/persistent");
+  late Directory temporaryCoverDir = Directory("${cache!.path}/temporary");
 
-  Future<Map<String, CoverArtData>> getMany(List<String> ids, {bool checkDb = true}) async {
-    logger.info("getMany($ids, $checkDb)");
+  @override
+  final defaultFilters = MangaDexCoverQueryFilter(
+    includes: [
+      EntityType.user,
+    ],
+    orderByVolumeDesc: true,
+    limit: 100,
+  );
 
-    final Map<String, CoverArtData?> mapped = {for (var e in ids) e: null};
+  @override
+  MangaDexCoverService get instance => MangaDex.instance.cover;
 
-    if (checkDb) {
+  @override
+  Future<CoverArt> get(String id, {bool checkDB = true}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, CoverArt>> getMany({
+    required MangaDexCoverQueryFilter overrides,
+    bool checkDB = true,
+  }) async {
+    logger.info("getMany($overrides, $checkDB)");
+    assert(overrides.ids != null && overrides.mangaId != null,
+        "Only one of ids or mangaIds can be set.");
+
+    final filters = defaultFilters.copyWith(overrides);
+    if (overrides.ids != null && overrides.orderByVolumeDesc != null) {
+      logger.warning("orderByVolumeDesc is ignored when ids are set.");
+    }
+
+    final ids = overrides.ids ?? [];
+    final Map<String, CoverArtData?> mapped = {for (final e in ids) e: null};
+
+    if (checkDB && filters.ids != null) {
       final inDB = await database.covers.getAll(ids.map((e) => fastHash(e)).toList());
+
       for (final cover in inDB) {
         if (cover == null) continue;
-        mapped[cover.id] = await _collectMeta(cover);
+        mapped[cover.id] = await collectMeta(cover);
+      }
+    }
+
+    if (checkDB && filters.mangaId != null) {
+      final statement = database.covers.where().mangaIdEqualTo(filters.mangaId!);
+      final inDB = filters.orderByVolumeDesc == false
+          ? await statement.findAll()
+          : await statement.sortByVolumeDesc().findAll();
+
+      for (final cover in inDB) {
+        mapped[cover.id] = await collectMeta(cover);
       }
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty) return mapped.cast();
+    if (missing.isEmpty && mapped.isNotEmpty) return mapped.cast();
 
     final block = Enumerate<String, CoverArtData>(
-      perStep: 100,
+      perStep: filters.limit ?? 100,
       items: missing,
       onStep: (resolved) async {
-        await rateLimiter.wait("/covers:GET");
-        final reqUrl = url
-            .copy()
-            .setParameter("ids[]", resolved.keys.toList())
-            .setParameter("includes[]", includes)
-            .setParameter("limit", 100);
+        await rateLimiter.wait("/cover:GET");
+
+        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
         final request = await client.get(reqUrl.toUri());
-        final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+        final response = CoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
         for (final data in response.data) {
-          final coverArtData = data.toCoverArtData();
+          final coverArtData = data.toCoverArtData(logger: logger);
           if (coverArtData == null) continue;
 
-          _insertMeta(coverArtData);
+          insertMeta(coverArtData);
           resolved[data.id] = coverArtData;
         }
       },
@@ -107,48 +129,20 @@ class MDCoverArtRepo {
     return mapped.cast();
   }
 
-  Future<List<CoverArtData>> getForManga(String id) async {
-    logger.info("getForManga($id)");
-
-    await rateLimiter.wait("/covers:GET");
-    final reqUrl = url
-        .copy()
-        .setParameter("manga[]", id)
-        .setParameter("includes[]", includes)
-        .setParameter("order[volume]", "desc")
-        .setParameter("limit", 100);
-    final request = await client.get(reqUrl.toUri());
-
-    final response = MDCoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
-    final coverArtData =
-        response.data.map((e) => e.toCoverArtData()).whereType<CoverArtData>().toList();
-
-    _insertManyMeta(coverArtData);
-    return coverArtData;
-  }
-
-  Future<void> _insertMeta(CoverArtData coverData) async {
+  @override
+  Future<void> insertMeta(CoverArtData data) async {
     await database.writeTxn(() async {
       await Future.wait([
-        database.covers.put(coverData.cover),
-        if (coverData.user != null) database.users.put(coverData.user!),
+        database.covers.put(data.cover),
+        if (data.user != null) database.users.put(data.user!),
       ]);
     });
   }
 
-  Future<void> _insertManyMeta(List<CoverArtData> coverData) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.covers.putAll(coverData.map((e) => e.cover).toList()),
-        database.users.putAll(coverData.map((e) => e.user).whereType<User>().toList()),
-      ]);
-    });
-  }
-
-  Future<CoverArtData> _collectMeta(CoverArt coverArt) async {
-    final user =
-        coverArt.userId != null ? await database.users.get(fastHash(coverArt.userId!)) : null;
-    return CoverArtData(cover: coverArt, user: user);
+  @override
+  Future<CoverArtData> collectMeta(CoverArt single) async {
+    final user = single.userId != null ? await database.users.get(fastHash(single.userId!)) : null;
+    return CoverArtData(cover: single, user: user);
   }
 
   /// Downloads a cover art based on the passed [mangaId], [coverArt] and [size].
@@ -227,13 +221,73 @@ class MDCoverArtRepo {
     return File("${base.path}/$mangaId/$name");
   }
 
-  /// Deletes the [root] directory that contains all the cover art files.
-  Future<void> deleteAll() async {
-    if (await root.exists()) await root.delete(recursive: true);
+  /// Deletes the [persistentCoverDir] directory that contains all the persistent cover art files.
+  Future<void> deleteAllPersistent() async {
+    if (await persistentCoverDir.exists()) await persistentCoverDir.delete(recursive: true);
   }
 
-  /// Deletes the [persistentCoverDir] directory that contains all the temporary cover art files.
+  /// Deletes the [temporaryCoverDir] directory that contains all the temporary cover art files.
   Future<void> deleteAllTemp() async {
     if (await temporaryCoverDir.exists()) await temporaryCoverDir.delete(recursive: true);
+  }
+}
+
+class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
+  final List<String>? ids;
+  final List<EntityType>? includes;
+  final int? limit;
+
+  /// I don't want to do list filtering though the api supports it.
+  final String? mangaId;
+  final List<Language>? locales;
+  final bool? orderByVolumeDesc;
+
+  MangaDexCoverQueryFilter({
+    this.ids,
+    this.includes,
+    this.limit,
+    this.mangaId,
+    this.locales,
+    this.orderByVolumeDesc,
+  });
+
+  @override
+  URL addFiltersToUrl(URL url) {
+    if (mangaId != null) {
+      url.setParameter("manga[]", mangaId!);
+    }
+
+    if (locales != null) {
+      url.setParameter("locales[]", locales!.map((e) => e.isoCode).toList());
+    }
+
+    if (orderByVolumeDesc != null && orderByVolumeDesc!) {
+      url.setParameter("order[volume]", "desc");
+    }
+
+    final generic = MangaDexGenericQueryFilter(
+      ids: ids,
+      includes: includes,
+      limit: limit,
+    );
+
+    return generic.addFiltersToUrl(url);
+  }
+
+  MangaDexCoverQueryFilter copyWith(MangaDexCoverQueryFilter other) {
+    return MangaDexCoverQueryFilter(
+      ids: other.ids ?? ids,
+      includes: other.includes ?? includes,
+      limit: other.limit ?? limit,
+      mangaId: other.mangaId ?? mangaId,
+      locales: other.locales ?? locales,
+      orderByVolumeDesc: other.orderByVolumeDesc ?? orderByVolumeDesc,
+    );
+  }
+
+  @override
+  String toString() {
+    return "MangaDexCoverQueryFilter(ids: $ids, includes: $includes, limit: $limit,"
+        " mangaId: $mangaId, locales: $locales, orderByVolumeDesc: $orderByVolumeDesc)";
   }
 }

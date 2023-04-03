@@ -2,10 +2,13 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
+import "package:riba/repositories/utils/exception.dart";
 
 import "general.dart";
 import "relationship.dart";
 import "user.dart";
+
+typedef CoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 
 class CoverArtAttributes {
   final String? volume;
@@ -40,15 +43,15 @@ class CoverArtAttributes {
 }
 
 extension ToCoverArt on MDResponseData<CoverArtAttributes> {
-  CoverArt? toCoverArt(String mangaId) {
+  CoverArt? toCoverArt(String mangaId, {required Logger logger}) {
     final file = attributes.fileName.split(".");
     Locale? locale;
 
     if (attributes.locale != null) {
       try {
         locale = Locale.fromJsonValue(attributes.locale!);
-      } on FormatException {
-        Logger.root.warning("${attributes.locale} of $mangaId is not supported, returning null.");
+      } on LanguageNotSupportedException {
+        logger.warning("${attributes.locale} of $mangaId is not supported, returning null.");
         return null;
       }
     }
@@ -68,8 +71,8 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
     );
   }
 
-  CoverArtData? toCoverArtData() {
-    final cover = toCoverArt(relationships.ofType(EntityType.manga).first.id);
+  CoverArtData? toCoverArtData({required Logger logger}) {
+    final cover = toCoverArt(relationships.ofType(EntityType.manga).first.id, logger: logger);
     if (cover == null) return null;
 
     return CoverArtData(

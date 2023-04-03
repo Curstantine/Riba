@@ -19,10 +19,12 @@ class CoverArt {
 
   late String fileId;
 
+  @Index()
   late String? volume;
   late String? description;
   late Locale? locale;
 
+  @Index()
   late String mangaId;
   late String? userId;
 

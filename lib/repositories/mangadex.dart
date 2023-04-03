@@ -27,7 +27,14 @@ class MangaDex {
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
   late final MDGroupRepo group = MDGroupRepo(client, rateLimiter, database);
   late final MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
-  late final MDCoverArtRepo covers;
+
+  late final MangaDexCoverService cover = MangaDexCoverService(
+    client: client,
+    rateLimiter: rateLimiter,
+    database: database,
+    rootUrl: url,
+    cache: Directory("${directory.path}/covers"),
+  );
 
   late final MangaDexChapterService chapter = MangaDexChapterService(
     client: client,
@@ -41,13 +48,6 @@ class MangaDex {
       database: database,
       userAgent: "${info.appName}/${info.buildNumber}",
       directory: directory,
-    );
-
-    instance.covers = await MDCoverArtRepo.init(
-      client: instance.client,
-      rateLimiter: instance.rateLimiter,
-      database: database,
-      root: Directory("${directory.path}/covers"),
     );
   }
 }

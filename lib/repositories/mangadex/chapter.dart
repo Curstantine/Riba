@@ -80,7 +80,7 @@ class MangaDexChapterService
     if (missing.isEmpty) return mapped.cast();
 
     final block = Enumerate<String, ChapterData>(
-      perStep: 100,
+      perStep: filters.limit ?? 100,
       items: missing,
       onStep: (resolved) async {
         await rateLimiter.wait("/chapter:GET");
@@ -131,7 +131,7 @@ class MangaDexChapterService
               (q) => q.anyOf(translatedLanguages, (q, e) => q.codeEqualTo(e.isoCode)))
           .findAll();
 
-      inDB.sortAsDescending();
+      if (filters.orderByChapterDesc == true) inDB.sortAsDescending();
 
       if (inDB.isNotEmpty) {
         final chapterFuture = <Future<ChapterData>>[];
