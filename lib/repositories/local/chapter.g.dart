@@ -99,7 +99,47 @@ const ChapterSchema = CollectionSchema(
   deserialize: _chapterDeserialize,
   deserializeProp: _chapterDeserializeProp,
   idName: r"isarId",
-  indexes: {},
+  indexes: {
+    r"mangaId": IndexSchema(
+      id: 7466570075891278896,
+      name: r"mangaId",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"mangaId",
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r"uploaderId": IndexSchema(
+      id: -2905442145074141949,
+      name: r"uploaderId",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"uploaderId",
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r"groupIds": IndexSchema(
+      id: 336612842135500568,
+      name: r"groupIds",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"groupIds",
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {r"Locale": LocaleSchema},
   getId: _chapterGetId,
@@ -342,6 +382,141 @@ extension ChapterQueryWhere on QueryBuilder<Chapter, Chapter, QWhereClause> {
         upper: upperIsarId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> mangaIdEqualTo(
+      String mangaId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"mangaId",
+        value: [mangaId],
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> mangaIdNotEqualTo(
+      String mangaId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"mangaId",
+              lower: [],
+              upper: [mangaId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"mangaId",
+              lower: [mangaId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"mangaId",
+              lower: [mangaId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"mangaId",
+              lower: [],
+              upper: [mangaId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> uploaderIdEqualTo(
+      String uploaderId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"uploaderId",
+        value: [uploaderId],
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> uploaderIdNotEqualTo(
+      String uploaderId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"uploaderId",
+              lower: [],
+              upper: [uploaderId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"uploaderId",
+              lower: [uploaderId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"uploaderId",
+              lower: [uploaderId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"uploaderId",
+              lower: [],
+              upper: [uploaderId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsEqualTo(
+      List<String> groupIds) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"groupIds",
+        value: [groupIds],
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsNotEqualTo(
+      List<String> groupIds) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"groupIds",
+              lower: [],
+              upper: [groupIds],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"groupIds",
+              lower: [groupIds],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"groupIds",
+              lower: [groupIds],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"groupIds",
+              lower: [],
+              upper: [groupIds],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }

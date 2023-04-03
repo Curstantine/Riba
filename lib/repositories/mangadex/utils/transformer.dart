@@ -1,9 +1,9 @@
-import "package:riba/repositories/mangadex/group.dart";
 import "package:riba/repositories/mangadex/models/author.dart";
 import "package:riba/repositories/mangadex/models/chapter.dart";
 import "package:riba/repositories/mangadex/models/cover_art.dart";
 import "package:riba/repositories/mangadex/models/custom_list.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/models/group.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/models/user.dart";

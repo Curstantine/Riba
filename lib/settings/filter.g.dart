@@ -16,7 +16,8 @@ class MangaFilterDataAdapter extends TypeAdapter<MangaFilterData> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return MangaFilterData()..excludedGroupIds = (fields[0] as List).cast<String>();
+    return MangaFilterData()
+      ..excludedGroupIds = (fields[0] as List).cast<String>();
   }
 
   @override
@@ -33,5 +34,7 @@ class MangaFilterDataAdapter extends TypeAdapter<MangaFilterData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MangaFilterDataAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
+      other is MangaFilterDataAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

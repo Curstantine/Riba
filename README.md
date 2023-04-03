@@ -6,8 +6,8 @@ Cross-platform mobile MangaDex client.
 
 To generate required type adapters and such:
 
-```
-flutter packages pub run build_runner build
+```fish
+flutter packages pub run build_runner build && dart fix . --apply
 ```
 
 ## Prerequisites

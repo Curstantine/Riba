@@ -1,7 +1,6 @@
 import "package:flutter/material.dart" hide Locale;
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/tag.dart";
-import "package:riba/repositories/mangadex/manga.dart";
 import "package:riba/widgets/material/chip.dart";
 
 class ContentRatingChip extends StatelessWidget {

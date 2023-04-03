@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/local/cover_art.dart";
-import 'package:riba/repositories/mangadex.dart';
+import "package:riba/repositories/mangadex.dart";
 import "package:riba/settings/cache.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";

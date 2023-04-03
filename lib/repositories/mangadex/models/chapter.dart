@@ -2,12 +2,15 @@ import "dart:convert";
 
 import "package:riba/repositories/local/chapter.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/group.dart";
 import "package:riba/repositories/mangadex/models/relationship.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 
 import "general.dart";
+import "group.dart";
 import "user.dart";
+
+typedef ChapterEntity = MDEntityResponse<ChapterAttributes>;
+typedef ChapterCollection = MDCollectionResponse<ChapterAttributes>;
 
 class ChapterAttributes {
   final String? title;
@@ -61,7 +64,7 @@ class ChapterAttributes {
       ChapterAttributes.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
-extension on MDResponseData<ChapterAttributes> {
+extension ToChapter on MDResponseData<ChapterAttributes> {
   /// Converts the response data to a [Chapter] object.
   ///
   /// Will throw an [LanguageNotSupportedError] if the language is not supported.

@@ -4,17 +4,17 @@ import "dart:developer";
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import 'package:riba/repositories/utils/enumerate.dart';
+import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
-import 'package:riba/repositories/utils/rate_limiter.dart';
+import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/utils/hash.dart";
 
-import '../mangadex.dart';
+import "../mangadex.dart";
 
 class MDMangaRepo {
   final Client client;

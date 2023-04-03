@@ -178,6 +178,8 @@ const _StatisticstypeEnumValueMap = {
   "tag": 6,
   "coverArt": 7,
   "scanlationGroup": 8,
+  "leader": 9,
+  "member": 10,
 };
 const _StatisticstypeValueEnumMap = {
   0: EntityType.manga,
@@ -189,6 +191,8 @@ const _StatisticstypeValueEnumMap = {
   6: EntityType.tag,
   7: EntityType.coverArt,
   8: EntityType.scanlationGroup,
+  9: EntityType.leader,
+  10: EntityType.member,
 };
 
 Id _statisticsGetId(Statistics object) {

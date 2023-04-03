@@ -49,29 +49,39 @@ const GroupSchema = CollectionSchema(
       name: r"inactive",
       type: IsarType.bool,
     ),
-    r"name": PropertySchema(
+    r"leaderId": PropertySchema(
       id: 6,
+      name: r"leaderId",
+      type: IsarType.string,
+    ),
+    r"memberIds": PropertySchema(
+      id: 7,
+      name: r"memberIds",
+      type: IsarType.stringList,
+    ),
+    r"name": PropertySchema(
+      id: 8,
       name: r"name",
       type: IsarType.string,
     ),
     r"official": PropertySchema(
-      id: 7,
+      id: 9,
       name: r"official",
       type: IsarType.bool,
     ),
     r"socials": PropertySchema(
-      id: 8,
+      id: 10,
       name: r"socials",
       type: IsarType.object,
       target: r"GroupSocials",
     ),
     r"updatedAt": PropertySchema(
-      id: 9,
+      id: 11,
       name: r"updatedAt",
       type: IsarType.dateTime,
     ),
     r"version": PropertySchema(
-      id: 10,
+      id: 12,
       name: r"version",
       type: IsarType.long,
     )
@@ -117,6 +127,24 @@ int _groupEstimateSize(
   }
   bytesCount += 3 + object.focusedLanguages.length;
   bytesCount += 3 + object.id.length * 3;
+  {
+    final value = object.leaderId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final list = object.memberIds;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 +
       GroupSocialsSchema.estimateSize(
@@ -142,16 +170,18 @@ void _groupSerialize(
       offsets[3], object.focusedLanguages.map((e) => e.index).toList());
   writer.writeString(offsets[4], object.id);
   writer.writeBool(offsets[5], object.inactive);
-  writer.writeString(offsets[6], object.name);
-  writer.writeBool(offsets[7], object.official);
+  writer.writeString(offsets[6], object.leaderId);
+  writer.writeStringList(offsets[7], object.memberIds);
+  writer.writeString(offsets[8], object.name);
+  writer.writeBool(offsets[9], object.official);
   writer.writeObject<GroupSocials>(
-    offsets[8],
+    offsets[10],
     allOffsets,
     GroupSocialsSchema.serialize,
     object.socials,
   );
-  writer.writeDateTime(offsets[9], object.updatedAt);
-  writer.writeLong(offsets[10], object.version);
+  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeLong(offsets[12], object.version);
 }
 
 Group _groupDeserialize(
@@ -177,16 +207,18 @@ Group _groupDeserialize(
         [],
     id: reader.readString(offsets[4]),
     inactive: reader.readBool(offsets[5]),
-    name: reader.readString(offsets[6]),
-    official: reader.readBool(offsets[7]),
+    leaderId: reader.readStringOrNull(offsets[6]),
+    memberIds: reader.readStringList(offsets[7]),
+    name: reader.readString(offsets[8]),
+    official: reader.readBool(offsets[9]),
     socials: reader.readObjectOrNull<GroupSocials>(
-          offsets[8],
+          offsets[10],
           GroupSocialsSchema.deserialize,
           allOffsets,
         ) ??
         GroupSocials(),
-    updatedAt: reader.readDateTime(offsets[9]),
-    version: reader.readLong(offsets[10]),
+    updatedAt: reader.readDateTime(offsets[11]),
+    version: reader.readLong(offsets[12]),
   );
   return object;
 }
@@ -222,19 +254,23 @@ P _groupDeserializeProp<P>(
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readBool(offset)) as P;
+    case 10:
       return (reader.readObjectOrNull<GroupSocials>(
             offset,
             GroupSocialsSchema.deserialize,
             allOffsets,
           ) ??
           GroupSocials()) as P;
-    case 9:
+    case 11:
       return (reader.readDateTime(offset)) as P;
-    case 10:
+    case 12:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
@@ -248,6 +284,7 @@ const _GroupfocusedLanguagesEnumValueMap = {
   "simpleChinese": 3,
   "traditionalChinese": 4,
   "korean": 5,
+  "french": 6,
 };
 const _GroupfocusedLanguagesValueEnumMap = {
   0: Language.none,
@@ -256,6 +293,7 @@ const _GroupfocusedLanguagesValueEnumMap = {
   3: Language.simpleChinese,
   4: Language.traditionalChinese,
   5: Language.korean,
+  6: Language.french,
 };
 
 Id _groupGetId(Group object) {
@@ -961,6 +999,383 @@ extension GroupQueryFilter on QueryBuilder<Group, Group, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r"leaderId",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r"leaderId",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"leaderId",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r"leaderId",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r"leaderId",
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"leaderId",
+        value: "",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> leaderIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r"leaderId",
+        value: "",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r"memberIds",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r"memberIds",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"memberIds",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r"memberIds",
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r"memberIds",
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"memberIds",
+        value: "",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition>
+      memberIdsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r"memberIds",
+        value: "",
+      ));
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterFilterCondition> memberIdsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"memberIds",
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Group, Group, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1272,6 +1687,18 @@ extension GroupQuerySortBy on QueryBuilder<Group, Group, QSortBy> {
     });
   }
 
+  QueryBuilder<Group, Group, QAfterSortBy> sortByLeaderId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"leaderId", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterSortBy> sortByLeaderIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"leaderId", Sort.desc);
+    });
+  }
+
   QueryBuilder<Group, Group, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"name", Sort.asc);
@@ -1382,6 +1809,18 @@ extension GroupQuerySortThenBy on QueryBuilder<Group, Group, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Group, Group, QAfterSortBy> thenByLeaderId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"leaderId", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Group, Group, QAfterSortBy> thenByLeaderIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"leaderId", Sort.desc);
+    });
+  }
+
   QueryBuilder<Group, Group, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"name", Sort.asc);
@@ -1464,6 +1903,19 @@ extension GroupQueryWhereDistinct on QueryBuilder<Group, Group, QDistinct> {
     });
   }
 
+  QueryBuilder<Group, Group, QDistinct> distinctByLeaderId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"leaderId", caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Group, Group, QDistinct> distinctByMemberIds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"memberIds");
+    });
+  }
+
   QueryBuilder<Group, Group, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1532,6 +1984,18 @@ extension GroupQueryProperty on QueryBuilder<Group, Group, QQueryProperty> {
   QueryBuilder<Group, bool, QQueryOperations> inactiveProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"inactive");
+    });
+  }
+
+  QueryBuilder<Group, String?, QQueryOperations> leaderIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"leaderId");
+    });
+  }
+
+  QueryBuilder<Group, List<String>?, QQueryOperations> memberIdsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"memberIds");
     });
   }
 

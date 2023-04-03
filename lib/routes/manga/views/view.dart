@@ -11,7 +11,7 @@ import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
-import 'package:riba/repositories/mangadex.dart';
+import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";

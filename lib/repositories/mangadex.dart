@@ -26,9 +26,15 @@ class MangaDex {
   late final Client client = SelfClient(Client(), userAgent);
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
   late final MDGroupRepo group = MDGroupRepo(client, rateLimiter, database);
-  late final MDChapterRepo chapter = MDChapterRepo(client, rateLimiter, database);
   late final MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
   late final MDCoverArtRepo covers;
+
+  late final MangaDexChapterService chapter = MangaDexChapterService(
+    client: client,
+    rateLimiter: rateLimiter,
+    database: database,
+    rootUrl: url,
+  );
 
   static Future<void> init(Isar database, Directory directory, PackageInfo info) async {
     instance = MangaDex._internal(

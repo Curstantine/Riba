@@ -537,6 +537,7 @@ const _LocalelanguageEnumValueMap = {
   "simpleChinese": 3,
   "traditionalChinese": 4,
   "korean": 5,
+  "french": 6,
 };
 const _LocalelanguageValueEnumMap = {
   0: Language.none,
@@ -545,6 +546,7 @@ const _LocalelanguageValueEnumMap = {
   3: Language.simpleChinese,
   4: Language.traditionalChinese,
   5: Language.korean,
+  6: Language.french,
 };
 
 extension LocaleQueryFilter on QueryBuilder<Locale, Locale, QFilterCondition> {

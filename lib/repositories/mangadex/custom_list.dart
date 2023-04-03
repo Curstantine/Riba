@@ -5,13 +5,12 @@ import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/custom_list.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex/user.dart";
-import 'package:riba/repositories/utils/rate_limiter.dart';
+import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/utils/hash.dart";
 
 import "general.dart";
-import '../mangadex.dart';
+import "../mangadex.dart";
 import "relationship.dart";
 
 typedef MDCustomListEntity = MDEntityResponse<CustomListAttributes>;

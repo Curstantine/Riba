@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import 'package:riba/repositories/mangadex.dart';
+import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/routes/manga/widgets/list.dart";
 

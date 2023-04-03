@@ -9,8 +9,13 @@ class Chapter {
   late String id;
   Id get isarId => fastHash(id);
 
+  @Index()
   late String mangaId;
+
+  @Index()
   late String uploaderId;
+
+  @Index()
   late List<String> groupIds;
 
   late String? title;
