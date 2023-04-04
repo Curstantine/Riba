@@ -11,7 +11,7 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  final seasonalFuture = MangaDex.instance.customLists.getSeasonal();
+  final seasonalFuture = MangaDex.instance.customList.getSeasonal();
 
   @override
   Widget build(BuildContext context) {

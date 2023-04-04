@@ -26,7 +26,13 @@ class MangaDex {
   late final Client client = SelfClient(Client(), userAgent);
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
   late final MDGroupRepo group = MDGroupRepo(client, rateLimiter, database);
-  late final MDCustomListRepo customLists = MDCustomListRepo(client, rateLimiter, database);
+
+  late final MangaDexCustomListService customList = MangaDexCustomListService(
+    client: client,
+    rateLimiter: rateLimiter,
+    database: database,
+    rootUrl: url,
+  );
 
   late final MangaDexCoverService cover = MangaDexCoverService(
     client: client,
@@ -49,5 +55,7 @@ class MangaDex {
       userAgent: "${info.appName}/${info.buildNumber}",
       directory: directory,
     );
+
+    await instance.cover.deleteAllTemp();
   }
 }

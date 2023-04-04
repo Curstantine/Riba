@@ -5,6 +5,8 @@ import "general.dart";
 import "relationship.dart";
 import "user.dart";
 
+typedef CustomListEntity = MDEntityResponse<CustomListAttributes>;
+
 class CustomListAttributes {
   final String name;
   final CustomListVisibility visibility;

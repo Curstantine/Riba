@@ -17,8 +17,8 @@ import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-class MangaDexChapterService
-    extends MangaDexService<ChapterAttributes, Chapter, ChapterData, MangaDexChapterQueryFilter> {
+class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter, ChapterData,
+    ChapterData, MangaDexChapterQueryFilter> {
   MangaDexChapterService({
     required super.client,
     required super.rateLimiter,
@@ -52,13 +52,14 @@ class MangaDexChapterService
   MangaDexChapterService get instance => MangaDex.instance.chapter;
 
   @override
-  Future<Chapter> get(String id, {bool checkDB = true}) {
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<ChapterData> get(String id, {bool checkDB = true}) {
     throw UnimplementedError();
   }
 
   /// Gets a list of chapters from MangaDex.
   @override
-  Future<Map<String, Chapter>> getMany({
+  Future<Map<String, ChapterData>> getMany({
     required MangaDexChapterQueryFilter overrides,
     bool checkDB = true,
   }) async {

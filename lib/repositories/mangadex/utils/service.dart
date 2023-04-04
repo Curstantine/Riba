@@ -9,7 +9,7 @@ import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 
-abstract class MangaDexService<DexType, LocalType, InternalDataType,
+abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalDataType,
     QueryFilterType extends MangaDexQueryFilter> {
   final Client client;
   final RateLimiter rateLimiter;
@@ -32,8 +32,8 @@ abstract class MangaDexService<DexType, LocalType, InternalDataType,
     rateLimiter.rates.addAll(rates);
   }
 
-  Future<LocalType> get(String id, {bool checkDB = true});
-  Future<Map<String, LocalType>> getMany({
+  Future<RuntimeDataType> get(String id, {bool checkDB = true});
+  Future<Map<String, RuntimeDataType>> getMany({
     required QueryFilterType overrides,
     bool checkDB = true,
   });
@@ -43,7 +43,8 @@ abstract class MangaDexService<DexType, LocalType, InternalDataType,
   @visibleForOverriding
   Future<InternalDataType> collectMeta(LocalType single);
 
-  MangaDexService<DexType, LocalType, InternalDataType, QueryFilterType> get instance;
+  MangaDexService<DexType, LocalType, RuntimeDataType, InternalDataType, QueryFilterType>
+      get instance;
 }
 
 abstract class MangaDexQueryFilter {
@@ -54,8 +55,9 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
   final List<String>? ids;
   final List<EntityType>? includes;
   final int? limit;
+  final int? offset;
 
-  MangaDexGenericQueryFilter({this.includes, this.limit, this.ids});
+  MangaDexGenericQueryFilter({this.includes, this.limit, this.offset, this.ids});
 
   @override
   URL addFiltersToUrl(URL url) {
@@ -71,6 +73,10 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
       url.setParameter("limit", limit);
     }
 
+    if (offset != null) {
+      url.setParameter("offset", offset);
+    }
+
     return url;
   }
 
@@ -78,14 +84,17 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
     List<String>? ids,
     List<EntityType>? includes,
     int? limit,
+    int? offset,
   }) {
     return MangaDexGenericQueryFilter(
       ids: ids ?? this.ids,
       includes: includes ?? this.includes,
       limit: limit ?? this.limit,
+      offset: offset ?? this.offset,
     );
   }
 
   @override
-  String toString() => "MangaDexGenericQueryFilter(ids: $ids, includes: $includes, limit: $limit)";
+  String toString() => "MangaDexGenericQueryFilter(ids: $ids, includes: $includes,"
+      " limit: $limit, offset: $offset)";
 }

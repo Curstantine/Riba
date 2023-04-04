@@ -19,8 +19,8 @@ import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-class MangaDexCoverService
-    extends MangaDexService<CoverArtAttributes, CoverArt, CoverArtData, MangaDexCoverQueryFilter> {
+class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt, CoverArtData,
+    CoverArtData, MangaDexCoverQueryFilter> {
   MangaDexCoverService({
     required super.client,
     required super.rateLimiter,
@@ -58,12 +58,13 @@ class MangaDexCoverService
   MangaDexCoverService get instance => MangaDex.instance.cover;
 
   @override
-  Future<CoverArt> get(String id, {bool checkDB = true}) {
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<CoverArtData> get(String id, {bool checkDB = true}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Map<String, CoverArt>> getMany({
+  Future<Map<String, CoverArtData>> getMany({
     required MangaDexCoverQueryFilter overrides,
     bool checkDB = true,
   }) async {
