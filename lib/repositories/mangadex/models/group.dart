@@ -9,6 +9,8 @@ import "general.dart";
 import "relationship.dart";
 import "user.dart";
 
+typedef GroupCollection = MDCollectionResponse<GroupAttributes>;
+
 class GroupAttributes {
   final String name;
   final List<Map<String, String>> altNames;
@@ -79,7 +81,7 @@ class GroupAttributes {
       GroupAttributes.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
-extension on MDResponseData<GroupAttributes> {
+extension ToGroup on MDResponseData<GroupAttributes> {
   Group toGroup() {
     final leaderId = relationships.ofType(EntityType.leader);
     final memberIds = relationships.ofType(EntityType.member);

@@ -25,7 +25,6 @@ class MangaDex {
 
   late final Client client = SelfClient(Client(), userAgent);
   late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
-  late final MDGroupRepo group = MDGroupRepo(client, rateLimiter, database);
 
   late final MangaDexCustomListService customList = MangaDexCustomListService(
     client: client,
@@ -43,6 +42,13 @@ class MangaDex {
   );
 
   late final MangaDexChapterService chapter = MangaDexChapterService(
+    client: client,
+    rateLimiter: rateLimiter,
+    database: database,
+    rootUrl: url,
+  );
+
+  late final MangaDexGroupService group = MangaDexGroupService(
     client: client,
     rateLimiter: rateLimiter,
     database: database,

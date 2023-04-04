@@ -1,36 +1,69 @@
 import "dart:convert";
 
-import "package:http/http.dart";
-import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/user.dart";
 import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/models/group.dart";
+import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/utils/hash.dart";
 
-class MDGroupRepo {
-  final Client client;
-  final RateLimiter rateLimiter;
-  final Isar database;
-  final logger = Logger("MDChapterRepo");
+class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, GroupData, GroupData,
+    MangaDexGenericQueryFilter> {
+  MangaDexGroupService({
+    required super.client,
+    required super.rateLimiter,
+    required super.database,
+    required super.rootUrl,
+  });
 
-  MDGroupRepo(this.client, this.rateLimiter, this.database) {
-    rateLimiter.rates["/group:GET"] = const Rate(4, Duration(seconds: 1));
+  @override
+  final logger = Logger("MangaDexGroupService");
+
+  @override
+  final Map<String, Rate> rates = {
+    "/group:GET": const Rate(4, Duration(seconds: 1)),
+  };
+
+  @override
+  late final baseUrl = rootUrl.copyWith(pathSegments: ["group"]);
+
+  @override
+  final defaultFilters = MangaDexGenericQueryFilter(
+    includes: [EntityType.leader, EntityType.member],
+  );
+
+  @override
+  MangaDexGroupService get instance => MangaDex.instance.group;
+
+  @override
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<GroupData> get(String id, {bool checkDB = true}) => throw UnimplementedError();
+
+  @override
+  Future<Map<String, GroupData>> getMany({
+    required MangaDexGenericQueryFilter overrides,
+    bool checkDB = true,
+  }) {
+    // TODO: implement getMany
+    throw UnimplementedError();
   }
 
-  final url = MangaDex.url.copyWith(pathSegments: ["group"]);
-  final includes = [
-    EntityType.leader.toJsonValue(),
-    EntityType.member.toJsonValue(),
-  ];
+  Future<Map<String, Group>> getWithSingleConstraint({
+    required MangaDexGenericQueryFilter overrides,
+    bool checkDB = true,
+  }) async {
+    logger.info("getMany($overrides, $checkDB)");
 
-  Future<Map<String, Group>> getSimpleMany(List<String> ids, {bool checkDB = true}) async {
-    logger.info("getMany($ids, $checkDB)");
+    assert(overrides.ids != null, "This method requires ids to be populated.");
 
+    final ids = overrides.ids!;
+    final filters = defaultFilters.copyWith(overrides);
     final Map<String, Group?> mapped = {for (final e in ids) e: null};
 
     if (checkDB) {
@@ -49,17 +82,13 @@ class MDGroupRepo {
       items: missing,
       onStep: (resolved) async {
         await rateLimiter.wait("/group:GET");
-        final reqUrl = url
-            .copy()
-            .setParameter("ids[]", resolved.keys.toList())
-            .setParameter("includes[]", includes)
-            .setParameter("limit", 100);
+        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
         final request = await client.get(reqUrl.toUri());
-        final response = MDGroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+        final response = GroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
         for (final data in response.data) {
           final groupData = data.toGroupData();
-          _insertMeta(groupData);
+          insertMeta(groupData);
           resolved[data.id] = groupData.group;
         }
       },
@@ -72,11 +101,12 @@ class MDGroupRepo {
     return mapped.cast();
   }
 
-  Future<void> _insertMeta(GroupData groupData) async {
+  @override
+  Future<void> insertMeta(GroupData data) async {
     await database.writeTxn(() async {
       await Future.wait([
-        database.users.putAll(groupData.users.values.toList()),
-        database.groups.put(groupData.group),
+        database.users.putAll(data.users.values.toList()),
+        database.groups.put(data.group),
       ]);
     });
   }
@@ -84,12 +114,13 @@ class MDGroupRepo {
   /// Collects related data for a group to make a [GroupData] object.
   ///
   /// [Group.memberIds] should not be null, if it is, [IncompleteDataException] is thrown.
-  Future<GroupData> _collectMeta(Group group) async {
-    if (group.memberIds == null) throw const IncompleteDataException("Group.memberIds is null");
-    final users = await database.users.getAll(group.memberIds!.map((e) => fastHash(e)).toList());
+  @override
+  Future<GroupData> collectMeta(Group single) async {
+    if (single.memberIds == null) throw const IncompleteDataException("Group.memberIds is null");
+    final users = await database.users.getAll(single.memberIds!.map((e) => fastHash(e)).toList());
 
     return GroupData(
-      group: group,
+      group: single,
       users: {for (final user in users as List<User>) user.id: user},
     );
   }

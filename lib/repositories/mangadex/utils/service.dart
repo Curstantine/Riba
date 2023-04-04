@@ -80,17 +80,12 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
     return url;
   }
 
-  MangaDexGenericQueryFilter copyWith({
-    List<String>? ids,
-    List<EntityType>? includes,
-    int? limit,
-    int? offset,
-  }) {
+  MangaDexGenericQueryFilter copyWith(MangaDexGenericQueryFilter other) {
     return MangaDexGenericQueryFilter(
-      ids: ids ?? this.ids,
-      includes: includes ?? this.includes,
-      limit: limit ?? this.limit,
-      offset: offset ?? this.offset,
+      ids: other.ids ?? ids,
+      includes: other.includes ?? includes,
+      limit: other.limit ?? limit,
+      offset: other.offset ?? offset,
     );
   }
 
