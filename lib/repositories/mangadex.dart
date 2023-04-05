@@ -22,9 +22,7 @@ class MangaDex {
   final String userAgent;
   final Directory directory;
   final RateLimiter rateLimiter = RateLimiter(name: "MangaDex");
-
   late final Client client = SelfClient(Client(), userAgent);
-  late final MDMangaRepo manga = MDMangaRepo(client, rateLimiter, database);
 
   late final MangaDexCustomListService customList = MangaDexCustomListService(
     client: client,
@@ -49,6 +47,13 @@ class MangaDex {
   );
 
   late final MangaDexGroupService group = MangaDexGroupService(
+    client: client,
+    rateLimiter: rateLimiter,
+    database: database,
+    rootUrl: url,
+  );
+
+  late final MangaDexMangaService manga = MangaDexMangaService(
     client: client,
     rateLimiter: rateLimiter,
     database: database,

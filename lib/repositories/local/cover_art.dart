@@ -19,7 +19,6 @@ class CoverArt {
 
   late String fileId;
 
-  @Index()
   late String? volume;
   late String? description;
   late Locale? locale;

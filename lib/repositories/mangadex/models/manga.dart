@@ -8,6 +8,9 @@ import "general.dart";
 import "relationship.dart";
 import "tag.dart";
 
+typedef MangaEntity = MDEntityResponse<MangaAttributes>;
+typedef MangaCollection = MDCollectionResponse<MangaAttributes>;
+
 class MangaAttributes {
   final Map<String, String> title;
   final List<Map<String, String>> altTitles;
@@ -117,7 +120,7 @@ enum MangaContentRating {
   String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
 }
 
-extension on MDResponseData<MangaAttributes> {
+extension ToManga on MDResponseData<MangaAttributes> {
   Manga toManga({String? usedCoverId}) {
     final String usedCover = relationships
         .ofType<CoverArtAttributes>(EntityType.coverArt)

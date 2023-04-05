@@ -36,6 +36,7 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   @override
   final defaultFilters = MangaDexGenericQueryFilter(
     includes: [EntityType.leader, EntityType.member],
+    limit: 100,
   );
 
   @override

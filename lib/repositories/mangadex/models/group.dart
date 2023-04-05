@@ -112,7 +112,7 @@ extension ToGroup on MDResponseData<GroupAttributes> {
   }
 
   GroupData toGroupData() {
-    final users = relationships.ofType<UserAttributes>(EntityType.member).map((e) => e.toUser());
+    final users = relationships.ofType<UserAttributes>(EntityType.member).map((e) => e.asUser());
 
     return GroupData(
       group: toGroup(),

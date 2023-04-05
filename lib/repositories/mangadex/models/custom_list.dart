@@ -57,7 +57,7 @@ extension ToCustomList on MDResponseData<CustomListAttributes> {
   CustomListData toCustomListData() {
     return CustomListData(
       list: toCustomList(),
-      user: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
+      user: relationships.ofType<UserAttributes>(EntityType.user).first.asUser(),
     );
   }
 }

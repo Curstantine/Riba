@@ -129,19 +129,6 @@ const CoverArtSchema = CollectionSchema(
   deserializeProp: _coverArtDeserializeProp,
   idName: r"isarId",
   indexes: {
-    r"volume": IndexSchema(
-      id: 7691401451822141275,
-      name: r"volume",
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r"volume",
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
     r"mangaId": IndexSchema(
       id: 7466570075891278896,
       name: r"mangaId",
@@ -386,71 +373,6 @@ extension CoverArtQueryWhere on QueryBuilder<CoverArt, CoverArt, QWhereClause> {
         upper: upperIsarId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<CoverArt, CoverArt, QAfterWhereClause> volumeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r"volume",
-        value: [null],
-      ));
-    });
-  }
-
-  QueryBuilder<CoverArt, CoverArt, QAfterWhereClause> volumeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r"volume",
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<CoverArt, CoverArt, QAfterWhereClause> volumeEqualTo(
-      String? volume) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r"volume",
-        value: [volume],
-      ));
-    });
-  }
-
-  QueryBuilder<CoverArt, CoverArt, QAfterWhereClause> volumeNotEqualTo(
-      String? volume) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"volume",
-              lower: [],
-              upper: [volume],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"volume",
-              lower: [volume],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"volume",
-              lower: [volume],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"volume",
-              lower: [],
-              upper: [volume],
-              includeUpper: false,
-            ));
-      }
     });
   }
 

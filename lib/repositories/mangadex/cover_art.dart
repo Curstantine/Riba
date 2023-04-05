@@ -69,15 +69,9 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     bool checkDB = true,
   }) async {
     logger.info("getMany($overrides, $checkDB)");
-    assert(overrides.ids != null && overrides.mangaId != null,
-        "Only one of ids or mangaIds can be set.");
-
-    final filters = defaultFilters.copyWith(overrides);
-    if (overrides.ids != null && overrides.orderByVolumeDesc != null) {
-      logger.warning("orderByVolumeDesc is ignored when ids are set.");
-    }
 
     final ids = overrides.ids ?? [];
+    final filters = defaultFilters.copyWith(overrides);
     final Map<String, CoverArtData?> mapped = {for (final e in ids) e: null};
 
     if (checkDB && filters.ids != null) {
@@ -90,7 +84,12 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     }
 
     if (checkDB && filters.mangaId != null) {
-      final statement = database.covers.where().mangaIdEqualTo(filters.mangaId!);
+      final statement = database.covers
+          .where()
+          .mangaIdEqualTo(filters.mangaId!)
+          .filter()
+          .locale((q) => q.anyOf(filters.locales ?? <Locale>[], (q, e) => q.codeEqualTo(e.code)));
+
       final inDB = filters.orderByVolumeDesc == false
           ? await statement.findAll()
           : await statement.sortByVolumeDesc().findAll();
@@ -114,11 +113,13 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
         final response = CoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
         for (final data in response.data) {
-          final coverArtData = data.toCoverArtData(logger: logger);
-          if (coverArtData == null) continue;
-
-          insertMeta(coverArtData);
-          resolved[data.id] = coverArtData;
+          try {
+            final cover = data.asCoverArtData();
+            insertMeta(cover);
+            resolved[data.id] = cover;
+          } on LanguageNotSupportedException catch (e) {
+            logger.warning(e.toString());
+          }
         }
       },
       onMismatch: (missedIds) {
@@ -240,7 +241,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
 
   /// I don't want to do list filtering though the api supports it.
   final String? mangaId;
-  final List<Language>? locales;
+  final List<Locale>? locales;
   final bool? orderByVolumeDesc;
 
   MangaDexCoverQueryFilter({
@@ -250,7 +251,12 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
     this.mangaId,
     this.locales,
     this.orderByVolumeDesc,
-  });
+  })  : assert(
+            (ids == null && mangaId != null) || (ids != null && mangaId == null),
+            "Either mangaId or ids must be specified."
+            "And only one of them at a time."),
+        assert(ids != null && orderByVolumeDesc != null,
+            "orderByVolumeDesc should not be specified when ids are populated.");
 
   @override
   URL addFiltersToUrl(URL url) {
@@ -259,7 +265,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
     }
 
     if (locales != null) {
-      url.setParameter("locales[]", locales!.map((e) => e.isoCode).toList());
+      url.setParameter("locales[]", locales!.map((e) => e.code).toList());
     }
 
     if (orderByVolumeDesc != null && orderByVolumeDesc!) {

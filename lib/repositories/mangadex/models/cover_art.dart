@@ -1,4 +1,3 @@
-import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
@@ -43,18 +42,11 @@ class CoverArtAttributes {
 }
 
 extension ToCoverArt on MDResponseData<CoverArtAttributes> {
-  CoverArt? toCoverArt(String mangaId, {required Logger logger}) {
+  /// Converts self to a [CoverArt] object.
+  ///
+  /// Might throw a [LanguageNotSupportedException] if the locale is not supported.
+  CoverArt asCoverArt(String mangaId, {bool inRelationship = false}) {
     final file = attributes.fileName.split(".");
-    Locale? locale;
-
-    if (attributes.locale != null) {
-      try {
-        locale = Locale.fromJsonValue(attributes.locale!);
-      } on LanguageNotSupportedException {
-        logger.warning("${attributes.locale} of $mangaId is not supported, returning null.");
-        return null;
-      }
-    }
 
     return CoverArt(
       id: id,
@@ -62,42 +54,48 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
       fileId: file.first,
       fileType: ImageFileType.fromExtension(file.last),
       description: attributes.description,
-      locale: locale,
+      locale: attributes.locale == null ? null : Locale.fromJsonValue(attributes.locale!),
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,
       version: attributes.version,
       mangaId: mangaId,
-      userId: relationships.ofType(EntityType.user).first.id,
+      userId: inRelationship ? null : relationships.ofType(EntityType.user).first.id,
     );
   }
 
-  CoverArtData? toCoverArtData({required Logger logger}) {
-    final cover = toCoverArt(relationships.ofType(EntityType.manga).first.id, logger: logger);
-    if (cover == null) return null;
-
+  /// Converts self to a [CoverArtData] object.
+  ///
+  /// Unlike [asCoverArt], this method requires [relationships] to be populated.
+  ///
+  /// Throws:
+  ///   - [IncompleteDataException] if [relationships] are null.
+  ///   - [LanguageNotSupportedException] if the locale is not supported.
+  CoverArtData asCoverArtData() {
     return CoverArtData(
-      cover: cover,
-      user: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
+      cover: asCoverArt(relationships.ofType(EntityType.manga).first.id),
+      user: relationships.ofType<UserAttributes>(EntityType.user).first.asUser(),
     );
   }
 }
 
 extension ToRelCoverArt on Relationship<CoverArtAttributes> {
+  /// Converts self to a [CoverArt] object.
+  ///
+  /// [CoverArt.userId] will be null, as relationships are not populated.
+  ///
+  /// Throws:
+  ///   - [IncompleteDataException] if [attributes] is null.
+  ///   - [LanguageNotSupportedException] if the locale is not supported.
   CoverArt toCoverArt(String mangaId) {
-    if (attributes == null) throw Exception("Attributes are null");
-    final file = attributes!.fileName.split(".");
+    if (attributes == null) throw const IncompleteDataException("Attributes are null");
 
-    return CoverArt(
+    final tempResp = MDResponseData<CoverArtAttributes>(
       id: id,
-      volume: attributes!.volume,
-      fileId: file.first,
-      fileType: ImageFileType.fromExtension(file.last),
-      description: attributes!.description,
-      locale: attributes!.locale != null ? Locale.fromJsonValue(attributes!.locale!) : null,
-      createdAt: attributes!.createdAt,
-      updatedAt: attributes!.updatedAt,
-      version: attributes!.version,
-      mangaId: mangaId,
+      type: type,
+      attributes: attributes!,
+      relationships: const [],
     );
+
+    return tempResp.asCoverArt(mangaId, inRelationship: true);
   }
 }

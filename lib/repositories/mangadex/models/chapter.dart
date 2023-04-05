@@ -94,7 +94,7 @@ extension ToChapter on MDResponseData<ChapterAttributes> {
   ChapterData toChapterData() {
     return ChapterData(
       chapter: toChapter(),
-      uploader: relationships.ofType<UserAttributes>(EntityType.user).first.toUser(),
+      uploader: relationships.ofType<UserAttributes>(EntityType.user).first.asUser(),
       groups: relationships
           .ofType<GroupAttributes>(EntityType.scanlationGroup)
           .map((e) => e.toGroup())

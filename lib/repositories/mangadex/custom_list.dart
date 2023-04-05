@@ -36,8 +36,8 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
 
   @override
   final defaultFilters = MangaDexCustomListQueryFilter(
-    limit: 10,
     includes: [EntityType.user],
+    limit: 100,
   );
 
   @override

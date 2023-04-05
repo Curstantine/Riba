@@ -1,71 +1,96 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
-import "dart:developer";
 
-import "package:http/http.dart";
-import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
-import "package:riba/repositories/utils/rate_limiter.dart";
+import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
+import "package:riba/repositories/mangadex/models/statistics.dart";
+import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/repositories/utils/enumerate.dart";
+import "package:riba/repositories/utils/rate_limiter.dart";
+import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-import "../mangadex.dart";
+class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, MangaData,
+    InternalMangaData, MangaDexMangaQueryFilter> {
+  MangaDexMangaService({
+    required super.client,
+    required super.rateLimiter,
+    required super.database,
+    required super.rootUrl,
+  });
 
-class MDMangaRepo {
-  final Client client;
-  final RateLimiter rateLimiter;
-  final Isar database;
-  final logger = Logger("MDMangaRepo");
+  @override
+  final logger = Logger("MangaDexMangaService");
 
-  MDMangaRepo(this.client, this.rateLimiter, this.database) {
-    rateLimiter.rates["/manga:GET"] = const Rate(4, Duration(seconds: 1));
-    rateLimiter.rates["/statistics/manga:GET"] = const Rate(4, Duration(seconds: 1));
-  }
+  @override
+  final Map<String, Rate> rates = {
+    "/manga:GET": const Rate(4, Duration(seconds: 1)),
+    "/statistics/manga:GET": const Rate(4, Duration(seconds: 1)),
+  };
 
-  final url = MangaDex.url.copyWith(pathSegments: ["manga"]);
-  final statisticUrl = MangaDex.url.copyWith(pathSegments: ["statistics", "manga"]);
+  @override
+  late final baseUrl = rootUrl.copyWith(pathSegments: ["manga"]);
+  late final statisticUrl = rootUrl.copyWith(pathSegments: ["statistics", "manga"]);
 
-  final includes = [
-    EntityType.artist.toJsonValue(),
-    EntityType.author.toJsonValue(),
-    EntityType.coverArt.toJsonValue(),
-  ];
+  @override
+  final defaultFilters = MangaDexMangaQueryFilter(
+    includes: [
+      EntityType.artist,
+      EntityType.author,
+      EntityType.coverArt,
+    ],
+    limit: 100,
+  );
 
+  @override
+  MangaDexMangaService get instance => MangaDex.instance.manga;
+
+  @override
   Future<MangaData> get(String id, {bool checkDB = true}) async {
     logger.info("get($id, $checkDB)");
 
     if (checkDB) {
       final inDB = await database.manga.get(fastHash(id));
-      if (inDB != null) return _collectMeta(inDB);
+      if (inDB != null) return collectMeta(inDB);
     }
 
     await rateLimiter.wait("/manga:GET");
-    final reqUrl = url.copy().addPathSegment(id).setParameter("includes[]", includes);
+    final reqUrl =
+        baseUrl.copy().addPathSegment(id).setParameter("includes[]", defaultFilters.includes);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDMangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
+    final response = MangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
     final internalMangaData = response.data.toInternalMangaData();
-    _insertMeta(internalMangaData);
+    insertMeta(internalMangaData);
 
     return internalMangaData.toMangaData();
   }
 
-  /// Get multiple manga at once.
-  Future<Map<String, MangaData>> getMany(List<String> ids, {bool checkDB = true}) async {
-    logger.info("getMany($ids, $checkDB)");
+  @override
+  Future<Map<String, MangaData>> getMany({
+    required MangaDexMangaQueryFilter overrides,
+    bool checkDB = true,
+  }) async {
+    logger.info("getMany($overrides, $checkDB)");
 
+    final ids = overrides.ids ?? [];
+    final filters = defaultFilters.copyWith(overrides);
     final Map<String, MangaData?> mapped = {for (final e in ids) e: null};
 
     if (checkDB) {
       final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
       for (final manga in inDB) {
         if (manga == null) continue;
-        mapped[manga.id] = await _collectMeta(manga);
+        mapped[manga.id] = await collectMeta(manga);
       }
     }
 
@@ -77,17 +102,13 @@ class MDMangaRepo {
       items: missing,
       onStep: (resolved) async {
         await rateLimiter.wait("/manga:GET");
-        final reqUrl = url
-            .copy()
-            .setParameter("ids[]", resolved.keys.toList())
-            .setParameter("includes[]", includes)
-            .setParameter("limit", 100);
+        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
         final request = await client.get(reqUrl.toUri());
-        final response = MDMangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+        final response = MangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
         for (final data in response.data) {
           final internalMangaData = data.toInternalMangaData();
-          _insertMeta(internalMangaData);
+          insertMeta(internalMangaData);
           resolved[data.id] = internalMangaData.toMangaData();
         }
       },
@@ -100,38 +121,8 @@ class MDMangaRepo {
     return mapped.cast();
   }
 
-  Future<void> _insertMeta(InternalMangaData internalMangaData) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.authors.putAll(internalMangaData.authors + internalMangaData.artists),
-        database.covers.putAll(internalMangaData.covers),
-        database.tags.putAll(internalMangaData.tags),
-        database.manga.put(internalMangaData.manga),
-      ]);
-    });
-  }
-
-  Future<MangaData> _collectMeta(Manga manga) async {
-    final data = await Future.wait([
-      database.authors.getAll(manga.artistIds.map((e) => fastHash(e)).toList()),
-      database.authors.getAll(manga.authorIds.map((e) => fastHash(e)).toList()),
-      database.tags.getAll(manga.tagsIds.map((e) => fastHash(e)).toList()),
-      manga.usedCoverId != null
-          ? database.covers.get(fastHash(manga.usedCoverId!))
-          : Future.value(null),
-    ]);
-
-    return MangaData(
-      manga: manga,
-      authors: (data[0] as List<Author?>).cast(),
-      artists: (data[1] as List<Author?>).cast(),
-      tags: (data[2] as List<Tag?>).cast(),
-      cover: data[3] as CoverArt?,
-    );
-  }
-
   Future<Statistics> getStatistics(String id, {bool checkDB = true}) async {
-    log("getStatistics($id)", name: "MDMangaRepo");
+    logger.info("getStatistics($id, $checkDB)");
 
     if (checkDB) {
       final inDB = await database.statistics.get(fastHash(id));
@@ -152,5 +143,125 @@ class MDMangaRepo {
     database.writeTxn(() async => await database.statistics.put(statistic));
 
     return statistic;
+  }
+
+  @override
+  Future<void> insertMeta(InternalMangaData data) async {
+    await database.writeTxn(() async {
+      await Future.wait([
+        database.authors.putAll(data.authors + data.artists),
+        database.covers.putAll(data.covers),
+        database.tags.putAll(data.tags),
+        database.manga.put(data.manga),
+      ]);
+    });
+  }
+
+  @override
+  Future<MangaData> collectMeta(Manga single) async {
+    final data = await Future.wait([
+      database.authors.getAll(single.artistIds.map((e) => fastHash(e)).toList()),
+      database.authors.getAll(single.authorIds.map((e) => fastHash(e)).toList()),
+      database.tags.getAll(single.tagsIds.map((e) => fastHash(e)).toList()),
+      single.usedCoverId != null
+          ? database.covers.get(fastHash(single.usedCoverId!))
+          : Future.value(null),
+    ]);
+
+    return MangaData(
+      manga: single,
+      authors: (data[0] as List<Author?>).cast(),
+      artists: (data[1] as List<Author?>).cast(),
+      tags: (data[2] as List<Tag?>).cast(),
+      cover: data[3] as CoverArt?,
+    );
+  }
+}
+
+class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
+  final List<String>? ids;
+  final List<EntityType>? includes;
+  final int? limit;
+  final int? offset;
+
+  final String? title;
+  final List<String>? authorIds;
+  final List<String>? artistIds;
+
+  final List<MangaStatus>? statuses;
+  final List<MangaContentRating>? contentRatings;
+  final List<MangaPublicationDemographic>? publicationDemographics;
+
+  final List<Language>? originalLanguages;
+  final List<Language>? excludedOriginalLanguages;
+  final List<Language>? availableTranslatedLanguages;
+
+  MangaDexMangaQueryFilter({
+    this.ids,
+    this.includes,
+    this.limit,
+    this.offset,
+    this.title,
+    this.authorIds,
+    this.artistIds,
+    this.statuses,
+    this.contentRatings,
+    this.publicationDemographics,
+    this.originalLanguages,
+    this.excludedOriginalLanguages,
+    this.availableTranslatedLanguages,
+  });
+
+  @override
+  URL addFiltersToUrl(URL url) {
+    if (title != null) url.setParameter("title", title);
+    if (authorIds != null) url.setParameter("authors[]", authorIds);
+    if (artistIds != null) url.setParameter("artists[]", artistIds);
+    if (statuses != null) url.setParameter("status[]", statuses);
+    if (contentRatings != null) url.setParameter("contentRating[]", contentRatings);
+
+    if (publicationDemographics != null) {
+      url.setParameter("publicationDemographic[]", publicationDemographics);
+    }
+
+    if (originalLanguages != null) {
+      url.setParameter("originalLanguage[]", originalLanguages);
+    }
+
+    if (excludedOriginalLanguages != null) {
+      url.setParameter("excludedOriginalLanguage[]", excludedOriginalLanguages);
+    }
+
+    if (availableTranslatedLanguages != null) {
+      url.setParameter("availableTranslatedLanguage[]", availableTranslatedLanguages);
+    }
+
+    final generic = MangaDexGenericQueryFilter(
+      ids: ids,
+      includes: includes,
+      limit: limit,
+      offset: offset,
+    );
+
+    return generic.addFiltersToUrl(url);
+  }
+
+  MangaDexMangaQueryFilter copyWith(MangaDexMangaQueryFilter other) {
+    return MangaDexMangaQueryFilter(
+      ids: other.ids ?? ids,
+      includes: other.includes ?? includes,
+      limit: other.limit ?? limit,
+      offset: other.offset ?? offset,
+      title: other.title ?? title,
+      authorIds: other.authorIds ?? authorIds,
+      artistIds: other.artistIds ?? artistIds,
+      statuses: other.statuses ?? statuses,
+      contentRatings: other.contentRatings ?? contentRatings,
+      publicationDemographics: other.publicationDemographics ?? publicationDemographics,
+      originalLanguages: other.originalLanguages ?? originalLanguages,
+      excludedOriginalLanguages: other.excludedOriginalLanguages ?? excludedOriginalLanguages,
+      availableTranslatedLanguages:
+          other.availableTranslatedLanguages ?? availableTranslatedLanguages,
+    );
   }
 }

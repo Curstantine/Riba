@@ -65,20 +65,38 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
   }) async {
     logger.info("getMany($overrides, $checkDB)");
 
-    final ids = overrides.ids!;
+    final ids = overrides.ids ?? [];
     final filters = defaultFilters.copyWith(overrides);
     final Map<String, ChapterData?> mapped = {for (final e in ids) e: null};
 
-    if (checkDB) {
+    if (checkDB && filters.ids != null) {
       final inDB = await database.chapters.getAll(ids.map((e) => fastHash(e)).toList());
-      for (final chapter in inDB) {
-        if (chapter == null) continue;
-        mapped[chapter.id] = await collectMeta(chapter);
+
+      for (final cover in inDB) {
+        if (cover == null) continue;
+        mapped[cover.id] = await collectMeta(cover);
+      }
+    }
+
+    // TODO: Implement the excludedGroupIds filter.
+    if (checkDB && filters.mangaId != null) {
+      final translatedLangs = filters.translatedLanguages ?? <Language>[];
+      final orderChapterByDesc = filters.orderByChapterDesc == true;
+      final inDB = await database.chapters
+          .where()
+          .mangaIdEqualTo(filters.mangaId!)
+          .filter()
+          .translatedLanguage((q) => q.anyOf(translatedLangs, (q, e) => q.codeEqualTo(e.isoCode)))
+          .optional(orderChapterByDesc, (q) => q.sortByChapterDesc().thenByVolumeDesc())
+          .findAll();
+
+      for (final cover in inDB) {
+        mapped[cover.id] = await collectMeta(cover);
       }
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty) return mapped.cast();
+    if (missing.isEmpty && mapped.isNotEmpty) return mapped.cast();
 
     final block = Enumerate<String, ChapterData>(
       perStep: filters.limit ?? 100,
@@ -115,7 +133,6 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
   }) async {
     logger.info("getFeed($overrides, $checkDB)");
     assert(overrides.mangaId != null, "Manga ID must be specified");
-    assert(overrides.ids == null, "IDs cannot be specified");
 
     final filters = defaultFilters.copyWith(overrides);
     final mangaId = filters.mangaId!;
@@ -207,7 +224,12 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     this.orderByChapterDesc,
     this.translatedLanguages,
     this.excludedGroups,
-  });
+  })  : assert(
+            (ids == null && mangaId != null) || (ids != null && mangaId == null),
+            "Either mangaId or ids must be specified."
+            "And only one of them at a time."),
+        assert(ids != null && orderByChapterDesc != null,
+            "orderByChapterDesc should not be specified when ids are populated.");
 
   @override
   URL addFiltersToUrl(URL url) {

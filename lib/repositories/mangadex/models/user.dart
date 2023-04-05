@@ -1,4 +1,5 @@
 import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/utils/exception.dart";
 
 import "relationship.dart";
 
@@ -88,8 +89,11 @@ enum UserRole {
 }
 
 extension ToRelUser on Relationship<UserAttributes> {
-  User toUser() {
-    if (attributes == null) throw Exception("Attributes are null");
+  /// Converts self to a [User] object.
+  ///
+  /// Might throw a [IncompleteDataException] if the attributes are null.
+  User asUser() {
+    if (attributes == null) throw const IncompleteDataException("Attributes are null");
     return User(
       id: id,
       username: attributes!.username,

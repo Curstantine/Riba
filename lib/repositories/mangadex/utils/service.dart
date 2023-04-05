@@ -41,7 +41,7 @@ abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalData
   @visibleForOverriding
   Future<void> insertMeta(InternalDataType data);
   @visibleForOverriding
-  Future<InternalDataType> collectMeta(LocalType single);
+  Future<RuntimeDataType> collectMeta(LocalType single);
 
   MangaDexService<DexType, LocalType, RuntimeDataType, InternalDataType, QueryFilterType>
       get instance;
