@@ -275,7 +275,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
       url.setParameter("locales[]", locales!.map((e) => e.code).toList());
     }
 
-    if (orderByVolumeDesc != null && orderByVolumeDesc!) {
+    if (orderByVolumeDesc == true) {
       url.setParameter("order[volume]", "desc");
     }
 

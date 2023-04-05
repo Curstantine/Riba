@@ -240,7 +240,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
 
   @override
   URL addFiltersToUrl(URL url) {
-    if (orderByChapterDesc != null && orderByChapterDesc!) {
+    if (orderByChapterDesc == true) {
       url.setParameter("order[chapter]", "desc");
     }
 
