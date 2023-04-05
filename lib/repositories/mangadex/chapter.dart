@@ -65,8 +65,17 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
   }) async {
     logger.info("getMany($overrides, $checkDB)");
 
-    final ids = overrides.ids ?? [];
+    assert(
+        (overrides.ids != null || overrides.mangaId != null) &&
+            !(overrides.ids != null && overrides.mangaId != null),
+        "Either ids or mangaId must be specified. Not both or none.");
+
     final filters = defaultFilters.copyWith(overrides);
+    if (filters.ids != null && filters.orderByChapterDesc == true) {
+      logger.warning("orderByChapterDesc is not supported when using ids, ignoring it.");
+    }
+
+    final ids = filters.ids ?? [];
     final Map<String, ChapterData?> mapped = {for (final e in ids) e: null};
 
     if (checkDB && filters.ids != null) {
@@ -120,6 +129,9 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
       },
       onMismatch: (missedIds) {
         logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+        for (final id in missedIds) {
+          mapped.remove(id);
+        }
       },
     );
 
@@ -224,12 +236,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     this.orderByChapterDesc,
     this.translatedLanguages,
     this.excludedGroups,
-  })  : assert(
-            (ids == null && mangaId != null) || (ids != null && mangaId == null),
-            "Either mangaId or ids must be specified."
-            "And only one of them at a time."),
-        assert(ids != null && orderByChapterDesc != null,
-            "orderByChapterDesc should not be specified when ids are populated.");
+  });
 
   @override
   URL addFiltersToUrl(URL url) {

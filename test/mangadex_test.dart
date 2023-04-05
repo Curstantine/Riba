@@ -7,6 +7,11 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/database.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/chapter.dart";
+import "package:riba/repositories/mangadex/cover_art.dart";
+import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
+import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/utils/logging.dart";
 
 import "constants.dart";
@@ -37,15 +42,38 @@ void main() async {
       expect(dbMangaData.manga.id, mangaData.manga.id);
     });
     test("Manga.getMany", () async {
-      final manga = await mangaDex.manga.getMany(mangaIds);
-      expect(manga.length, mangaIds.length);
+      final manga = await mangaDex.manga.getMany(
+        overrides: MangaDexMangaQueryFilter(ids: mangaIds),
+      );
+
+      // MangaIds contain a pornographic title, so the resolved list will be -1
+      expect(manga.length, mangaIds.length - 1);
+
+      final withRatingFilters = await MangaDex.instance.manga.getMany(
+        overrides: MangaDexMangaQueryFilter(ids: mangaIds, contentRatings: [
+          MangaContentRating.safe,
+          MangaContentRating.suggestive,
+          MangaContentRating.erotica,
+          MangaContentRating.pornographic,
+        ]),
+      );
+
+      expect(withRatingFilters.length, mangaIds.length);
     });
   });
 
   group("MangaDex.Chapter", () {
-    test("Chapter.getMany", () {
-      final chapters = mangaDex.chapter.getMany(chapterIds);
-      expect(chapters, isNotNull);
+    test("Chapter.getMany", () async {
+      final chapters = await mangaDex.chapter.getMany(
+        overrides: MangaDexChapterQueryFilter(ids: chapterIds),
+      );
+      expect(chapters, isNotEmpty);
+    });
+    test("Chapter.getMany with mangaId", () async {
+      final chapters = await mangaDex.chapter.getMany(
+        overrides: MangaDexChapterQueryFilter(mangaId: mangaId),
+      );
+      expect(chapters, isNotEmpty);
     });
   });
 
@@ -64,17 +92,20 @@ void main() async {
       expect(small, "$coverFile.256.jpg");
     });
     test("CoverArt.getMany", () async {
-      final covers = await mangaDex.cover.getMany([coverId]);
-
-      expect(covers, isNotNull);
+      final covers = await mangaDex.cover.getMany(
+        overrides: MangaDexCoverQueryFilter(ids: [coverId]),
+      );
       expect(covers.length, 1);
     });
-    test("CoverArt.getForManga", () async {
-      final covers = await mangaDex.cover.getForManga(mangaId);
-      expect(covers, isNotEmpty);
+    test("CoverArt.getMany with mangaId", () async {
+      final covers = await mangaDex.cover.getMany(
+        overrides: MangaDexCoverQueryFilter(mangaId: mangaId),
+      );
+      expect(covers.length, 1);
     });
     test("CoverArt.getImage", () async {
-      final coverTemp = (await mangaDex.cover.getMany([coverId])).values.first;
+      final res = await mangaDex.cover.getMany(overrides: MangaDexCoverQueryFilter(ids: [coverId]));
+      final coverTemp = res.values.first;
       final cover = await mangaDex.cover.getImage(mangaId, coverTemp.cover);
 
       final mediumCover = await mangaDex.cover.getImage(
@@ -104,7 +135,8 @@ void main() async {
   });
   group("MangaDex.Group", () {
     test("Group.getSimpleMany", () async {
-      final groups = await mangaDex.group.getSimpleMany(groupIds);
+      final groups = await mangaDex.group
+          .getWithSingleConstraint(overrides: MangaDexGenericQueryFilter(ids: groupIds));
       expect(groups, isNotNull);
       expect(groups.length, groupIds.length);
     });

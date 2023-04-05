@@ -1,4 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
+import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/logging.dart";
 
@@ -35,6 +37,20 @@ void main() {
     expect(
       uri.toString(),
       "$apiStr/manga?ids%5B%5D=$id&ids%5B%5D=$id&sort%5Btitle%5D=asc&limit=100",
+    );
+  });
+  test("URL creation with custom type enums.", () {
+    final url = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
+    url.setParameter("includes[]", [EntityType.artist, EntityType.author]);
+    url.setParameter("status", MangaStatus.cancelled);
+    url.setParameter("publicationDemographic", MangaPublicationDemographic.shounen);
+    url.setParameter("contentRating", MangaContentRating.safe);
+
+    final uri = url.toUri();
+    expect(
+      uri.toString(),
+      "$apiStr/manga?includes%5B%5D=artist&includes%5B%5D=author"
+      "&status=cancelled&publicationDemographic=shounen&contentRating=safe",
     );
   });
 

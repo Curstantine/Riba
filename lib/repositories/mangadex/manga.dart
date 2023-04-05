@@ -114,6 +114,9 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
       },
       onMismatch: (missedIds) {
         logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+        for (final id in missedIds) {
+          mapped.remove(id);
+        }
       },
     );
 

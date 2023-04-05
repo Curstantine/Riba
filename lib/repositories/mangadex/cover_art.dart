@@ -70,8 +70,17 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
   }) async {
     logger.info("getMany($overrides, $checkDB)");
 
-    final ids = overrides.ids ?? [];
+    assert(
+        (overrides.ids != null || overrides.mangaId != null) &&
+            !(overrides.ids != null && overrides.mangaId != null),
+        "Either ids or mangaId must be specified. Not both or none.");
+
     final filters = defaultFilters.copyWith(overrides);
+    if (filters.ids != null && filters.orderByVolumeDesc == true) {
+      logger.warning("orderByVolumeDesc is not supported when using ids, ignoring it.");
+    }
+
+    final ids = filters.ids ?? [];
     final Map<String, CoverArtData?> mapped = {for (final e in ids) e: null};
 
     if (checkDB && filters.ids != null) {
@@ -84,15 +93,15 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     }
 
     if (checkDB && filters.mangaId != null) {
-      final statement = database.covers
+      final orderByVolumeDesc = filters.orderByVolumeDesc == false;
+
+      final inDB = await database.covers
           .where()
           .mangaIdEqualTo(filters.mangaId!)
           .filter()
-          .locale((q) => q.anyOf(filters.locales ?? <Locale>[], (q, e) => q.codeEqualTo(e.code)));
-
-      final inDB = filters.orderByVolumeDesc == false
-          ? await statement.findAll()
-          : await statement.sortByVolumeDesc().findAll();
+          .locale((q) => q.anyOf(filters.locales ?? <Locale>[], (q, e) => q.codeEqualTo(e.code)))
+          .optional(orderByVolumeDesc, (q) => q.sortByVolumeDesc())
+          .findAll();
 
       for (final cover in inDB) {
         mapped[cover.id] = await collectMeta(cover);
@@ -124,6 +133,9 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
       },
       onMismatch: (missedIds) {
         logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+        for (final id in missedIds) {
+          mapped.remove(id);
+        }
       },
     );
 
@@ -251,12 +263,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
     this.mangaId,
     this.locales,
     this.orderByVolumeDesc,
-  })  : assert(
-            (ids == null && mangaId != null) || (ids != null && mangaId == null),
-            "Either mangaId or ids must be specified."
-            "And only one of them at a time."),
-        assert(ids != null && orderByVolumeDesc != null,
-            "orderByVolumeDesc should not be specified when ids are populated.");
+  });
 
   @override
   URL addFiltersToUrl(URL url) {

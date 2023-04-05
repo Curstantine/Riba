@@ -68,6 +68,7 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
     required MangaDexCustomListQueryFilter overrides,
     bool checkDB = true,
   }) {
+    // TODO: implement getMany
     throw UnimplementedError();
   }
 

@@ -1,5 +1,6 @@
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
+import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/runtime/manga.dart";
 
 import "author.dart";
@@ -57,7 +58,7 @@ class MangaAttributes {
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
-enum MangaStatus {
+enum MangaStatus implements TwoWayEnumSerde {
   ongoing,
   completed,
   hiatus,
@@ -70,15 +71,17 @@ enum MangaStatus {
         "cancelled": cancelled,
       };
 
-  factory MangaStatus.fromJsonValue(String str) {
-    return jsonValues[str]!;
-  }
-
   String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
+
+  @override
+  factory MangaStatus.fromJsonValue(String str) => jsonValues[str]!;
+
+  @override
+  String toJsonValue() => jsonValues.entries.firstWhere((e) => e.value == this).key;
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
-enum MangaPublicationDemographic {
+enum MangaPublicationDemographic implements TwoWayEnumSerde {
   unknown,
   shounen,
   shoujo,
@@ -92,15 +95,17 @@ enum MangaPublicationDemographic {
         "seinen": seinen,
       };
 
-  factory MangaPublicationDemographic.fromJsonValue(String str) {
-    return jsonValues[str]!;
-  }
-
   String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
+
+  @override
+  factory MangaPublicationDemographic.fromJsonValue(String str) => jsonValues[str]!;
+
+  @override
+  String toJsonValue() => jsonValues.entries.firstWhere((e) => e.value == this).key;
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
-enum MangaContentRating {
+enum MangaContentRating implements TwoWayEnumSerde {
   safe,
   suggestive,
   erotica,
@@ -113,11 +118,13 @@ enum MangaContentRating {
         "pornographic": pornographic,
       };
 
-  factory MangaContentRating.fromJsonValue(String str) {
-    return jsonValues[str]!;
-  }
-
   String get humanReadable => name.substring(0, 1).toUpperCase() + name.substring(1);
+
+  @override
+  factory MangaContentRating.fromJsonValue(String str) => jsonValues[str]!;
+
+  @override
+  String toJsonValue() => jsonValues.entries.firstWhere((e) => e.value == this).key;
 }
 
 extension ToManga on MDResponseData<MangaAttributes> {
