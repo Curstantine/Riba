@@ -14,7 +14,7 @@ part "localization.g.dart";
 ///```
 /// Locale.English -> "English Title"
 /// Locale.RomanizedJapanese -> "Romanized Japanese Title"
-/// localizations[0] = Locale.English && values[0] = "English Title"
+/// localizations[0] == Locale.English && values[0] == "English Title"
 /// ```
 ///
 /// ### Note
@@ -111,7 +111,12 @@ class Locale {
   static Locale ja = Locale(language: Language.japanese, romanized: false);
   static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
   static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
+  static Locale ko = Locale(language: Language.korean, romanized: false);
   static Locale fr = Locale(language: Language.french, romanized: false);
+  static Locale ru = Locale(language: Language.russian, romanized: false);
+  static Locale vi = Locale(language: Language.vietnamese, romanized: false);
+  static Locale ptBr = Locale(language: Language.portugueseBrazil, romanized: false);
+  static Locale id = Locale(language: Language.indonesian, romanized: false);
 
   static Locale jaRo = Locale(language: Language.japanese, romanized: true);
   static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
@@ -126,7 +131,11 @@ enum Language {
   simpleChinese("zh"),
   traditionalChinese("zh-hk"),
   korean("ko"),
-  french("fr");
+  french("fr"),
+  russian("ru"),
+  vietnamese("vi"),
+  portugueseBrazil("pt-br"),
+  indonesian("id");
 
   final String isoCode;
   const Language(this.isoCode);
@@ -149,6 +158,10 @@ enum Language {
     Language.traditionalChinese: "Traditional Chinese",
     Language.korean: "Korean",
     Language.french: "French",
+    Language.russian: "Russian",
+    Language.vietnamese: "Vietnamese",
+    Language.portugueseBrazil: "Portuguese (Brazil)",
+    Language.indonesian: "Indonesian",
   };
 
   static Map<Language, flag.Language> _flagLanguages = {
@@ -158,6 +171,10 @@ enum Language {
     Language.traditionalChinese: flag.Language.zh_TW,
     Language.korean: flag.Language.ko,
     Language.french: flag.Language.fr,
+    Language.russian: flag.Language.ru,
+    Language.vietnamese: flag.Language.vi,
+    Language.portugueseBrazil: flag.Language.pt_br,
+    Language.indonesian: flag.Language.id,
   };
 
   String get human => _humanNames[this]!;

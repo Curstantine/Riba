@@ -6,6 +6,7 @@ import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:meta/meta.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 
@@ -32,19 +33,30 @@ abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalData
     rateLimiter.rates.addAll(rates);
   }
 
+  /// Returns a [RuntimeDataType] object from the given [id].
+  ///
+  /// If [checkDB] is true, the database will be checked for the data first.
   Future<RuntimeDataType> get(String id, {bool checkDB = true});
+
+  /// Returns a Map of [RuntimeDataType] accompanied by their [id].
+  ///
+  /// If [checkDB] is true, the database will be checked for the data first.
   Future<Map<String, RuntimeDataType>> getMany({
     required QueryFilterType overrides,
     bool checkDB = true,
+  });
+
+  /// Returns a [CollectionData] of [RuntimeDataType] objects.
+  ///
+  /// This method will always fetch the data from the API.
+  Future<CollectionData<RuntimeDataType>> withFilters({
+    required QueryFilterType overrides,
   });
 
   @visibleForOverriding
   Future<void> insertMeta(InternalDataType data);
   @visibleForOverriding
   Future<RuntimeDataType> collectMeta(LocalType single);
-
-  MangaDexService<DexType, LocalType, RuntimeDataType, InternalDataType, QueryFilterType>
-      get instance;
 }
 
 abstract class MangaDexQueryFilter {
@@ -57,25 +69,14 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
   final int? limit;
   final int? offset;
 
-  MangaDexGenericQueryFilter({this.includes, this.limit, this.offset, this.ids});
+  MangaDexGenericQueryFilter({this.ids, this.includes, this.limit, this.offset});
 
   @override
   URL addFiltersToUrl(URL url) {
-    if (ids != null) {
-      url.setParameter("ids[]", ids);
-    }
-
-    if (includes != null) {
-      url.setParameter("includes[]", includes!.map((e) => e.toJsonValue()).toList());
-    }
-
-    if (limit != null) {
-      url.setParameter("limit", limit);
-    }
-
-    if (offset != null) {
-      url.setParameter("offset", offset);
-    }
+    if (ids != null) url.setParameter("ids[]", ids);
+    if (includes != null) url.setParameter("includes[]", includes);
+    if (limit != null) url.setParameter("limit", limit);
+    if (offset != null) url.setParameter("offset", offset);
 
     return url;
   }
@@ -90,6 +91,6 @@ class MangaDexGenericQueryFilter extends MangaDexQueryFilter {
   }
 
   @override
-  String toString() => "MangaDexGenericQueryFilter(ids: $ids, includes: $includes,"
-      " limit: $limit, offset: $offset)";
+  String toString() =>
+      "MangaDexGenericQueryFilter(includes: $includes, limit: $limit, offset: $offset)";
 }

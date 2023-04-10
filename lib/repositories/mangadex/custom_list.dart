@@ -4,10 +4,10 @@ import "dart:convert";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/custom_list.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/mangadex/models/custom_list.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
@@ -41,11 +41,8 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
   );
 
   @override
-  MangaDexCustomListService get instance => MangaDex.instance.customList;
-
-  @override
-  Future<CustomListData> get(String id, {bool checkDB = true}) async {
-    logger.info("get($id, checkDB: $checkDB)");
+  Future<CustomListData> get(String id, {checkDB = true}) async {
+    logger.info("get($id, $checkDB)");
 
     if (checkDB) {
       final inDB = await database.customLists.get(fastHash(id));
@@ -53,22 +50,25 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
     }
 
     await rateLimiter.wait("/list:GET");
-    final reqUrl = baseUrl.addPathSegment(id).setParameter("includes[]", defaultFilters.includes);
+    final reqUrl = defaultFilters.addFiltersToUrl(baseUrl.copy().addPathSegment(id));
     final request = await client.get(reqUrl.toUri());
-
     final response = CustomListEntity.fromMap(jsonDecode(request.body), url: reqUrl);
+
     final listData = response.data.toCustomListData();
-    await insertMeta(listData);
+    await database.writeTxn(() => insertMeta(listData));
 
     return listData;
   }
 
   @override
-  Future<Map<String, CustomListData>> getMany({
-    required MangaDexCustomListQueryFilter overrides,
-    bool checkDB = true,
-  }) {
+  Future<Map<String, CustomListData>> getMany({required overrides, checkDB = true}) {
     // TODO: implement getMany
+    throw UnimplementedError();
+  }
+
+  @override
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<CollectionData<CustomListData>> withFilters({required overrides}) {
     throw UnimplementedError();
   }
 
@@ -76,10 +76,10 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
 
   @override
   Future<void> insertMeta(CustomListData data) async {
-    await database.writeTxn(() async {
-      await database.customLists.put(data.list);
-      await database.users.put(data.user);
-    });
+    await Future.wait([
+      database.customLists.put(data.list),
+      database.users.put(data.user),
+    ]);
   }
 
   @override

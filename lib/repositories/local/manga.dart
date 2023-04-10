@@ -19,12 +19,22 @@ class Manga {
   late Localizations titles;
   late Localizations description;
   late List<Localizations> altTitles;
+
+  @Index(type: IndexType.hashElements)
   late List<String> authorIds;
+
+  @Index(type: IndexType.hashElements)
   late List<String> artistIds;
+
+  @Index(type: IndexType.hashElements)
   late List<String> tagsIds;
+
   late String? usedCoverId;
-  late Locale originalLocale;
+
   late int version;
+
+  @Enumerated(EnumType.ordinal)
+  late Language originalLanguage;
 
   @Enumerated(EnumType.ordinal)
   late MangaStatus status;
@@ -44,7 +54,7 @@ class Manga {
     required this.artistIds,
     required this.tagsIds,
     required this.usedCoverId,
-    required this.originalLocale,
+    required this.originalLanguage,
     required this.version,
     required this.status,
     required this.publicationDemographic,

@@ -7,11 +7,11 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/mangadex/models/cover_art.dart";
 import "package:riba/repositories/mangadex/models/error.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/utils/exception.dart";
@@ -51,11 +51,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
       EntityType.user,
     ],
     orderByVolumeDesc: true,
-    limit: 100,
   );
-
-  @override
-  MangaDexCoverService get instance => MangaDex.instance.cover;
 
   @override
   @Deprecated("Will not be implemented, used as a stub for the interface.")
@@ -64,43 +60,25 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
   }
 
   @override
-  Future<Map<String, CoverArtData>> getMany({
-    required MangaDexCoverQueryFilter overrides,
-    bool checkDB = true,
-  }) async {
+  Future<Map<String, CoverArtData>> getMany({required overrides, checkDB = true}) async {
     logger.info("getMany($overrides, $checkDB)");
 
-    assert(
-        (overrides.ids != null || overrides.mangaId != null) &&
-            !(overrides.ids != null && overrides.mangaId != null),
-        "Either ids or mangaId must be specified. Not both or none.");
+    assert(overrides.ids != null, "This method requires the ids to be populated");
 
-    final filters = defaultFilters.copyWith(overrides);
-    if (filters.ids != null && filters.orderByVolumeDesc == true) {
-      logger.warning("orderByVolumeDesc is not supported when using ids, ignoring it.");
-    }
+    final filters = defaultFilters.copyWithSelf(overrides);
+    final ids = filters.ids!;
+    final locales = filters.locales ?? [];
+    final orderByVolDesc = filters.orderByVolumeDesc == true;
 
-    final ids = filters.ids ?? [];
-    final Map<String, CoverArtData?> mapped = {for (final e in ids) e: null};
+    final mapped = <String, CoverArtData?>{for (final e in ids) e: null};
 
-    if (checkDB && filters.ids != null) {
-      final inDB = await database.covers.getAll(ids.map((e) => fastHash(e)).toList());
-
-      for (final cover in inDB) {
-        if (cover == null) continue;
-        mapped[cover.id] = await collectMeta(cover);
-      }
-    }
-
-    if (checkDB && filters.mangaId != null) {
-      final orderByVolumeDesc = filters.orderByVolumeDesc == false;
-
+    if (checkDB) {
       final inDB = await database.covers
           .where()
-          .mangaIdEqualTo(filters.mangaId!)
+          .anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
           .filter()
-          .locale((q) => q.anyOf(filters.locales ?? <Locale>[], (q, e) => q.codeEqualTo(e.code)))
-          .optional(orderByVolumeDesc, (q) => q.sortByVolumeDesc())
+          .locale((q) => q.allOf(locales, (q, e) => q.codeEqualTo(e.code)))
+          .optional(orderByVolDesc, (q) => q.sortByMangaId().thenByVolumeDesc())
           .findAll();
 
       for (final cover in inDB) {
@@ -109,26 +87,22 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty && mapped.isNotEmpty) return mapped.cast();
+    if (missing.isEmpty) return mapped.cast<String, CoverArtData>();
 
     final block = Enumerate<String, CoverArtData>(
-      perStep: filters.limit ?? 100,
       items: missing,
+      perStep: filters.limit,
       onStep: (resolved) async {
         await rateLimiter.wait("/cover:GET");
 
-        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
+        final tempFilter = filters.copyWith(ids: resolved.keys.toList());
+        final reqUrl = tempFilter.addFiltersToUrl(baseUrl.copy());
         final request = await client.get(reqUrl.toUri());
-        final response = CoverArtCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+        final response = CoverArtCollection.fromMap(jsonDecode(request.body));
 
-        for (final data in response.data) {
-          try {
-            final cover = data.asCoverArtData();
-            insertMeta(cover);
-            resolved[data.id] = cover;
-          } on LanguageNotSupportedException catch (e) {
-            logger.warning(e.toString());
-          }
+        for (final cover in response.data) {
+          final coverData = cover.asCoverArtData();
+          resolved[cover.id] = coverData;
         }
       },
       onMismatch: (missedIds) {
@@ -139,18 +113,82 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
       },
     );
 
-    mapped.addAll(await block.run());
-    return mapped.cast();
+    final res = await block.run();
+    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+    return mapped.cast<String, CoverArtData>()..addAll(res);
+  }
+
+  /// Returns all the [CoverArtData] related to a manga.
+  ///
+  /// This method internally handles pagination.
+  Future<List<CoverArtData>> getManyByMangaId({
+    required MangaDexCoverQueryFilter overrides,
+    bool checkDB = true,
+  }) async {
+    logger.info("getManyByMangaId($overrides, $checkDB)");
+
+    assert(overrides.mangaId != null, "This method requires the mangaId to be set");
+    assert(overrides.offset == 0, "This method does not support pagination, offset must be 0");
+
+    final filters = defaultFilters.copyWithSelf(overrides);
+    final locales = filters.locales ?? [];
+    final orderByVolDesc = filters.orderByVolumeDesc == true;
+
+    if (checkDB) {
+      final inDB = await database.covers
+          .where()
+          .mangaIdEqualTo(filters.mangaId!)
+          .filter()
+          .locale((q) => q.anyOf(locales, (q, e) => q.codeEqualTo(e.code)))
+          .optional(orderByVolDesc, (q) => q.sortByVolumeDesc())
+          .offset(filters.offset)
+          .limit(filters.limit)
+          .findAll();
+
+      if (inDB.isNotEmpty) {
+        final coverFuture = inDB.map(collectMeta).toList();
+        return await Future.wait(coverFuture);
+      }
+    }
+
+    int offset = 0;
+    final covers = <CoverArtData>[];
+
+    while (true) {
+      await rateLimiter.wait("/cover:GET");
+      final reqUrl = filters.copyWith(offset: offset).addFiltersToUrl(baseUrl.copy());
+      final request = await client.get(reqUrl.toUri());
+      final response = CoverArtCollection.fromMap(jsonDecode(request.body));
+
+      for (final cover in response.data) {
+        try {
+          final coverData = cover.asCoverArtData();
+          covers.add(coverData);
+        } on LanguageNotSupportedException catch (e) {
+          logger.warning(e.toString());
+        }
+      }
+
+      if ((response.offset + response.limit) >= response.total) break;
+      offset += response.limit;
+    }
+
+    await database.writeTxn(() => Future.wait(covers.map(insertMeta)));
+    return covers;
+  }
+
+  @override
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<CollectionData<CoverArtData>> withFilters({required overrides}) {
+    throw UnimplementedError();
   }
 
   @override
   Future<void> insertMeta(CoverArtData data) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.covers.put(data.cover),
-        if (data.user != null) database.users.put(data.user!),
-      ]);
-    });
+    await Future.wait([
+      database.covers.put(data.cover),
+      if (data.user != null) database.users.put(data.user!),
+    ]);
   }
 
   @override
@@ -176,7 +214,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     final file = getFile(mangaId, coverArt.fileId, coverArt.fileType, size, cache);
     if (await file.exists()) return file;
 
-    await rateLimiter.wait("/covers/image:GET");
+    await rateLimiter.wait("/cover/image:GET");
     final fileName = getFileName(coverArt.fileId, size, coverArt.fileType);
     final reqUrl = cdnUrl.copy().addPathSegments([mangaId, fileName]);
 
@@ -249,9 +287,9 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
 class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
   final List<String>? ids;
   final List<EntityType>? includes;
-  final int? limit;
+  final int limit;
+  final int offset;
 
-  /// I don't want to do list filtering though the api supports it.
   final String? mangaId;
   final List<Locale>? locales;
   final bool? orderByVolumeDesc;
@@ -259,7 +297,8 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
   MangaDexCoverQueryFilter({
     this.ids,
     this.includes,
-    this.limit,
+    this.limit = 100,
+    this.offset = 0,
     this.mangaId,
     this.locales,
     this.orderByVolumeDesc,
@@ -288,11 +327,32 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
     return generic.addFiltersToUrl(url);
   }
 
-  MangaDexCoverQueryFilter copyWith(MangaDexCoverQueryFilter other) {
+  MangaDexCoverQueryFilter copyWith({
+    List<String>? ids,
+    List<EntityType>? includes,
+    int? limit,
+    int? offset,
+    String? mangaId,
+    List<Locale>? locales,
+    bool? orderByVolumeDesc,
+  }) {
+    return MangaDexCoverQueryFilter(
+      ids: ids ?? this.ids,
+      includes: includes ?? this.includes,
+      limit: limit ?? this.limit,
+      offset: offset ?? this.offset,
+      mangaId: mangaId ?? this.mangaId,
+      locales: locales ?? this.locales,
+      orderByVolumeDesc: orderByVolumeDesc ?? this.orderByVolumeDesc,
+    );
+  }
+
+  MangaDexCoverQueryFilter copyWithSelf(MangaDexCoverQueryFilter other) {
     return MangaDexCoverQueryFilter(
       ids: other.ids ?? ids,
       includes: other.includes ?? includes,
-      limit: other.limit ?? limit,
+      limit: other.limit,
+      offset: other.offset,
       mangaId: other.mangaId ?? mangaId,
       locales: other.locales ?? locales,
       orderByVolumeDesc: other.orderByVolumeDesc ?? orderByVolumeDesc,
@@ -301,7 +361,6 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
 
   @override
   String toString() {
-    return "MangaDexCoverQueryFilter(ids: $ids, includes: $includes, limit: $limit,"
-        " mangaId: $mangaId, locales: $locales, orderByVolumeDesc: $orderByVolumeDesc)";
+    return "MangaDexCoverQueryFilter(ids: $ids, includes: $includes, limit: $limit, offset: $offset, mangaId: $mangaId, locales: $locales, orderByVolumeDesc: $orderByVolumeDesc)";
   }
 }

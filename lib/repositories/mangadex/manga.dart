@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
 
+import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/cover_art.dart";
@@ -8,13 +9,14 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/local/tag.dart";
-import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/statistics.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/repositories/utils/enumerate.dart";
+import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
@@ -43,6 +45,11 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 
   @override
   final defaultFilters = MangaDexMangaQueryFilter(
+    contentRatings: [
+      MangaContentRating.safe,
+      MangaContentRating.suggestive,
+      MangaContentRating.erotica,
+    ],
     includes: [
       EntityType.artist,
       EntityType.author,
@@ -50,9 +57,6 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     ],
     limit: 100,
   );
-
-  @override
-  MangaDexMangaService get instance => MangaDex.instance.manga;
 
   @override
   Future<MangaData> get(String id, {bool checkDB = true}) async {
@@ -64,52 +68,60 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     }
 
     await rateLimiter.wait("/manga:GET");
-    final reqUrl =
-        baseUrl.copy().addPathSegment(id).setParameter("includes[]", defaultFilters.includes);
+    final reqUrl = defaultFilters.addFiltersToUrl(baseUrl.copy().addPathSegment(id));
     final request = await client.get(reqUrl.toUri());
-
     final response = MangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
+
     final internalMangaData = response.data.toInternalMangaData();
-    insertMeta(internalMangaData);
+    await database.writeTxn(() => insertMeta(internalMangaData));
 
     return internalMangaData.toMangaData();
   }
 
   @override
-  Future<Map<String, MangaData>> getMany({
-    required MangaDexMangaQueryFilter overrides,
-    bool checkDB = true,
-  }) async {
+  Future<Map<String, MangaData>> getMany({required overrides, checkDB = true}) async {
     logger.info("getMany($overrides, $checkDB)");
 
-    final ids = overrides.ids ?? [];
-    final filters = defaultFilters.copyWith(overrides);
-    final Map<String, MangaData?> mapped = {for (final e in ids) e: null};
+    assert(
+      overrides.ids != null,
+      "This method requires ids to be populated",
+    );
+
+    final filters = defaultFilters.copyWithSelf(overrides);
+    final ids = filters.ids!;
+    final contentRatings = filters.contentRatings!;
+    final excludedOriginalLangs = filters.excludedOriginalLanguages ?? [];
+
+    final mapped = <String, MangaData?>{for (final e in ids) e: null};
 
     if (checkDB) {
-      final inDB = await database.manga.getAll(ids.map((e) => fastHash(e)).toList());
+      final inDB = await database.manga
+          .where()
+          .anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
+          .filter()
+          .anyOf(contentRatings, (q, e) => q.contentRatingEqualTo(e))
+          .anyOf(excludedOriginalLangs, (q, e) => q.not().originalLanguageEqualTo(e))
+          .findAll();
+
       for (final manga in inDB) {
-        if (manga == null) continue;
         mapped[manga.id] = await collectMeta(manga);
       }
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty) return mapped.cast();
+    if (missing.isEmpty) return mapped.cast<String, MangaData>();
 
-    final block = Enumerate<String, MangaData>(
-      perStep: 100,
+    final block = Enumerate<String, InternalMangaData>(
       items: missing,
+      perStep: defaultFilters.limit,
       onStep: (resolved) async {
-        await rateLimiter.wait("/manga:GET");
-        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
+        final tempFilter = filters.copyWith(ids: resolved.keys.toList());
+        final reqUrl = tempFilter.addFiltersToUrl(baseUrl.copy());
         final request = await client.get(reqUrl.toUri());
         final response = MangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-        for (final data in response.data) {
-          final internalMangaData = data.toInternalMangaData();
-          insertMeta(internalMangaData);
-          resolved[data.id] = internalMangaData.toMangaData();
+        for (final manga in response.data) {
+          resolved[manga.id] = manga.toInternalMangaData();
         }
       },
       onMismatch: (missedIds) {
@@ -120,8 +132,78 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
       },
     );
 
-    mapped.addAll(await block.run());
-    return mapped.cast();
+    final res = await block.run();
+    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+
+    return mapped.cast<String, MangaData>()
+      ..addAll(res.map((k, v) => MapEntry(k, v.toMangaData())));
+  }
+
+  Future<List<MangaData>> getByAuthorOrArtistId({
+    bool checkDB = true,
+    required MangaDexMangaQueryFilter overrides,
+  }) async {
+    logger.info("getByArtistOrAuthorId($overrides, $checkDB)");
+
+    assert(
+      overrides.authorOrArtist != null,
+      "This method requires artistOrAuthorId to be populated",
+    );
+
+    final filters = defaultFilters.copyWithSelf(overrides);
+
+    if (checkDB) {
+      final authorOrArtistId = filters.authorOrArtist!;
+      final excludedOriginalLangs = filters.excludedOriginalLanguages ?? [];
+      final contentRatings = filters.contentRatings ?? [];
+
+      final inDB = await database.manga
+          .where()
+          .artistIdsElementEqualTo(authorOrArtistId)
+          .or()
+          .authorIdsElementEqualTo(authorOrArtistId)
+          .filter()
+          .anyOf(excludedOriginalLangs, (q, e) => q.not().originalLanguageEqualTo(e))
+          .anyOf(contentRatings, (q, e) => q.contentRatingEqualTo(e))
+          .findAll();
+
+      if (inDB.isNotEmpty) {
+        final mangaFuture = inDB.map((e) => collectMeta(e));
+        return await Future.wait(mangaFuture);
+      }
+    }
+
+    int offset = 0;
+    final mango = <InternalMangaData>[];
+
+    while (true) {
+      await rateLimiter.wait("/manga:GET");
+      final tempFilters = filters.copyWith(offset: offset);
+      final reqUrl = tempFilters.addFiltersToUrl(baseUrl.copy());
+      final request = await client.get(reqUrl.toUri());
+      final response = MangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+
+      for (final manga in response.data) {
+        try {
+          mango.add(manga.toInternalMangaData());
+        } on LanguageNotSupportedException catch (e) {
+          logger.warning(e);
+        }
+      }
+
+      if ((response.offset + response.limit) >= response.total) break;
+      offset += response.limit;
+    }
+
+    await database.writeTxn(() => Future.wait(mango.map(insertMeta)));
+    return mango.map((e) => e.toMangaData()).toList();
+  }
+
+  @override
+  @Deprecated(
+      "Will not be implemented, used as a stub for the interface. Use the respective sub methods instead.")
+  Future<CollectionData<MangaData>> withFilters({required overrides}) {
+    throw UnimplementedError();
   }
 
   Future<Statistics> getStatistics(String id, {bool checkDB = true}) async {
@@ -143,21 +225,19 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     );
 
     final statistic = response.statistics[id]!.toStatistics();
-    database.writeTxn(() async => await database.statistics.put(statistic));
+    await database.writeTxn(() => database.statistics.put(statistic));
 
     return statistic;
   }
 
   @override
   Future<void> insertMeta(InternalMangaData data) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.authors.putAll(data.authors + data.artists),
-        database.covers.putAll(data.covers),
-        database.tags.putAll(data.tags),
-        database.manga.put(data.manga),
-      ]);
-    });
+    await Future.wait([
+      database.authors.putAll(data.authors + data.artists),
+      database.covers.putAll(data.covers),
+      database.tags.putAll(data.tags),
+      database.manga.put(data.manga),
+    ]);
   }
 
   @override
@@ -184,33 +264,33 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
   final List<String>? ids;
   final List<EntityType>? includes;
-  final int? limit;
-  final int? offset;
+  final int limit;
+  final int offset;
 
   final String? title;
-  final List<String>? authorIds;
-  final List<String>? artistIds;
+  final String? authorId;
+  final String? artistId;
+  final String? authorOrArtist;
 
   final List<MangaStatus>? statuses;
   final List<MangaContentRating>? contentRatings;
   final List<MangaPublicationDemographic>? publicationDemographics;
 
-  final List<Language>? originalLanguages;
   final List<Language>? excludedOriginalLanguages;
   final List<Language>? availableTranslatedLanguages;
 
   MangaDexMangaQueryFilter({
     this.ids,
     this.includes,
-    this.limit,
-    this.offset,
+    this.limit = 100,
+    this.offset = 0,
     this.title,
-    this.authorIds,
-    this.artistIds,
+    this.authorId,
+    this.artistId,
+    this.authorOrArtist,
     this.statuses,
     this.contentRatings,
     this.publicationDemographics,
-    this.originalLanguages,
     this.excludedOriginalLanguages,
     this.availableTranslatedLanguages,
   });
@@ -218,17 +298,14 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
   @override
   URL addFiltersToUrl(URL url) {
     if (title != null) url.setParameter("title", title);
-    if (authorIds != null) url.setParameter("authors[]", authorIds);
-    if (artistIds != null) url.setParameter("artists[]", artistIds);
+    if (authorId != null) url.setParameter("authors[]", authorId);
+    if (artistId != null) url.setParameter("artists[]", artistId);
+    if (authorOrArtist != null) url.setParameter("authorOrArtist", authorOrArtist);
     if (statuses != null) url.setParameter("status[]", statuses);
     if (contentRatings != null) url.setParameter("contentRating[]", contentRatings);
 
     if (publicationDemographics != null) {
       url.setParameter("publicationDemographic[]", publicationDemographics);
-    }
-
-    if (originalLanguages != null) {
-      url.setParameter("originalLanguage[]", originalLanguages);
     }
 
     if (excludedOriginalLanguages != null) {
@@ -249,19 +326,52 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
     return generic.addFiltersToUrl(url);
   }
 
-  MangaDexMangaQueryFilter copyWith(MangaDexMangaQueryFilter other) {
+  MangaDexMangaQueryFilter copyWith({
+    List<String>? ids,
+    List<EntityType>? includes,
+    int? limit,
+    int? offset,
+    String? title,
+    String? authorId,
+    String? artistId,
+    String? artistOrAuthorId,
+    List<MangaStatus>? statuses,
+    List<MangaContentRating>? contentRatings,
+    List<MangaPublicationDemographic>? publicationDemographics,
+    List<Language>? excludedOriginalLanguages,
+    List<Language>? availableTranslatedLanguages,
+  }) {
+    return MangaDexMangaQueryFilter(
+      ids: ids ?? this.ids,
+      includes: includes ?? this.includes,
+      limit: limit ?? this.limit,
+      offset: offset ?? this.offset,
+      title: title ?? this.title,
+      authorId: authorId ?? this.authorId,
+      artistId: artistId ?? this.artistId,
+      authorOrArtist: artistOrAuthorId ?? authorOrArtist,
+      statuses: statuses ?? this.statuses,
+      contentRatings: contentRatings ?? this.contentRatings,
+      publicationDemographics: publicationDemographics ?? this.publicationDemographics,
+      excludedOriginalLanguages: excludedOriginalLanguages ?? this.excludedOriginalLanguages,
+      availableTranslatedLanguages:
+          availableTranslatedLanguages ?? this.availableTranslatedLanguages,
+    );
+  }
+
+  MangaDexMangaQueryFilter copyWithSelf(MangaDexMangaQueryFilter other) {
     return MangaDexMangaQueryFilter(
       ids: other.ids ?? ids,
       includes: other.includes ?? includes,
-      limit: other.limit ?? limit,
-      offset: other.offset ?? offset,
+      limit: other.limit,
+      offset: other.offset,
       title: other.title ?? title,
-      authorIds: other.authorIds ?? authorIds,
-      artistIds: other.artistIds ?? artistIds,
+      authorId: other.authorId ?? authorId,
+      artistId: other.artistId ?? artistId,
+      authorOrArtist: other.authorOrArtist ?? authorOrArtist,
       statuses: other.statuses ?? statuses,
       contentRatings: other.contentRatings ?? contentRatings,
       publicationDemographics: other.publicationDemographics ?? publicationDemographics,
-      originalLanguages: other.originalLanguages ?? originalLanguages,
       excludedOriginalLanguages: other.excludedOriginalLanguages ?? excludedOriginalLanguages,
       availableTranslatedLanguages:
           other.availableTranslatedLanguages ?? availableTranslatedLanguages,

@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
 
 import "package:isar/isar.dart";
@@ -6,12 +7,11 @@ import "package:riba/repositories/local/chapter.dart";
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/mangadex/models/chapter.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/chapter.dart";
-import "package:riba/repositories/utils/enumerate.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
@@ -32,6 +32,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
   @override
   final rates = {
     "/chapter:GET": const Rate(4, Duration(seconds: 1)),
+    "/manga/feed:GET": const Rate(2, Duration(seconds: 1)),
   };
 
   @override
@@ -45,111 +46,72 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
       EntityType.scanlationGroup,
     ],
     orderByChapterDesc: true,
-    limit: 100,
   );
 
   @override
-  MangaDexChapterService get instance => MangaDex.instance.chapter;
-
-  @override
-  @Deprecated("Will not be implemented, used as a stub for the interface.")
-  Future<ChapterData> get(String id, {bool checkDB = true}) {
+  Future<ChapterData> get(String id, {checkDB = true}) {
+    // TODO: implement get
     throw UnimplementedError();
   }
 
-  /// Gets a list of chapters from MangaDex.
   @override
-  Future<Map<String, ChapterData>> getMany({
-    required MangaDexChapterQueryFilter overrides,
-    bool checkDB = true,
-  }) async {
-    logger.info("getMany($overrides, $checkDB)");
-
-    assert(
-        (overrides.ids != null || overrides.mangaId != null) &&
-            !(overrides.ids != null && overrides.mangaId != null),
-        "Either ids or mangaId must be specified. Not both or none.");
-
-    final filters = defaultFilters.copyWith(overrides);
-    if (filters.ids != null && filters.orderByChapterDesc == true) {
-      logger.warning("orderByChapterDesc is not supported when using ids, ignoring it.");
-    }
-
-    final ids = filters.ids ?? [];
-    final Map<String, ChapterData?> mapped = {for (final e in ids) e: null};
-
-    if (checkDB && filters.ids != null) {
-      final inDB = await database.chapters.getAll(ids.map((e) => fastHash(e)).toList());
-
-      for (final cover in inDB) {
-        if (cover == null) continue;
-        mapped[cover.id] = await collectMeta(cover);
-      }
-    }
-
-    // TODO: Implement the excludedGroupIds filter.
-    if (checkDB && filters.mangaId != null) {
-      final translatedLangs = filters.translatedLanguages ?? <Language>[];
-      final orderChapterByDesc = filters.orderByChapterDesc == true;
-      final inDB = await database.chapters
-          .where()
-          .mangaIdEqualTo(filters.mangaId!)
-          .filter()
-          .translatedLanguage((q) => q.anyOf(translatedLangs, (q, e) => q.codeEqualTo(e.isoCode)))
-          .optional(orderChapterByDesc, (q) => q.sortByChapterDesc().thenByVolumeDesc())
-          .findAll();
-
-      for (final cover in inDB) {
-        mapped[cover.id] = await collectMeta(cover);
-      }
-    }
-
-    final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty && mapped.isNotEmpty) return mapped.cast();
-
-    final block = Enumerate<String, ChapterData>(
-      perStep: filters.limit ?? 100,
-      items: missing,
-      onStep: (resolved) async {
-        await rateLimiter.wait("/chapter:GET");
-
-        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
-        final request = await client.get(reqUrl.toUri());
-        final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
-
-        for (final data in response.data) {
-          try {
-            final chapter = data.toChapterData();
-            insertMeta(chapter);
-            resolved[data.id] = chapter;
-          } on LanguageNotSupportedException catch (e) {
-            logger.warning(e.toString());
-          }
-        }
-      },
-      onMismatch: (missedIds) {
-        logger.warning("Some entries were not in the response, ignoring them: $missedIds");
-        for (final id in missedIds) {
-          mapped.remove(id);
-        }
-      },
-    );
-
-    mapped.addAll(await block.run());
-    return mapped.cast();
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  Future<Map<String, ChapterData>> getMany({required overrides, checkDB = true}) async {
+    throw UnimplementedError();
   }
 
-  Future<List<ChapterData>> getFeed({
+  /// Returns a list of chapters that match the given filters.
+  ///
+  /// These results are not read from the database, but are always fetched from the MangaDex API.
+  @override
+  Future<CollectionData<ChapterData>> withFilters({required overrides}) async {
+    logger.info("withFilters($overrides)");
+
+    final filters = defaultFilters.copyWithSelf(overrides);
+    await rateLimiter.wait("/chapter:GET");
+
+    final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
+    final request = await client.get(reqUrl.toUri());
+    final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+
+    final chapters = <ChapterData>[];
+    for (final data in response.data) {
+      try {
+        final chapter = data.toChapterData();
+        chapters.add(chapter);
+      } on LanguageNotSupportedException catch (e) {
+        logger.warning(e.toString());
+      }
+    }
+
+    await database.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+
+    return CollectionData(
+      data: chapters,
+      offset: response.offset,
+      limit: response.limit,
+      total: response.total,
+    );
+  }
+
+  /// Returns a list of chapters related to the given manga.
+  ///
+  /// This method does not handle pagination internally,
+  /// instead provide the offset (lastRequest.data.length) and limit (lastRequest.limit)
+  /// when calling this method.
+  Future<CollectionData<ChapterData>> getFeed({
     required MangaDexChapterQueryFilter overrides,
     bool checkDB = true,
   }) async {
     logger.info("getFeed($overrides, $checkDB)");
     assert(overrides.mangaId != null, "Manga ID must be specified");
 
-    final filters = defaultFilters.copyWith(overrides);
-    final mangaId = filters.mangaId!;
+    // Manga ID in the filter should be ignored, since id is part of the path segments.
+    final filters = defaultFilters.copyWithSelf(overrides)..mangaId = null;
+    final mangaId = overrides.mangaId!;
     final excludedGroups = filters.excludedGroups ?? [];
-    final translatedLanguages = filters.translatedLanguages ?? [];
+    final translatedLangs = filters.translatedLanguages ?? [];
+    final orderByChapterDesc = filters.orderByChapterDesc;
 
     if (checkDB) {
       final inDB = await database.chapters
@@ -157,24 +119,25 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
           .mangaIdEqualTo(mangaId)
           .filter()
           .group((q) => q.anyOf(excludedGroups, (q, e) => q.not().groupIdsElementContains(e)))
-          .translatedLanguage(
-              (q) => q.anyOf(translatedLanguages, (q, e) => q.codeEqualTo(e.isoCode)))
+          .anyOf(translatedLangs, (q, e) => q.translatedLanguageEqualTo(e))
+          .optional(orderByChapterDesc == true, (q) => q.sortByVolumeDesc().thenByChapterDesc())
           .findAll();
 
-      if (filters.orderByChapterDesc == true) inDB.sortAsDescending();
-
       if (inDB.isNotEmpty) {
-        final chapterFuture = <Future<ChapterData>>[];
-        for (final chapter in inDB) {
-          chapterFuture.add(collectMeta(chapter));
-        }
+        final chapterFuture = database.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
 
-        return await Future.wait(chapterFuture);
+        return CollectionData(
+          data: await chapterFuture,
+          offset: filters.offset,
+          limit: filters.limit,
+          total: -1,
+        );
       }
     }
 
-    await rateLimiter.wait("/manga:GET");
-    final reqUrl = filters.addFiltersToUrl(mangaUrl.copy().addPathSegments([mangaId, "feed"]));
+    await rateLimiter.wait("/manga/feed:GET");
+    final tempBaseUrl = mangaUrl.copy().addPathSegments([mangaId, "feed"]);
+    final reqUrl = filters.addFiltersToUrl(tempBaseUrl);
     final request = await client.get(reqUrl.toUri());
     final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
@@ -182,25 +145,28 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
     for (final data in response.data) {
       try {
         final chapterData = data.toChapterData();
-        insertMeta(chapterData);
         chapters.add(chapterData);
       } on LanguageNotSupportedException catch (e) {
         logger.warning(e.toString());
       }
     }
 
-    return chapters;
+    await database.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+    return CollectionData(
+      data: chapters,
+      offset: response.offset,
+      limit: response.limit,
+      total: response.total,
+    );
   }
 
   @override
   Future<void> insertMeta(ChapterData data) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.chapters.put(data.chapter),
-        database.groups.putAll(data.groups),
-        database.users.put(data.uploader),
-      ]);
-    });
+    await Future.wait([
+      database.chapters.put(data.chapter),
+      database.groups.putAll(data.groups),
+      database.users.put(data.uploader),
+    ]);
   }
 
   @override
@@ -221,9 +187,10 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
 class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
   final List<String>? ids;
   final List<EntityType>? includes;
-  final int? limit;
+  final int limit;
+  final int offset;
 
-  final String? mangaId;
+  String? mangaId;
   final bool? orderByChapterDesc;
   final List<Language>? translatedLanguages;
   final List<String>? excludedGroups;
@@ -231,7 +198,8 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
   MangaDexChapterQueryFilter({
     this.ids,
     this.includes,
-    this.limit,
+    this.offset = 0,
+    this.limit = 100,
     this.mangaId,
     this.orderByChapterDesc,
     this.translatedLanguages,
@@ -260,25 +228,49 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
       ids: ids,
       includes: includes,
       limit: limit,
+      offset: offset,
     );
 
     return generic.addFiltersToUrl(url);
   }
 
-  MangaDexChapterQueryFilter copyWith(MangaDexChapterQueryFilter other) {
+  MangaDexChapterQueryFilter copyWith({
+    List<String>? ids,
+    List<EntityType>? includes,
+    int? limit,
+    int? offset,
+    String? mangaId,
+    bool? orderByChapterDesc,
+    List<Language>? translatedLanguages,
+    List<String>? excludedGroups,
+  }) {
+    return MangaDexChapterQueryFilter(
+      ids: ids ?? this.ids,
+      includes: includes ?? this.includes,
+      limit: limit ?? this.limit,
+      offset: offset ?? this.offset,
+      mangaId: mangaId ?? this.mangaId,
+      orderByChapterDesc: orderByChapterDesc ?? this.orderByChapterDesc,
+      translatedLanguages: translatedLanguages ?? this.translatedLanguages,
+      excludedGroups: excludedGroups ?? this.excludedGroups,
+    );
+  }
+
+  MangaDexChapterQueryFilter copyWithSelf(MangaDexChapterQueryFilter other) {
     return MangaDexChapterQueryFilter(
       ids: other.ids ?? ids,
       includes: other.includes ?? includes,
-      limit: other.limit ?? limit,
+      limit: other.limit,
+      offset: other.offset,
       mangaId: other.mangaId ?? mangaId,
       orderByChapterDesc: other.orderByChapterDesc ?? orderByChapterDesc,
+      translatedLanguages: other.translatedLanguages ?? translatedLanguages,
+      excludedGroups: other.excludedGroups ?? excludedGroups,
     );
   }
 
   @override
   String toString() {
-    return "MangaDexChapterQueryFilter("
-        "ids: $ids, includes: $includes, limit: $limit,"
-        "orderByChapterDesc: $orderByChapterDesc, mangaId: $mangaId)";
+    return "MangaDexChapterQueryFilter(ids: $ids, includes: $includes, limit: $limit, offset: $offset, mangaId: $mangaId, orderByChapterDesc: $orderByChapterDesc, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups)";
   }
 }

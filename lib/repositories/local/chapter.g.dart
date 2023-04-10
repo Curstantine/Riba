@@ -70,8 +70,8 @@ const ChapterSchema = CollectionSchema(
     r"translatedLanguage": PropertySchema(
       id: 10,
       name: r"translatedLanguage",
-      type: IsarType.object,
-      target: r"Locale",
+      type: IsarType.byte,
+      enumMap: _ChaptertranslatedLanguageEnumValueMap,
     ),
     r"updatedAt": PropertySchema(
       id: 11,
@@ -134,14 +134,14 @@ const ChapterSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r"groupIds",
-          type: IndexType.hash,
+          type: IndexType.hashElements,
           caseSensitive: true,
         )
       ],
     )
   },
   links: {},
-  embeddedSchemas: {r"Locale": LocaleSchema},
+  embeddedSchemas: {},
   getId: _chapterGetId,
   getLinks: _chapterGetLinks,
   attach: _chapterAttach,
@@ -181,9 +181,6 @@ int _chapterEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  bytesCount += 3 +
-      LocaleSchema.estimateSize(
-          object.translatedLanguage, allOffsets[Locale]!, allOffsets);
   bytesCount += 3 + object.uploaderId.length * 3;
   {
     final value = object.volume;
@@ -210,12 +207,7 @@ void _chapterSerialize(
   writer.writeDateTime(offsets[7], object.publishAt);
   writer.writeDateTime(offsets[8], object.readableAt);
   writer.writeString(offsets[9], object.title);
-  writer.writeObject<Locale>(
-    offsets[10],
-    allOffsets,
-    LocaleSchema.serialize,
-    object.translatedLanguage,
-  );
+  writer.writeByte(offsets[10], object.translatedLanguage.index);
   writer.writeDateTime(offsets[11], object.updatedAt);
   writer.writeString(offsets[12], object.uploaderId);
   writer.writeLong(offsets[13], object.version);
@@ -239,12 +231,9 @@ Chapter _chapterDeserialize(
     publishAt: reader.readDateTime(offsets[7]),
     readableAt: reader.readDateTime(offsets[8]),
     title: reader.readStringOrNull(offsets[9]),
-    translatedLanguage: reader.readObjectOrNull<Locale>(
-          offsets[10],
-          LocaleSchema.deserialize,
-          allOffsets,
-        ) ??
-        Locale(),
+    translatedLanguage: _ChaptertranslatedLanguageValueEnumMap[
+            reader.readByteOrNull(offsets[10])] ??
+        Language.none,
     updatedAt: reader.readDateTime(offsets[11]),
     uploaderId: reader.readString(offsets[12]),
     version: reader.readLong(offsets[13]),
@@ -281,12 +270,9 @@ P _chapterDeserializeProp<P>(
     case 9:
       return (reader.readStringOrNull(offset)) as P;
     case 10:
-      return (reader.readObjectOrNull<Locale>(
-            offset,
-            LocaleSchema.deserialize,
-            allOffsets,
-          ) ??
-          Locale()) as P;
+      return (_ChaptertranslatedLanguageValueEnumMap[
+              reader.readByteOrNull(offset)] ??
+          Language.none) as P;
     case 11:
       return (reader.readDateTime(offset)) as P;
     case 12:
@@ -299,6 +285,25 @@ P _chapterDeserializeProp<P>(
       throw IsarError("Unknown property with id $propertyId");
   }
 }
+
+const _ChaptertranslatedLanguageEnumValueMap = {
+  "none": 0,
+  "english": 1,
+  "japanese": 2,
+  "simpleChinese": 3,
+  "traditionalChinese": 4,
+  "korean": 5,
+  "french": 6,
+};
+const _ChaptertranslatedLanguageValueEnumMap = {
+  0: Language.none,
+  1: Language.english,
+  2: Language.japanese,
+  3: Language.simpleChinese,
+  4: Language.traditionalChinese,
+  5: Language.korean,
+  6: Language.french,
+};
 
 Id _chapterGetId(Chapter object) {
   return object.isarId;
@@ -475,30 +480,30 @@ extension ChapterQueryWhere on QueryBuilder<Chapter, Chapter, QWhereClause> {
     });
   }
 
-  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsEqualTo(
-      List<String> groupIds) {
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsElementEqualTo(
+      String groupIdsElement) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r"groupIds",
-        value: [groupIds],
+        value: [groupIdsElement],
       ));
     });
   }
 
-  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsNotEqualTo(
-      List<String> groupIds) {
+  QueryBuilder<Chapter, Chapter, QAfterWhereClause> groupIdsElementNotEqualTo(
+      String groupIdsElement) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
               indexName: r"groupIds",
               lower: [],
-              upper: [groupIds],
+              upper: [groupIdsElement],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
               indexName: r"groupIds",
-              lower: [groupIds],
+              lower: [groupIdsElement],
               includeLower: false,
               upper: [],
             ));
@@ -506,14 +511,14 @@ extension ChapterQueryWhere on QueryBuilder<Chapter, Chapter, QWhereClause> {
         return query
             .addWhereClause(IndexWhereClause.between(
               indexName: r"groupIds",
-              lower: [groupIds],
+              lower: [groupIdsElement],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
               indexName: r"groupIds",
               lower: [],
-              upper: [groupIds],
+              upper: [groupIdsElement],
               includeUpper: false,
             ));
       }
@@ -1705,6 +1710,62 @@ extension ChapterQueryFilter
     });
   }
 
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition>
+      translatedLanguageEqualTo(Language value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"translatedLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition>
+      translatedLanguageGreaterThan(
+    Language value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"translatedLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition>
+      translatedLanguageLessThan(
+    Language value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"translatedLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition>
+      translatedLanguageBetween(
+    Language lower,
+    Language upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"translatedLanguage",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Chapter, Chapter, QAfterFilterCondition> updatedAtEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -2089,14 +2150,7 @@ extension ChapterQueryFilter
 }
 
 extension ChapterQueryObject
-    on QueryBuilder<Chapter, Chapter, QFilterCondition> {
-  QueryBuilder<Chapter, Chapter, QAfterFilterCondition> translatedLanguage(
-      FilterQuery<Locale> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"translatedLanguage");
-    });
-  }
-}
+    on QueryBuilder<Chapter, Chapter, QFilterCondition> {}
 
 extension ChapterQueryLinks
     on QueryBuilder<Chapter, Chapter, QFilterCondition> {}
@@ -2207,6 +2261,18 @@ extension ChapterQuerySortBy on QueryBuilder<Chapter, Chapter, QSortBy> {
   QueryBuilder<Chapter, Chapter, QAfterSortBy> sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"title", Sort.desc);
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterSortBy> sortByTranslatedLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"translatedLanguage", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterSortBy> sortByTranslatedLanguageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"translatedLanguage", Sort.desc);
     });
   }
 
@@ -2381,6 +2447,18 @@ extension ChapterQuerySortThenBy
     });
   }
 
+  QueryBuilder<Chapter, Chapter, QAfterSortBy> thenByTranslatedLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"translatedLanguage", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterSortBy> thenByTranslatedLanguageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"translatedLanguage", Sort.desc);
+    });
+  }
+
   QueryBuilder<Chapter, Chapter, QAfterSortBy> thenByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"updatedAt", Sort.asc);
@@ -2497,6 +2575,12 @@ extension ChapterQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Chapter, Chapter, QDistinct> distinctByTranslatedLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"translatedLanguage");
+    });
+  }
+
   QueryBuilder<Chapter, Chapter, QDistinct> distinctByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"updatedAt");
@@ -2592,7 +2676,8 @@ extension ChapterQueryProperty
     });
   }
 
-  QueryBuilder<Chapter, Locale, QQueryOperations> translatedLanguageProperty() {
+  QueryBuilder<Chapter, Language, QQueryOperations>
+      translatedLanguageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"translatedLanguage");
     });

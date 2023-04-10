@@ -2,6 +2,7 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/repositories/utils/exception.dart";
 
 import "author.dart";
 import "cover_art.dart";
@@ -128,6 +129,9 @@ enum MangaContentRating implements TwoWayEnumSerde {
 }
 
 extension ToManga on MDResponseData<MangaAttributes> {
+  /// Converts the response data into a [Manga] object.
+  ///
+  /// Will throw a [LanguageNotSupportedException] if the [Manga.originalLanguage] is not supported.
   Manga toManga({String? usedCoverId}) {
     final String usedCover = relationships
         .ofType<CoverArtAttributes>(EntityType.coverArt)
@@ -143,7 +147,7 @@ extension ToManga on MDResponseData<MangaAttributes> {
       artistIds: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
       usedCoverId: usedCover.isEmpty ? null : usedCover,
       tagsIds: attributes.tags.map((e) => e.id).toList(),
-      originalLocale: Locale.fromJsonValue(attributes.originalLanguage),
+      originalLanguage: Language.fromIsoCode(attributes.originalLanguage),
       contentRating: attributes.contentRating,
       publicationDemographic:
           attributes.publicationDemographic ?? MangaPublicationDemographic.unknown,
@@ -152,6 +156,9 @@ extension ToManga on MDResponseData<MangaAttributes> {
     );
   }
 
+  /// Converts the response data into a [Manga] object.
+  ///
+  /// Will throw a [LanguageNotSupportedException] if the [Manga.originalLanguage] is not supported.
   InternalMangaData toInternalMangaData({String? usedCoverId}) {
     return InternalMangaData(
       manga: toManga(usedCoverId: usedCoverId),

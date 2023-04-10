@@ -78,7 +78,7 @@ extension ToChapter on MDResponseData<ChapterAttributes> {
       volume: attributes.volume,
       chapter: attributes.chapter,
       pages: attributes.pages,
-      translatedLanguage: Locale.fromJsonValue(attributes.translatedLanguage),
+      translatedLanguage: Language.fromIsoCode(attributes.translatedLanguage),
       externalUrl: attributes.externalUrl,
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,

@@ -166,7 +166,7 @@ class _CoverSheetState extends State<CoverSheet> {
           await MangaDex.instance.database.covers.filter().mangaIdEqualTo(manga.id).findAll();
 
       coverDataFuture = MangaDex.instance.cover
-          .getMany(localCovers.map((e) => e.id).toList())
+          .withFilters(localCovers.map((e) => e.id).toList())
           .then((e) => e.values.toList());
     }
 

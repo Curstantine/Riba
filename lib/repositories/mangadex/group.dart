@@ -3,10 +3,10 @@ import "dart:convert";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/user.dart";
-import "package:riba/repositories/mangadex.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/models/group.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/utils/exception.dart";
@@ -40,35 +40,39 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   );
 
   @override
-  MangaDexGroupService get instance => MangaDex.instance.group;
-
-  @override
-  @Deprecated("Will not be implemented, used as a stub for the interface.")
-  Future<GroupData> get(String id, {bool checkDB = true}) => throw UnimplementedError();
-
-  @override
-  Future<Map<String, GroupData>> getMany({
-    required MangaDexGenericQueryFilter overrides,
-    bool checkDB = true,
-  }) {
-    // TODO: implement getMany
+  Future<GroupData> get(String id, {bool checkDB = true}) {
+    // TODO: implement get
     throw UnimplementedError();
   }
 
-  Future<Map<String, Group>> getWithSingleConstraint({
+  @override
+  @Deprecated(
+      "Will not be implemented, used as a stub for the interface. Use getManyAsSingle instead.")
+  Future<Map<String, GroupData>> getMany({required overrides, checkDB = true}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<CollectionData<GroupData>> withFilters({required overrides}) {
+    // TODO: implement withFilters
+    throw UnimplementedError();
+  }
+
+  Future<Map<String, Group>> getManyAsSingle({
     required MangaDexGenericQueryFilter overrides,
     bool checkDB = true,
   }) async {
-    logger.info("getMany($overrides, $checkDB)");
+    logger.info("getManyAsSingle($overrides, $checkDB)");
 
     assert(overrides.ids != null, "This method requires ids to be populated.");
+    assert(overrides.offset != 0, "This method does not support pagination, offset must be 0");
 
     final ids = overrides.ids!;
     final filters = defaultFilters.copyWith(overrides);
     final Map<String, Group?> mapped = {for (final e in ids) e: null};
 
     if (checkDB) {
-      final inDB = await database.groups.getAll(ids.map((e) => fastHash(e)).toList());
+      final inDB = await database.groups.getAll(ids.map(fastHash).toList());
       for (final group in inDB) {
         if (group == null) continue;
         mapped[group.id] = group;
@@ -76,9 +80,9 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
     }
 
     final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty) return mapped.cast();
+    if (missing.isEmpty) return mapped.cast<String, Group>();
 
-    final block = Enumerate<String, Group>(
+    final block = Enumerate<String, GroupData>(
       perStep: 100,
       items: missing,
       onStep: (resolved) async {
@@ -88,9 +92,11 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
         final response = GroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
         for (final data in response.data) {
-          final groupData = data.toGroupData();
-          insertMeta(groupData);
-          resolved[data.id] = groupData.group;
+          try {
+            resolved[data.id] = data.toGroupData();
+          } on LanguageNotSupportedException catch (e) {
+            logger.warning(e.toString());
+          }
         }
       },
       onMismatch: (missedIds) {
@@ -101,18 +107,18 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
       },
     );
 
-    mapped.addAll(await block.run());
-    return mapped.cast();
+    final res = await block.run();
+    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+
+    return mapped.cast<String, Group>()..addAll(res.map((k, v) => MapEntry(k, v.group)));
   }
 
   @override
   Future<void> insertMeta(GroupData data) async {
-    await database.writeTxn(() async {
-      await Future.wait([
-        database.users.putAll(data.users.values.toList()),
-        database.groups.put(data.group),
-      ]);
-    });
+    await Future.wait([
+      database.users.putAll(data.users.values.toList()),
+      database.groups.put(data.group),
+    ]);
   }
 
   /// Collects related data for a group to make a [GroupData] object.

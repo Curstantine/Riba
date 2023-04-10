@@ -50,11 +50,11 @@ const MangaSchema = CollectionSchema(
       name: r"id",
       type: IsarType.string,
     ),
-    r"originalLocale": PropertySchema(
+    r"originalLanguage": PropertySchema(
       id: 6,
-      name: r"originalLocale",
-      type: IsarType.object,
-      target: r"Locale",
+      name: r"originalLanguage",
+      type: IsarType.byte,
+      enumMap: _MangaoriginalLanguageEnumValueMap,
     ),
     r"publicationDemographic": PropertySchema(
       id: 7,
@@ -95,7 +95,47 @@ const MangaSchema = CollectionSchema(
   deserialize: _mangaDeserialize,
   deserializeProp: _mangaDeserializeProp,
   idName: r"isarId",
-  indexes: {},
+  indexes: {
+    r"authorIds": IndexSchema(
+      id: -7996935101339351690,
+      name: r"authorIds",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"authorIds",
+          type: IndexType.hashElements,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r"artistIds": IndexSchema(
+      id: -1867997334466972802,
+      name: r"artistIds",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"artistIds",
+          type: IndexType.hashElements,
+          caseSensitive: true,
+        )
+      ],
+    ),
+    r"tagsIds": IndexSchema(
+      id: -8425780021134725086,
+      name: r"tagsIds",
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r"tagsIds",
+          type: IndexType.hashElements,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {
     r"Localizations": LocalizationsSchema,
@@ -140,9 +180,6 @@ int _mangaEstimateSize(
       LocalizationsSchema.estimateSize(
           object.description, allOffsets[Localizations]!, allOffsets);
   bytesCount += 3 + object.id.length * 3;
-  bytesCount += 3 +
-      LocaleSchema.estimateSize(
-          object.originalLocale, allOffsets[Locale]!, allOffsets);
   bytesCount += 3 + object.tagsIds.length * 3;
   {
     for (var i = 0; i < object.tagsIds.length; i++) {
@@ -184,12 +221,7 @@ void _mangaSerialize(
     object.description,
   );
   writer.writeString(offsets[5], object.id);
-  writer.writeObject<Locale>(
-    offsets[6],
-    allOffsets,
-    LocaleSchema.serialize,
-    object.originalLocale,
-  );
+  writer.writeByte(offsets[6], object.originalLanguage.index);
   writer.writeByte(offsets[7], object.publicationDemographic.index);
   writer.writeByte(offsets[8], object.status.index);
   writer.writeStringList(offsets[9], object.tagsIds);
@@ -229,12 +261,9 @@ Manga _mangaDeserialize(
         ) ??
         Localizations(),
     id: reader.readString(offsets[5]),
-    originalLocale: reader.readObjectOrNull<Locale>(
-          offsets[6],
-          LocaleSchema.deserialize,
-          allOffsets,
-        ) ??
-        Locale(),
+    originalLanguage:
+        _MangaoriginalLanguageValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+            Language.none,
     publicationDemographic: _MangapublicationDemographicValueEnumMap[
             reader.readByteOrNull(offsets[7])] ??
         MangaPublicationDemographic.unknown,
@@ -285,12 +314,9 @@ P _mangaDeserializeProp<P>(
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readObjectOrNull<Locale>(
-            offset,
-            LocaleSchema.deserialize,
-            allOffsets,
-          ) ??
-          Locale()) as P;
+      return (_MangaoriginalLanguageValueEnumMap[
+              reader.readByteOrNull(offset)] ??
+          Language.none) as P;
     case 7:
       return (_MangapublicationDemographicValueEnumMap[
               reader.readByteOrNull(offset)] ??
@@ -327,6 +353,24 @@ const _MangacontentRatingValueEnumMap = {
   1: MangaContentRating.suggestive,
   2: MangaContentRating.erotica,
   3: MangaContentRating.pornographic,
+};
+const _MangaoriginalLanguageEnumValueMap = {
+  "none": 0,
+  "english": 1,
+  "japanese": 2,
+  "simpleChinese": 3,
+  "traditionalChinese": 4,
+  "korean": 5,
+  "french": 6,
+};
+const _MangaoriginalLanguageValueEnumMap = {
+  0: Language.none,
+  1: Language.english,
+  2: Language.japanese,
+  3: Language.simpleChinese,
+  4: Language.traditionalChinese,
+  5: Language.korean,
+  6: Language.french,
 };
 const _MangapublicationDemographicEnumValueMap = {
   "unknown": 0,
@@ -436,6 +480,141 @@ extension MangaQueryWhere on QueryBuilder<Manga, Manga, QWhereClause> {
         upper: upperIsarId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> authorIdsElementEqualTo(
+      String authorIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"authorIds",
+        value: [authorIdsElement],
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> authorIdsElementNotEqualTo(
+      String authorIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"authorIds",
+              lower: [],
+              upper: [authorIdsElement],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"authorIds",
+              lower: [authorIdsElement],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"authorIds",
+              lower: [authorIdsElement],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"authorIds",
+              lower: [],
+              upper: [authorIdsElement],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> artistIdsElementEqualTo(
+      String artistIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"artistIds",
+        value: [artistIdsElement],
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> artistIdsElementNotEqualTo(
+      String artistIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"artistIds",
+              lower: [],
+              upper: [artistIdsElement],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"artistIds",
+              lower: [artistIdsElement],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"artistIds",
+              lower: [artistIdsElement],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"artistIds",
+              lower: [],
+              upper: [artistIdsElement],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> tagsIdsElementEqualTo(
+      String tagsIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r"tagsIds",
+        value: [tagsIdsElement],
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterWhereClause> tagsIdsElementNotEqualTo(
+      String tagsIdsElement) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"tagsIds",
+              lower: [],
+              upper: [tagsIdsElement],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"tagsIds",
+              lower: [tagsIdsElement],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"tagsIds",
+              lower: [tagsIdsElement],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r"tagsIds",
+              lower: [],
+              upper: [tagsIdsElement],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -1188,6 +1367,59 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLanguageEqualTo(
+      Language value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"originalLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLanguageGreaterThan(
+    Language value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"originalLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLanguageLessThan(
+    Language value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"originalLanguage",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLanguageBetween(
+    Language lower,
+    Language upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"originalLanguage",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Manga, Manga, QAfterFilterCondition>
       publicationDemographicEqualTo(MangaPublicationDemographic value) {
     return QueryBuilder.apply(this, (query) {
@@ -1725,13 +1957,6 @@ extension MangaQueryObject on QueryBuilder<Manga, Manga, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Manga, Manga, QAfterFilterCondition> originalLocale(
-      FilterQuery<Locale> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"originalLocale");
-    });
-  }
-
   QueryBuilder<Manga, Manga, QAfterFilterCondition> titles(
       FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
@@ -1764,6 +1989,18 @@ extension MangaQuerySortBy on QueryBuilder<Manga, Manga, QSortBy> {
   QueryBuilder<Manga, Manga, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> sortByOriginalLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"originalLanguage", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> sortByOriginalLanguageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"originalLanguage", Sort.desc);
     });
   }
 
@@ -1853,6 +2090,18 @@ extension MangaQuerySortThenBy on QueryBuilder<Manga, Manga, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Manga, Manga, QAfterSortBy> thenByOriginalLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"originalLanguage", Sort.asc);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QAfterSortBy> thenByOriginalLanguageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"originalLanguage", Sort.desc);
+    });
+  }
+
   QueryBuilder<Manga, Manga, QAfterSortBy> thenByPublicationDemographic() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"publicationDemographic", Sort.asc);
@@ -1925,6 +2174,12 @@ extension MangaQueryWhereDistinct on QueryBuilder<Manga, Manga, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Manga, Manga, QDistinct> distinctByOriginalLanguage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"originalLanguage");
     });
   }
 
@@ -2005,9 +2260,9 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Manga, Locale, QQueryOperations> originalLocaleProperty() {
+  QueryBuilder<Manga, Language, QQueryOperations> originalLanguageProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"originalLocale");
+      return query.addPropertyName(r"originalLanguage");
     });
   }
 

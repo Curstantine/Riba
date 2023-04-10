@@ -130,10 +130,11 @@ const _UserrolesEnumValueMap = {
   "powerUploader": 6,
   "vip": 7,
   "staff": 8,
-  "forumModerator": 9,
-  "globalModerator": 10,
-  "developer": 11,
-  "administrator": 12,
+  "publicRelations": 9,
+  "forumModerator": 10,
+  "globalModerator": 11,
+  "developer": 12,
+  "administrator": 13,
 };
 const _UserrolesValueEnumMap = {
   0: UserRole.user,
@@ -145,10 +146,11 @@ const _UserrolesValueEnumMap = {
   6: UserRole.powerUploader,
   7: UserRole.vip,
   8: UserRole.staff,
-  9: UserRole.forumModerator,
-  10: UserRole.globalModerator,
-  11: UserRole.developer,
-  12: UserRole.administrator,
+  9: UserRole.publicRelations,
+  10: UserRole.forumModerator,
+  11: UserRole.globalModerator,
+  12: UserRole.developer,
+  13: UserRole.administrator,
 };
 
 Id _userGetId(User object) {

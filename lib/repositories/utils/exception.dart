@@ -11,10 +11,11 @@ class MDException implements Exception {
   const MDException(this.response, {this.url});
 
   String get title => response.title;
+  String? get detail => response.detail;
   int get status => response.status;
 
   @override
-  String toString() => "MDException: ${response.title}";
+  String toString() => "MDException: $title (${detail ?? "No detail provided."})";
 }
 
 class LanguageNotSupportedException implements Exception {

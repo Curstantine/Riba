@@ -31,6 +31,7 @@ enum UserRole {
   powerUploader,
   vip,
   staff,
+  publicRelations,
   forumModerator,
   globalModerator,
   developer,
@@ -56,6 +57,8 @@ enum UserRole {
         return "VIP";
       case UserRole.staff:
         return "Staff";
+      case UserRole.publicRelations:
+        return "Public Relations";
       case UserRole.forumModerator:
         return "Forum Moderator";
       case UserRole.globalModerator:
@@ -77,6 +80,7 @@ enum UserRole {
         "ROLE_POWER_UPLOADER": UserRole.powerUploader,
         "ROLE_VIP": UserRole.vip,
         "ROLE_STAFF": UserRole.staff,
+        "ROLE_PUBLIC_RELATIONS": UserRole.publicRelations,
         "ROLE_FORUM_MODERATOR": UserRole.forumModerator,
         "ROLE_GLOBAL_MODERATOR": UserRole.globalModerator,
         "ROLE_DEVELOPER": UserRole.developer,

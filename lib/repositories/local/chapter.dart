@@ -15,7 +15,7 @@ class Chapter {
   @Index()
   late String uploaderId;
 
-  @Index()
+  @Index(type: IndexType.hashElements)
   late List<String> groupIds;
 
   late String? title;
@@ -23,7 +23,6 @@ class Chapter {
   late String? chapter;
 
   late int pages;
-  late Locale translatedLanguage;
   late String? externalUrl;
 
   late DateTime createdAt;
@@ -32,6 +31,9 @@ class Chapter {
   late DateTime readableAt;
 
   late int version;
+
+  @Enumerated(EnumType.ordinal)
+  late Language translatedLanguage;
 
   Chapter({
     required this.id,
