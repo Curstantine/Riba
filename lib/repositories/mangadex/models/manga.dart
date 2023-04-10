@@ -132,11 +132,11 @@ extension ToManga on MDResponseData<MangaAttributes> {
   /// Converts the response data into a [Manga] object.
   ///
   /// Will throw a [LanguageNotSupportedException] if the [Manga.originalLanguage] is not supported.
-  Manga toManga({String? usedCoverId}) {
-    final String usedCover = relationships
-        .ofType<CoverArtAttributes>(EntityType.coverArt)
-        .map((e) => e.id)
-        .firstWhere((e) => usedCoverId != null ? e == usedCoverId : true, orElse: () => "");
+  Manga toManga({String? preferredCoverId}) {
+    final covers = relationships.ofType<CoverArtAttributes>(EntityType.coverArt).map((e) => e.id);
+    final usedCover = preferredCoverId == null
+        ? covers.first
+        : covers.firstWhere((e) => e == preferredCoverId, orElse: () => covers.first);
 
     return Manga(
       id: id,
@@ -145,7 +145,8 @@ extension ToManga on MDResponseData<MangaAttributes> {
       description: Localizations.fromMap(attributes.description),
       authorIds: relationships.ofType(EntityType.author).map((e) => e.id).toList(),
       artistIds: relationships.ofType(EntityType.artist).map((e) => e.id).toList(),
-      usedCoverId: usedCover.isEmpty ? null : usedCover,
+      defaultCoverId: usedCover,
+      preferredCoverId: usedCover != preferredCoverId ? null : preferredCoverId,
       tagsIds: attributes.tags.map((e) => e.id).toList(),
       originalLanguage: Language.fromIsoCode(attributes.originalLanguage),
       contentRating: attributes.contentRating,
@@ -161,7 +162,7 @@ extension ToManga on MDResponseData<MangaAttributes> {
   /// Will throw a [LanguageNotSupportedException] if the [Manga.originalLanguage] is not supported.
   InternalMangaData toInternalMangaData({String? usedCoverId}) {
     return InternalMangaData(
-      manga: toManga(usedCoverId: usedCoverId),
+      manga: toManga(preferredCoverId: usedCoverId),
       authors: relationships
           .ofType<AuthorAttributes>(EntityType.author)
           .map((e) => e.toAuthor())

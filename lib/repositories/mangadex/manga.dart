@@ -242,13 +242,12 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 
   @override
   Future<MangaData> collectMeta(Manga single) async {
+    final usableCoverId = single.preferredCoverId ?? single.defaultCoverId;
     final data = await Future.wait([
       database.authors.getAll(single.artistIds.map((e) => fastHash(e)).toList()),
       database.authors.getAll(single.authorIds.map((e) => fastHash(e)).toList()),
       database.tags.getAll(single.tagsIds.map((e) => fastHash(e)).toList()),
-      single.usedCoverId != null
-          ? database.covers.get(fastHash(single.usedCoverId!))
-          : Future.value(null),
+      usableCoverId == null ? Future.value(null) : database.covers.get(fastHash(usableCoverId)),
     ]);
 
     return MangaData(

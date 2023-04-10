@@ -29,7 +29,11 @@ class Manga {
   @Index(type: IndexType.hashElements)
   late List<String> tagsIds;
 
-  late String? usedCoverId;
+  /// The cover id defaulted by the provider.
+  late String? defaultCoverId;
+
+  /// The cover id preferred by the user.
+  late String? preferredCoverId;
 
   late int version;
 
@@ -53,7 +57,8 @@ class Manga {
     required this.authorIds,
     required this.artistIds,
     required this.tagsIds,
-    required this.usedCoverId,
+    required this.defaultCoverId,
+    required this.preferredCoverId,
     required this.originalLanguage,
     required this.version,
     required this.status,

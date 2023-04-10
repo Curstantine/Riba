@@ -294,6 +294,10 @@ const _ChaptertranslatedLanguageEnumValueMap = {
   "traditionalChinese": 4,
   "korean": 5,
   "french": 6,
+  "russian": 7,
+  "vietnamese": 8,
+  "portugueseBrazil": 9,
+  "indonesian": 10,
 };
 const _ChaptertranslatedLanguageValueEnumMap = {
   0: Language.none,
@@ -303,6 +307,10 @@ const _ChaptertranslatedLanguageValueEnumMap = {
   4: Language.traditionalChinese,
   5: Language.korean,
   6: Language.french,
+  7: Language.russian,
+  8: Language.vietnamese,
+  9: Language.portugueseBrazil,
+  10: Language.indonesian,
 };
 
 Id _chapterGetId(Chapter object) {
