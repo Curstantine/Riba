@@ -5,12 +5,12 @@ import "dart:math";
 import "package:fl_chart/fl_chart.dart";
 import "package:flutter/material.dart";
 import "package:google_fonts/google_fonts.dart";
-import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/cover_art.dart";
+import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/cache.dart";
@@ -157,25 +157,16 @@ class _CoverSheetState extends State<CoverSheet> {
 
   void initialize() async {
     selectedCoverId.value = manga.usedCoverId;
-
-    try {
-      final covers = await MangaDex.instance.cover.getForManga(manga.id);
-      coverDataFuture = Future.value(covers);
-    } catch (e) {
-      final localCovers =
-          await MangaDex.instance.database.covers.filter().mangaIdEqualTo(manga.id).findAll();
-
-      coverDataFuture = MangaDex.instance.cover
-          .withFilters(localCovers.map((e) => e.id).toList())
-          .then((e) => e.values.toList());
-    }
-
-    setState(() => {});
+    reloadData();
   }
 
-  void reloadData() => setState(() {
-        coverDataFuture = MangaDex.instance.cover.getForManga(manga.id);
-      });
+  void reloadData() {
+    setState(() {
+      coverDataFuture = MangaDex.instance.cover.getManyByMangaId(
+        overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
+      );
+    });
+  }
 
   void setUsedCover() async {
     final id = selectedCoverId.value;
@@ -485,6 +476,9 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
       id: ValueNotifier(!widget.data.filter.excludedGroupIds.contains(id))
   };
 
+  late final groupFuture = MangaDex.instance.group
+      .getManyAsSingle(overrides: MangaDexGenericQueryFilter(ids: widget.data.groupIds));
+
   @override
   Widget build(context) {
     final theme = Theme.of(context);
@@ -511,7 +505,7 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
           style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
       const SizedBox(height: Edges.small),
       FutureBuilder(
-        future: MangaDex.instance.group.getSimpleMany(widget.data.groupIds),
+        future: groupFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());

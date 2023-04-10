@@ -12,7 +12,9 @@ import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/local/statistics.dart";
 import "package:riba/repositories/mangadex.dart";
+import "package:riba/repositories/mangadex/chapter.dart";
 import "package:riba/repositories/runtime/chapter.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
@@ -37,7 +39,8 @@ class _MangaViewState extends State<MangaView> {
   final expandedAppBarHeight = 500.0;
   final logger = Logger("MangaView");
   final scrollController = ScrollController();
-  final preferredLocales = [Locale.en, Locale.ja];
+  final preferredLanguages = [Language.english, Language.japanese];
+  final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
   final cacheSettings = CacheSettings.instance;
   final filterSettings = FilterSettings.instance;
 
@@ -49,9 +52,10 @@ class _MangaViewState extends State<MangaView> {
   late Future<Statistics> statisticsFuture;
   late Future<File?> coverFuture;
 
-  late StreamController<List<ChapterData>> chapterStreamController = StreamController.broadcast();
-  Stream<List<ChapterData>> get chapterStream => chapterStreamController.stream;
-  StreamSink<List<ChapterData>> get chapterSink => chapterStreamController.sink;
+  late StreamController<CollectionData<ChapterData>> chapterStreamController =
+      StreamController.broadcast();
+  Stream<CollectionData<ChapterData>> get chapterStream => chapterStreamController.stream;
+  StreamSink<CollectionData<ChapterData>> get chapterSink => chapterStreamController.sink;
 
   /// TODO: migrate to ValueNotifier with user login and etc.
   bool isFollowed = false;
@@ -91,16 +95,18 @@ class _MangaViewState extends State<MangaView> {
       );
     });
 
-    fetchChapters(reload: reload).then((value) => chapterSink.add(value));
+    fetchChapters(reload: reload).then(chapterSink.add);
   }
 
-  Future<List<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
+  Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
     final filters = await filterSettings.mangaFilters.get(widget.id) ?? MangaFilterData.defaults();
     final data = await MangaDex.instance.chapter.getFeed(
-      widget.id,
       checkDB: !reload,
-      langs: preferredLocales,
-      excludedGroups: filters.excludedGroupIds,
+      overrides: MangaDexChapterQueryFilter(
+        mangaId: widget.id,
+        translatedLanguages: preferredLanguages,
+        excludedGroups: filters.excludedGroupIds,
+      ),
     );
 
     return data;
@@ -465,7 +471,7 @@ class _MangaViewState extends State<MangaView> {
 
   /// Handles both the filter and loading indicator for chapters.
   Widget buildChapterHeader() {
-    return StreamBuilder<List<ChapterData>>(
+    return StreamBuilder<CollectionData<ChapterData>>(
         stream: chapterStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.none) {
@@ -473,7 +479,7 @@ class _MangaViewState extends State<MangaView> {
           }
 
           final chapters = snapshot.data;
-          final chapterCount = chapters?.length ?? 0;
+          final chapterCount = chapters?.data.length ?? 0;
 
           return Container(
             height: 40,
@@ -503,8 +509,10 @@ class _MangaViewState extends State<MangaView> {
                         icon: const Icon(Icons.filter_list_rounded),
                         selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
                         visualDensity: VisualDensity.comfortable,
-                        onPressed: () =>
-                            chapters == null ? null : showFilterSheet(chapters, filterData),
+                        onPressed: () {
+                          if (chapters == null) return;
+                          showFilterSheet(chapters.data, filterData);
+                        },
                       );
                     },
                   );
@@ -516,7 +524,7 @@ class _MangaViewState extends State<MangaView> {
   }
 
   Widget buildChapters() {
-    return StreamBuilder<List<ChapterData>>(
+    return StreamBuilder<CollectionData<ChapterData>>(
       stream: chapterStream,
       builder: (context, snapshot) {
         // Since the loading indicator is in the header, we don't need to handle other states here.
@@ -542,19 +550,19 @@ class _MangaViewState extends State<MangaView> {
           );
         }
 
-        if (snapshot.data!.isEmpty) {
+        final chapters = snapshot.requireData;
+
+        if (chapters.data.isEmpty) {
           return const SliverToBoxAdapter(
             child: SizedBox(height: 100, child: Center(child: Text("No chapters found"))),
           );
         }
 
-        final chapters = snapshot.requireData;
-
         return SliverList(
           delegate: SliverChildBuilderDelegate(
-            childCount: chapters.length,
+            childCount: chapters.data.length,
             (context, index) {
-              final data = chapters[index];
+              final data = chapters.data[index];
 
               late String title;
               final groups =
@@ -580,7 +588,7 @@ class _MangaViewState extends State<MangaView> {
                   child: Center(
                     child: flags.LanguageFlag(
                       height: 18,
-                      language: data.chapter.translatedLanguage.language.flagLanguage,
+                      language: data.chapter.translatedLanguage.flagLanguage,
                     ),
                   ),
                 ),

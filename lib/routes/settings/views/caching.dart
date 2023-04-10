@@ -19,7 +19,7 @@ class SettingsCachingView extends StatefulWidget {
 class _SettingsCachingViewState extends State<SettingsCachingView> {
   final settings = Settings.instance.caching;
   Future<DirectoryInfo> coverDir = Future.delayed(
-      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.cover.root));
+      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.cover.cache!));
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +175,7 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
     await MangaDex.instance.cover.deleteAllPersistent();
     if (mounted) {
       showLazyBar(context, "Cover cache cleared successfully.");
-      coverDir = getDirectoryInfo(MangaDex.instance.cover.root);
+      coverDir = getDirectoryInfo(MangaDex.instance.cover.cache!);
       setState(() {});
     }
   }
