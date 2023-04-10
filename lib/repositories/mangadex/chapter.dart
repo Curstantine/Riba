@@ -120,7 +120,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
           .filter()
           .group((q) => q.anyOf(excludedGroups, (q, e) => q.not().groupIdsElementContains(e)))
           .anyOf(translatedLangs, (q, e) => q.translatedLanguageEqualTo(e))
-          .optional(orderByChapterDesc == true, (q) => q.sortByVolumeDesc().thenByChapterDesc())
+          .optional(orderByChapterDesc == true, (q) => q.sortByChapterDesc().thenByVolumeDesc())
           .findAll();
 
       if (inDB.isNotEmpty) {

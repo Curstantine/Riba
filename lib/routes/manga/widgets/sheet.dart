@@ -265,7 +265,6 @@ class _CoverSheetState extends State<CoverSheet> {
             }
 
             return ListView(
-              shrinkWrap: true,
               padding: Edges.allLarge.add(EdgeInsets.only(bottom: widget.padding.bottom)),
               children: [
                 OutlinedCard(
@@ -282,7 +281,6 @@ class _CoverSheetState extends State<CoverSheet> {
                   SizedBox(
                     height: 200,
                     child: ListView.separated(
-                      shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       itemCount: snapshot.data!.length,
                       separatorBuilder: (context, _) => const SizedBox(width: Edges.medium),
@@ -329,12 +327,20 @@ class _CoverSheetState extends State<CoverSheet> {
       builder: (context, selectedId, _) {
         final selectedCover = covers.firstWhere((e) => e.cover.id == selectedId).cover;
 
+        // NOTE: This hard delay is to not to flash the user with a rapid rebuilds
+        // between the loading indicator and the image.
+        // TODO: Find some fancy transition to use here
+        final fileFuture = Future.delayed(
+          const Duration(milliseconds: 500),
+          () => MangaDex.instance.cover.getImage(manga.id, selectedCover,
+              size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers),
+        );
+
         return Stack(
           alignment: Alignment.bottomRight,
           children: [
             FutureBuilder<File?>(
-              future: MangaDex.instance.cover.getImage(manga.id, selectedCover,
-                  size: cacheSettings.fullSize, cache: cacheSettings.cacheCovers),
+              future: fileFuture,
               builder: (context, snapshot) {
                 List<Widget>? children;
 
