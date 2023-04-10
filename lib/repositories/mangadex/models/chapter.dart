@@ -1,5 +1,4 @@
-import "dart:convert";
-
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/chapter.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/mangadex/models/relationship.dart";
@@ -9,9 +8,12 @@ import "general.dart";
 import "group.dart";
 import "user.dart";
 
+part "chapter.g.dart";
+
 typedef ChapterEntity = MDEntityResponse<ChapterAttributes>;
 typedef ChapterCollection = MDCollectionResponse<ChapterAttributes>;
 
+@JsonSerializable(createToJson: false)
 class ChapterAttributes {
   final String? title;
   final String? volume;
@@ -40,28 +42,8 @@ class ChapterAttributes {
     required this.readableAt,
   });
 
-  factory ChapterAttributes.fromMap(Map<String, dynamic> map) {
-    final title = map["title"] as String?;
-    final volume = map["volume"] as String?;
-    final chapter = map["chapter"] as String?;
-
-    return ChapterAttributes(
-      title: title?.isNotEmpty == true ? title : null,
-      volume: volume?.isNotEmpty == true ? volume : null,
-      chapter: chapter,
-      pages: map["pages"] as int,
-      translatedLanguage: map["translatedLanguage"] as String,
-      externalUrl: map["externalUrl"] as String?,
-      version: map["version"] as int,
-      createdAt: DateTime.parse(map["createdAt"] as String),
-      updatedAt: DateTime.parse(map["updatedAt"] as String),
-      publishAt: DateTime.parse(map["publishAt"] as String),
-      readableAt: DateTime.parse(map["readableAt"] as String),
-    );
-  }
-
-  factory ChapterAttributes.fromJson(String source) =>
-      ChapterAttributes.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory ChapterAttributes.fromJson(Map<String, dynamic> json) =>
+      _$ChapterAttributesFromJson(json);
 }
 
 extension ToChapter on MDResponseData<ChapterAttributes> {

@@ -1,6 +1,10 @@
+import "package:json_annotation/json_annotation.dart";
+import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/mangadex/utils/transformer.dart";
 
 import "general.dart";
+
+part "relationship.g.dart";
 
 class Relationship<T> {
   final String id;
@@ -19,11 +23,11 @@ class Relationship<T> {
     this.attributes,
   });
 
-  factory Relationship.fromMap(Map<String, dynamic> json) {
-    final type = EntityType.fromJsonValue(json["type"] as String);
+  factory Relationship.fromJson(Map<String, dynamic> json) {
+    final type = EntityType.fromJson(json["type"] as String);
     final jsonAttr = json["attributes"];
     final related =
-        json["related"] == null ? null : MangaRelationType.fromJsonValue(json["related"] as String);
+        json["related"] == null ? null : MangaRelationType.fromJson(json["related"] as String);
 
     T? attributes = jsonAttr == null ? null : transformToEntity(jsonAttr, type);
 
@@ -46,7 +50,8 @@ class Relationship<T> {
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
-enum MangaRelationType {
+@JsonEnum(alwaysCreate: true, fieldRename: FieldRename.snake)
+enum MangaRelationType implements TwoWayEnumSerde {
   monochrome,
   colored,
   preserialization,
@@ -64,27 +69,49 @@ enum MangaRelationType {
   alternateStory,
   alternateVersion;
 
-  static Map<String, MangaRelationType> get jsonValues => {
-        "monochrome": MangaRelationType.monochrome,
-        "colored": MangaRelationType.colored,
-        "preserialization": MangaRelationType.preserialization,
-        "serialization": MangaRelationType.serialization,
-        "prequel": MangaRelationType.prequel,
-        "sequel": MangaRelationType.sequel,
-        "doujinshi": MangaRelationType.doujinshi,
-        "main_story": MangaRelationType.mainStory,
-        "side_story": MangaRelationType.sideStory,
-        "adapted_from": MangaRelationType.adaptedFrom,
-        "spin_off": MangaRelationType.spinOff,
-        "based_on": MangaRelationType.basedOn,
-        "same_franchise": MangaRelationType.sameFranchise,
-        "shared_universe": MangaRelationType.sharedUniverse,
-        "alternate_story": MangaRelationType.alternateStory,
-        "alternate_version": MangaRelationType.alternateVersion,
-      };
+  @override
+  factory MangaRelationType.fromJson(String source) =>
+      $enumDecode(_$MangaRelationTypeEnumMap, source);
 
-  factory MangaRelationType.fromJsonValue(String str) {
-    return jsonValues[str]!;
+  @override
+  String toJson() => _$MangaRelationTypeEnumMap[this]!;
+
+  @override
+  String asHumanReadable() {
+    switch (this) {
+      case MangaRelationType.monochrome:
+        return "Monochrome";
+      case MangaRelationType.colored:
+        return "Colored";
+      case MangaRelationType.preserialization:
+        return "Preserialization";
+      case MangaRelationType.serialization:
+        return "Serialization";
+      case MangaRelationType.prequel:
+        return "Prequel";
+      case MangaRelationType.sequel:
+        return "Sequel";
+      case MangaRelationType.doujinshi:
+        return "Doujinshi";
+      case MangaRelationType.mainStory:
+        return "Main Story";
+      case MangaRelationType.sideStory:
+        return "Side Story";
+      case MangaRelationType.adaptedFrom:
+        return "Adapted From";
+      case MangaRelationType.spinOff:
+        return "Spin Off";
+      case MangaRelationType.basedOn:
+        return "Based On";
+      case MangaRelationType.sameFranchise:
+        return "Same Franchise";
+      case MangaRelationType.sharedUniverse:
+        return "Shared Universe";
+      case MangaRelationType.alternateStory:
+        return "Alternate Story";
+      case MangaRelationType.alternateVersion:
+        return "Alternate Version";
+    }
   }
 }
 

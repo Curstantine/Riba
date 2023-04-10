@@ -1,4 +1,5 @@
 abstract class TwoWayEnumSerde {
-  TwoWayEnumSerde.fromJsonValue(String value);
-  String toJsonValue();
+  TwoWayEnumSerde.fromJson(String value);
+  String toJson();
+  String asHumanReadable();
 }

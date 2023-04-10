@@ -17,7 +17,7 @@ class ContentRatingChip extends StatelessWidget {
       elevation: 1,
       surfaceTintColor: getBackgroundColor(theme),
       labelColor: getBackgroundColor(theme),
-      label: contentRating.humanReadable,
+      label: contentRating.asHumanReadable(),
       onPressed: () => {},
     );
   }
@@ -48,7 +48,7 @@ class DemographicChip extends StatelessWidget {
       elevation: 1,
       surfaceTintColor: getBackgroundColor(theme),
       labelColor: getBackgroundColor(theme),
-      label: demographic.humanReadable,
+      label: demographic.asHumanReadable(),
       onPressed: () => {},
     );
   }

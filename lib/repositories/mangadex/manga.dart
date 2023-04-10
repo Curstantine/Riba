@@ -218,7 +218,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     final reqUrl = statisticUrl.copy().addPathSegment(id);
     final request = await client.get(reqUrl.toUri());
 
-    final response = MDStatistics.fromMap(
+    final response = MDStatistics.fromJson(
       jsonDecode(request.body),
       type: EntityType.manga,
       url: reqUrl,

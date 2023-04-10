@@ -21,7 +21,7 @@ class HomeUserBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Guest", style: theme.textTheme.titleMedium?.copyWith(height: 0)),
-            Text(UserRole.member.human,
+            Text(UserRole.member.asHumanReadable(),
                 style: theme.textTheme.bodySmall
                     ?.withColorOpacity(0.5)
                     .copyWith(letterSpacing: 0, height: 0))

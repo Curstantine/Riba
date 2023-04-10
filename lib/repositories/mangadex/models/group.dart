@@ -1,5 +1,4 @@
-import "dart:convert";
-
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/group.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/user.dart";
@@ -9,8 +8,11 @@ import "general.dart";
 import "relationship.dart";
 import "user.dart";
 
+part "group.g.dart";
+
 typedef GroupCollection = MDCollectionResponse<GroupAttributes>;
 
+@JsonSerializable(createToJson: false)
 class GroupAttributes {
   final String name;
   final List<Map<String, String>> altNames;
@@ -54,31 +56,8 @@ class GroupAttributes {
     required this.version,
   });
 
-  factory GroupAttributes.fromMap(Map<String, dynamic> map) {
-    return GroupAttributes(
-      name: map["name"] as String,
-      altNames: (map["altNames"] as List)
-          .map((e) => (e as Map<String, dynamic>).cast<String, String>())
-          .toList(),
-      description: map["description"] as String?,
-      website: map["website"] as String?,
-      discord: map["discord"] as String?,
-      ircServer: map["ircServer"] as String?,
-      ircChannel: map["ircChannel"] as String?,
-      contactEmail: map["contactEmail"] as String?,
-      twitter: map["twitter"] as String?,
-      mangaUpdates: map["mangaUpdates"] as String?,
-      focusedLanguages: (map["focusedLanguages"] as List).cast(),
-      official: map["official"] as bool,
-      inactive: map["inactive"] as bool,
-      createdAt: DateTime.parse(map["createdAt"] as String),
-      updatedAt: DateTime.parse(map["updatedAt"] as String),
-      version: map["version"] as int,
-    );
-  }
-
-  factory GroupAttributes.fromJson(String source) =>
-      GroupAttributes.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory GroupAttributes.fromJson(Map<String, dynamic> source) =>
+      _$GroupAttributesFromJson(source);
 }
 
 extension ToGroup on MDResponseData<GroupAttributes> {

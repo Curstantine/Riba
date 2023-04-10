@@ -1,3 +1,4 @@
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/mangadex/models/relationship.dart";
 import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/mangadex/utils/transformer.dart";
@@ -5,6 +6,8 @@ import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/url.dart";
 
 import "error.dart";
+
+part "general.g.dart";
 
 abstract class MDResponse {
   final String result;
@@ -26,12 +29,11 @@ class MDEntityResponse<T> extends MDResponse {
     final result = json["result"] as String;
 
     if (result == "error") {
-      final errors = MDError.fromMap((json["errors"] as List<dynamic>)[0]);
+      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
       throw MDException(errors, url: url);
     }
 
     final responseType = json["response"] as String;
-
     if (responseType != "entity") {
       throw Exception("Response type is not entity.");
     }
@@ -39,7 +41,7 @@ class MDEntityResponse<T> extends MDResponse {
     return MDEntityResponse(
       result: result,
       response: responseType,
-      data: MDResponseData<T>.fromMap(json["data"]),
+      data: MDResponseData<T>.fromJson(json["data"]),
     );
   }
 }
@@ -63,12 +65,11 @@ class MDCollectionResponse<T> extends MDResponse {
     final result = json["result"] as String;
 
     if (result == "error") {
-      final errors = MDError.fromMap((json["errors"] as List<dynamic>)[0]);
+      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
       throw MDException(errors, url: url);
     }
 
     final responseType = json["response"] as String;
-
     if (responseType != "collection") {
       throw Exception("Response type is not collection.");
     }
@@ -76,7 +77,7 @@ class MDCollectionResponse<T> extends MDResponse {
     return MDCollectionResponse(
       result: result,
       response: responseType,
-      data: (json["data"] as List<dynamic>).map((e) => MDResponseData<T>.fromMap(e)).toList(),
+      data: (json["data"] as List<dynamic>).map((e) => MDResponseData<T>.fromJson(e)).toList(),
       limit: json["limit"] as int,
       offset: json["offset"] as int,
       total: json["total"] as int,
@@ -97,8 +98,8 @@ class MDResponseData<T> {
     required this.relationships,
   });
 
-  factory MDResponseData.fromMap(Map<String, dynamic> map) {
-    final type = EntityType.fromJsonValue(map["type"] as String);
+  factory MDResponseData.fromJson(Map<String, dynamic> map) {
+    final type = EntityType.fromJson(map["type"] as String);
     final attributes = transformToEntity<T>(map["attributes"], type);
 
     return MDResponseData(
@@ -106,13 +107,14 @@ class MDResponseData<T> {
       type: type,
       attributes: attributes,
       relationships: (map["relationships"] as List<dynamic>)
-          .map((e) => Relationship.fromMap(e as Map<String, dynamic>))
+          .map((e) => Relationship.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
+@JsonEnum(fieldRename: FieldRename.snake, alwaysCreate: true)
 enum EntityType implements TwoWayEnumSerde {
   manga,
   chapter,
@@ -130,23 +132,13 @@ enum EntityType implements TwoWayEnumSerde {
   /// Special entity type for group relationships, stored here for convenience.
   member;
 
-  static Map<String, EntityType> get jsonValues => {
-        "manga": manga,
-        "chapter": chapter,
-        "custom_list": customList,
-        "author": author,
-        "artist": artist,
-        "user": user,
-        "tag": tag,
-        "cover_art": coverArt,
-        "scanlation_group": scanlationGroup,
-        "leader": leader,
-        "member": member,
-      };
+  @override
+  factory EntityType.fromJson(String source) => $enumDecode(_$EntityTypeEnumMap, source);
 
   @override
-  factory EntityType.fromJsonValue(String str) => jsonValues[str]!;
+  String toJson() => _$EntityTypeEnumMap[this]!;
 
   @override
-  String toJsonValue() => jsonValues.entries.firstWhere((e) => e.value == this).key;
+  @Deprecated("Will not be implemented, used as a stub for the interface.")
+  String asHumanReadable() => throw UnimplementedError();
 }

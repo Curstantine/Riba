@@ -1,3 +1,4 @@
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
@@ -7,8 +8,11 @@ import "general.dart";
 import "relationship.dart";
 import "user.dart";
 
+part "cover_art.g.dart";
+
 typedef CoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 
+@JsonSerializable(createToJson: false)
 class CoverArtAttributes {
   final String? volume;
   final String fileName;
@@ -28,17 +32,8 @@ class CoverArtAttributes {
     required this.version,
   });
 
-  factory CoverArtAttributes.fromMap(Map<String, dynamic> map) {
-    return CoverArtAttributes(
-      volume: map["volume"] as String?,
-      fileName: map["fileName"] as String,
-      description: map["description"] as String?,
-      locale: map["locale"] as String?,
-      createdAt: DateTime.parse(map["createdAt"] as String),
-      updatedAt: DateTime.parse(map["updatedAt"] as String),
-      version: map["version"] as int,
-    );
-  }
+  factory CoverArtAttributes.fromJson(Map<String, dynamic> json) =>
+      _$CoverArtAttributesFromJson(json);
 }
 
 extension ToCoverArt on MDResponseData<CoverArtAttributes> {

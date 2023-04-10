@@ -10,21 +10,21 @@ class MDStatistics {
 
   const MDStatistics(this.statistics);
 
-  factory MDStatistics.fromMap(
+  factory MDStatistics.fromJson(
     Map<String, dynamic> json, {
     required EntityType type,
     required URL url,
   }) {
     final result = json["result"] as String;
     if (result == "error") {
-      final errors = MDError.fromMap((json["errors"] as List<dynamic>)[0]);
+      final errors = MDError.fromJson((json["errors"] as List<dynamic>)[0]);
       throw MDException(errors, url: url);
     }
 
     final statistics = <String, StatisticAttributes>{};
     for (final entry in (json["statistics"] as Map<String, dynamic>).entries) {
       final id = entry.key;
-      statistics[id] = StatisticAttributes.fromMap(entry.value, id: id, type: type);
+      statistics[id] = StatisticAttributes.fromJson(entry.value, id: id, type: type);
     }
 
     return MDStatistics(statistics);
@@ -46,7 +46,7 @@ class StatisticAttributes {
     this.follows,
   });
 
-  factory StatisticAttributes.fromMap(
+  factory StatisticAttributes.fromJson(
     Map<String, dynamic> json, {
     required String id,
     required EntityType type,

@@ -1,8 +1,13 @@
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/localization.dart";
 import "package:riba/repositories/local/tag.dart";
+import "package:riba/repositories/mangadex/utils/enum.dart";
 
 import "general.dart";
 
+part "tag.g.dart";
+
+@JsonSerializable(createToJson: false)
 class TagAttributes {
   final Map<String, String> name;
   final TagGroup group;
@@ -16,14 +21,7 @@ class TagAttributes {
     required this.version,
   });
 
-  factory TagAttributes.fromMap(Map<String, dynamic> map) {
-    return TagAttributes(
-      name: (map["name"] as Map<String, dynamic>).cast(),
-      group: TagGroup.fromJsonValue(map["group"]),
-      description: (map["description"] as Map<String, dynamic>).cast(),
-      version: map["version"] as int,
-    );
-  }
+  factory TagAttributes.fromJson(Map<String, dynamic> source) => _$TagAttributesFromJson(source);
 }
 
 extension ToTag on MDResponseData<TagAttributes> {
@@ -37,20 +35,30 @@ extension ToTag on MDResponseData<TagAttributes> {
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
-enum TagGroup {
+@JsonEnum(alwaysCreate: true)
+enum TagGroup implements TwoWayEnumSerde {
   content,
   format,
   genre,
   theme;
 
-  static Map<String, TagGroup> get jsonValues => {
-        "content": TagGroup.content,
-        "format": TagGroup.format,
-        "genre": TagGroup.genre,
-        "theme": TagGroup.theme,
-      };
+  @override
+  factory TagGroup.fromJson(String source) => $enumDecode(_$TagGroupEnumMap, source);
 
-  static TagGroup fromJsonValue(String str) {
-    return jsonValues[str]!;
+  @override
+  String toJson() => _$TagGroupEnumMap[this]!;
+
+  @override
+  String asHumanReadable() {
+    switch (this) {
+      case TagGroup.content:
+        return "Content";
+      case TagGroup.format:
+        return "Format";
+      case TagGroup.genre:
+        return "Genre";
+      case TagGroup.theme:
+        return "Theme";
+    }
   }
 }

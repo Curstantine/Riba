@@ -8,48 +8,37 @@ import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/models/user.dart";
 
+/// Transforms an entity to its corresponding model.
 T transformToEntity<T>(Map<String, dynamic> map, EntityType type) {
-  late T attributes;
-
   switch (type) {
-    case EntityType.manga:
-      attributes = MangaAttributes.fromMap(map) as T;
-      break;
-
-    case EntityType.chapter:
-      attributes = ChapterAttributes.fromMap(map) as T;
-      break;
-
-    case EntityType.customList:
-      attributes = CustomListAttributes.fromMap(map) as T;
-      break;
-
     case EntityType.author:
     case EntityType.artist:
-      attributes = AuthorAttributes.fromMap(map) as T;
-      break;
+      return AuthorAttributes.fromJson(map) as T;
 
-    case EntityType.tag:
-      attributes = TagAttributes.fromMap(map) as T;
-      break;
+    case EntityType.chapter:
+      return ChapterAttributes.fromJson(map) as T;
 
     case EntityType.coverArt:
-      attributes = CoverArtAttributes.fromMap(map) as T;
-      break;
+      return CoverArtAttributes.fromJson(map) as T;
+
+    case EntityType.customList:
+      return CustomListAttributes.fromJson(map) as T;
+
+    case EntityType.manga:
+      return MangaAttributes.fromJson(map) as T;
+
+    case EntityType.scanlationGroup:
+      return GroupAttributes.fromJson(map) as T;
+
+    case EntityType.tag:
+      return TagAttributes.fromJson(map) as T;
 
     case EntityType.user:
     case EntityType.leader:
     case EntityType.member:
-      attributes = UserAttributes.fromMap(map) as T;
-      break;
-
-    case EntityType.scanlationGroup:
-      attributes = GroupAttributes.fromMap(map) as T;
-      break;
+      return UserAttributes.fromJson(map) as T;
 
     default:
       throw UnimplementedError("Entity: $type, on T: $T is not implemented yet.");
   }
-
-  return attributes;
 }

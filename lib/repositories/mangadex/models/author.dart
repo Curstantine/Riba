@@ -1,9 +1,13 @@
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/author.dart";
 import "package:riba/repositories/local/localization.dart";
 
 import "general.dart";
 import "relationship.dart";
 
+part "author.g.dart";
+
+@JsonSerializable(createToJson: false)
 class AuthorAttributes {
   final String name;
   final Map<String, String> biography;
@@ -45,28 +49,7 @@ class AuthorAttributes {
     required this.version,
   });
 
-  factory AuthorAttributes.fromMap(Map<String, dynamic> map) {
-    return AuthorAttributes(
-      name: map["name"] as String,
-      biography: (map["biography"] as Map<String, dynamic>).cast(),
-      createdAt: DateTime.parse(map["createdAt"] as String),
-      updatedAt: DateTime.parse(map["updatedAt"] as String),
-      twitter: map["twitter"] as String?,
-      pixiv: map["pixiv"] as String?,
-      melonBook: map["melonBook"] as String?,
-      fanBox: map["fanBox"] as String?,
-      booth: map["booth"] as String?,
-      nicoVideo: map["nicoVideo"] as String?,
-      skeb: map["skeb"] as String?,
-      fantia: map["fantia"] as String?,
-      tumblr: map["tumblr"] as String?,
-      youtube: map["youtube"] as String?,
-      weibo: map["weibo"] as String?,
-      naver: map["naver"] as String?,
-      website: map["website"] as String?,
-      version: map["version"] as int,
-    );
-  }
+  factory AuthorAttributes.fromJson(Map<String, dynamic> json) => _$AuthorAttributesFromJson(json);
 }
 
 extension ToAuthorSocials on AuthorAttributes {

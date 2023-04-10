@@ -1,3 +1,4 @@
+import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/custom_list.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 
@@ -5,8 +6,11 @@ import "general.dart";
 import "relationship.dart";
 import "user.dart";
 
+part "custom_list.g.dart";
+
 typedef CustomListEntity = MDEntityResponse<CustomListAttributes>;
 
+@JsonSerializable(createToJson: false)
 class CustomListAttributes {
   final String name;
   final CustomListVisibility visibility;
@@ -18,28 +22,15 @@ class CustomListAttributes {
     required this.version,
   });
 
-  factory CustomListAttributes.fromMap(Map<String, dynamic> map) {
-    return CustomListAttributes(
-      name: map["name"] as String,
-      visibility: CustomListVisibility.fromJsonValue(map["visibility"] as String),
-      version: map["version"] as int,
-    );
-  }
+  factory CustomListAttributes.fromJson(Map<String, dynamic> json) =>
+      _$CustomListAttributesFromJson(json);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
+@JsonEnum()
 enum CustomListVisibility {
   public,
   private;
-
-  static Map<CustomListVisibility, String> get jsonValues => const {
-        CustomListVisibility.public: "public",
-        CustomListVisibility.private: "private",
-      };
-
-  factory CustomListVisibility.fromJsonValue(String str) {
-    return jsonValues.entries.firstWhere((element) => element.value == str).key;
-  }
 }
 
 extension ToCustomList on MDResponseData<CustomListAttributes> {

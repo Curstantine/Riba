@@ -60,11 +60,11 @@ class URL {
       default:
         if (value is TwoWayEnumSerde) {
           parameters[key] ??= [];
-          parameters[key]!.add(value.toJsonValue());
+          parameters[key]!.add(value.toJson());
         }
 
         if (value is List<TwoWayEnumSerde>) {
-          parameters[key] = value.map((e) => e.toJsonValue()).toList();
+          parameters[key] = value.map((e) => e.toJson()).toList();
         }
 
         break;

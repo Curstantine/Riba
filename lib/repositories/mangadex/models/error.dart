@@ -1,3 +1,8 @@
+import "package:json_annotation/json_annotation.dart";
+
+part "error.g.dart";
+
+@JsonSerializable(createToJson: false)
 class MDError {
   final String title;
   final int status;
@@ -5,11 +10,5 @@ class MDError {
 
   const MDError({required this.title, required this.status, this.detail});
 
-  factory MDError.fromMap(Map<String, dynamic> map) {
-    return MDError(
-      title: map["title"] as String,
-      status: map["status"] as int,
-      detail: map["detail"] as String?,
-    );
-  }
+  factory MDError.fromJson(Map<String, dynamic> json) => _$MDErrorFromJson(json);
 }
