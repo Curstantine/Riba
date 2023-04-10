@@ -3,6 +3,11 @@ import "dart:io";
 import "package:http/http.dart";
 import "package:isar/isar.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:riba/repositories/local/chapter.dart";
+import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/custom_list.dart";
+import "package:riba/repositories/local/group.dart";
+import "package:riba/repositories/local/manga.dart";
 import "package:riba/repositories/mangadex/chapter.dart";
 import "package:riba/repositories/mangadex/cover_art.dart";
 import "package:riba/repositories/mangadex/custom_list.dart";
@@ -27,14 +32,14 @@ class MangaDex {
   late final MangaDexCustomListService customList = MangaDexCustomListService(
     client: client,
     rateLimiter: rateLimiter,
-    database: database,
+    database: database.customLists,
     rootUrl: url,
   );
 
   late final MangaDexCoverService cover = MangaDexCoverService(
     client: client,
     rateLimiter: rateLimiter,
-    database: database,
+    database: database.covers,
     rootUrl: url,
     cache: Directory("${directory.path}/covers"),
   );
@@ -42,21 +47,21 @@ class MangaDex {
   late final MangaDexChapterService chapter = MangaDexChapterService(
     client: client,
     rateLimiter: rateLimiter,
-    database: database,
+    database: database.chapters,
     rootUrl: url,
   );
 
   late final MangaDexGroupService group = MangaDexGroupService(
     client: client,
     rateLimiter: rateLimiter,
-    database: database,
+    database: database.groups,
     rootUrl: url,
   );
 
   late final MangaDexMangaService manga = MangaDexMangaService(
     client: client,
     rateLimiter: rateLimiter,
-    database: database,
+    database: database.manga,
     rootUrl: url,
   );
 

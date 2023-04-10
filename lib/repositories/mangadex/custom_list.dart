@@ -45,7 +45,7 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
     logger.info("get($id, $checkDB)");
 
     if (checkDB) {
-      final inDB = await database.customLists.get(fastHash(id));
+      final inDB = await database.get(fastHash(id));
       if (inDB != null) return await collectMeta(inDB);
     }
 
@@ -55,7 +55,7 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
     final response = CustomListEntity.fromMap(jsonDecode(request.body), url: reqUrl);
 
     final listData = response.data.toCustomListData();
-    await database.writeTxn(() => insertMeta(listData));
+    await database.isar.writeTxn(() => insertMeta(listData));
 
     return listData;
   }
@@ -77,8 +77,8 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
   @override
   Future<void> insertMeta(CustomListData data) async {
     await Future.wait([
-      database.customLists.put(data.list),
-      database.users.put(data.user),
+      database.put(data.list),
+      database.isar.users.put(data.user),
     ]);
   }
 
@@ -86,7 +86,7 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
   Future<CustomListData> collectMeta(CustomList single) async {
     return CustomListData(
       list: single,
-      user: (await database.users.get(fastHash(single.userId)))!,
+      user: (await database.isar.users.get(fastHash(single.userId)))!,
     );
   }
 }

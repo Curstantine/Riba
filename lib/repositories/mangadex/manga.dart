@@ -63,7 +63,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     logger.info("get($id, $checkDB)");
 
     if (checkDB) {
-      final inDB = await database.manga.get(fastHash(id));
+      final inDB = await database.get(fastHash(id));
       if (inDB != null) return collectMeta(inDB);
     }
 
@@ -73,7 +73,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     final response = MangaEntity.fromMap(jsonDecode(request.body), url: reqUrl);
 
     final internalMangaData = response.data.toInternalMangaData();
-    await database.writeTxn(() => insertMeta(internalMangaData));
+    await database.isar.writeTxn(() => insertMeta(internalMangaData));
 
     return internalMangaData.toMangaData();
   }
@@ -95,7 +95,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     final mapped = <String, MangaData?>{for (final e in ids) e: null};
 
     if (checkDB) {
-      final inDB = await database.manga
+      final inDB = await database
           .where()
           .anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
           .filter()
@@ -133,7 +133,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     );
 
     final res = await block.run();
-    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(res.values.map(insertMeta)));
 
     return mapped.cast<String, MangaData>()
       ..addAll(res.map((k, v) => MapEntry(k, v.toMangaData())));
@@ -157,7 +157,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
       final excludedOriginalLangs = filters.excludedOriginalLanguages ?? [];
       final contentRatings = filters.contentRatings ?? [];
 
-      final inDB = await database.manga
+      final inDB = await database
           .where()
           .artistIdsElementEqualTo(authorOrArtistId)
           .or()
@@ -195,7 +195,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
       offset += response.limit;
     }
 
-    await database.writeTxn(() => Future.wait(mango.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(mango.map(insertMeta)));
     return mango.map((e) => e.toMangaData()).toList();
   }
 
@@ -210,7 +210,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     logger.info("getStatistics($id, $checkDB)");
 
     if (checkDB) {
-      final inDB = await database.statistics.get(fastHash(id));
+      final inDB = await database.isar.statistics.get(fastHash(id));
       if (inDB != null) return inDB;
     }
 
@@ -225,7 +225,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     );
 
     final statistic = response.statistics[id]!.toStatistics();
-    await database.writeTxn(() => database.statistics.put(statistic));
+    await database.isar.writeTxn(() => database.isar.statistics.put(statistic));
 
     return statistic;
   }
@@ -233,10 +233,10 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
   @override
   Future<void> insertMeta(InternalMangaData data) async {
     await Future.wait([
-      database.authors.putAll(data.authors + data.artists),
-      database.covers.putAll(data.covers),
-      database.tags.putAll(data.tags),
-      database.manga.put(data.manga),
+      database.isar.authors.putAll(data.authors + data.artists),
+      database.isar.covers.putAll(data.covers),
+      database.isar.tags.putAll(data.tags),
+      database.put(data.manga),
     ]);
   }
 
@@ -244,10 +244,12 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
   Future<MangaData> collectMeta(Manga single) async {
     final usableCoverId = single.preferredCoverId ?? single.defaultCoverId;
     final data = await Future.wait([
-      database.authors.getAll(single.artistIds.map((e) => fastHash(e)).toList()),
-      database.authors.getAll(single.authorIds.map((e) => fastHash(e)).toList()),
-      database.tags.getAll(single.tagsIds.map((e) => fastHash(e)).toList()),
-      usableCoverId == null ? Future.value(null) : database.covers.get(fastHash(usableCoverId)),
+      database.isar.authors.getAll(single.artistIds.map((e) => fastHash(e)).toList()),
+      database.isar.authors.getAll(single.authorIds.map((e) => fastHash(e)).toList()),
+      database.isar.tags.getAll(single.tagsIds.map((e) => fastHash(e)).toList()),
+      usableCoverId == null
+          ? Future.value(null)
+          : database.isar.covers.get(fastHash(usableCoverId)),
     ]);
 
     return MangaData(

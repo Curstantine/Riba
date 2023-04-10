@@ -14,7 +14,7 @@ abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalData
     QueryFilterType extends MangaDexQueryFilter> {
   final Client client;
   final RateLimiter rateLimiter;
-  final Isar database;
+  final IsarCollection<LocalType> database;
   final Directory? cache;
   final URL rootUrl;
 

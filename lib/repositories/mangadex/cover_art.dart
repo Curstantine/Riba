@@ -73,7 +73,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     final mapped = <String, CoverArtData?>{for (final e in ids) e: null};
 
     if (checkDB) {
-      final inDB = await database.covers
+      final inDB = await database
           .where()
           .anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
           .filter()
@@ -114,7 +114,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     );
 
     final res = await block.run();
-    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(res.values.map(insertMeta)));
     return mapped.cast<String, CoverArtData>()..addAll(res);
   }
 
@@ -135,7 +135,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     final orderByVolDesc = filters.orderByVolumeDesc == true;
 
     if (checkDB) {
-      final inDB = await database.covers
+      final inDB = await database
           .where()
           .mangaIdEqualTo(filters.mangaId!)
           .filter()
@@ -173,7 +173,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
       offset += response.limit;
     }
 
-    await database.writeTxn(() => Future.wait(covers.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(covers.map(insertMeta)));
     return covers;
   }
 
@@ -186,15 +186,17 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
   @override
   Future<void> insertMeta(CoverArtData data) async {
     await Future.wait([
-      database.covers.put(data.cover),
-      if (data.user != null) database.users.put(data.user!),
+      database.put(data.cover),
+      if (data.user != null) database.isar.users.put(data.user!),
     ]);
   }
 
   @override
   Future<CoverArtData> collectMeta(CoverArt single) async {
-    final user = single.userId != null ? await database.users.get(fastHash(single.userId!)) : null;
-    return CoverArtData(cover: single, user: user);
+    return CoverArtData(
+      cover: single,
+      user: single.userId == null ? null : await database.isar.users.get(fastHash(single.userId!)),
+    );
   }
 
   /// Downloads a cover art based on the passed [mangaId], [coverArt] and [size].

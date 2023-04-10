@@ -72,7 +72,7 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
     final Map<String, Group?> mapped = {for (final e in ids) e: null};
 
     if (checkDB) {
-      final inDB = await database.groups.getAll(ids.map(fastHash).toList());
+      final inDB = await database.getAll(ids.map(fastHash).toList());
       for (final group in inDB) {
         if (group == null) continue;
         mapped[group.id] = group;
@@ -108,7 +108,7 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
     );
 
     final res = await block.run();
-    await database.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(res.values.map(insertMeta)));
 
     return mapped.cast<String, Group>()..addAll(res.map((k, v) => MapEntry(k, v.group)));
   }
@@ -116,8 +116,8 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   @override
   Future<void> insertMeta(GroupData data) async {
     await Future.wait([
-      database.users.putAll(data.users.values.toList()),
-      database.groups.put(data.group),
+      database.put(data.group),
+      database.isar.users.putAll(data.users.values.toList()),
     ]);
   }
 
@@ -127,7 +127,8 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   @override
   Future<GroupData> collectMeta(Group single) async {
     if (single.memberIds == null) throw const IncompleteDataException("Group.memberIds is null");
-    final users = await database.users.getAll(single.memberIds!.map((e) => fastHash(e)).toList());
+    final users =
+        await database.isar.users.getAll(single.memberIds!.map((e) => fastHash(e)).toList());
 
     return GroupData(
       group: single,

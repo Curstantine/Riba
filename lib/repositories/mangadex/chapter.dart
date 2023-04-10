@@ -84,7 +84,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
       }
     }
 
-    await database.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
 
     return CollectionData(
       data: chapters,
@@ -114,7 +114,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
     final orderByChapterDesc = filters.orderByChapterDesc;
 
     if (checkDB) {
-      final inDB = await database.chapters
+      final inDB = await database
           .where()
           .mangaIdEqualTo(mangaId)
           .filter()
@@ -124,7 +124,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
           .findAll();
 
       if (inDB.isNotEmpty) {
-        final chapterFuture = database.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
+        final chapterFuture = database.isar.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
 
         return CollectionData(
           data: await chapterFuture,
@@ -151,7 +151,7 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
       }
     }
 
-    await database.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+    await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
     return CollectionData(
       data: chapters,
       offset: response.offset,
@@ -163,17 +163,17 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
   @override
   Future<void> insertMeta(ChapterData data) async {
     await Future.wait([
-      database.chapters.put(data.chapter),
-      database.groups.putAll(data.groups),
-      database.users.put(data.uploader),
+      database.put(data.chapter),
+      database.isar.groups.putAll(data.groups),
+      database.isar.users.put(data.uploader),
     ]);
   }
 
   @override
   Future<ChapterData> collectMeta(Chapter single) async {
     final data = await Future.wait([
-      database.groups.getAll(single.groupIds.map((e) => fastHash(e)).toList()),
-      database.users.get(fastHash(single.uploaderId)),
+      database.isar.groups.getAll(single.groupIds.map((e) => fastHash(e)).toList()),
+      database.isar.users.get(fastHash(single.uploaderId)),
     ]);
 
     return ChapterData(
