@@ -372,6 +372,7 @@ class _CoverSheetState extends State<CoverSheet> {
                 return InkWell(
                   onTap: () => showDialog(
                     context: context,
+                    useSafeArea: false,
                     builder: (context) => buildZoomablePreview(context, snapshot.data!),
                   ),
                   child: Image.file(snapshot.data!, fit: BoxFit.fitWidth, width: double.infinity),
@@ -457,20 +458,42 @@ class _CoverSheetState extends State<CoverSheet> {
     );
   }
 
-  InteractiveViewer buildZoomablePreview(BuildContext context, File image) {
-    return InteractiveViewer(
-      maxScale: 2,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          alignment: Alignment.center,
-          margin: Edges.horizontalMedium,
-          child: Image.file(image, fit: BoxFit.fitWidth, filterQuality: FilterQuality.high),
+  Widget buildZoomablePreview(BuildContext context, File image) {
+    return Stack(
+      children: [
+        InteractiveViewer(
+          maxScale: 2,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              alignment: Alignment.center,
+              margin: Edges.horizontalMedium,
+              child: Image.file(image, fit: BoxFit.fitWidth, filterQuality: FilterQuality.high),
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            height: 64,
+            padding: Edges.bottomExtraLarge.copyWith(right: Edges.medium),
+            child: Row(children: [
+              ElevatedButton.icon(
+                  onPressed: saveCoverImage,
+                  icon: const Icon(Icons.save),
+                  label: const Text("Save"))
+            ]),
+          ),
+        )
+      ],
     );
   }
+
+  /// TODO: implement a platform agnostic way to save the image
+  /// to a shared path outside of the app.
+  void saveCoverImage() {}
 }
 
 class ChapterFilterSheet extends StatefulWidget {
