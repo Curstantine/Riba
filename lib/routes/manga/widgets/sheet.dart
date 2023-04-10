@@ -157,12 +157,33 @@ class _CoverSheetState extends State<CoverSheet> {
 
   void initialize() async {
     selectedCoverId.value = manga.usedCoverId;
-    reloadData();
+    fetchData(init: true);
   }
 
-  void reloadData() {
+  Future<void> fetchData({bool init = false, bool checkDB = true}) async {
+    if (init) {
+      try {
+        final data = await MangaDex.instance.cover.getManyByMangaId(
+          checkDB: true,
+          overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
+        );
+
+        if (data.length <= 1) return fetchData(checkDB: false);
+        if (mounted) {
+          coverDataFuture = Future.value(data);
+          return setState(() => {});
+        }
+      } catch (e) {
+        if (mounted) {
+          coverDataFuture = Future.error(e);
+          return setState(() => {});
+        }
+      }
+    }
+
     setState(() {
       coverDataFuture = MangaDex.instance.cover.getManyByMangaId(
+        checkDB: checkDB,
         overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
       );
     });
@@ -196,7 +217,7 @@ class _CoverSheetState extends State<CoverSheet> {
         appBar: AppBar(
           title: const Text("Covers"),
           actions: [
-            IconButton(icon: const Icon(Icons.refresh), onPressed: reloadData),
+            IconButton(icon: const Icon(Icons.refresh), onPressed: () => fetchData(checkDB: false)),
             ValueListenableBuilder<String?>(
               valueListenable: selectedCoverId,
               builder: (context, selectedId, child) => IconButton(
@@ -393,7 +414,7 @@ class _CoverSheetState extends State<CoverSheet> {
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
                 const SizedBox(height: Edges.small),
-                Text(error.description, style: text.bodySmall)
+                Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
               ]),
             );
           }
