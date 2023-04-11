@@ -32,6 +32,7 @@ dependencies:
     dash_flags: ^0.0.4
     meta: ^1.8.0
     json_annotation: ^4.8.0
+    freezed: ^2.3.2
 
 dev_dependencies:
     flutter_test:

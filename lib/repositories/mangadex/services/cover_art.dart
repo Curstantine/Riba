@@ -21,13 +21,20 @@ import "package:riba/utils/hash.dart";
 
 class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt, CoverArtData,
     CoverArtData, MangaDexCoverQueryFilter> {
+  @override
+  final Directory dataDir;
+
+  @override
+  final Directory cacheDir;
+
   MangaDexCoverService({
     required super.client,
     required super.rateLimiter,
     required super.database,
     required super.rootUrl,
-    required super.cache,
-  }) : assert(cache != null, "Cache directory must be set for the cover art service.");
+    required this.dataDir,
+    required this.cacheDir,
+  });
 
   @override
   final logger = Logger("MangaDexCoverService");
@@ -41,9 +48,6 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["cover"]);
   final cdnUrl = URL(hostname: "uploads.mangadex.org", pathSegments: ["covers"]);
-
-  late Directory persistentCoverDir = Directory("${cache!.path}/persistent");
-  late Directory temporaryCoverDir = Directory("${cache!.path}/temporary");
 
   @override
   final defaultFilters = MangaDexCoverQueryFilter(
@@ -270,19 +274,19 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
   /// always be [ImageFileType.jpeg]. Check [getFileName] for more info.
   File getFile(String mangaId, String fileId, ImageFileType type, CoverSize size, bool persist) {
     final name = getFileName(fileId, size, type);
-    final base = persist ? persistentCoverDir : temporaryCoverDir;
+    final base = persist ? dataDir : cacheDir;
 
     return File("${base.path}/$mangaId/$name");
   }
 
   /// Deletes the [persistentCoverDir] directory that contains all the persistent cover art files.
   Future<void> deleteAllPersistent() async {
-    if (await persistentCoverDir.exists()) await persistentCoverDir.delete(recursive: true);
+    if (await dataDir.exists()) await dataDir.delete(recursive: true);
   }
 
   /// Deletes the [temporaryCoverDir] directory that contains all the temporary cover art files.
   Future<void> deleteAllTemp() async {
-    if (await temporaryCoverDir.exists()) await temporaryCoverDir.delete(recursive: true);
+    if (await cacheDir.exists()) await cacheDir.delete(recursive: true);
   }
 }
 

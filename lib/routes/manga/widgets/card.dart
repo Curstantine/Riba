@@ -4,7 +4,7 @@ import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
 import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex.dart";
+import 'package:riba/repositories/mangadex/mangadex.dart';
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
 import "package:riba/settings/cache.dart";

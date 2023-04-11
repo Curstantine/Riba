@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
+import "dart:io";
 
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
@@ -34,6 +35,12 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
     "/chapter:GET": const Rate(4, Duration(seconds: 1)),
     "/manga/feed:GET": const Rate(2, Duration(seconds: 1)),
   };
+
+  @override
+  Directory get cacheDir => throw UnimplementedError();
+
+  @override
+  Directory get dataDir => throw UnimplementedError();
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["chapter"]);

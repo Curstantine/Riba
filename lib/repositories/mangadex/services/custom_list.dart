@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
+import "dart:io";
 
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/custom_list.dart";
@@ -29,6 +30,12 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
   final Map<String, Rate> rates = {
     "/list:GET": const Rate(4, Duration(seconds: 1)),
   };
+
+  @override
+  Directory get cacheDir => throw UnimplementedError();
+
+  @override
+  Directory get dataDir => throw UnimplementedError();
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["list"]);

@@ -4,25 +4,28 @@ import "dart:io";
 import "package:flutter_test/flutter_test.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/database.dart";
 import "package:riba/repositories/local/cover_art.dart";
 import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex.dart";
-import "package:riba/repositories/mangadex/chapter.dart";
-import "package:riba/repositories/mangadex/cover_art.dart";
-import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/mangadex/database.dart";
+import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
+import "package:riba/repositories/mangadex/services/chapter.dart";
+import "package:riba/repositories/mangadex/services/cover_art.dart";
+import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/utils/directories.dart";
 import "package:riba/utils/logging.dart";
+import "package:riba/utils/package_info.dart";
 
 import "constants.dart";
 
 void main() async {
   await Isar.initializeIsarCore(download: true);
   Logging.init();
+  InitDirectories.initMock();
+  InitPackageInfo.initMock();
 
-  final tempDirectory = Directory("./tmp");
-  final database = await Database.init(directory: tempDirectory, testing: true);
+  final database = await MangaDexDatabase.init(testing: true);
   final mangadex = MangaDex.instance;
 
   setUp(() async => await clear(database, mangadex));
@@ -253,10 +256,13 @@ void main() async {
   });
 }
 
-Future<void> clear(Database database, MangaDex mangadex) async {
+Future<void> clear(MangaDexDatabase database, MangaDex mangadex) async {
   await database.local.writeTxn(() async => await database.local.clear());
   try {
-    await mangadex.directory.delete(recursive: true);
+    await Future.wait([
+      mangadex.rootDataDir.delete(recursive: true),
+      mangadex.rootCacheDir.delete(recursive: true),
+    ]);
   } on FileSystemException {
     log("Failed to delete the temp directory", name: "MangaDexTest", level: Level.SHOUT.value);
   }

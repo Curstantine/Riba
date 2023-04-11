@@ -6,6 +6,7 @@ import "theme.dart";
 
 class Settings {
   static late final Settings instance;
+
   Settings._internal();
 
   final ThemeSettings theme = ThemeSettings();
@@ -21,13 +22,4 @@ class Settings {
       instance.filter.init(),
     ]);
   }
-}
-
-abstract class SettingsController<T> {
-  abstract final String id;
-  abstract final Box box;
-
-  T get defaultValue;
-
-  Future<void> init();
 }

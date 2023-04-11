@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
 import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/mangadex.dart";
+import 'package:riba/repositories/mangadex/mangadex.dart';
 import "package:riba/settings/cache.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
@@ -19,7 +19,7 @@ class SettingsCachingView extends StatefulWidget {
 class _SettingsCachingViewState extends State<SettingsCachingView> {
   final settings = Settings.instance.caching;
   Future<DirectoryInfo> coverDir = Future.delayed(
-      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.cover.cache!));
+      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.cover.cacheDir!));
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +175,7 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
     await MangaDex.instance.cover.deleteAllPersistent();
     if (mounted) {
       showLazyBar(context, "Cover cache cleared successfully.");
-      coverDir = getDirectoryInfo(MangaDex.instance.cover.cache!);
+      coverDir = getDirectoryInfo(MangaDex.instance.cover.cacheDir!);
       setState(() {});
     }
   }

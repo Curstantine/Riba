@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:io";
 
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/group.dart";
@@ -29,6 +30,12 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   final Map<String, Rate> rates = {
     "/group:GET": const Rate(4, Duration(seconds: 1)),
   };
+
+  @override
+  Directory get cacheDir => throw UnimplementedError();
+
+  @override
+  Directory get dataDir => throw UnimplementedError();
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["group"]);
