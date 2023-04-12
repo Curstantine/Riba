@@ -2,13 +2,14 @@ import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:google_fonts/google_fonts.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
 
 class ThemeManager with ChangeNotifier {
   static bool _initialized = false;
   static late final ThemeManager instance;
 
-  ThemeManager._internal({required this.id, required this.mode, required this.settings}) {
+  ThemeManager._internal({required this.settings}) {
     _initialized = true;
     addListener(onChange);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -17,28 +18,23 @@ class ThemeManager with ChangeNotifier {
   static Future<void> init() async {
     if (_initialized) throw Exception("ThemeManager is already initialized.");
 
-    final settings = ThemeSettings.instance;
+    final settings = await Settings.instance.database.themeSettings.getByKey("themeSettings");
+    if (settings == null) throw Exception("ThemeSettings is null.");
 
-    final manager = ThemeManager._internal(
-      id: settings.themeId,
-      mode: settings.mode,
-      settings: settings,
-    );
+    final manager = ThemeManager._internal(settings: settings);
+    await manager.setTheme(settings.themeId);
 
-    await manager.setTheme(manager.id);
     instance = manager;
   }
 
-  ThemeId id;
-  ThemeMode mode;
   late ColorScheme scheme;
-  final ThemeSettings settings;
+  late ThemeSettings settings;
 
   ThemeData get theme => ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       textTheme: textTheme,
-      brightness: mode.toBrightness());
+      brightness: settings.themeMode.toBrightness());
 
   TextTheme get textTheme => GoogleFonts.robotoFlexTextTheme(const TextTheme());
 
@@ -59,15 +55,17 @@ class ThemeManager with ChangeNotifier {
       scheme = themes[themeId]!;
     }
 
-    id = themeId;
-    settings.box.put(ThemeSettingKeys.id, id);
+    settings = settings.copyWith(themeId: themeId);
+    ThemeSettings.ref.isar.writeTxn(() async {
+      await ThemeSettings.ref.put(settings);
+    });
 
     notifyListeners();
   }
 
   Future<void> refresh() async {
-    if (mode == ThemeMode.system) {
-      if (id == ThemeId.dynamic) {
+    if (settings.themeMode == ThemeMode.system) {
+      if (settings.themeId == ThemeId.dynamic) {
         scheme = await getDynamicColorScheme();
       }
 
@@ -77,7 +75,7 @@ class ThemeManager with ChangeNotifier {
 
   Future<ColorScheme> getDynamicColorScheme() async {
     final palette = await DynamicColorPlugin.getCorePalette();
-    final brightness = mode.toBrightness();
+    final brightness = settings.themeMode.toBrightness();
 
     if (palette != null) {
       return palette.toColorScheme(brightness: brightness);
@@ -96,14 +94,15 @@ class ThemeManager with ChangeNotifier {
     Brightness? statusBarIconBrightness,
     Brightness? systemNavigationBarIconBrightness,
   }) {
+    final themeModeBrightness = settings.themeMode.toBrightness();
+
     return SystemUiOverlayStyle(
       statusBarColor: statusBarColor,
-      statusBarBrightness: statusBarBrightness ?? mode.toBrightness(),
-      statusBarIconBrightness: statusBarIconBrightness ??
-          (mode.toBrightness() == Brightness.light ? Brightness.dark : Brightness.light),
+      statusBarBrightness: statusBarBrightness ?? themeModeBrightness,
+      statusBarIconBrightness: statusBarIconBrightness ?? themeModeBrightness.toOpposite(),
       systemNavigationBarColor: systemNavigationBarColor,
       systemNavigationBarDividerColor: systemNavigationBarColor,
-      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? mode.toBrightness(),
+      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? themeModeBrightness,
     );
   }
 
@@ -119,6 +118,15 @@ extension ToThemeMode on Brightness {
         return ThemeMode.light;
       case Brightness.dark:
         return ThemeMode.dark;
+    }
+  }
+
+  Brightness toOpposite() {
+    switch (this) {
+      case Brightness.light:
+        return Brightness.dark;
+      case Brightness.dark:
+        return Brightness.light;
     }
   }
 }

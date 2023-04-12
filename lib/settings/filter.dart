@@ -2,10 +2,15 @@
 import "package:isar/isar.dart";
 import "package:riba/utils/hash.dart";
 
+import "settings.dart";
+
 part "filter.g.dart";
 
 @Collection(accessor: "mangaFilterSettings")
 class MangaFilterSettings {
+  static final ref = Settings.instance.database.mangaFilterSettings;
+
+  /// The manga id
   final String id;
   Id get isarId => fastHash(id);
 
@@ -17,4 +22,14 @@ class MangaFilterSettings {
     required this.id,
     required this.excludedGroupIds,
   });
+
+  MangaFilterSettings copyWith({
+    String? id,
+    List<String>? excludedGroupIds,
+  }) {
+    return MangaFilterSettings(
+      id: id ?? this.id,
+      excludedGroupIds: excludedGroupIds ?? this.excludedGroupIds,
+    );
+  }
 }

@@ -9,13 +9,14 @@ part of "cache.dart";
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
-extension GetCacheCoverSettingsCollection on Isar {
-  IsarCollection<CoverCacheSettings> get cacheCoverSettings => this.collection();
+extension GetCoverCacheSettingsCollection on Isar {
+  IsarCollection<CoverCacheSettings> get coverCacheSettings =>
+      this.collection();
 }
 
-const CacheCoverSettingsSchema = CollectionSchema(
-  name: r"CacheCoverSettings",
-  id: 5730172158645151325,
+const CoverCacheSettingsSchema = CollectionSchema(
+  name: r"CoverCacheSettings",
+  id: -6349337884832606692,
   properties: {
     r"enabled": PropertySchema(
       id: 0,
@@ -26,7 +27,7 @@ const CacheCoverSettingsSchema = CollectionSchema(
       id: 1,
       name: r"fullSize",
       type: IsarType.byte,
-      enumMap: _CacheCoverSettingsfullSizeEnumValueMap,
+      enumMap: _CoverCacheSettingsfullSizeEnumValueMap,
     ),
     r"key": PropertySchema(
       id: 2,
@@ -37,13 +38,13 @@ const CacheCoverSettingsSchema = CollectionSchema(
       id: 3,
       name: r"previewSize",
       type: IsarType.byte,
-      enumMap: _CacheCoverSettingspreviewSizeEnumValueMap,
+      enumMap: _CoverCacheSettingspreviewSizeEnumValueMap,
     )
   },
-  estimateSize: _cacheCoverSettingsEstimateSize,
-  serialize: _cacheCoverSettingsSerialize,
-  deserialize: _cacheCoverSettingsDeserialize,
-  deserializeProp: _cacheCoverSettingsDeserializeProp,
+  estimateSize: _coverCacheSettingsEstimateSize,
+  serialize: _coverCacheSettingsSerialize,
+  deserialize: _coverCacheSettingsDeserialize,
+  deserializeProp: _coverCacheSettingsDeserializeProp,
   idName: r"id",
   indexes: {
     r"key": IndexSchema(
@@ -62,13 +63,13 @@ const CacheCoverSettingsSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _cacheCoverSettingsGetId,
-  getLinks: _cacheCoverSettingsGetLinks,
-  attach: _cacheCoverSettingsAttach,
+  getId: _coverCacheSettingsGetId,
+  getLinks: _coverCacheSettingsGetLinks,
+  attach: _coverCacheSettingsAttach,
   version: "3.0.5",
 );
 
-int _cacheCoverSettingsEstimateSize(
+int _coverCacheSettingsEstimateSize(
   CoverCacheSettings object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
@@ -78,7 +79,7 @@ int _cacheCoverSettingsEstimateSize(
   return bytesCount;
 }
 
-void _cacheCoverSettingsSerialize(
+void _coverCacheSettingsSerialize(
   CoverCacheSettings object,
   IsarWriter writer,
   List<int> offsets,
@@ -90,7 +91,7 @@ void _cacheCoverSettingsSerialize(
   writer.writeByte(offsets[3], object.previewSize.index);
 }
 
-CoverCacheSettings _cacheCoverSettingsDeserialize(
+CoverCacheSettings _coverCacheSettingsDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
@@ -98,15 +99,17 @@ CoverCacheSettings _cacheCoverSettingsDeserialize(
 ) {
   final object = CoverCacheSettings(
     enabled: reader.readBool(offsets[0]),
-    fullSize: _CacheCoverSettingsfullSizeValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+    fullSize: _CoverCacheSettingsfullSizeValueEnumMap[
+            reader.readByteOrNull(offsets[1])] ??
         CoverSize.original,
-    previewSize: _CacheCoverSettingspreviewSizeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+    previewSize: _CoverCacheSettingspreviewSizeValueEnumMap[
+            reader.readByteOrNull(offsets[3])] ??
         CoverSize.original,
   );
   return object;
 }
 
-P _cacheCoverSettingsDeserializeProp<P>(
+P _coverCacheSettingsDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -116,50 +119,54 @@ P _cacheCoverSettingsDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
-      return (_CacheCoverSettingsfullSizeValueEnumMap[reader.readByteOrNull(offset)] ??
+      return (_CoverCacheSettingsfullSizeValueEnumMap[
+              reader.readByteOrNull(offset)] ??
           CoverSize.original) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (_CacheCoverSettingspreviewSizeValueEnumMap[reader.readByteOrNull(offset)] ??
+      return (_CoverCacheSettingspreviewSizeValueEnumMap[
+              reader.readByteOrNull(offset)] ??
           CoverSize.original) as P;
     default:
       throw IsarError("Unknown property with id $propertyId");
   }
 }
 
-const _CacheCoverSettingsfullSizeEnumValueMap = {
+const _CoverCacheSettingsfullSizeEnumValueMap = {
   "original": 0,
   "medium": 1,
   "small": 2,
 };
-const _CacheCoverSettingsfullSizeValueEnumMap = {
+const _CoverCacheSettingsfullSizeValueEnumMap = {
   0: CoverSize.original,
   1: CoverSize.medium,
   2: CoverSize.small,
 };
-const _CacheCoverSettingspreviewSizeEnumValueMap = {
+const _CoverCacheSettingspreviewSizeEnumValueMap = {
   "original": 0,
   "medium": 1,
   "small": 2,
 };
-const _CacheCoverSettingspreviewSizeValueEnumMap = {
+const _CoverCacheSettingspreviewSizeValueEnumMap = {
   0: CoverSize.original,
   1: CoverSize.medium,
   2: CoverSize.small,
 };
 
-Id _cacheCoverSettingsGetId(CoverCacheSettings object) {
+Id _coverCacheSettingsGetId(CoverCacheSettings object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _cacheCoverSettingsGetLinks(CoverCacheSettings object) {
+List<IsarLinkBase<dynamic>> _coverCacheSettingsGetLinks(
+    CoverCacheSettings object) {
   return [];
 }
 
-void _cacheCoverSettingsAttach(IsarCollection<dynamic> col, Id id, CoverCacheSettings object) {}
+void _coverCacheSettingsAttach(
+    IsarCollection<dynamic> col, Id id, CoverCacheSettings object) {}
 
-extension CacheCoverSettingsByIndex on IsarCollection<CoverCacheSettings> {
+extension CoverCacheSettingsByIndex on IsarCollection<CoverCacheSettings> {
   Future<CoverCacheSettings?> getByKey(String key) {
     return getByIndex(r"key", [key]);
   }
@@ -208,12 +215,13 @@ extension CacheCoverSettingsByIndex on IsarCollection<CoverCacheSettings> {
     return putAllByIndex(r"key", objects);
   }
 
-  List<Id> putAllByKeySync(List<CoverCacheSettings> objects, {bool saveLinks = true}) {
+  List<Id> putAllByKeySync(List<CoverCacheSettings> objects,
+      {bool saveLinks = true}) {
     return putAllByIndexSync(r"key", objects, saveLinks: saveLinks);
   }
 }
 
-extension CacheCoverSettingsQueryWhereSort
+extension CoverCacheSettingsQueryWhereSort
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QWhere> {
   QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
@@ -222,9 +230,10 @@ extension CacheCoverSettingsQueryWhereSort
   }
 }
 
-extension CacheCoverSettingsQueryWhere
+extension CoverCacheSettingsQueryWhere
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QWhereClause> {
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -233,7 +242,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -255,8 +265,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -264,8 +274,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -273,7 +283,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> idBetween(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -289,7 +300,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> keyEqualTo(String key) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      keyEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r"key",
@@ -298,8 +310,8 @@ extension CacheCoverSettingsQueryWhere
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause> keyNotEqualTo(
-      String key) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterWhereClause>
+      keyNotEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -334,10 +346,10 @@ extension CacheCoverSettingsQueryWhere
   }
 }
 
-extension CacheCoverSettingsQueryFilter
+extension CoverCacheSettingsQueryFilter
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QFilterCondition> {
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> enabledEqualTo(
-      bool value) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      enabledEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"enabled",
@@ -346,8 +358,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> fullSizeEqualTo(
-      CoverSize value) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      fullSizeEqualTo(CoverSize value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"fullSize",
@@ -356,7 +368,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> fullSizeGreaterThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      fullSizeGreaterThan(
     CoverSize value, {
     bool include = false,
   }) {
@@ -369,7 +382,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> fullSizeLessThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      fullSizeLessThan(
     CoverSize value, {
     bool include = false,
   }) {
@@ -382,7 +396,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> fullSizeBetween(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      fullSizeBetween(
     CoverSize lower,
     CoverSize upper, {
     bool includeLower = true,
@@ -399,7 +414,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"id",
@@ -408,7 +424,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -421,7 +438,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> idLessThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -434,7 +452,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> idBetween(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -451,7 +470,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyEqualTo(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -464,7 +484,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyGreaterThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -479,7 +500,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyLessThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -494,7 +516,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyBetween(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -513,7 +536,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyStartsWith(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -526,7 +550,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyEndsWith(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -539,9 +564,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r"key",
@@ -551,9 +575,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r"key",
@@ -563,7 +586,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyIsEmpty() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"key",
@@ -572,7 +596,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> keyIsNotEmpty() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      keyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r"key",
@@ -581,8 +606,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> previewSizeEqualTo(
-      CoverSize value) {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      previewSizeEqualTo(CoverSize value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"previewSize",
@@ -605,7 +630,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> previewSizeLessThan(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      previewSizeLessThan(
     CoverSize value, {
     bool include = false,
   }) {
@@ -618,7 +644,8 @@ extension CacheCoverSettingsQueryFilter
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition> previewSizeBetween(
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterFilterCondition>
+      previewSizeBetween(
     CoverSize lower,
     CoverSize upper, {
     bool includeLower = true,
@@ -636,135 +663,155 @@ extension CacheCoverSettingsQueryFilter
   }
 }
 
-extension CacheCoverSettingsQueryObject
+extension CoverCacheSettingsQueryObject
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QFilterCondition> {}
 
-extension CacheCoverSettingsQueryLinks
+extension CoverCacheSettingsQueryLinks
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QFilterCondition> {}
 
-extension CacheCoverSettingsQuerySortBy
+extension CoverCacheSettingsQuerySortBy
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QSortBy> {
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByEnabled() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByEnabledDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByFullSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByFullSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"fullSize", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByFullSizeDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByFullSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"fullSize", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByKey() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByKeyDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByPreviewSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"previewSize", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> sortByPreviewSizeDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      sortByPreviewSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"previewSize", Sort.desc);
     });
   }
 }
 
-extension CacheCoverSettingsQuerySortThenBy
+extension CoverCacheSettingsQuerySortThenBy
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QSortThenBy> {
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByEnabled() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByEnabledDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByFullSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByFullSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"fullSize", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByFullSizeDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByFullSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"fullSize", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenById() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByKey() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByKeyDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByPreviewSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"previewSize", Sort.asc);
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy> thenByPreviewSizeDesc() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QAfterSortBy>
+      thenByPreviewSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"previewSize", Sort.desc);
     });
   }
 }
 
-extension CacheCoverSettingsQueryWhereDistinct
+extension CoverCacheSettingsQueryWhereDistinct
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct> {
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct> distinctByEnabled() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct>
+      distinctByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"enabled");
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct> distinctByFullSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct>
+      distinctByFullSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"fullSize");
     });
@@ -777,14 +824,15 @@ extension CacheCoverSettingsQueryWhereDistinct
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct> distinctByPreviewSize() {
+  QueryBuilder<CoverCacheSettings, CoverCacheSettings, QDistinct>
+      distinctByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"previewSize");
     });
   }
 }
 
-extension CacheCoverSettingsQueryProperty
+extension CoverCacheSettingsQueryProperty
     on QueryBuilder<CoverCacheSettings, CoverCacheSettings, QQueryProperty> {
   QueryBuilder<CoverCacheSettings, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -798,7 +846,8 @@ extension CacheCoverSettingsQueryProperty
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverSize, QQueryOperations> fullSizeProperty() {
+  QueryBuilder<CoverCacheSettings, CoverSize, QQueryOperations>
+      fullSizeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"fullSize");
     });
@@ -810,7 +859,8 @@ extension CacheCoverSettingsQueryProperty
     });
   }
 
-  QueryBuilder<CoverCacheSettings, CoverSize, QQueryOperations> previewSizeProperty() {
+  QueryBuilder<CoverCacheSettings, CoverSize, QQueryOperations>
+      previewSizeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"previewSize");
     });
@@ -820,13 +870,14 @@ extension CacheCoverSettingsQueryProperty
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
 
-extension GetCacheChapterSettingsCollection on Isar {
-  IsarCollection<ChapterCacheSettings> get cacheChapterSettings => this.collection();
+extension GetChapterCacheSettingsCollection on Isar {
+  IsarCollection<ChapterCacheSettings> get chapterCacheSettings =>
+      this.collection();
 }
 
-const CacheChapterSettingsSchema = CollectionSchema(
-  name: r"CacheChapterSettings",
-  id: -116877440429101519,
+const ChapterCacheSettingsSchema = CollectionSchema(
+  name: r"ChapterCacheSettings",
+  id: -1596114072565871281,
   properties: {
     r"enabled": PropertySchema(
       id: 0,
@@ -839,10 +890,10 @@ const CacheChapterSettingsSchema = CollectionSchema(
       type: IsarType.string,
     )
   },
-  estimateSize: _cacheChapterSettingsEstimateSize,
-  serialize: _cacheChapterSettingsSerialize,
-  deserialize: _cacheChapterSettingsDeserialize,
-  deserializeProp: _cacheChapterSettingsDeserializeProp,
+  estimateSize: _chapterCacheSettingsEstimateSize,
+  serialize: _chapterCacheSettingsSerialize,
+  deserialize: _chapterCacheSettingsDeserialize,
+  deserializeProp: _chapterCacheSettingsDeserializeProp,
   idName: r"id",
   indexes: {
     r"key": IndexSchema(
@@ -861,13 +912,13 @@ const CacheChapterSettingsSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _cacheChapterSettingsGetId,
-  getLinks: _cacheChapterSettingsGetLinks,
-  attach: _cacheChapterSettingsAttach,
+  getId: _chapterCacheSettingsGetId,
+  getLinks: _chapterCacheSettingsGetLinks,
+  attach: _chapterCacheSettingsAttach,
   version: "3.0.5",
 );
 
-int _cacheChapterSettingsEstimateSize(
+int _chapterCacheSettingsEstimateSize(
   ChapterCacheSettings object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
@@ -877,7 +928,7 @@ int _cacheChapterSettingsEstimateSize(
   return bytesCount;
 }
 
-void _cacheChapterSettingsSerialize(
+void _chapterCacheSettingsSerialize(
   ChapterCacheSettings object,
   IsarWriter writer,
   List<int> offsets,
@@ -887,7 +938,7 @@ void _cacheChapterSettingsSerialize(
   writer.writeString(offsets[1], object.key);
 }
 
-ChapterCacheSettings _cacheChapterSettingsDeserialize(
+ChapterCacheSettings _chapterCacheSettingsDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
@@ -899,7 +950,7 @@ ChapterCacheSettings _cacheChapterSettingsDeserialize(
   return object;
 }
 
-P _cacheChapterSettingsDeserializeProp<P>(
+P _chapterCacheSettingsDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -915,17 +966,19 @@ P _cacheChapterSettingsDeserializeProp<P>(
   }
 }
 
-Id _cacheChapterSettingsGetId(ChapterCacheSettings object) {
+Id _chapterCacheSettingsGetId(ChapterCacheSettings object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _cacheChapterSettingsGetLinks(ChapterCacheSettings object) {
+List<IsarLinkBase<dynamic>> _chapterCacheSettingsGetLinks(
+    ChapterCacheSettings object) {
   return [];
 }
 
-void _cacheChapterSettingsAttach(IsarCollection<dynamic> col, Id id, ChapterCacheSettings object) {}
+void _chapterCacheSettingsAttach(
+    IsarCollection<dynamic> col, Id id, ChapterCacheSettings object) {}
 
-extension CacheChapterSettingsByIndex on IsarCollection<ChapterCacheSettings> {
+extension ChapterCacheSettingsByIndex on IsarCollection<ChapterCacheSettings> {
   Future<ChapterCacheSettings?> getByKey(String key) {
     return getByIndex(r"key", [key]);
   }
@@ -974,23 +1027,26 @@ extension CacheChapterSettingsByIndex on IsarCollection<ChapterCacheSettings> {
     return putAllByIndex(r"key", objects);
   }
 
-  List<Id> putAllByKeySync(List<ChapterCacheSettings> objects, {bool saveLinks = true}) {
+  List<Id> putAllByKeySync(List<ChapterCacheSettings> objects,
+      {bool saveLinks = true}) {
     return putAllByIndexSync(r"key", objects, saveLinks: saveLinks);
   }
 }
 
-extension CacheChapterSettingsQueryWhereSort
+extension ChapterCacheSettingsQueryWhereSort
     on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QWhere> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhere> anyId() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhere>
+      anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension CacheChapterSettingsQueryWhere
+extension ChapterCacheSettingsQueryWhere
     on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QWhereClause> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> idEqualTo(Id id) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -999,7 +1055,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -1021,8 +1078,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -1030,8 +1087,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -1039,7 +1096,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> idBetween(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -1055,8 +1113,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> keyEqualTo(
-      String key) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      keyEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r"key",
@@ -1065,8 +1123,8 @@ extension CacheChapterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause> keyNotEqualTo(
-      String key) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterWhereClause>
+      keyNotEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -1101,10 +1159,10 @@ extension CacheChapterSettingsQueryWhere
   }
 }
 
-extension CacheChapterSettingsQueryFilter
-    on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QFilterCondition> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> enabledEqualTo(
-      bool value) {
+extension ChapterCacheSettingsQueryFilter on QueryBuilder<ChapterCacheSettings,
+    ChapterCacheSettings, QFilterCondition> {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> enabledEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"enabled",
@@ -1113,8 +1171,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> idEqualTo(
-      Id value) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"id",
@@ -1123,7 +1181,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -1136,7 +1195,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> idLessThan(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -1149,7 +1209,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> idBetween(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -1166,7 +1227,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyEqualTo(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -1179,7 +1241,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyGreaterThan(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1194,7 +1257,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyLessThan(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1209,7 +1273,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyBetween(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -1228,7 +1293,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyStartsWith(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -1241,7 +1307,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyEndsWith(
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -1254,9 +1321,9 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+          QAfterFilterCondition>
+      keyContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r"key",
@@ -1266,9 +1333,9 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+          QAfterFilterCondition>
+      keyMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r"key",
@@ -1278,7 +1345,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyIsEmpty() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"key",
@@ -1287,7 +1355,8 @@ extension CacheChapterSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterFilterCondition> keyIsNotEmpty() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings,
+      QAfterFilterCondition> keyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r"key",
@@ -1297,96 +1366,107 @@ extension CacheChapterSettingsQueryFilter
   }
 }
 
-extension CacheChapterSettingsQueryObject
-    on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QFilterCondition> {}
+extension ChapterCacheSettingsQueryObject on QueryBuilder<ChapterCacheSettings,
+    ChapterCacheSettings, QFilterCondition> {}
 
-extension CacheChapterSettingsQueryLinks
-    on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QFilterCondition> {}
+extension ChapterCacheSettingsQueryLinks on QueryBuilder<ChapterCacheSettings,
+    ChapterCacheSettings, QFilterCondition> {}
 
-extension CacheChapterSettingsQuerySortBy
+extension ChapterCacheSettingsQuerySortBy
     on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QSortBy> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> sortByEnabled() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      sortByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.asc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> sortByEnabledDesc() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      sortByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.desc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> sortByKey() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      sortByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> sortByKeyDesc() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      sortByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 }
 
-extension CacheChapterSettingsQuerySortThenBy
+extension ChapterCacheSettingsQuerySortThenBy
     on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QSortThenBy> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenByEnabled() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.asc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenByEnabledDesc() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"enabled", Sort.desc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenById() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.asc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenByKey() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy> thenByKeyDesc() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QAfterSortBy>
+      thenByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 }
 
-extension CacheChapterSettingsQueryWhereDistinct
+extension ChapterCacheSettingsQueryWhereDistinct
     on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QDistinct> {
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QDistinct> distinctByEnabled() {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QDistinct>
+      distinctByEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"enabled");
     });
   }
 
-  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QDistinct> distinctByKey(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QDistinct>
+      distinctByKey({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"key", caseSensitive: caseSensitive);
     });
   }
 }
 
-extension CacheChapterSettingsQueryProperty
-    on QueryBuilder<ChapterCacheSettings, ChapterCacheSettings, QQueryProperty> {
+extension ChapterCacheSettingsQueryProperty on QueryBuilder<
+    ChapterCacheSettings, ChapterCacheSettings, QQueryProperty> {
   QueryBuilder<ChapterCacheSettings, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"id");
