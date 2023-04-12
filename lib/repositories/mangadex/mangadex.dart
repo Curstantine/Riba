@@ -2,11 +2,11 @@ import "dart:io";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/custom_list.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/manga.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/custom_list.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/mangadex/services/custom_list.dart";

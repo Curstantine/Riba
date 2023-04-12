@@ -4,9 +4,9 @@ import "dart:io";
 
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/models/cover_art.dart";
 import "package:riba/repositories/mangadex/models/error.dart";
 import "package:riba/repositories/mangadex/models/general.dart";

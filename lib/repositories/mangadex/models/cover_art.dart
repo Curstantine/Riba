@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/utils/exception.dart";
 

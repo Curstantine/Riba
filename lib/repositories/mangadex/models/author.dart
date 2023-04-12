@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/author.dart";
-import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/models/author.dart";
+import "package:riba/repositories/local/models/localization.dart";
 
 import "general.dart";
 import "relationship.dart";

@@ -4,10 +4,10 @@ import "dart:io";
 
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/models/chapter.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";

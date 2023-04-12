@@ -1,5 +1,5 @@
 import "package:flutter/material.dart" show runApp, WidgetsFlutterBinding;
-import "package:riba/repositories/mangadex/database.dart";
+import "package:riba/repositories/local/database.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/directories.dart";
 import "package:riba/utils/logging.dart";
@@ -17,7 +17,7 @@ void main() async {
     InitPackageInfo.initPlatform(),
   ]);
 
-  await MangaDexDatabase.init();
+  await LocalDatabase.init();
   await Settings.init();
   await ThemeManager.init();
   runApp(const App());

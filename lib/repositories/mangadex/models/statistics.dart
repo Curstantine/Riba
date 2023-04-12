@@ -1,9 +1,9 @@
-import "package:riba/repositories/local/statistics.dart";
-import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/url.dart";
 
 import "error.dart";
+import "general.dart";
 
 class MDStatistics {
   final Map<String, StatisticAttributes> statistics;

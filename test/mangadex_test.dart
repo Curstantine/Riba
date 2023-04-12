@@ -4,9 +4,9 @@ import "dart:io";
 import "package:flutter_test/flutter_test.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/mangadex/database.dart";
+import "package:riba/repositories/local/database.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
@@ -25,7 +25,7 @@ void main() async {
   InitDirectories.initMock();
   InitPackageInfo.initMock();
 
-  final database = await MangaDexDatabase.init(testing: true);
+  final database = await LocalDatabase.init(testing: true);
   final mangadex = MangaDex.instance;
 
   setUp(() async => await clear(database, mangadex));
@@ -256,7 +256,7 @@ void main() async {
   });
 }
 
-Future<void> clear(MangaDexDatabase database, MangaDex mangadex) async {
+Future<void> clear(LocalDatabase database, MangaDex mangadex) async {
   await database.local.writeTxn(() async => await database.local.clear());
   try {
     await Future.wait([

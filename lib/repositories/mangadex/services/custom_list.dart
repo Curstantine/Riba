@@ -3,8 +3,8 @@ import "dart:convert";
 import "dart:io";
 
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/custom_list.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/custom_list.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/models/custom_list.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";

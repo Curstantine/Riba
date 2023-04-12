@@ -1,5 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/utils/exception.dart";
 

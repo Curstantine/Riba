@@ -1,7 +1,7 @@
-import "package:riba/repositories/local/author.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/manga.dart";
-import "package:riba/repositories/local/tag.dart";
+import "package:riba/repositories/local/models/author.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/manga.dart";
+import "package:riba/repositories/local/models/tag.dart";
 
 class MangaData {
   final Manga manga;

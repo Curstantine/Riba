@@ -1,6 +1,4 @@
-import "package:hive/hive.dart";
 import "package:isar/isar.dart";
-import "package:riba/utils/constants.dart";
 import "package:riba/utils/hash.dart";
 
 import "localization.dart";
@@ -104,19 +102,23 @@ enum ImageFileType {
   }
 }
 
-@HiveType(typeId: TypeAdapterIds.coverSizeAdapter)
+/// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
 enum CoverSize {
-  @HiveField(0)
   original(null),
-
-  @HiveField(1)
   medium(512),
-
-  @HiveField(2)
   small(256);
 
   final int? size;
   const CoverSize(this.size);
 
-  String get human => name.substring(0, 1).toUpperCase() + name.substring(1);
+  String asHumanReadable() {
+    switch (this) {
+      case CoverSize.original:
+        return "Original";
+      case CoverSize.medium:
+        return "Medium";
+      case CoverSize.small:
+        return "Small";
+    }
+  }
 }

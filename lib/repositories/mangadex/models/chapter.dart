@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/models/relationship.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 
