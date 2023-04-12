@@ -15,10 +15,10 @@ void main() async {
   await Future.wait([
     InitDirectories.initPlatform(),
     InitPackageInfo.initPlatform(),
+    LocalDatabase.init(),
+    Settings.init(),
   ]);
 
-  await LocalDatabase.init();
-  await Settings.init();
   await ThemeManager.init();
   runApp(const App());
 }
