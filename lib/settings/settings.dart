@@ -1,25 +1,31 @@
-import "package:hive/hive.dart";
-import "package:riba/settings/filter.dart";
+import "package:isar/isar.dart";
+import "package:riba/utils/directories.dart";
 
 import "cache.dart";
+import "filter.dart";
 import "theme.dart";
 
 class Settings {
   static late final Settings instance;
 
-  Settings._internal();
+  Settings._internal({required this.database});
 
-  final ThemeSettings theme = ThemeSettings();
-  final CacheSettings caching = CacheSettings();
-  final FilterSettings filter = FilterSettings();
+  final Isar database;
 
   static Future<void> init() async {
-    instance = Settings._internal();
+    final schemas = [
+      CacheCoverSettingsSchema,
+      CacheChapterSettingsSchema,
+      MangaFilterSettingsSchema,
+      ThemeSettingsSchema,
+    ];
 
-    await Future.wait([
-      instance.theme.init(),
-      instance.caching.init(),
-      instance.filter.init(),
-    ]);
+    instance = Settings._internal(
+      database: await Isar.open(
+        schemas,
+        directory: InitDirectories.instance.supportDir.path,
+        name: "Settings",
+      ),
+    );
   }
 }

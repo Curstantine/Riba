@@ -34,6 +34,7 @@ class LocalDatabase {
       local: await Isar.open(
         schemas,
         directory: InitDirectories.instance.supportDir.path,
+        name: "LocalDatabase",
       ),
     );
 

@@ -1,35 +1,40 @@
 import "package:isar/isar.dart";
-import "package:riba/repositories/local/cover_art.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
 
-@Collection(accessor: "cache")
-class CacheSettings {
+part "cache.g.dart";
+
+@Collection(accessor: "coverCacheSettings")
+class CoverCacheSettings {
   final Id id = Isar.autoIncrement;
 
   @Index(unique: true, replace: true)
-  final String key = "cache";
+  final String key = "cacheCoverSettings";
 
-  late CacheCoverSettings coverSettings;
-  late CacheChapterSettings chapterSettings;
-}
-
-@embedded
-class CacheCoverSettings {
   late bool enabled;
+
+  @Enumerated(EnumType.ordinal)
   late CoverSize previewSize;
+
+  @Enumerated(EnumType.ordinal)
   late CoverSize fullSize;
 
-  CacheCoverSettings({
+  CoverCacheSettings({
     required this.enabled,
     required this.previewSize,
     required this.fullSize,
   });
 }
 
-@embedded
-class CacheChapterSettings {
+@Collection(accessor: "chapterCacheSettings")
+class ChapterCacheSettings {
+  final Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
+  final String key = "cacheChapterSettings";
+
   late bool enabled;
 
-  CacheChapterSettings({
+  ChapterCacheSettings({
     required this.enabled,
   });
 }
