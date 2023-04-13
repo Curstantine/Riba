@@ -26,14 +26,14 @@ class Settings {
 		final localChapterCacheSettings = locals[1];
 		final localThemeSettings = locals[2];
 
-		await Future.wait([
+		await database.writeTxn(() => Future.wait([
 			if (localCoverCacheSettings == null)
 				database.coverCacheSettings.put(CoverCacheSettings.defaultSettings),
 			if (localChapterCacheSettings == null)
 				database.chapterCacheSettings.put(ChapterCacheSettings.defaultSettings),
 			if (localThemeSettings == null)
 				database.themeSettings.put(ThemeSettings.defaultSettings),
-		]);
+		]));
 
 		/// Run migrations and default initializations here.
 		instance = Settings._internal(database:  database);
