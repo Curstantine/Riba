@@ -12,6 +12,7 @@ Models here are categorized into 2 types:
 
 -   Id is auto-incremented and the model itself is replaced by an unchangeable `key`.
 -   'getByKey` should be used to query from Isar.
+-   `static const isarKey` should be populated with same `key` to expose to the rest of the app.
 
 As an example, `CoverCacheSettings` is unique per collection:
 

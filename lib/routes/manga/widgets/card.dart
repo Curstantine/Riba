@@ -2,10 +2,14 @@ import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
+import "package:isar/isar.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
@@ -16,73 +20,85 @@ class MangaCard extends StatelessWidget {
   MangaCard({super.key, required this.id});
 
   final String id;
-  final cacheSettings = CacheSettings.instance;
+
+  late final coverCacheSettingsStream = CoverCacheSettings.ref
+      .where()
+      .keyEqualTo(CoverCacheSettings.isarKey)
+      .watch()
+      .asBroadcastStream()
+      .asyncMap((e) => e.first);
+
+  late final mangaFuture = MangaDex.instance.manga.get(id);
+
+  late final Stream<File?> coverStream = coverCacheSettingsStream.asyncMap((e) async {
+    final mangaData = await mangaFuture;
+    if (mangaData.cover == null) return null;
+
+    return MangaDex.instance.cover.getFile(
+      mangaData.manga.id,
+      mangaData.cover!.fileId,
+      mangaData.cover!.fileType,
+      e.previewSize,
+      e.enabled,
+    );
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final listenable = cacheSettings.box
-        .listenable(keys: [CacheSettingKeys.previewSize, CacheSettingKeys.cacheCovers]);
 
     return FutureBuilder<MangaData>(
-      future: MangaDex.instance.manga.get(id),
+      future: mangaFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return buildCard(theme, child: const Center(child: CircularProgressIndicator()));
+          return buildCardLayout(theme, child: const Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-          return buildCard(theme, child: buildError(theme, error: snapshot.error));
+          return buildCardLayout(theme, child: buildError(theme, error: snapshot.error));
         }
 
-        final manga = snapshot.data!.manga;
-        final cover = snapshot.data!.cover;
+        final data = snapshot.requireData;
 
-        return buildCard(
-          theme,
-          onTap: () => Navigator.push(
-              context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical)),
-          title: manga.titles.getPreferred([Locale.en, Locale.ja]),
-          child: ValueListenableBuilder(
-            valueListenable: listenable,
-            builder: (context, _, __) {
-              final coverFuture = cover == null
-                  ? Future.value(null)
-                  : MangaDex.instance.cover.getImage(id, cover,
-                      size: cacheSettings.previewSize, cache: cacheSettings.cacheCovers);
-
-              return FutureBuilder<File?>(
-                future: coverFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return buildError(theme, error: snapshot.error);
-                  }
-
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: Text(
-                        "Cover art not found.",
-                        style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-
-                  return Image.file(snapshot.data!, fit: BoxFit.fill);
-                },
-              );
-            },
-          ),
-        );
+        return buildCard(theme, context, data.manga, data.cover);
       },
     );
   }
 
-  Widget buildCard(ThemeData theme, {void Function()? onTap, Widget? child, String? title}) {
+  Widget buildCard(ThemeData theme, BuildContext context, Manga manga, CoverArt? cover) {
+    return buildCardLayout(
+      theme,
+      onTap: () => navigateToMangaView(context),
+      // TODO: dynamic preferred locale
+      title: manga.titles.getPreferred([Locale.en, Locale.ja]),
+      child: StreamBuilder<File?>(
+        stream: coverStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return buildError(theme, error: snapshot.error);
+          }
+
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text(
+                "Cover art not found.",
+                style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          return Image.file(snapshot.data!, fit: BoxFit.fill);
+        },
+      ),
+    );
+  }
+
+  Widget buildCardLayout(ThemeData theme, {void Function()? onTap, Widget? child, String? title}) {
     return Container(
       width: 150,
       constraints: const BoxConstraints(maxHeight: 275),
@@ -126,5 +142,9 @@ class MangaCard extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(height: 1), textAlign: TextAlign.center),
       ]),
     );
+  }
+
+  void navigateToMangaView(BuildContext context) {
+    Navigator.push(context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical));
   }
 }

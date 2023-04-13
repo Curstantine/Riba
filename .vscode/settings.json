@@ -1,51 +1,59 @@
 {
-	"dart.lineLength": 100,
-	"prettier.printWidth": 100,
-	"prettier.useTabs": true,
-	"prettier.tabWidth": 4,
-	"xmlTools.enforcePrettySelfClosingTagOnFormat": true,
-	"xmlTools.splitAttributesOnFormat": true,
-	"xmlTools.splitXmlnsOnFormat": true,
-	"editor.rulers": [
-		{
-			"column": 100
-		}
-	],
-	"editor.formatOnSave": true,
-	"editor.codeActionsOnSave": {
-		"source.fixAll": true,
-		"source.organizeImports": true
-	},
-	"licenser.author": "Curstantine",
-	"licenser.license": "GPLv3",
-	"licenser.disableAutoHeaderInsertion": true,
-	"explorer.fileNesting.enabled": true,
-	"explorer.fileNesting.patterns": {
-		"*.dart": "${capture}.g.dart"
-	},
-	"cSpell.words": [
-		"curstantine",
-		"deduped",
-		"doujinshi",
-		"fantia",
-		"josei",
-		"mangadex",
-		"naver",
-		"nico",
-		"Oneshot",
-		"pixiv",
-		"preserialization",
-		"riba",
-		"riverpod",
-		"roboto",
-		"scanlation",
-		"seinen",
-		"Serde",
-		"shoujo",
-		"shounen",
-		"skeb",
-		"tappable",
-		"weibo",
-		"Zoomable"
-	]
+    "editor.rulers": [
+        100,
+    ],
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.indentSize": "tabSize",
+    "editor.detectIndentation": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true,
+        "source.organizeImports": true,
+    },
+    // Disable Dart Formatter
+    "dart.enableSdkFormatter": false,
+    "dart.lineLength": 100,
+    // Prettier Settings for files outside of Dart
+    "prettier.tabWidth": 4,
+    "prettier.useTabs": true,
+    "prettier.printWidth": 100,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // XML Tools Settings
+    "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
+    "xmlTools.splitAttributesOnFormat": true,
+    "xmlTools.splitXmlnsOnFormat": true,
+    // Licenser Settings
+    "licenser.author": "Curstantine",
+    "licenser.license": "GPLv3",
+    "licenser.disableAutoHeaderInsertion": true,
+    // Dart Auto Generated Files
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.dart": "${capture}.g.dart"
+    },
+    "cSpell.words": [
+        "curstantine",
+        "deduped",
+        "doujinshi",
+        "fantia",
+        "josei",
+        "mangadex",
+        "naver",
+        "nico",
+        "Oneshot",
+        "pixiv",
+        "preserialization",
+        "riba",
+        "riverpod",
+        "roboto",
+        "scanlation",
+        "seinen",
+        "Serde",
+        "shoujo",
+        "shounen",
+        "skeb",
+        "tappable",
+        "weibo",
+        "Zoomable"
+    ],
 }

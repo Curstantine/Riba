@@ -8,11 +8,12 @@ part "cache.g.dart";
 @Collection(accessor: "coverCacheSettings")
 class CoverCacheSettings {
   static final ref = Settings.instance.database.coverCacheSettings;
+  static const isarKey = "coverCacheSettings";
 
   final Id id = Isar.autoIncrement;
 
   @Index(unique: true, replace: true)
-  final String key = "coverCacheSettings";
+  final String key = isarKey;
 
   late bool enabled;
 
@@ -44,11 +45,12 @@ class CoverCacheSettings {
 @Collection(accessor: "chapterCacheSettings")
 class ChapterCacheSettings {
   static final ref = Settings.instance.database.chapterCacheSettings;
+  static const isarKey = "chapterCacheSettings";
 
   final Id id = Isar.autoIncrement;
 
   @Index(unique: true, replace: true)
-  final String key = "chapterCacheSettings";
+  final String key = isarKey;
 
   late bool enabled;
 

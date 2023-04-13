@@ -5,6 +5,7 @@ import "package:dash_flags/dash_flags.dart" as flags;
 import "package:flutter/material.dart" hide Locale;
 import "package:flutter/services.dart";
 import "package:intl/intl.dart" show DateFormat;
+import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/localization.dart";
@@ -18,8 +19,12 @@ import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
 import "package:riba/routes/manga/widgets/sheet.dart";
+import "package:riba/routes/manga/widgets/sheets/cover.dart";
+import "package:riba/settings/cache.dart";
+import "package:riba/settings/filter.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/utils/hash.dart";
 import "package:riba/utils/lazy.dart";
 import "package:riba/utils/theme.dart";
 
@@ -38,12 +43,22 @@ class _MangaViewState extends State<MangaView> {
   final scrollController = ScrollController();
   final preferredLanguages = [Language.english, Language.japanese];
   final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
-  final cacheSettings = CacheSettings.instance;
-  final filterSettings = FilterSettings.instance;
 
   final showAppBar = ValueNotifier(false);
   final expandDescription = ValueNotifier(false);
   final filtersApplied = ValueNotifier(false);
+
+  late final mangaFilterSettingsStream = MangaFilterSettings.ref
+      .watchObject(fastHash(widget.id))
+      .asBroadcastStream()
+      .asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
+
+  late final coverCacheSettingsStream = CoverCacheSettings.ref
+      .where()
+      .keyEqualTo(CoverCacheSettings.isarKey)
+      .watch()
+      .asBroadcastStream()
+      .asyncMap((e) => e.first);
 
   late Future<MangaData> mangaFuture;
   late Future<Statistics> statisticsFuture;
@@ -81,14 +96,15 @@ class _MangaViewState extends State<MangaView> {
   void fetchMangaData({bool reload = false}) {
     mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
     statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-    coverFuture = mangaFuture.then((data) {
+    coverFuture = mangaFuture.then((data) async {
       if (data.cover == null) return Future.value(null);
+      final coverCacheSettings = await coverCacheSettingsStream.single;
 
       return MangaDex.instance.cover.getImage(
         widget.id,
         data.cover!,
-        size: cacheSettings.fullSize,
-        cache: cacheSettings.cacheCovers,
+        size: coverCacheSettings.fullSize,
+        cache: coverCacheSettings.enabled,
       );
     });
 
@@ -96,7 +112,9 @@ class _MangaViewState extends State<MangaView> {
   }
 
   Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
-    final filters = await filterSettings.mangaFilters.get(widget.id) ?? MangaFilterData.defaults();
+    final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
+        MangaFilterSettings(id: widget.id, excludedGroupIds: []);
+
     final data = await MangaDex.instance.chapter.getFeed(
       checkDB: !reload,
       overrides: MangaDexChapterQueryFilter(
@@ -484,33 +502,25 @@ class _MangaViewState extends State<MangaView> {
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("$chapterCount Chapters",
                   style: text.titleMedium?.withColorOpacity(chapters != null ? 1 : 0.5)),
-              ValueListenableBuilder(
-                valueListenable: filterSettings.mangaFilters.listenable(keys: [widget.id]),
-                child: const SizedBox.square(
-                  dimension: 24,
-                  child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
-                ),
-                builder: (context, value, loadingChild) {
-                  return FutureBuilder<MangaFilterData?>(
-                    future: value.get(widget.id),
-                    builder: (context, filterSnapshot) {
-                      if (!snapshot.hasData ||
-                          filterSnapshot.connectionState != ConnectionState.done) {
-                        return loadingChild!;
-                      }
+              StreamBuilder(
+                stream: mangaFilterSettingsStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
+                    return const SizedBox.square(
+                      dimension: 24,
+                      child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
+                    );
+                  }
 
-                      final filterData = filterSnapshot.data ?? MangaFilterData.defaults();
-
-                      return IconButton(
-                        isSelected: !filterData.isDefault,
-                        icon: const Icon(Icons.filter_list_rounded),
-                        selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
-                        visualDensity: VisualDensity.comfortable,
-                        onPressed: () {
-                          if (chapters == null) return;
-                          showFilterSheet(chapters.data, filterData);
-                        },
-                      );
+                  final filterData = snapshot.requireData;
+                  return IconButton(
+                    isSelected: !filterData.isDefault,
+                    icon: const Icon(Icons.filter_list_rounded),
+                    selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
+                    visualDensity: VisualDensity.comfortable,
+                    onPressed: () {
+                      if (chapters == null) return;
+                      showFilterSheet(chapters.data, filterData);
                     },
                   );
                 },
@@ -657,11 +667,11 @@ class _MangaViewState extends State<MangaView> {
     );
   }
 
-  void showFilterSheet(List<ChapterData> chapters, MangaFilterData filterData) {
+  void showFilterSheet(List<ChapterData> chapters, MangaFilterSettings filterSettings) {
     final media = MediaQuery.of(context);
     final groupIds =
         chapters.map((e) => e.groups).expand((e) => e).map((e) => e.id).toSet().toList() +
-            filterData.excludedGroupIds;
+            filterSettings.excludedGroupIds;
 
     showModalBottomSheet(
       context: context,
@@ -670,11 +680,11 @@ class _MangaViewState extends State<MangaView> {
         padding: EdgeInsets.only(bottom: media.padding.bottom),
         data: ChapterFilterSheetData(
           mangaId: widget.id,
-          filter: filterData,
+          filterSettings: filterSettings,
           groupIds: groupIds,
         ),
         onApply: (newFilter) async {
-          await filterSettings.mangaFilters.put(widget.id, newFilter);
+          await MangaFilterSettings.ref.isar.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
 
           if (mounted) {
             Navigator.pop(context);

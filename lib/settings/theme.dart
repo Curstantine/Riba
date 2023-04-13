@@ -9,11 +9,12 @@ part "theme.g.dart";
 @Collection(accessor: "themeSettings")
 class ThemeSettings {
   static final ref = Settings.instance.database.themeSettings;
+  static const isarKey = "themeSettings";
 
   final Id id = Isar.autoIncrement;
 
   @Index(unique: true, replace: true)
-  final String key = "themeSettings";
+  final String key = isarKey;
 
   @Enumerated(EnumType.ordinal)
   late ThemeId themeId;
