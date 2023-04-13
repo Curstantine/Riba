@@ -1,59 +1,66 @@
 {
-    "editor.rulers": [
-        100,
-    ],
-    "editor.tabSize": 4,
-    "editor.formatOnSave": true,
-    "editor.indentSize": "tabSize",
-    "editor.detectIndentation": false,
-    "editor.codeActionsOnSave": {
-        "source.fixAll": true,
-        "source.organizeImports": true,
-    },
-    // Disable Dart Formatter
-    "dart.enableSdkFormatter": false,
-    "dart.lineLength": 100,
-    // Prettier Settings for files outside of Dart
-    "prettier.tabWidth": 4,
-    "prettier.useTabs": true,
-    "prettier.printWidth": 100,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    // XML Tools Settings
-    "xmlTools.enforcePrettySelfClosingTagOnFormat": true,
-    "xmlTools.splitAttributesOnFormat": true,
-    "xmlTools.splitXmlnsOnFormat": true,
-    // Licenser Settings
-    "licenser.author": "Curstantine",
-    "licenser.license": "GPLv3",
-    "licenser.disableAutoHeaderInsertion": true,
-    // Dart Auto Generated Files
-    "explorer.fileNesting.enabled": true,
-    "explorer.fileNesting.patterns": {
-        "*.dart": "${capture}.g.dart"
-    },
-    "cSpell.words": [
-        "curstantine",
-        "deduped",
-        "doujinshi",
-        "fantia",
-        "josei",
-        "mangadex",
-        "naver",
-        "nico",
-        "Oneshot",
-        "pixiv",
-        "preserialization",
-        "riba",
-        "riverpod",
-        "roboto",
-        "scanlation",
-        "seinen",
-        "Serde",
-        "shoujo",
-        "shounen",
-        "skeb",
-        "tappable",
-        "weibo",
-        "Zoomable"
-    ],
+	"editor.rulers": [
+		100,
+	],
+	"editor.tabSize": 4,
+	"editor.formatOnSave": true,
+	"editor.indentSize": "tabSize",
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": true,
+		"source.organizeImports": true,
+	},
+	// Disable Dart Formatter
+	"dart.enableSdkFormatter": false,
+	"dart.lineLength": 100,
+	// Dart-Code extension sets language-specific settings.
+	// Ref: https://github.com/Dart-Code/Dart-Code/blob/0f22ea3c770950702add7d629433f4f011bd9069/package.json#L1362
+	"[dart]": {
+		"editor.tabSize": 4,
+		"editor.insertSpaces": false,
+	},
+	// Prettier Settings for files outside of Dart
+	"prettier.tabWidth": 4,
+	"prettier.useTabs": true,
+	"prettier.printWidth": 100,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	// XML Tools Settings
+	"xmlTools.enforcePrettySelfClosingTagOnFormat": true,
+	"xmlTools.splitAttributesOnFormat": true,
+	"xmlTools.splitXmlnsOnFormat": true,
+	// Licenser Settings
+	"licenser.author": "Curstantine",
+	"licenser.license": "GPLv3",
+	"licenser.disableAutoHeaderInsertion": true,
+	// Dart Auto Generated Files
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.patterns": {
+		"*.dart": "${capture}.g.dart"
+	},
+	"cSpell.words": [
+		"curstantine",
+		"deduped",
+		"doujinshi",
+		"fantia",
+		"josei",
+		"mangadex",
+		"naver",
+		"nico",
+		"Oneshot",
+		"pixiv",
+		"preserialization",
+		"riba",
+		"riverpod",
+		"roboto",
+		"scanlation",
+		"seinen",
+		"Serde",
+		"shoujo",
+		"shounen",
+		"skeb",
+		"tappable",
+		"weibo",
+		"Zoomable"
+	],
 }
