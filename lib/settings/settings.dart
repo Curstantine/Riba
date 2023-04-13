@@ -16,6 +16,25 @@ class Settings {
 	IsarCollection<ThemeSettings> get themeSettings => _database.themeSettings;
 
 	static Future<void> init(Isar database) async {
+		final locals = await Future.wait([
+			database.coverCacheSettings.getByKey(CoverCacheSettings.isarKey),
+			database.chapterCacheSettings.getByKey(ChapterCacheSettings.isarKey),
+			database.themeSettings.getByKey(ThemeSettings.isarKey),  
+		]);
+
+		final localCoverCacheSettings = locals[0];
+		final localChapterCacheSettings = locals[1];
+		final localThemeSettings = locals[2];
+
+		await Future.wait([
+			if (localCoverCacheSettings == null)
+				database.coverCacheSettings.put(CoverCacheSettings.defaultSettings),
+			if (localChapterCacheSettings == null)
+				database.chapterCacheSettings.put(ChapterCacheSettings.defaultSettings),
+			if (localThemeSettings == null)
+				database.themeSettings.put(ThemeSettings.defaultSettings),
+		]);
+
 		/// Run migrations and default initializations here.
 		instance = Settings._internal(database:  database);
 	}

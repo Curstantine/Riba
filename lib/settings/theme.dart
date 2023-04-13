@@ -35,6 +35,11 @@ class ThemeSettings {
 			themeMode: themeMode ?? this.themeMode,
 		);
 	}
+
+	static final defaultSettings = ThemeSettings(
+		themeId: ThemeId.dynamic,
+		themeMode: ThemeMode.system,
+	);
 }
 
 /// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM

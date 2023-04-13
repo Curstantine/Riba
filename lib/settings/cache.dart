@@ -39,6 +39,12 @@ class CoverCacheSettings {
 			fullSize: fullSize ?? this.fullSize,
 		);
 	}
+
+	static final defaultSettings = CoverCacheSettings(
+		enabled: true,
+		previewSize: CoverSize.medium,
+		fullSize: CoverSize.original,
+	);
 }
 
 @Collection(accessor: "chapterCacheSettings")
@@ -64,4 +70,8 @@ class ChapterCacheSettings {
 			enabled: enabled ?? this.enabled,
 		);
 	}
+
+	static final defaultSettings = ChapterCacheSettings(
+		enabled: true,
+	);
 }
