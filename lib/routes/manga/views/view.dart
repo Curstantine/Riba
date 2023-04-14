@@ -48,7 +48,7 @@ class _MangaViewState extends State<MangaView> {
 	final areFiltersApplied = ValueNotifier(false);
 
 	late final mangaFilterSettingsStream = MangaFilterSettings.ref
-		.watchObject(fastHash(widget.id))
+		.watchObject(fastHash(widget.id), fireImmediately: true)
 		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
 
 	late final coverCacheSettingsStream = CoverCacheSettings.ref
@@ -89,12 +89,12 @@ class _MangaViewState extends State<MangaView> {
 		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
 		coverFuture = mangaFuture.then((data) async {
 			if (data.cover == null) return Future.value(null);
-			final coverCacheSettings = await coverCacheSettingsStream.single;
+			final coverCacheSettings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
 
 			return MangaDex.instance.cover.getImage(
 				widget.id,
 				data.cover!,
-				size: coverCacheSettings.fullSize,
+				size: coverCacheSettings!.fullSize,
 				cache: coverCacheSettings.enabled,
 			);
 		});
