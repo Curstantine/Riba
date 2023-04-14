@@ -2,14 +2,13 @@ import "dart:async";
 import "dart:io";
 
 import "package:dash_flags/dash_flags.dart" as flags;
-import "package:flutter/material.dart" hide Locale;
+import "package:flutter/material.dart" hide Locale, Localizations;
 import "package:flutter/services.dart";
 import "package:intl/intl.dart" show DateFormat;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/localization.dart";
-import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
@@ -29,687 +28,835 @@ import "package:riba/utils/lazy.dart";
 import "package:riba/utils/theme.dart";
 
 class MangaView extends StatefulWidget {
-  const MangaView({super.key, required this.id});
+	const MangaView({super.key, required this.id});
 
-  final String id;
+	final String id;
 
-  @override
-  State<MangaView> createState() => _MangaViewState();
+	@override
+	State<MangaView> createState() => _MangaViewState();
 }
 
 class _MangaViewState extends State<MangaView> {
-  final expandedAppBarHeight = 500.0;
-  final logger = Logger("MangaView");
-  final scrollController = ScrollController();
-  final preferredLanguages = [Language.english, Language.japanese];
-  final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
+	final expandedAppBarHeight = 500.0;
+	final logger = Logger("MangaView");
+	final scrollController = ScrollController();
+	final preferredLanguages = [Language.english, Language.japanese];
+	final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
 
-  final showAppBar = ValueNotifier(false);
-  final expandDescription = ValueNotifier(false);
-  final filtersApplied = ValueNotifier(false);
+	final showAppBar = ValueNotifier(false);
+	final isDescriptionExpanded = ValueNotifier(false);
+	final areFiltersApplied = ValueNotifier(false);
 
-  late final mangaFilterSettingsStream = MangaFilterSettings.ref
-      .watchObject(fastHash(widget.id))
-      .asBroadcastStream()
-      .asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
+	late final mangaFilterSettingsStream = MangaFilterSettings.ref
+		.watchObject(fastHash(widget.id))
+		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
 
-  late final coverCacheSettingsStream = CoverCacheSettings.ref
-      .where()
-      .keyEqualTo(CoverCacheSettings.isarKey)
-      .watch()
-      .asBroadcastStream()
-      .asyncMap((e) => e.first);
+	late final coverCacheSettingsStream = CoverCacheSettings.ref
+		.where()
+		.keyEqualTo(CoverCacheSettings.isarKey)
+		.watch()
+		.asyncMap((e) => e.first);
 
-  late Future<MangaData> mangaFuture;
-  late Future<Statistics> statisticsFuture;
-  late Future<File?> coverFuture;
+	late Future<MangaData> mangaFuture;
+	late Future<Statistics> statisticsFuture;
+	late Future<File?> coverFuture;
 
-  late StreamController<CollectionData<ChapterData>> chapterStreamController =
-      StreamController.broadcast();
-  Stream<CollectionData<ChapterData>> get chapterStream => chapterStreamController.stream;
-  StreamSink<CollectionData<ChapterData>> get chapterSink => chapterStreamController.sink;
+	late StreamController<CollectionData<ChapterData>> chapterStreamController = StreamController.broadcast();
+	Stream<CollectionData<ChapterData>> get chapterStream => chapterStreamController.stream;
+	StreamSink<CollectionData<ChapterData>> get chapterSink => chapterStreamController.sink;
 
-  /// TODO: migrate to ValueNotifier with user login and etc.
-  bool isFollowed = false;
-  bool hasTrackers = false;
-  bool hasCustomLists = false;
+	final isFollowed = ValueNotifier(false);
+	final hasTrackers = ValueNotifier(false);
+	final hasCustomLists = ValueNotifier(false);
 
-  late final colors = Theme.of(context).colorScheme;
-  late final text = Theme.of(context).textTheme;
+	@override
+	void initState() {
+		super.initState();
+		scrollController.addListener(onScroll);
+		fetchMangaData();
+	}
 
-  @override
-  void initState() {
-    super.initState();
-    scrollController.addListener(onScroll);
+	@override
+	void dispose() {
+		chapterStreamController.close();
+		scrollController.removeListener(onScroll);
+		scrollController.dispose();
+		super.dispose();
+	}
 
-    fetchMangaData();
+	void fetchMangaData({bool reload = false}) {
+		mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
+		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
+		coverFuture = mangaFuture.then((data) async {
+			if (data.cover == null) return Future.value(null);
+			final coverCacheSettings = await coverCacheSettingsStream.single;
+
+			return MangaDex.instance.cover.getImage(
+				widget.id,
+				data.cover!,
+				size: coverCacheSettings.fullSize,
+				cache: coverCacheSettings.enabled,
+			);
+		});
+
+		fetchChapters(reload: reload).then(chapterSink.add);
+	}
+
+	Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
+		final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
+			MangaFilterSettings(id: widget.id, excludedGroupIds: []);
+
+		final data = await MangaDex.instance.chapter.getFeed(
+			checkDB: !reload,
+			overrides: MangaDexChapterQueryFilter(
+				mangaId: widget.id,
+				translatedLanguages: preferredLanguages,
+				excludedGroups: filters.excludedGroupIds,
+			),
+		);
+
+		return data;
+	}
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
+
+		final media = MediaQuery.of(context);
+
+		return Scaffold(
+			backgroundColor: theme.colorScheme.background,
+			body: FutureBuilder(
+				// Lol. Don't setState for anything other than fetchMangaData.
+				// Shit will break, badly.
+				future: mangaFuture,
+				builder: (context, snapshot) {
+					if (snapshot.connectionState != ConnectionState.done) {
+						return const Center(child: CircularProgressIndicator());
+					}
+
+					if (snapshot.hasError || !snapshot.hasData) {
+						final error = handleError(snapshot.error ?? "Data was null without errors.");
+
+						return Center(
+							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+								Text(error.title, style: theme.textTheme.titleLarge),
+								Text(error.description, style: theme.textTheme.bodyMedium),
+								const SizedBox(height: Edges.large),
+								ElevatedButton(
+									onPressed: () => setState(() => fetchMangaData(reload: true)),
+									child: const Text("Retry"),
+								),
+							]),
+						);
+					}
+
+					final mangaData = snapshot.requireData;
+
+					return RefreshIndicator(
+						onRefresh: () async {
+							setState(() => fetchMangaData(reload: true));
+						},
+						child: CustomScrollView(controller: scrollController, slivers: [
+							buildAppBar(text, colors, media, mangaData),
+							SliverToBoxAdapter(child: DescriptionSection(
+								description: mangaData.manga.description,
+								isExpanded: isDescriptionExpanded,
+								preferredLocales: preferredLocales,
+							)),
+							SliverToBoxAdapter(child: buildReadButton()),
+							SliverToBoxAdapter(child: ChapterInfoBar(
+								mangaId: widget.id,
+								chapterStream: chapterStream,
+								filterStream: mangaFilterSettingsStream,
+								onFilterApplied: onFiltersApplied,
+							)),
+							ChapterList(
+								chapterStream: chapterStream,
+								onBottomReached: onChapterListBottomReached,
+							)
+						]),
+					);
+				},
+			),
+		);
+	}
+
+	Widget buildAppBar(
+		TextTheme text,
+		ColorScheme colors,
+		MediaQueryData media,
+		MangaData mangaData,
+	) {
+		return SliverAppBar(
+			pinned: true,
+			expandedHeight: expandedAppBarHeight,
+			title: ValueListenableBuilder(
+				valueListenable: showAppBar,
+				child: Text(
+					mangaData.manga.titles.getPreferred(preferredLocales),
+					style: text.titleMedium,
+				),
+				builder: (context, value, child) => AnimatedOpacity(
+					opacity: value ? 1 : 0,
+					duration: Durations.normal,
+					child: child,
+				),
+			),
+			flexibleSpace: FlexibleSpaceBar(
+				collapseMode: CollapseMode.pin,
+				titlePadding: Edges.allNone,
+				background: DetailsHeader(
+					height: expandedAppBarHeight + media.padding.top,
+					isFollowed: isFollowed,
+					hasTrackers: hasTrackers,
+					hasCustomLists: hasCustomLists,
+					preferredLocales: preferredLocales,
+					mangaData: mangaData,
+					coverFuture: coverFuture,
+					statisticsFuture: statisticsFuture,
+				),
+			),
+		);
+	}
+
+	Widget buildReadButton() {
+		return Padding(
+			padding: Edges.horizontalLarge.copyWithSelf(Edges.verticalMedium),
+			child: FilledButton.tonal(
+				onPressed: () {},
+				child: const Text("Start Reading"),
+			),
+		);
+	}
+
+	void onScroll() {
+		final height = expandedAppBarHeight - kToolbarHeight;
+
+		if (showAppBar.value && scrollController.offset < height) {
+			showAppBar.value = false;
+		} else if (!showAppBar.value && scrollController.offset > height) {
+			showAppBar.value = true;
+		}
+	}
+
+	void onChapterListBottomReached() {}
+
+	void onFiltersApplied() {
+		fetchChapters().then((value) => setState(() => chapterSink.add(value)));
+	}
+}
+
+class DetailsHeader extends StatelessWidget {
+  	const DetailsHeader({
+		super.key,
+		required this.height,
+		required this.mangaData,
+		required this.coverFuture,
+		required this.statisticsFuture,
+		required this.preferredLocales,
+		required this.isFollowed,
+		required this.hasTrackers,
+		required this.hasCustomLists,
+	}) : assert(height > 100);
+  
+	final double height;
+	final MangaData mangaData;
+	final Future<File?> coverFuture;
+	final Future<Statistics> statisticsFuture;
+
+	final List<Locale> preferredLocales;
+	final ValueNotifier<bool> isFollowed;
+	final ValueNotifier<bool> hasTrackers;
+	final ValueNotifier<bool> hasCustomLists;
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
+
+		return Stack(
+			children: [
+				buildImage(text, colors),
+				buildDetails(context, text, colors),
+			],
+		);
+	}
+
+	Widget buildImage(TextTheme text, ColorScheme colors) {
+		return Container(
+			width: double.infinity,
+			height:  height,
+			foregroundDecoration: BoxDecoration(
+				gradient: LinearGradient(
+					begin: Alignment.topCenter,
+					end: Alignment.bottomCenter,
+					stops: const [0, 0.5, 0.65, 1],
+					colors: [
+						colors.background.withOpacity(0),
+						colors.background.withOpacity(0.85),
+						colors.background.withOpacity(0.95),
+						colors.background,
+					],
+				),
+			),
+			child: FutureBuilder<File?>(
+				future: coverFuture,
+				builder: (context, snapshot) {
+					List<Widget>? children;
+
+					if (snapshot.connectionState != ConnectionState.done) {
+						children = [const CircularProgressIndicator()];
+					}
+
+					if (snapshot.hasError) {
+						final error = handleError(snapshot.error!);
+						children = [
+							Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
+							Text(error.description)
+						];
+					}
+
+					if (!snapshot.hasData &&
+						!snapshot.hasError &&
+						snapshot.connectionState == ConnectionState.done) {
+						children = [
+							Icon(Icons.broken_image_outlined, size: 72, color: colors.secondary)
+						];
+					}
+
+					if (children != null) {
+						return Align(
+							alignment: Alignment.topCenter,
+							child: SizedBox(
+								height: height - 100,
+								child: Column(
+									mainAxisAlignment: MainAxisAlignment.center,
+									children: children,
+								),
+							),
+						);
+					}
+
+					return Padding(
+						padding: Edges.bottomSmall,
+						child: Image.file(
+							snapshot.data!,
+							fit: BoxFit.cover,
+							alignment: Alignment.topCenter,
+						),
+					);
+				},
+			),
+		);
+	}
+
+	Widget buildDetails(BuildContext context, TextTheme text, ColorScheme colors) {
+		final title = mangaData.manga.titles.getPreferred(preferredLocales);
+		final authorList = (mangaData.authors + mangaData.artists.whereNotIn(mangaData.authors))
+			.map((e) => e.name)
+			.join(", ");
+
+
+		return Container(
+			height: height,
+			width: double.infinity,
+			padding: Edges.horizontalMedium.copyWith(bottom: Edges.large),
+			child: Column(
+				mainAxisAlignment: MainAxisAlignment.end,
+				crossAxisAlignment: CrossAxisAlignment.start,
+				children: [
+					Expanded(child: InkWell(onTap: () => showCoverSheet(context))),
+					Text(title, style: text.titleLarge),
+					Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
+					const SizedBox(height: Edges.small),
+					buildRatingsRow(text, colors),
+					const SizedBox(height: Edges.small),
+					Wrap(
+						spacing: Edges.extraSmall,
+						runSpacing: Edges.small,
+						children: [
+							ContentRatingChip(contentRating: mangaData.manga.contentRating),
+							DemographicChip(demographic: mangaData.manga.publicationDemographic),
+							for (final tag in mangaData.tags)
+								TagChip(tag: tag, preferredLocales: preferredLocales),
+						],
+					),
+					const SizedBox(height: Edges.large),
+					SizedBox(
+						height: 40,
+						child: ListView(
+							shrinkWrap: true,
+							scrollDirection: Axis.horizontal,
+							children: [
+								buildFollowButton(),
+								const SizedBox(width: 8),
+								buildCustomListButton(),
+							],
+						),
+					),
+				],
+			),
+		);
+	}
+
+	Widget buildRatingsRow(TextTheme text, ColorScheme colors) {
+		return SizedBox(
+			height: 25,
+			child: FutureBuilder<Statistics>(
+				future: statisticsFuture,
+				builder: (context, snapshot) {
+					if (snapshot.hasError) {
+						final error = handleError(snapshot.error!);
+						final label = text.bodyMedium?.copyWith(color: colors.error);
+
+						return InkWell(
+							onLongPress: () {
+								Clipboard.setData(ClipboardData(text: error.toString()));
+								showLazyBar(context, "Error copied to clipboard.");
+							},
+							child: ListView(scrollDirection: Axis.horizontal, children: [
+								Text(error.title, style: label),
+								const SizedBox(width: Edges.small),
+								Text(error.description, style: label?.withColorOpacity(0.75)),
+							]),
+						);
+					}
+
+					final rating = snapshot.data?.rating;
+					final bayesian = rating?.bayesian ?? 0.0;
+					final follows = snapshot.data?.follows ?? 0;
+					final comments = snapshot.data?.comments?.total ?? 0;
+
+					return Row(children: [
+						TinyButton(
+							enabled: rating != null,
+							text: bayesian.toStringAsFixed(2),
+							icon: Icons.star_border_rounded,
+							onTap: () => rating == null
+								? null
+								: showRatingStatisticSheet(context, rating),
+						),
+						const SizedBox(width: Edges.small),
+						TinyButton(
+							enabled: snapshot.data?.follows != null,
+							text: follows.toString(),
+							icon: Icons.bookmark_border_rounded,
+						),
+						const SizedBox(width: Edges.small),
+						TinyButton(
+							enabled: snapshot.data?.comments != null,
+							text: comments.toString(),
+							icon: Icons.comment_outlined,
+						),
+					]);
+				},
+			),
+		);
+	}
+
+	Widget buildFollowButton() {
+		return AnimatedSize(
+			duration: Durations.slow,
+			curve: Curves.easeInOut,
+			alignment: Alignment.centerLeft,
+			child: ValueListenableBuilder(
+				valueListenable: isFollowed,
+				builder: (context, value, _) {
+					return FilledButton.icon(
+						onPressed: handleFollowTap,
+						icon: value ? const Icon(Icons.check_rounded) : const Icon(Icons.add_rounded),
+						label: value ?  const Text("Reading") : const Text("Add to Library"),
+					);
+				},
+			),
+		);
+	}
+
+	Widget buildTrackerButton() {
+		return AnimatedSize(
+			duration: Durations.slow,
+			curve: Curves.easeInOut,
+			alignment: Alignment.centerLeft,
+			child: ValueListenableBuilder(
+				valueListenable: hasTrackers,
+				builder: (context, value, _) {
+					return OutlinedButton.icon(
+						onPressed: handleTrackerPress,
+						icon: value ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
+						label: value ? const Text("Tracking") : const Text("Track"),
+					);
+				},
+			),
+		);
+	}
+
+	Widget buildCustomListButton() {
+		return OutlinedButton(onPressed: () => {}, child: const Text("Custom Lists"));
+	}
+
+	Future<void> showCoverSheet(BuildContext context) {
+		final media = MediaQuery.of(context);
+
+		return showModalBottomSheet(
+			context: context,
+			shape: Shapes.none,
+			isScrollControlled: true,
+			builder: (context) => CoverSheet(
+				mangaData: mangaData,
+				padding: EdgeInsets.only(top: media.padding.top, bottom: media.padding.bottom),
+			),
+		);
+	}
+
+	Future<void> showRatingStatisticSheet(BuildContext context, RatingStatistics rating) {
+		final media = MediaQuery.of(context);
+
+		return showModalBottomSheet(
+			context: context,
+			builder: (context) => RatingDetailsSheet(
+				rating: rating,
+				padding: EdgeInsets.only(bottom: media.padding.bottom),
+			),
+		);
   }
 
-  @override
-  void dispose() {
-    chapterStreamController.close();
-    scrollController.removeListener(onScroll);
-    scrollController.dispose();
-    super.dispose();
-  }
+	void handleTrackerPress() {}
 
-  void fetchMangaData({bool reload = false}) {
-    mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
-    statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-    coverFuture = mangaFuture.then((data) async {
-      if (data.cover == null) return Future.value(null);
-      final coverCacheSettings = await coverCacheSettingsStream.single;
+	void handleFollowTap() {}
+}
 
-      return MangaDex.instance.cover.getImage(
-        widget.id,
-        data.cover!,
-        size: coverCacheSettings.fullSize,
-        cache: coverCacheSettings.enabled,
-      );
-    });
+class DescriptionSection extends StatelessWidget {
+	const DescriptionSection({
+		super.key,
+		required this.isExpanded,
+		required this.description,
+		required this.preferredLocales,	
+	});
 
-    fetchChapters(reload: reload).then(chapterSink.add);
-  }
+	final ValueNotifier<bool> isExpanded;
+	final Localizations description;
+	final List<Locale> preferredLocales;
 
-  Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
-    final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
-        MangaFilterSettings(id: widget.id, excludedGroupIds: []);
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
 
-    final data = await MangaDex.instance.chapter.getFeed(
-      checkDB: !reload,
-      overrides: MangaDexChapterQueryFilter(
-        mangaId: widget.id,
-        translatedLanguages: preferredLanguages,
-        excludedGroups: filters.excludedGroupIds,
-      ),
-    );
+		final media = MediaQuery.of(context);
+		final textScaleFactor = media.textScaleFactor;
 
-    return data;
-  }
+		final span = TextSpan(
+			text: description.getPreferred(preferredLocales),
+			style: text.bodyMedium,
+		);
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final media = MediaQuery.of(context);
-    final textScale = media.textScaleFactor;
+		final content = Text.rich(span);
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: FutureBuilder(
-        // Lol. Don't setState for anything other than fetchMangaData.
-        // Shit will break, badly.
-        future: mangaFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
+		return Padding(
+			padding: Edges.horizontalMedium,
+			child: LayoutBuilder(builder: (context, constraints) {
+				final minTp = TextPainter(
+					text: span,
+					maxLines: 4,
+					textDirection: TextDirection.ltr,
+					textScaleFactor: textScaleFactor,
+					strutStyle: StrutStyle.fromTextStyle(span.style!))
+				..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
-          if (snapshot.hasError || !snapshot.hasData) {
-            final error = handleError(snapshot.error ?? "Data was null without errors.");
+				final maxTp = TextPainter(
+					text: span,
+					textDirection: TextDirection.ltr,
+					strutStyle: StrutStyle.fromTextStyle(span.style!),
+					textScaleFactor: textScaleFactor,
+				)..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
 
-            return Center(
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(error.title, style: theme.textTheme.titleLarge),
-                Text(error.description, style: theme.textTheme.bodyMedium),
-                const SizedBox(height: Edges.large),
-                ElevatedButton(
-                  onPressed: () => setState(() => fetchMangaData(reload: true)),
-                  child: const Text("Retry"),
-                ),
-              ]),
-            );
-          }
+				if (!minTp.didExceedMaxLines) {
+					return content;
+				}
 
-          final mangaData = snapshot.requireData;
+				return ValueListenableBuilder(
+					valueListenable: isExpanded,
+					builder: (context, value, _) => Stack(children: [
+						buildWallOfText(text, colors, minTp, maxTp, content, value),
+						buildExpansionButton(colors, value),
+					]),
+				);
+			}),
+		);
+	}
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() => fetchMangaData(reload: true));
-            },
-            child: CustomScrollView(controller: scrollController, slivers: [
-              buildAppBar(text, colors, media, mangaData),
-              SliverToBoxAdapter(child: buildDescription(textScale, mangaData.manga)),
-              SliverToBoxAdapter(child: buildReadButton()),
-              SliverToBoxAdapter(child: buildChapterHeader()),
-              buildChapters(),
-            ]),
-          );
-        },
-      ),
-    );
-  }
+	Widget buildWallOfText(
+		TextTheme text,
+		ColorScheme colors,
+		TextPainter minTp,
+		TextPainter maxTp,
+		Text content,
+		bool expanded,
+	) {
+		return AnimatedContainer(
+			height: expanded ? maxTp.height + Edges.extraLarge : minTp.height,
+			curve: Curves.easeInOutCubic,
+			duration: Durations.slow,
+			clipBehavior: Clip.hardEdge,
+			decoration: const BoxDecoration(),
+			foregroundDecoration: BoxDecoration(
+				gradient: expanded
+					? null
+					: LinearGradient(
+						begin: Alignment.topCenter,
+						end: Alignment.bottomCenter,
+						stops: const [0, 0.5, 0.75, 1],
+						colors: [
+							colors.background.withOpacity(0),
+							colors.background.withOpacity(0.75),
+							colors.background.withOpacity(0.95),
+							colors.background,
+						],
+					),
+			),
+			child: content,
+		);
+	}
 
-  Widget buildAppBar(
-      TextTheme text, ColorScheme colors, MediaQueryData media, MangaData mangaData) {
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: expandedAppBarHeight,
-      title: ValueListenableBuilder(
-        valueListenable: showAppBar,
-        child: Text(mangaData.manga.titles.getPreferred(preferredLocales), style: text.titleMedium),
-        builder: (context, value, child) => AnimatedOpacity(
-          opacity: value ? 1 : 0,
-          duration: Durations.normal,
-          child: child,
-        ),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        collapseMode: CollapseMode.pin,
-        background: buildDetailsHeader(text, colors, media, mangaData),
-        titlePadding: Edges.allNone,
-      ),
-    );
-  }
+	Widget buildExpansionButton(ColorScheme colors, bool expanded) {
+		return Positioned(
+			bottom: 0,
+			right: 0,
+			child: IconButton(
+				isSelected: expanded,
+				icon: AnimatedRotation(
+					duration: Durations.slow,
+					turns: expanded ? 0.5 : 0,
+					curve: Curves.easeInOutCubic,
+					child: const Icon(Icons.expand_more_rounded),
+				),
+				visualDensity: VisualDensity.compact,
+				tooltip: expanded ? "Collapse" : "Expand",
+				onPressed: () => isExpanded.value = !expanded,
+				style: IconButton.styleFrom(
+					backgroundColor: expanded ? colors.primaryContainer : null,
+					foregroundColor: expanded ? colors.onPrimaryContainer : null),
+			),
+		);
+	}
+	
+}
 
-  Widget buildReadButton() {
-    return Padding(
-      padding: Edges.horizontalLarge.copyWithSelf(Edges.verticalMedium),
-      child: FilledButton.tonal(
-        onPressed: () {},
-        child: const Text("Start Reading"),
-      ),
-    );
-  }
+class ChapterInfoBar extends StatelessWidget {
+	const ChapterInfoBar({
+		super.key,
+		required this.mangaId,
+		required this.filterStream,
+		required this.chapterStream,
+		required this.onFilterApplied,
+	});
 
-  Widget buildDetailsHeader(
-      TextTheme text, ColorScheme colors, MediaQueryData media, MangaData mangaData) {
-    final title = mangaData.manga.titles.getPreferred(preferredLocales);
-    final authorList = (mangaData.authors + mangaData.artists.whereNotIn(mangaData.authors))
-        .map((e) => e.name)
-        .join(", ");
+	final String mangaId;
+	final Stream<MangaFilterSettings> filterStream;
+	final Stream<CollectionData<ChapterData>> chapterStream;
+	final VoidCallback onFilterApplied;
 
-    return Stack(
-      children: [
-        Container(
-          width: double.infinity,
-          height: expandedAppBarHeight + media.padding.top,
-          foregroundDecoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0, 0.5, 0.65, 1],
-              colors: [
-                colors.background.withOpacity(0),
-                colors.background.withOpacity(0.85),
-                colors.background.withOpacity(0.95),
-                colors.background,
-              ],
-            ),
-          ),
-          child: FutureBuilder<File?>(
-            future: coverFuture,
-            builder: (context, snapshot) {
-              List<Widget>? children;
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
 
-              if (snapshot.connectionState != ConnectionState.done) {
-                children = [const CircularProgressIndicator()];
-              }
+		return StreamBuilder<CollectionData<ChapterData>>(
+			stream: chapterStream,
+			builder: (context, snapshot) {
+				if (snapshot.connectionState == ConnectionState.none) {
+					return const SizedBox.shrink();
+				}
 
-              if (snapshot.hasError) {
-                final error = handleError(snapshot.error!);
-                children = [
-                  Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
-                  Text(error.description)
-                ];
-              }
+				final chapters = snapshot.data;
+				final chapterCount = chapters?.data.length ?? 0;
 
-              if (!snapshot.hasData &&
-                  !snapshot.hasError &&
-                  snapshot.connectionState == ConnectionState.done) {
-                children = [Icon(Icons.broken_image_outlined, size: 72, color: colors.secondary)];
-              }
+				return Container(
+					height: 40,
+					padding: Edges.horizontalMedium,
+					child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+						Text("$chapterCount Chapters",
+							style: text.titleMedium?.withColorOpacity(chapters != null ? 1 : 0.5)),
+						buildFilterButton(context, text, colors, chapters),
+					]),
+				);
+			},
+		);
+	}
 
-              if (children != null) {
-                return Align(
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    height: expandedAppBarHeight - 100 + media.padding.top,
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
-                  ),
-                );
-              }
+	Widget buildFilterButton(
+		BuildContext context,
+		TextTheme text,
+		ColorScheme colors,
+		CollectionData<ChapterData>? chapters,
+	) {
+		return 	StreamBuilder(
+			stream: filterStream,
+			builder: (context, snapshot) {
+				if (snapshot.connectionState != ConnectionState.active) {
+					return const SizedBox.square(
+						dimension: 24,
+						child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
+					);
+				}
 
-              return Padding(
-                padding: Edges.bottomSmall,
-                child: Image.file(
-                  snapshot.data!,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                ),
-              );
-            },
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          height: expandedAppBarHeight + media.padding.top,
-          padding: Edges.horizontalMedium.copyWith(bottom: Edges.large),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: InkWell(onTap: () => showCoverSheet(mangaData))),
-              Text(title, style: text.titleLarge),
-              Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
-              const SizedBox(height: Edges.small),
-              SizedBox(
-                height: 25,
-                child: FutureBuilder<Statistics>(
-                  future: statisticsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      final error = handleError(snapshot.error!);
-                      final label = text.bodyMedium?.copyWith(color: colors.error);
+				final filterData = snapshot.requireData;
+				return IconButton(
+					isSelected: !filterData.isDefault,
+					icon: const Icon(Icons.filter_list_rounded),
+					selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
+					visualDensity: VisualDensity.comfortable,
+					onPressed: () {
+						if (chapters == null) return;
+						showFilterSheet(context, chapters.data, filterData);
+					},
+				);
+			},
+		);
+	}
 
-                      return InkWell(
-                        onLongPress: () {
-                          Clipboard.setData(ClipboardData(text: error.toString()));
-                          showLazyBar(context, "Error copied to clipboard.");
-                        },
-                        child: ListView(scrollDirection: Axis.horizontal, children: [
-                          Text(error.title, style: label),
-                          const SizedBox(width: Edges.small),
-                          Text(error.description, style: label?.withColorOpacity(0.75)),
-                        ]),
-                      );
-                    }
+	void showFilterSheet(
+		BuildContext context,
+		List<ChapterData> chapters,
+		MangaFilterSettings filterSettings,
+	) {
+		final media = MediaQuery.of(context);
+		final groupIds = chapters
+			.map((e) => e.groups)
+			.expand((e) => e)
+			.map((e) => e.id)
+			.toSet();
+		
+		groupIds.addAll(filterSettings.excludedGroupIds);
 
-                    final rating = snapshot.data?.rating?.bayesian ?? 0.0;
-                    final follows = snapshot.data?.follows ?? 0;
-                    final comments = snapshot.data?.comments?.total ?? 0;
+		showModalBottomSheet(
+			context: context,
+			isScrollControlled: true,
+			builder: (context) => ChapterFilterSheet(
+				padding: EdgeInsets.only(bottom: media.padding.bottom),
+				data: ChapterFilterSheetData(
+					mangaId: mangaId,
+					groupIds: groupIds.toList(),
+					filterSettings: filterSettings,
+				),
+				onApply: (newFilter) async {
+					await MangaFilterSettings.ref.isar
+						.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
+					onFilterApplied.call();
+				},
+			),
+		);
+	}
+}
 
-                    return Row(children: [
-                      TinyButton(
-                        enabled: snapshot.data?.rating != null,
-                        text: rating.toStringAsFixed(2),
-                        icon: Icons.star_border_rounded,
-                        onTap: () => snapshot.data?.rating == null
-                            ? null
-                            : showRatingStatisticSheet(snapshot.data!.rating!),
-                      ),
-                      const SizedBox(width: Edges.small),
-                      TinyButton(
-                        enabled: snapshot.data?.follows != null,
-                        text: follows.toString(),
-                        icon: Icons.bookmark_border_rounded,
-                      ),
-                      const SizedBox(width: Edges.small),
-                      TinyButton(
-                        enabled: snapshot.data?.comments != null,
-                        text: comments.toString(),
-                        icon: Icons.comment_outlined,
-                      ),
-                    ]);
-                  },
-                ),
-              ),
-              const SizedBox(height: Edges.small),
-              Wrap(
-                spacing: Edges.extraSmall,
-                runSpacing: Edges.small,
-                children: [
-                  ContentRatingChip(contentRating: mangaData.manga.contentRating),
-                  DemographicChip(demographic: mangaData.manga.publicationDemographic),
-                  for (final tag in mangaData.tags)
-                    TagChip(tag: tag, preferredLocales: preferredLocales),
-                ],
-              ),
-              const SizedBox(height: Edges.large),
-              SizedBox(
-                height: 40,
-                child: ListView(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    buildFollowButton(),
-                    if (isFollowed) ...[const SizedBox(width: 8), buildTrackerButton()],
-                    const SizedBox(width: 8),
-                    OutlinedButton(onPressed: () => {}, child: const Text("Custom Lists")),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+class ChapterList extends StatelessWidget {
+	const ChapterList({
+		super.key,
+		required this.chapterStream,
+		required this.onBottomReached,
+	});
 
-  Widget buildDescription(double textScaleFactor, Manga manga) {
-    final span = TextSpan(
-      text: manga.description.getPreferred(preferredLocales),
-      style: text.bodyMedium,
-    );
+	final Stream<CollectionData<ChapterData>> chapterStream;
+	final VoidCallback onBottomReached;
 
-    return Padding(
-      padding: Edges.horizontalMedium,
-      child: LayoutBuilder(builder: (context, constraints) {
-        final minTp = TextPainter(
-            text: span,
-            maxLines: 4,
-            textDirection: TextDirection.ltr,
-            textScaleFactor: textScaleFactor,
-            strutStyle: StrutStyle.fromTextStyle(span.style!))
-          ..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
 
-        final maxTp = TextPainter(
-          text: span,
-          textDirection: TextDirection.ltr,
-          strutStyle: StrutStyle.fromTextStyle(span.style!),
-          textScaleFactor: textScaleFactor,
-        )..layout(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
+		return StreamBuilder<CollectionData<ChapterData>>(
+			stream: chapterStream,
+			builder: (context, snapshot) {
+				// Since the loading indicator is in the header, we don't need to handle other states here.
+				if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
+					return const SliverToBoxAdapter(child: SizedBox.shrink());
+				}
 
-        final content = Text.rich(span);
+				if (snapshot.hasError) {
+					final error = handleError(snapshot.error!);
 
-        if (!minTp.didExceedMaxLines) {
-          return content;
-        }
+					return SliverToBoxAdapter(
+						child: SizedBox(
+							height: 150,
+							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+								Text(error.title, style: text.titleLarge?.copyWith(color: colors.error)),
+								const SizedBox(height: 8),
+								Text(error.description, style: text.bodySmall),
+							]),
+						),
+					);
+				}
 
-        return ValueListenableBuilder(
-          valueListenable: expandDescription,
-          builder: (context, value, child) {
-            return Stack(
-              children: [
-                AnimatedContainer(
-                  height: value ? maxTp.height + Edges.extraLarge : minTp.height,
-                  curve: Curves.easeInOutCubic,
-                  duration: Durations.slow,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: const BoxDecoration(),
-                  foregroundDecoration: BoxDecoration(
-                    gradient: value
-                        ? null
-                        : LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: const [0, 0.5, 0.75, 1],
-                            colors: [
-                              colors.background.withOpacity(0),
-                              colors.background.withOpacity(0.75),
-                              colors.background.withOpacity(0.95),
-                              colors.background,
-                            ],
-                          ),
-                  ),
-                  child: content,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: IconButton(
-                    isSelected: value,
-                    icon: AnimatedRotation(
-                      duration: Durations.slow,
-                      turns: value ? 0.5 : 0,
-                      curve: Curves.easeInOutCubic,
-                      child: const Icon(Icons.expand_more_rounded),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    tooltip: value ? "Collapse" : "Expand",
-                    onPressed: () => expandDescription.value = !expandDescription.value,
-                    style: IconButton.styleFrom(
-                        backgroundColor: value ? colors.primaryContainer : null,
-                        foregroundColor: value ? colors.onPrimaryContainer : null),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      }),
-    );
-  }
+				final chapters = snapshot.requireData;
 
-  LayoutBuilder buildTags(MangaData mangaData) {
-    final tags = mangaData.tags.map(
-      (tag) => SizedBox(
-        height: 32,
-        child: ActionChip(
-            padding: Edges.allNone,
-            labelStyle: text.labelSmall?.withColorOpacity(0.75),
-            label: Text(tag.name.getPreferred(preferredLocales)),
-            onPressed: () => {}),
-      ),
-    );
+				if (chapters.data.isEmpty) {
+					return const SliverToBoxAdapter(
+						child: SizedBox(
+							height: 100,
+							child: Center(child: Text("No chapters found")),
+						),
+					);
+				}
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-        child: Wrap(
-          runSpacing: Edges.extraSmall,
-          spacing: Edges.extraSmall,
-          children: tags.toList(),
-        ),
-      );
-    });
-  }
+				return buildList(text, colors, chapters);
+			},
+		);
+	}
 
-  /// Handles both the filter and loading indicator for chapters.
-  Widget buildChapterHeader() {
-    return StreamBuilder<CollectionData<ChapterData>>(
-        stream: chapterStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.none) {
-            return const SizedBox.shrink();
-          }
+	SliverList buildList(TextTheme text, ColorScheme colors, CollectionData<ChapterData> chapters) {
+		return SliverList(delegate: SliverChildBuilderDelegate(
+			childCount: chapters.data.length,
+			(context, i) {
+				final data = chapters.data[i];
 
-          final chapters = snapshot.data;
-          final chapterCount = chapters?.data.length ?? 0;
+				late String title;
+				final groups = data.groups.isEmpty 
+					? "No group"
+					: data.groups.map((e) => e.name).join(", ");
 
-          return Container(
-            height: 40,
-            padding: Edges.horizontalMedium,
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text("$chapterCount Chapters",
-                  style: text.titleMedium?.withColorOpacity(chapters != null ? 1 : 0.5)),
-              StreamBuilder(
-                stream: mangaFilterSettingsStream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.connectionState != ConnectionState.done) {
-                    return const SizedBox.square(
-                      dimension: 24,
-                      child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
-                    );
-                  }
+				if (data.chapter.chapter != null && data.chapter.volume != null) {
+					title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
+				} else if (data.chapter.chapter != null) {
+					title = "Chapter ${data.chapter.chapter}";
+				} else {
+					title = "Oneshot";
+				}
 
-                  final filterData = snapshot.requireData;
-                  return IconButton(
-                    isSelected: !filterData.isDefault,
-                    icon: const Icon(Icons.filter_list_rounded),
-                    selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
-                    visualDensity: VisualDensity.comfortable,
-                    onPressed: () {
-                      if (chapters == null) return;
-                      showFilterSheet(chapters.data, filterData);
-                    },
-                  );
-                },
-              )
-            ]),
-          );
-        });
-  }
+				if (data.chapter.title != null) {
+					title += "- ${data.chapter.title!}";
+				}
 
-  Widget buildChapters() {
-    return StreamBuilder<CollectionData<ChapterData>>(
-      stream: chapterStream,
-      builder: (context, snapshot) {
-        // Since the loading indicator is in the header, we don't need to handle other states here.
-        if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
-
-        if (snapshot.hasError) {
-          final error = handleError(snapshot.error!);
-
-          return SliverToBoxAdapter(
-            child: SizedBox(
-              height: 150,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(error.title, style: text.titleLarge?.copyWith(color: colors.error)),
-                  const SizedBox(height: 8),
-                  Text(error.description, style: text.bodySmall),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final chapters = snapshot.requireData;
-
-        if (chapters.data.isEmpty) {
-          return const SliverToBoxAdapter(
-            child: SizedBox(height: 100, child: Center(child: Text("No chapters found"))),
-          );
-        }
-
-        return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            childCount: chapters.data.length,
-            (context, index) {
-              final data = chapters.data[index];
-
-              late String title;
-              final groups =
-                  data.groups.isEmpty ? "No group" : data.groups.map((e) => e.name).join(", ");
-
-              if (data.chapter.chapter != null && data.chapter.volume != null) {
-                title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
-              } else if (data.chapter.chapter != null) {
-                title = "Chapter ${data.chapter.chapter}";
-              } else {
-                title = "Oneshot";
-              }
-
-              if (data.chapter.title != null) {
-                title += "- ${data.chapter.title!}";
-              }
-
-              return ListTile(
-                onTap: () {},
-                title: Text(title, style: text.bodyMedium),
-                leading: SizedBox.square(
-                  dimension: 40,
-                  child: Center(
-                    child: flags.LanguageFlag(
-                      height: 18,
-                      language: data.chapter.translatedLanguage.flagLanguage,
-                    ),
-                  ),
-                ),
-                subtitle: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
-                      const TextSpan(text: "  -  "),
-                      TextSpan(text: data.uploader.username),
-                      const TextSpan(text: " • "),
-                      TextSpan(text: groups),
-                    ],
-                    style: text.bodySmall?.withColorOpacity(0.75),
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget buildFollowButton() {
-    return AnimatedSize(
-      duration: Durations.slow,
-      curve: Curves.easeInOut,
-      alignment: Alignment.centerLeft,
-      child: isFollowed
-          ? FilledButton.icon(
-              onPressed: () => changeFollowStatus(false),
-              icon: const Icon(Icons.check_rounded),
-              label: const Text("Reading"))
-          : FilledButton.icon(
-              onPressed: () => changeFollowStatus(true),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text("Add to Library")),
-    );
-  }
-
-  Widget buildTrackerButton() {
-    return OutlinedButton.icon(
-      onPressed: handleTrackerPress,
-      icon: hasTrackers ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
-      label: hasTrackers ? const Text("Tracking") : const Text("Track"),
-    );
-  }
-
-  void showRatingStatisticSheet(RatingStatistics rating) {
-    final media = MediaQuery.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => RatingDetailsSheet(
-          rating: rating, padding: EdgeInsets.only(bottom: media.padding.bottom)),
-    );
-  }
-
-  void showCoverSheet(MangaData mangaData) {
-    final media = MediaQuery.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      shape: Shapes.none,
-      isScrollControlled: true,
-      builder: (context) => CoverSheet(
-          mangaData: mangaData,
-          padding: EdgeInsets.only(top: media.padding.top, bottom: media.padding.bottom)),
-    );
-  }
-
-  void showFilterSheet(List<ChapterData> chapters, MangaFilterSettings filterSettings) {
-    final media = MediaQuery.of(context);
-    final groupIds =
-        chapters.map((e) => e.groups).expand((e) => e).map((e) => e.id).toSet().toList() +
-            filterSettings.excludedGroupIds;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => ChapterFilterSheet(
-        padding: EdgeInsets.only(bottom: media.padding.bottom),
-        data: ChapterFilterSheetData(
-          mangaId: widget.id,
-          filterSettings: filterSettings,
-          groupIds: groupIds,
-        ),
-        onApply: (newFilter) async {
-          await MangaFilterSettings.ref.isar.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
-
-          if (mounted) {
-            Navigator.pop(context);
-            fetchChapters().then((value) => setState(() => chapterSink.add(value)));
-          }
-        },
-      ),
-    );
-  }
-
-  Future<void> changeFollowStatus(bool follow) async {
-    setState(() => isFollowed = follow);
-  }
-
-  Future<void> handleTrackerPress() async {
-    setState(() => hasTrackers = !hasTrackers);
-  }
-
-  void onScroll() {
-    final height = expandedAppBarHeight - kToolbarHeight;
-
-    if (showAppBar.value && scrollController.offset < height) {
-      showAppBar.value = false;
-    } else if (!showAppBar.value && scrollController.offset > height) {
-      showAppBar.value = true;
-    }
-  }
+				return ListTile(
+					onTap: () {},
+					title: Text(title, style: text.bodyMedium),
+					leading: SizedBox.square(
+						dimension: 40,
+						child: Center(
+							child: flags.LanguageFlag(
+								height: 18,
+								language: data.chapter.translatedLanguage.flagLanguage,
+							),
+						),
+					),
+					subtitle: Text.rich(TextSpan(
+						style: text.bodySmall?.withColorOpacity(0.75),
+						children: [
+							TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
+							const TextSpan(text: "  -  "),
+							TextSpan(text: data.uploader.username),
+							const TextSpan(text: " • "),
+							TextSpan(text: groups),
+						],
+					)),
+				);
+			},
+		));
+	}
 }
