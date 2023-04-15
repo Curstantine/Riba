@@ -52,11 +52,6 @@ class _MangaViewState extends State<MangaView> {
 		.watchObject(fastHash(widget.id), fireImmediately: true)
 		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
 
-	final coverCacheWatchStream = CoverCacheSettings.ref
-		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
-		.watchLazy();
-
 	late final preferredCoverStream = MangaDex.instance.manga.database.where()
 		.isarIdEqualTo(fastHash(widget.id))
 		.preferredCoverIdProperty()
@@ -76,17 +71,16 @@ class _MangaViewState extends State<MangaView> {
 	@override
 	void initState() {
 		super.initState();
-		scrollController.addListener(onScroll);
 		fetchMangaData();
 
-		preferredCoverStream.listen((e) => fetchCover(e));
+		scrollController.addListener(onScroll);
+		preferredCoverStream.listen(fetchCover);
 	}
 
 	@override
 	void dispose() {
 		chapterController.close();
 		coverController.close();
-		scrollController.removeListener(onScroll);
 		scrollController.dispose();
 		super.dispose();
 	}
@@ -100,23 +94,29 @@ class _MangaViewState extends State<MangaView> {
 	}
 
 	Future<void> fetchCover([String? coverId]) async {
-		final data = await mangaFuture;
-		
-		final cover = coverId == null ? data.cover : (await MangaDex.instance.cover.get(coverId)).cover;
-		if (cover == null) {
-			coverController.add(null);
-			return coverController.close();
+		try {
+			final data = await mangaFuture;
+			final cover = coverId == null
+				? data.cover
+				: (await MangaDex.instance.cover.get(coverId)).cover;
+
+			if (cover == null) {
+				coverController.add(null);
+				return coverController.close();
+			}
+
+			final settings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
+			final image = await MangaDex.instance.cover.getImage(
+				widget.id,
+				cover,
+				size: settings!.fullSize,
+				cache: settings.enabled,
+			);
+
+			coverController.add(image);
+		} catch (e) {
+			 coverController.addError(e);
 		}
-
-		final settings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
-		final image = await MangaDex.instance.cover.getImage(
-			widget.id,
-			cover,
-			size: settings!.fullSize,
-			cache: settings.enabled,
-		);
-
-		coverController.add(image);
 	}
 
 	Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
