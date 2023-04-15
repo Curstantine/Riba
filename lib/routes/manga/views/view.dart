@@ -80,6 +80,7 @@ class _MangaViewState extends State<MangaView> {
 			// so that the internal events could be triggered with
 			// the fresh value.
 			mangaFuture.then((x) => x.manga.preferredCoverId = e);
+			logger.fine("Preferred cover id: $e");
 			fetchCover(e);
 		});
 	}
@@ -119,7 +120,6 @@ class _MangaViewState extends State<MangaView> {
 				size: settings!.fullSize,
 				cache: settings.enabled,
 			);
-
 			coverController.add(image);
 		} catch (e) {
 			coverController.addError(e);

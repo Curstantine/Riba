@@ -49,7 +49,7 @@ class _CoverSheetState extends State<CoverSheet> {
 	void initialize() async {
 		await fetchData(init: true);
 
-		final probableCoverId = widget.mangaData.manga.preferredCoverId ?? widget.mangaData.manga.defaultCoverId;
+		final probableCoverId = manga.preferredCoverId ?? manga.defaultCoverId;
 		if (probableCoverId != null) onCoverSelected(probableCoverId);
 
 		// When there aren't any covers, we need to sink a null to the stream and close
@@ -118,7 +118,9 @@ class _CoverSheetState extends State<CoverSheet> {
 							valueListenable: selectedCoverId,
 							builder: (context, selectedId, child) => IconButton(
 								icon: const Icon(Icons.check_rounded),
-								onPressed: selectedId != manga.defaultCoverId ? setUsedCover : null,
+								onPressed: selectedId != (manga.preferredCoverId ?? manga.defaultCoverId) 
+									? setUsedCover
+									: null,
 							),
 						),
 					],
