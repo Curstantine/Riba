@@ -12,7 +12,7 @@ import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
-import 'package:riba/utils/database.dart';
+import "package:riba/utils/database.dart";
 import "package:riba/utils/directories.dart";
 import "package:riba/utils/logging.dart";
 import "package:riba/utils/package_info.dart";

@@ -52,7 +52,7 @@ class _MangaViewState extends State<MangaView> {
 		.watchObject(fastHash(widget.id), fireImmediately: true)
 		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
 
-	late final preferredCoverStream = MangaDex.instance.manga.database.where()
+	late final preferredCoverIdStream = MangaDex.instance.manga.database.where()
 		.isarIdEqualTo(fastHash(widget.id))
 		.preferredCoverIdProperty()
 		.watch()
@@ -74,7 +74,14 @@ class _MangaViewState extends State<MangaView> {
 		fetchMangaData();
 
 		scrollController.addListener(onScroll);
-		preferredCoverStream.listen(fetchCover);
+		preferredCoverIdStream.listen((e) {
+			// While this behavior is somewhat undefined, all we 
+			// want from this is to temporarily set the preferred id
+			// so that the internal events could be triggered with
+			// the fresh value.
+			mangaFuture.then((x) => x.manga.preferredCoverId = e);
+			fetchCover(e);
+		});
 	}
 
 	@override
@@ -93,7 +100,7 @@ class _MangaViewState extends State<MangaView> {
 		fetchChapters(reload: reload).then(chapterController.add);
 	}
 
-	Future<void> fetchCover([String? coverId]) async {
+	void fetchCover([String? coverId]) async {
 		try {
 			final data = await mangaFuture;
 			final cover = coverId == null
@@ -115,7 +122,7 @@ class _MangaViewState extends State<MangaView> {
 
 			coverController.add(image);
 		} catch (e) {
-			 coverController.addError(e);
+			coverController.addError(e);
 		}
 	}
 
@@ -272,8 +279,8 @@ class DetailsHeader extends StatelessWidget {
 		super.key,
 		required this.height,
 		required this.mangaData,
-		required this.coverStream,
 		required this.statisticsFuture,
+		required this.coverStream,
 		required this.preferredLocales,
 		required this.isFollowed,
 		required this.hasTrackers,

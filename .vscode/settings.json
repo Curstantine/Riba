@@ -36,7 +36,7 @@
 	// Dart Auto Generated Files
 	"explorer.fileNesting.enabled": true,
 	"explorer.fileNesting.patterns": {
-		"*.dart": "${capture}.g.dart"
+		"*.dart": "${capture}.*.dart"
 	},
 	"cSpell.words": [
 		"curstantine",
