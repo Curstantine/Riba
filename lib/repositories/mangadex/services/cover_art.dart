@@ -57,11 +57,26 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     orderByVolumeDesc: true,
   );
 
-  @override
-  @Deprecated("Will not be implemented, used as a stub for the interface.")
-  Future<CoverArtData> get(String id, {bool checkDB = true}) {
-    throw UnimplementedError();
-  }
+	@override
+	Future<CoverArtData> get(String id, {bool checkDB = true}) async {
+		logger.info("get($id, $checkDB)");
+
+		if (checkDB) {
+			final inDB = await database.get(fastHash(id));
+			if (inDB != null) return collectMeta(inDB);
+		}
+
+		await rateLimiter.wait("/cover:GET");
+
+		final reqUrl = defaultFilters.addFiltersToUrl(baseUrl.copy().addPathSegment(id));
+		final request = await client.get(reqUrl.toUri());
+		final response = CoverArtEntity.fromMap(jsonDecode(request.body));
+
+		final coverData = response.data.asCoverArtData();
+		await database.isar.writeTxn(() => insertMeta(coverData));
+
+		return coverData;
+	}
 
   @override
   Future<Map<String, CoverArtData>> getMany({required overrides, checkDB = true}) async {

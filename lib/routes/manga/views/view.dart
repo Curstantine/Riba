@@ -9,6 +9,7 @@ import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
@@ -56,9 +57,16 @@ class _MangaViewState extends State<MangaView> {
 		.keyEqualTo(CoverCacheSettings.isarKey)
 		.watchLazy();
 
+	late final preferredCoverStream = MangaDex.instance.manga.database.where()
+		.isarIdEqualTo(fastHash(widget.id))
+		.preferredCoverIdProperty()
+		.watch()
+		.asyncMap((e) => e.first);
+
 	late Future<MangaData> mangaFuture;
 	late Future<Statistics> statisticsFuture;
-	late Future<File?> coverFuture;
+
+	final coverController = StreamController<File?>();
 	final chapterController = StreamController<CollectionData<ChapterData>>.broadcast();
 
 	final isFollowed = ValueNotifier(false);
@@ -70,11 +78,14 @@ class _MangaViewState extends State<MangaView> {
 		super.initState();
 		scrollController.addListener(onScroll);
 		fetchMangaData();
+
+		preferredCoverStream.listen((e) => fetchCover(e));
 	}
 
 	@override
 	void dispose() {
 		chapterController.close();
+		coverController.close();
 		scrollController.removeListener(onScroll);
 		scrollController.dispose();
 		super.dispose();
@@ -83,19 +94,29 @@ class _MangaViewState extends State<MangaView> {
 	void fetchMangaData({bool reload = false}) {
 		mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
 		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-		coverFuture = mangaFuture.then((data) async {
-			if (data.cover == null) return Future.value(null);
-			final coverCacheSettings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
 
-			return MangaDex.instance.cover.getImage(
-				widget.id,
-				data.cover!,
-				size: coverCacheSettings!.fullSize,
-				cache: coverCacheSettings.enabled,
-			);
-		});
-
+		fetchCover();
 		fetchChapters(reload: reload).then(chapterController.add);
+	}
+
+	Future<void> fetchCover([String? coverId]) async {
+		final data = await mangaFuture;
+		
+		final cover = coverId == null ? data.cover : (await MangaDex.instance.cover.get(coverId)).cover;
+		if (cover == null) {
+			coverController.add(null);
+			return coverController.close();
+		}
+
+		final settings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
+		final image = await MangaDex.instance.cover.getImage(
+			widget.id,
+			cover,
+			size: settings!.fullSize,
+			cache: settings.enabled,
+		);
+
+		coverController.add(image);
 	}
 
 	Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
@@ -211,7 +232,7 @@ class _MangaViewState extends State<MangaView> {
 					hasCustomLists: hasCustomLists,
 					preferredLocales: preferredLocales,
 					mangaData: mangaData,
-					coverFuture: coverFuture,
+					coverStream: coverController.stream,
 					statisticsFuture: statisticsFuture,
 				),
 			),
@@ -251,7 +272,7 @@ class DetailsHeader extends StatelessWidget {
 		super.key,
 		required this.height,
 		required this.mangaData,
-		required this.coverFuture,
+		required this.coverStream,
 		required this.statisticsFuture,
 		required this.preferredLocales,
 		required this.isFollowed,
@@ -261,8 +282,14 @@ class DetailsHeader extends StatelessWidget {
   
 	final double height;
 	final MangaData mangaData;
-	final Future<File?> coverFuture;
 	final Future<Statistics> statisticsFuture;
+
+	/// Stream of the cover image.
+	/// 
+	/// This stream should return null with an active connection if the image is loading.
+	/// 
+	/// To represent empty state, the stream should return null with a closed connection.
+	final Stream<File?> coverStream;
 
 	final List<Locale> preferredLocales;
 	final ValueNotifier<bool> isFollowed;
@@ -300,12 +327,12 @@ class DetailsHeader extends StatelessWidget {
 					],
 				),
 			),
-			child: FutureBuilder<File?>(
-				future: coverFuture,
+			child: StreamBuilder<File?>(
+				stream: coverStream,
 				builder: (context, snapshot) {
 					List<Widget>? children;
 
-					if (snapshot.connectionState != ConnectionState.done) {
+					if (snapshot.connectionState != ConnectionState.active) {
 						children = [const CircularProgressIndicator()];
 					}
 
@@ -321,7 +348,9 @@ class DetailsHeader extends StatelessWidget {
 						!snapshot.hasError &&
 						snapshot.connectionState == ConnectionState.done) {
 						children = [
-							Icon(Icons.broken_image_outlined, size: 72, color: colors.secondary)
+							Icon(Icons.image_not_supported_rounded, size: 42, color: colors.primary),
+							const SizedBox(height: Edges.small),
+							Text("Covers are not available.", style: text.bodyMedium),
 						];
 					}
 

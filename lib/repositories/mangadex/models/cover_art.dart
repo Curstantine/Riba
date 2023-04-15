@@ -10,6 +10,7 @@ import "user.dart";
 
 part "cover_art.g.dart";
 
+typedef CoverArtEntity = MDEntityResponse<CoverArtAttributes>;
 typedef CoverArtCollection = MDCollectionResponse<CoverArtAttributes>;
 
 @JsonSerializable(createToJson: false)
