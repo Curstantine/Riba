@@ -1,8 +1,7 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import "dart:async";
 import "dart:io";
 
 import "package:flutter/material.dart";
-import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/manga.dart";
@@ -31,19 +30,15 @@ class _CoverSheetState extends State<CoverSheet> {
 	final logger = Logger("MangaCoverSheet");
 	Manga get manga => widget.mangaData.manga;
 
-	final coverCacheSettingsStream = CoverCacheSettings.ref
-		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
-		.watch()
-		.asBroadcastStream().asyncMap((e) => e.first);
+	final coverCacheSettings = CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
+	final bigPictureController = StreamController<File?>();
 
 	late final selectedCoverId = ValueNotifier<String?>(
 		manga.preferredCoverId ?? manga.defaultCoverId,
 	);
 
-	late Stream<File?> bigPictureStream;
-	late Future<Map<String, CoverArtData>> coverDataFuture;
-	late Stream<Map<String, Future<File>>> coverPreviewStream;
+	Future<Map<String, CoverArtData>>? coverDataFuture;
+	Future<Map<String, Future<File>>>? coverPreviewsFuture;
 
   	@override
   	void initState() {
@@ -53,6 +48,16 @@ class _CoverSheetState extends State<CoverSheet> {
 
 	void initialize() async {
 		await fetchData(init: true);
+
+		final probableCoverId = widget.mangaData.manga.preferredCoverId ?? widget.mangaData.manga.defaultCoverId;
+		if (probableCoverId != null) onCoverSelected(probableCoverId);
+
+		// When there aren't any covers, we need to sink a null to the stream and close
+		// its connection, so [_BigPicture] could comprehend the state.
+		if (probableCoverId == null && (await coverDataFuture)!.isEmpty) {
+			bigPictureController.add(null);
+			bigPictureController.close();			
+		}
 	}
 
 	Future<void> fetchData({bool init = false, bool checkDB = true}) async {
@@ -80,33 +85,18 @@ class _CoverSheetState extends State<CoverSheet> {
 				.then((data) => { for (final cover in data) cover.cover.id: cover });
 		}
 
-		coverPreviewStream = coverCacheSettingsStream.asyncMap((settings) async {
-			final data = await coverDataFuture;
-
+		coverPreviewsFuture = coverDataFuture?.then((data) async {
+			final settings = await coverCacheSettings;
 			return data.map((key, value) =>
 				MapEntry(key, MangaDex.instance.cover.getImage(
 					manga.id, value.cover,
-					size: settings.previewSize,
+					size: settings!.previewSize,
 					cache: settings.enabled,
 				))
-			);
+			);			
 		});
-
+		
 		setState(() => {});
-	}
-
-	void onCoverSelected(String id) {
-		selectedCoverId.value = id;
-
-		bigPictureStream = coverCacheSettingsStream.asyncMap((settings) async {
-			final data = await coverDataFuture;
-
-			return MangaDex.instance.cover.getImage(
-				manga.id, data[id]!.cover,
-				size: settings.fullSize,
-				cache: settings.enabled,
-			);
-		});
 	}
 
 	@override
@@ -182,39 +172,53 @@ class _CoverSheetState extends State<CoverSheet> {
 		return ListView(
 			padding: Edges.allLarge.add(EdgeInsets.only(bottom: widget.padding.bottom)),
 			children: [
-				OutlinedCard(
-					child: AnimatedSize(
-						duration: Durations.normal,
-						curve: Curves.easeInOut,
-						child: _BigPicture(
-							cover: covers[selectedCoverId.value]!.cover,
-							imageStream: bigPictureStream,
-						),
-					),
+				_BigPicture(
+					cover: covers[selectedCoverId.value]!.cover,
+					imageStream: bigPictureController.stream,
 				),
 				const SizedBox(height: Edges.medium),
 				Text("Select a cover", style: text.titleMedium),
-				const SizedBox(height: Edges.small),
+				const SizedBox(height: Edges.medium),
 				_CoverPreviewList(
 					manga: manga,
 					covers: covers,
-					imageMapStream: coverPreviewStream,
+					imageMapStream: coverPreviewsFuture,
 					selectedCoverId: selectedCoverId,
 					onCoverSelected: onCoverSelected),
-				Row(children: [
-					Icon(Icons.info_outline_rounded, size: 24, color: colors.primary),
-					const SizedBox(width: Edges.large),
-					Expanded(
-						child: Text(
-							"Selecting a cover and applying it will update the cover used for this title throughout the app.\n"
-							"This update will be only be reflected after either the app or the title is reloaded.",
-							softWrap: true,
-							style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+				Padding(
+					padding: Edges.bottomMedium,
+					child: Row(children: [
+						Icon(Icons.info_outline_rounded, size: 24, color: colors.primary),
+						const SizedBox(width: Edges.large),
+						Expanded(
+							child: Text(
+								"Selecting a cover and applying it will update the cover used for this title throughout the app.\n"
+								"This update will be only be reflected after either the app or the title is reloaded.",
+								softWrap: true,
+								style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+							),
 						),
-					),
-				]),
+					]),
+				),
 			],
 		);
+	}
+
+	void onCoverSelected(String id) async {
+		selectedCoverId.value = id;
+		bigPictureController.add(null);
+		
+		final data = (await coverDataFuture)!;
+		final settings = await coverCacheSettings;
+
+		final image = await MangaDex.instance.cover.getImage(
+			widget.mangaData.manga.id,
+			data[id]!.cover,
+			size: settings!.fullSize,
+			cache: settings.enabled,
+		);
+
+		bigPictureController.add(image);
 	}
 
   	void setUsedCover() async {
@@ -240,27 +244,41 @@ class _BigPicture extends StatelessWidget {
 		required this.imageStream,
 	});
 
-	final CoverArt cover;
+	final CoverArt? cover;
+
+	/// Stream of the big picture.
+	/// 
+	/// This stream should return null with an active connection if the image is loading.
+	/// 
+	/// To represent empty state, the stream should return null with a closed connection.
 	final Stream<File?> imageStream;
   
 	@override
 	Widget build(BuildContext context) {
-		return Stack(
-			alignment: Alignment.bottomRight,
-			children: [
-				Padding(
-					padding: Edges.horizontalSmall.copyWithSelf(Edges.verticalMedium),
-					child: Wrap(
-						spacing: Edges.extraSmall,
-						children: [
-							if (cover.volume != null)
-								TinyChip(label: "Vol ${cover.volume}", onPressed: () => {}),
-							if (cover.locale != null)
-								TinyChip(label: cover.locale!.language.human, onPressed: () => {}),
-						],
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
+		
+		return OutlinedCard(
+			child: AnimatedSize(
+				duration: Durations.normal,
+				curve: Curves.easeInOut,
+				child: Stack(alignment: Alignment.bottomRight, children: [
+					buildImage(text, colors),
+					Padding(
+						padding: Edges.horizontalSmall.copyWithSelf(Edges.verticalMedium),
+						child: Wrap(
+							spacing: Edges.extraSmall,
+							children: [
+								if (cover?.volume != null)
+									TinyChip(label: "Vol ${cover!.volume}", onPressed: () => {}),
+								if (cover?.locale != null)
+									TinyChip(label: cover!.locale!.language.human, onPressed: () => {}),
+							],
+						),
 					),
-				),
-			],
+				]),
+			),
 	    );
 	}
 
@@ -270,7 +288,9 @@ class _BigPicture extends StatelessWidget {
 			builder: (context, snapshot) {
 				List<Widget>? children;
 
-				if (snapshot.connectionState != ConnectionState.done) {
+				if (snapshot.connectionState != ConnectionState.active ||
+					!snapshot.hasData && !snapshot.hasError &&
+					snapshot.connectionState == ConnectionState.active) {
 					children = [const CircularProgressIndicator()];
 				}
 
@@ -286,9 +306,9 @@ class _BigPicture extends StatelessWidget {
 					!snapshot.hasError &&
 					snapshot.connectionState == ConnectionState.done) {
 					children = [
-						Icon(Icons.image_not_supported_rounded, size: 48, color: colors.onSurfaceVariant),
+						Icon(Icons.image_not_supported_rounded, size: 42, color: colors.primary),
 						const SizedBox(height: Edges.small),
-						Text("No cover available!", style: text.bodyMedium),
+						Text("Covers are not available.", style: text.bodyMedium),
 					];
 				}
 
@@ -362,16 +382,16 @@ class _BigPicture extends StatelessWidget {
 
 class _CoverPreview extends StatelessWidget {
 	const _CoverPreview({
-		required this.selected,
 		required this.preferred,
 		required this.cover,
+		required this.selectedCoverId,
 		required this.imageFuture,
 		required this.onTap,
 	});
 
-	final bool selected;
 	final bool preferred;
 	final CoverArt cover;
+	final ValueNotifier<String?> selectedCoverId;
 	final Future<File> imageFuture;
 	final Function(String coverId) onTap;
 
@@ -382,78 +402,84 @@ class _CoverPreview extends StatelessWidget {
 		final colors = theme.colorScheme;
 
 		return SizedBox(
-			width: 100,
-			height: 200,
-			child: FutureBuilder<File?>(
-				future: imageFuture,
-				builder: (context, snapshot) {
-					if (snapshot.connectionState != ConnectionState.done) {
-						return const Center(child: CircularProgressIndicator());
-					}
-			
-					if (snapshot.hasError) {
-						final error = handleError(snapshot.error!);
-						return Center(
-							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-								Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
-								const SizedBox(height: Edges.small),
-								Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
-							]),
-						);
-					}
-			
-					return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-						buildImage(text, colors),
-						if (cover.volume != null) ...[
-							const SizedBox(height: Edges.extraSmall),
-							Text("Vol ${cover.volume}", style: text.labelSmall),
-						]
-					]);
-				},
-			),
+			width: 125,
+			height: 250,
+			child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+				buildImage(text, colors),
+				if (cover.volume != null) ...[
+					const SizedBox(height: Edges.small),
+					Text("Vol ${cover.volume}", style: text.labelMedium),
+				]
+			]),
 		);
 	}
 
 	Widget buildImage(TextTheme text, ColorScheme colors) {
-		return FutureBuilder(
-			future: imageFuture,
-			builder: (context, snapshot) {
+		return AnimatedSize(
+			duration: Durations.slow,
+			curve: Curves.easeInOutCirc,
+			alignment: Alignment.bottomCenter,
+			child: FutureBuilder(future: imageFuture, builder: (context, snapshot) {
+				late Widget child;
+
 				if (snapshot.connectionState != ConnectionState.done) {
-					return const Center(child: CircularProgressIndicator());
+					child = const CircularProgressIndicator();
 				}
 
 				if (snapshot.hasError) {
 					final error = handleError(snapshot.error!);
-					return Center(
-						child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-							Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
-							const SizedBox(height: Edges.small),
-							Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
-						]),
-					);
+					child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+						Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+						const SizedBox(height: Edges.small),
+						Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
+					]);
 				}
-			
-				return Card(
-					margin: Edges.allNone,
-					clipBehavior: Clip.antiAlias,
-					elevation: selected ? 4 : 0,
-					shape: RoundedRectangleBorder(
-						borderRadius: Corners.allMedium,
-						side: !preferred
-							? BorderSide.none
-							: BorderSide(width: 2, color: colors.primary),
-					),
-					child: InkWell(
+
+				if (snapshot.hasData) {
+					child = InkWell(
 						onTap: () => onTap.call(cover.id),
 						child: Image.file(
-							snapshot.data!,
+							snapshot.requireData,
 							fit: BoxFit.fitWidth,
 							width: double.infinity,
 							filterQuality: FilterQuality.high,
 						),
+					);
+				} else {
+					child = Center(child: child);
+				}
+
+				return ConstrainedBox(
+					constraints: const BoxConstraints(
+						maxHeight: 200,
+						maxWidth: 150,
+						minHeight: 50,
+						minWidth: 50,
+					),
+					child: ValueListenableBuilder(
+						valueListenable: selectedCoverId,
+						builder: (context, value, _) {
+							BorderSide border = BorderSide.none;
+
+							if (value == cover.id) {
+								border = BorderSide(width: 2, color: colors.primary);
+							} else if (preferred) {
+								border = BorderSide(width: 2, color: colors.onSurface.withOpacity(0.5));
+							}
+
+							return Card(
+								margin: Edges.allNone,
+								clipBehavior: Clip.antiAlias,
+								shape: RoundedRectangleBorder(
+									borderRadius: Corners.allMedium,
+									side: border,
+								),
+								child: child,
+							);
+						},
 					),
 				);
-			},
+			}),
 		);
 	}
 }
@@ -469,7 +495,7 @@ class _CoverPreviewList extends StatelessWidget {
 
 	final Manga manga;
 	final Map<String, CoverArtData> covers;
-	final Stream<Map<String, Future<File>>> imageMapStream;
+	final Future<Map<String, Future<File>>>? imageMapStream;
 	final ValueNotifier<String?> selectedCoverId;
 	final Function(String coverId) onCoverSelected;
 
@@ -492,10 +518,29 @@ class _CoverPreviewList extends StatelessWidget {
 		}
 
 		return SizedBox(
-			height: 200,
-			child: StreamBuilder<Map<String, Future<File>>>(
-				stream: imageMapStream,
+			height: 250,
+			child: FutureBuilder<Map<String, Future<File>>>(
+				future: imageMapStream,
 				builder: (context, snapshot) {
+					Widget? child;
+
+					if (snapshot.connectionState != ConnectionState.done) {
+						child = const CircularProgressIndicator();
+					}
+
+					if (snapshot.hasError) {
+						final error = handleError(snapshot.error!);
+						child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+							Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+							const SizedBox(height: Edges.small),
+							Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
+						]);
+					}
+
+					if (child != null) {
+						return SizedBox(height: 250, child: Center(child: child));
+					}
+
 					final files = snapshot.requireData;
 
 					return ListView.separated(
@@ -518,9 +563,9 @@ class _CoverPreviewList extends StatelessWidget {
 
   	Widget buildList(CoverArt cover, Future<File> coverImageFuture) {
 		return _CoverPreview(
-			selected: selectedCoverId.value == cover.id,
 			preferred: manga.preferredCoverId == cover.id,
 			cover: cover,
+			selectedCoverId: selectedCoverId,
 			imageFuture: coverImageFuture,
 			onTap: onCoverSelected,
 		);
