@@ -51,19 +51,15 @@ class _MangaViewState extends State<MangaView> {
 		.watchObject(fastHash(widget.id), fireImmediately: true)
 		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
 
-	late final coverCacheSettingsStream = CoverCacheSettings.ref
+	final coverCacheWatchStream = CoverCacheSettings.ref
 		.where()
 		.keyEqualTo(CoverCacheSettings.isarKey)
-		.watch()
-		.asyncMap((e) => e.first);
+		.watchLazy();
 
 	late Future<MangaData> mangaFuture;
 	late Future<Statistics> statisticsFuture;
 	late Future<File?> coverFuture;
-
-	late StreamController<CollectionData<ChapterData>> chapterStreamController = StreamController.broadcast();
-	Stream<CollectionData<ChapterData>> get chapterStream => chapterStreamController.stream;
-	StreamSink<CollectionData<ChapterData>> get chapterSink => chapterStreamController.sink;
+	final chapterController = StreamController<CollectionData<ChapterData>>.broadcast();
 
 	final isFollowed = ValueNotifier(false);
 	final hasTrackers = ValueNotifier(false);
@@ -78,7 +74,7 @@ class _MangaViewState extends State<MangaView> {
 
 	@override
 	void dispose() {
-		chapterStreamController.close();
+		chapterController.close();
 		scrollController.removeListener(onScroll);
 		scrollController.dispose();
 		super.dispose();
@@ -99,7 +95,7 @@ class _MangaViewState extends State<MangaView> {
 			);
 		});
 
-		fetchChapters(reload: reload).then(chapterSink.add);
+		fetchChapters(reload: reload).then(chapterController.add);
 	}
 
 	Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
@@ -157,7 +153,7 @@ class _MangaViewState extends State<MangaView> {
 
 					return RefreshIndicator(
 						onRefresh: () async {
-							setState(() => fetchMangaData(reload: true));
+							fetchMangaData(reload: true);
 						},
 						child: CustomScrollView(controller: scrollController, slivers: [
 							buildAppBar(text, colors, media, mangaData),
@@ -169,12 +165,12 @@ class _MangaViewState extends State<MangaView> {
 							SliverToBoxAdapter(child: buildReadButton()),
 							SliverToBoxAdapter(child: ChapterInfoBar(
 								mangaId: widget.id,
-								chapterStream: chapterStream,
+								chapterStream: chapterController.stream,
 								filterStream: mangaFilterSettingsStream,
 								onFilterApplied: onFiltersApplied,
 							)),
 							ChapterList(
-								chapterStream: chapterStream,
+								chapterStream: chapterController.stream,
 								onBottomReached: onChapterListBottomReached,
 							)
 						]),
@@ -244,8 +240,9 @@ class _MangaViewState extends State<MangaView> {
 
 	void onChapterListBottomReached() {}
 
-	void onFiltersApplied() {
-		fetchChapters().then((value) => setState(() => chapterSink.add(value)));
+	void onFiltersApplied() async {
+		final chapters = await fetchChapters(reload: true);
+		chapterController.add(chapters);
 	}
 }
 
