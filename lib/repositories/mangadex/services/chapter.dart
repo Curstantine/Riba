@@ -136,10 +136,10 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
 			final chapterFuture = database.isar.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
 
 			return CollectionData(
-			data: await chapterFuture,
-			offset: filters.offset,
-			limit: filters.limit,
-			total: -1,
+				data: await chapterFuture,
+				offset: filters.offset,
+				limit: filters.limit,
+				total: -1,
 			);
 		}
     }
