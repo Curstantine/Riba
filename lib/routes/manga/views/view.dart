@@ -80,7 +80,6 @@ class _MangaViewState extends State<MangaView> {
 			// so that the internal events could be triggered with
 			// the fresh value.
 			mangaFuture.then((x) => x.manga.preferredCoverId = e);
-			logger.fine("Preferred cover id: $e");
 			fetchCover(e);
 		});
 	}
@@ -98,7 +97,7 @@ class _MangaViewState extends State<MangaView> {
 		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
 
 		fetchCover();
-		fetchChapters(reload: reload).then(chapterController.add);
+		fetchChapters(reload: reload);
 	}
 
 	void fetchCover([String? coverId]) async {
@@ -126,20 +125,24 @@ class _MangaViewState extends State<MangaView> {
 		}
 	}
 
-	Future<CollectionData<ChapterData>> fetchChapters({bool reload = false, int offset = 0}) async {
-		final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
-			MangaFilterSettings(id: widget.id, excludedGroupIds: []);
+	void fetchChapters({bool reload = false, int offset = 0}) async {
+		try {
+			final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
+				MangaFilterSettings(id: widget.id, excludedGroupIds: []);
 
-		final data = await MangaDex.instance.chapter.getFeed(
-			checkDB: !reload,
-			overrides: MangaDexChapterQueryFilter(
-				mangaId: widget.id,
-				translatedLanguages: preferredLanguages,
-				excludedGroups: filters.excludedGroupIds,
-			),
-		);
+			final data = await MangaDex.instance.chapter.getFeed(
+				checkDB: !reload,
+				overrides: MangaDexChapterQueryFilter(
+					mangaId: widget.id,
+					translatedLanguages: preferredLanguages,
+					excludedGroups: filters.excludedGroupIds,
+				),
+			);
 
-		return data;
+			chapterController.add(data);
+		} catch (e) {
+			chapterController.addError(e);
+		}
 	}
 
 	@override
@@ -259,6 +262,7 @@ class _MangaViewState extends State<MangaView> {
 	void onScroll() {
 		final height = expandedAppBarHeight - kToolbarHeight;
 
+
 		if (showAppBar.value && scrollController.offset < height) {
 			showAppBar.value = false;
 		} else if (!showAppBar.value && scrollController.offset > height) {
@@ -269,8 +273,7 @@ class _MangaViewState extends State<MangaView> {
 	void onChapterListBottomReached() {}
 
 	void onFiltersApplied() async {
-		final chapters = await fetchChapters(reload: true);
-		chapterController.add(chapters);
+		fetchChapters(reload: true);
 	}
 }
 
@@ -732,7 +735,7 @@ class ChapterInfoBar extends StatelessWidget {
 		return 	StreamBuilder(
 			stream: filterStream,
 			builder: (context, snapshot) {
-				if (snapshot.connectionState != ConnectionState.active) {
+				if (snapshot.connectionState != ConnectionState.active || chapters == null) {
 					return const SizedBox.square(
 						dimension: 24,
 						child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
@@ -745,10 +748,7 @@ class ChapterInfoBar extends StatelessWidget {
 					icon: const Icon(Icons.filter_list_rounded),
 					selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
 					visualDensity: VisualDensity.comfortable,
-					onPressed: () {
-						if (chapters == null) return;
-						showFilterSheet(context, chapters.data, filterData);
-					},
+					onPressed: () => showFilterSheet(context, chapters.data, filterData),
 				);
 			},
 		);
