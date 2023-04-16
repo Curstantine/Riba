@@ -1,97 +1,49 @@
 import "package:flutter/material.dart";
-import "package:hive/hive.dart";
-import "package:riba/utils/constants.dart";
+import "package:isar/isar.dart";
 
 import "settings.dart";
 
 part "theme.g.dart";
 
-class ThemeSettings extends SettingsController<ThemeSettingsData> {
-  static final ThemeSettings instance = Settings.instance.theme;
+@Collection(accessor: "themeSettings")
+class ThemeSettings {
+	static final ref = Settings.instance.themeSettings;
+	static const isarKey = "themeSettings";
 
-  @override
-  final String id = "theme";
+	final Id id = Isar.autoIncrement;
 
-  @override
-  late final Box box;
+	@Index(unique: true, replace: true)
+	final String key = isarKey;
 
-  @override
-  ThemeSettingsData get defaultValue => ThemeSettingsData(
-        id: ThemeId.dynamic,
-        mode: ThemeMode.system,
-      );
+	@Enumerated(EnumType.ordinal)
+	late ThemeId themeId;
 
-  @override
-  Future<void> init() async {
-    Hive.registerAdapter(ThemeIdAdapter());
-    Hive.registerAdapter(ThemeModeAdapter());
+	@Enumerated(EnumType.ordinal)
+	late ThemeMode themeMode;
 
-    box = await Hive.openBox(id);
-  }
+	ThemeSettings({
+		required this.themeId,
+		required this.themeMode,
+	});
 
-  ThemeId get themeId => box.get(
-        ThemeSettingKeys.id,
-        defaultValue: defaultValue.id,
-      );
+	ThemeSettings copyWith({
+		ThemeId? themeId,
+		ThemeMode? themeMode,
+	}) {
+		return ThemeSettings(
+			themeId: themeId ?? this.themeId,
+			themeMode: themeMode ?? this.themeMode,
+		);
+	}
 
-  ThemeMode get mode => box.get(
-        ThemeSettingKeys.mode,
-        defaultValue: defaultValue.mode,
-      );
+	static final defaultSettings = ThemeSettings(
+		themeId: ThemeId.dynamic,
+		themeMode: ThemeMode.system,
+	);
 }
 
-@HiveType(typeId: TypeAdapterIds.themeIdAdapter)
+/// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
 enum ThemeId {
-  @HiveField(0)
-  dynamic,
-
-  @HiveField(1)
-  lavender,
-}
-
-class ThemeSettingsData {
-  ThemeSettingsData({required this.id, required this.mode});
-
-  ThemeId id;
-  ThemeMode mode;
-}
-
-class ThemeSettingKeys {
-  static const String id = "id";
-  static const String mode = "mode";
-}
-
-// Hive adapter for ThemeMode enum
-class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
-  @override
-  final int typeId = TypeAdapterIds.themeModeAdapter;
-
-  @override
-  ThemeMode read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return ThemeMode.system;
-      case 1:
-        return ThemeMode.light;
-      case 2:
-        return ThemeMode.dark;
-      default:
-        throw Exception("Unknown theme mode: $this");
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, ThemeMode obj) {
-    switch (obj) {
-      case ThemeMode.system:
-        writer.writeByte(0);
-        break;
-      case ThemeMode.light:
-        writer.writeByte(1);
-        break;
-      case ThemeMode.dark:
-        writer.writeByte(2);
-        break;
-    }
-  }
+	dynamic,
+	lavender,
 }

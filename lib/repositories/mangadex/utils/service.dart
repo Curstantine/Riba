@@ -15,7 +15,6 @@ abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalData
   final Client client;
   final RateLimiter rateLimiter;
   final IsarCollection<LocalType> database;
-  final Directory? cache;
   final URL rootUrl;
 
   abstract final URL baseUrl;
@@ -23,12 +22,14 @@ abstract class MangaDexService<DexType, LocalType, RuntimeDataType, InternalData
   abstract final Map<String, Rate> rates;
   abstract final QueryFilterType defaultFilters;
 
+  abstract final Directory cacheDir;
+  abstract final Directory dataDir;
+
   MangaDexService({
     required this.client,
     required this.rateLimiter,
     required this.database,
     required this.rootUrl,
-    this.cache,
   }) {
     rateLimiter.rates.addAll(rates);
   }

@@ -1,7 +1,7 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/runtime/group.dart";
 
 import "general.dart";

@@ -1,14 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
+import "dart:io";
 
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/author.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/manga.dart";
-import "package:riba/repositories/local/statistics.dart";
-import "package:riba/repositories/local/tag.dart";
+import "package:riba/repositories/local/models/author.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/manga.dart";
+import "package:riba/repositories/local/models/statistics.dart";
+import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/statistics.dart";
@@ -38,6 +39,12 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
     "/manga:GET": const Rate(4, Duration(seconds: 1)),
     "/statistics/manga:GET": const Rate(4, Duration(seconds: 1)),
   };
+
+  @override
+  Directory get cacheDir => throw UnimplementedError();
+
+  @override
+  Directory get dataDir => throw UnimplementedError();
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["manga"]);

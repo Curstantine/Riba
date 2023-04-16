@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/tag.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/utils/enum.dart";
 
 import "general.dart";

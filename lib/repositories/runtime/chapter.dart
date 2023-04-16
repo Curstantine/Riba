@@ -1,6 +1,6 @@
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/user.dart";
 
 class ChapterData {
   final Chapter chapter;

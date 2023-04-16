@@ -1,75 +1,77 @@
-import "package:hive/hive.dart";
-import "package:riba/repositories/local/cover_art.dart";
+import "package:isar/isar.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/settings/settings.dart";
 
-class CacheSettings extends SettingsController<CacheSettingsData> {
-  static final CacheSettings instance = Settings.instance.caching;
+part "cache.g.dart";
 
-  @override
-  final String id = "cache";
+@Collection(accessor: "coverCacheSettings")
+class CoverCacheSettings {
+	static final ref = Settings.instance.coverCacheSettings;
+	static const isarKey = "coverCacheSettings";
 
-  @override
-  late final Box box;
+	final Id id = Isar.autoIncrement;
 
-  @override
-  CacheSettingsData get defaultValue => const CacheSettingsData(
-        cacheCovers: true,
-        fullSize: CoverSize.original,
-        previewSize: CoverSize.small,
-      );
+	@Index(unique: true, replace: true)
+	final String key = isarKey;
 
-  @override
-  Future<void> init() async {
-    Hive.registerAdapter(CoverSizeAdapter());
-    box = await Hive.openBox(id);
-  }
+	late bool enabled;
 
-  bool get cacheCovers => box.get(
-        CacheSettingKeys.cacheCovers,
-        defaultValue: defaultValue.cacheCovers,
-      );
+	@Enumerated(EnumType.ordinal)
+	late CoverSize previewSize;
 
-  CoverSize get previewSize => box.get(
-        CacheSettingKeys.previewSize,
-        defaultValue: defaultValue.previewSize,
-      );
+	@Enumerated(EnumType.ordinal)
+	late CoverSize fullSize;
 
-  CoverSize get fullSize => box.get(
-        CacheSettingKeys.fullSize,
-        defaultValue: defaultValue.fullSize,
-      );
+	CoverCacheSettings({
+		required this.enabled,
+		required this.previewSize,
+		required this.fullSize,
+	});
+
+	CoverCacheSettings copyWith({
+		bool? enabled,
+		CoverSize? previewSize,
+		CoverSize? fullSize,
+	}) {
+		return CoverCacheSettings(
+			enabled: enabled ?? this.enabled,
+			previewSize: previewSize ?? this.previewSize,
+			fullSize: fullSize ?? this.fullSize,
+		);
+	}
+
+	static final defaultSettings = CoverCacheSettings(
+		enabled: true,
+		previewSize: CoverSize.medium,
+		fullSize: CoverSize.original,
+	);
 }
 
-class CacheSettingsData {
-  final bool cacheCovers;
-  final CoverSize previewSize;
-  final CoverSize fullSize;
+@Collection(accessor: "chapterCacheSettings")
+class ChapterCacheSettings {
+	static final ref = Settings.instance.chapterCacheSettings;
+	static const isarKey = "chapterCacheSettings";
 
-  const CacheSettingsData({
-    required this.cacheCovers,
-    required this.previewSize,
-    required this.fullSize,
-  });
+	final Id id = Isar.autoIncrement;
 
-  CacheSettingsData copyWith({
-    bool? cacheCovers,
-    CoverSize? previewSize,
-    CoverSize? fullSize,
-  }) {
-    return CacheSettingsData(
-      cacheCovers: cacheCovers ?? this.cacheCovers,
-      previewSize: previewSize ?? this.previewSize,
-      fullSize: fullSize ?? this.fullSize,
-    );
-  }
+	@Index(unique: true, replace: true)
+	final String key = isarKey;
 
-  @override
-  String toString() =>
-      "CacheSettingsData(cacheCovers: $cacheCovers, previewSize: $previewSize, fullSize: $fullSize)";
-}
+	late bool enabled;
 
-class CacheSettingKeys {
-  static const cacheCovers = "cacheCovers";
-  static const fullSize = "fullSize";
-  static const previewSize = "previewSize";
+	ChapterCacheSettings({
+		required this.enabled,
+	});
+
+	ChapterCacheSettings copyWith({
+		bool? enabled,
+	}) {
+		return ChapterCacheSettings(
+			enabled: enabled ?? this.enabled,
+		);
+	}
+
+	static final defaultSettings = ChapterCacheSettings(
+		enabled: true,
+	);
 }

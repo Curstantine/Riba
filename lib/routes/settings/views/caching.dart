@@ -1,9 +1,8 @@
 import "package:flutter/material.dart";
-import "package:hive_flutter/hive_flutter.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/mangadex.dart";
+import "package:isar/isar.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/settings/cache.dart";
-import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/external.dart";
 import "package:riba/utils/lazy.dart";
@@ -17,9 +16,17 @@ class SettingsCachingView extends StatefulWidget {
 }
 
 class _SettingsCachingViewState extends State<SettingsCachingView> {
-  final settings = Settings.instance.caching;
   Future<DirectoryInfo> coverDir = Future.delayed(
-      const Duration(milliseconds: 500), () => getDirectoryInfo(MangaDex.instance.cover.cache!));
+    const Duration(milliseconds: 500),
+    () => getDirectoryInfo(MangaDex.instance.cover.cacheDir),
+  );
+
+  final coverCacheSettingsStream = CoverCacheSettings.ref
+      .where()
+      .keyEqualTo(CoverCacheSettings.isarKey)
+      .watch()
+      .asBroadcastStream()
+      .asyncMap((event) => event.first);
 
   @override
   Widget build(BuildContext context) {
@@ -47,36 +54,52 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
           isThreeLine: true,
           title: const Text("Cache Covers"),
           subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
-          trailing: ValueListenableBuilder(
-            valueListenable: settings.box.listenable(),
-            builder: (context, _, __) => Switch(
-                value: settings.cacheCovers,
-                onChanged: (value) => settings.box.put(CacheSettingKeys.cacheCovers, value)),
+          trailing: StreamBuilder(
+            stream: coverCacheSettingsStream,
+            builder: (context, snapshot) {
+              final settings = snapshot.requireData;
+              return Switch(
+                value: settings.enabled,
+                onChanged: (value) => CoverCacheSettings.ref.put(settings.copyWith(enabled: value)),
+              );
+            },
           ),
         ),
-        ValueListenableBuilder(
-          valueListenable: settings.box.listenable(keys: [CacheSettingKeys.previewSize]),
-          builder: (context, _, __) => ListTile(
-            title: const Text("Preview Cover Size"),
-            subtitle: const Text("Cover size to display in previews."),
-            trailing: Text(settings.previewSize.human),
-            onTap: () => showCoverSizeDialog(true, (value) {
-              if (value == null) return;
-              settings.box.put(CacheSettingKeys.previewSize, value);
-            }),
-          ),
+        StreamBuilder(
+          stream: coverCacheSettingsStream,
+          builder: (context, snapshot) {
+            final settings = snapshot.requireData;
+
+            return ListTile(
+              title: const Text("Preview Cover Size"),
+              subtitle: const Text("Cover size to display in previews."),
+              trailing: Text(settings.previewSize.asHumanReadable()),
+              onTap: () => showCoverSizeDialog(
+                isPreview: true,
+                current: settings.previewSize,
+                onChanged: (value) =>
+                    CoverCacheSettings.ref.put(settings.copyWith(previewSize: value)),
+              ),
+            );
+          },
         ),
-        ValueListenableBuilder(
-          valueListenable: settings.box.listenable(keys: [CacheSettingKeys.fullSize]),
-          builder: (context, _, __) => ListTile(
-            title: const Text("Full Cover Size"),
-            subtitle: const Text("Cover size to display on big surfaces."),
-            trailing: Text(settings.fullSize.human),
-            onTap: () => showCoverSizeDialog(false, (value) {
-              if (value == null) return;
-              settings.box.put(CacheSettingKeys.fullSize, value);
-            }),
-          ),
+        StreamBuilder(
+          stream: coverCacheSettingsStream,
+          builder: (context, snapshot) {
+            final settings = snapshot.requireData;
+
+            return ListTile(
+              title: const Text("Full Cover Size"),
+              subtitle: const Text("Cover size to display on big surfaces."),
+              trailing: Text(settings.fullSize.asHumanReadable()),
+              onTap: () => showCoverSizeDialog(
+                isPreview: false,
+                current: settings.fullSize,
+                onChanged: (value) =>
+                    CoverCacheSettings.ref.put(settings.copyWith(fullSize: value)),
+              ),
+            );
+          },
         ),
         ListTile(
           title: const Text("Clear Cover Cache"),
@@ -117,43 +140,18 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
     );
   }
 
-  void showCoverSizeDialog(
-    bool isPreview,
-    ValueChanged<CoverSize?> onChanged,
-  ) =>
+  void showCoverSizeDialog({
+    required bool isPreview,
+    required CoverSize current,
+    required ValueChanged<CoverSize> onChanged,
+  }) =>
       showModalBottomSheet(
         context: context,
         builder: (context) {
-          final textTheme = Theme.of(context).textTheme;
-
-          return SizedBox(
-            child: Padding(
-              padding: Edges.verticalMedium,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: Edges.horizontalExtraLarge.copyWithSelf(Edges.verticalLarge),
-                    child: Text(isPreview ? "Preview Cover Size" : "Full Cover Size",
-                        style: textTheme.titleMedium),
-                  ),
-                  for (final size in CoverSize.values)
-                    RadioListTile<CoverSize>(
-                      value: size,
-                      groupValue: isPreview ? settings.previewSize : settings.fullSize,
-                      title: Text(size.human),
-                      secondary: size.size == null
-                          ? null
-                          : Text("${size.size}x", style: textTheme.labelSmall),
-                      onChanged: (value) {
-                        Navigator.pop(context, value);
-                        onChanged(value);
-                      },
-                    ),
-                ],
-              ),
-            ),
+          return CoverSizeSheet(
+            title: isPreview ? "Preview Cover Size" : "Full Cover Size",
+            currentValue: current,
+            onChanged: onChanged,
           );
         },
       );
@@ -175,8 +173,55 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
     await MangaDex.instance.cover.deleteAllPersistent();
     if (mounted) {
       showLazyBar(context, "Cover cache cleared successfully.");
-      coverDir = getDirectoryInfo(MangaDex.instance.cover.cache!);
+      coverDir = getDirectoryInfo(MangaDex.instance.cover.cacheDir);
       setState(() {});
     }
+  }
+}
+
+class CoverSizeSheet extends StatelessWidget {
+  const CoverSizeSheet({
+    super.key,
+    required this.title,
+    required this.currentValue,
+    required this.onChanged,
+  });
+
+  final String title;
+  final CoverSize currentValue;
+  final ValueChanged<CoverSize> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return SizedBox(
+      child: Padding(
+        padding: Edges.verticalMedium,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: Edges.horizontalExtraLarge.copyWithSelf(Edges.verticalLarge),
+              child: Text(title, style: textTheme.titleMedium),
+            ),
+            for (final size in CoverSize.values)
+              RadioListTile<CoverSize>(
+                value: size,
+                key: ValueKey(size.name),
+                groupValue: currentValue,
+                title: Text(size.asHumanReadable()),
+                secondary:
+                    size.size == null ? null : Text("${size.size}x", style: textTheme.labelSmall),
+                onChanged: (value) {
+                  Navigator.pop(context, value);
+                  if (value != null) onChanged.call(value);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }

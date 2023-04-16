@@ -1,6 +1,7 @@
 import "package:isar/isar.dart";
-import "package:riba/repositories/local/localization.dart";
 import "package:riba/utils/hash.dart";
+
+import "localization.dart";
 
 part "chapter.g.dart";
 
@@ -72,7 +73,7 @@ extension SortChapter on List<Chapter> {
   /// If [chapter] is not null, it will be sorted by [chapter].
   /// If [chapter] is null, it will be sorted by [volume].
   /// If both [chapter] and [volume] are null, it will not be sorted.
-  void sortAsDescending() {
+  void sortInDesc() {
     sort((a, b) {
       if (a.chapter != null && b.chapter != null) {
         final aChapter = double.parse(a.chapter!);

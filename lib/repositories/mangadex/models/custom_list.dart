@@ -1,5 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
-import "package:riba/repositories/local/custom_list.dart";
+import "package:riba/repositories/local/models/custom_list.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 
 import "general.dart";

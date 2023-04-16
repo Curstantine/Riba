@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/localization.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/utils/logging.dart";
 
 import "constants.dart";

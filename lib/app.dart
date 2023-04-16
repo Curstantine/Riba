@@ -25,8 +25,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: ThemeManager.instance.mode,
       theme: ThemeManager.instance.theme,
+      themeMode: ThemeManager.instance.settings.themeMode,
       debugShowCheckedModeBanner: false,
       initialRoute: Router.home,
       onGenerateRoute: Router.onGenerateRoute,

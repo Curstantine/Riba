@@ -1,12 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
+import "dart:io";
 
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/localization.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/models/chapter.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
@@ -34,6 +35,12 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
     "/chapter:GET": const Rate(4, Duration(seconds: 1)),
     "/manga/feed:GET": const Rate(2, Duration(seconds: 1)),
   };
+
+  @override
+  Directory get cacheDir => throw UnimplementedError();
+
+  @override
+  Directory get dataDir => throw UnimplementedError();
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["chapter"]);
@@ -103,61 +110,63 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
     required MangaDexChapterQueryFilter overrides,
     bool checkDB = true,
   }) async {
-    logger.info("getFeed($overrides, $checkDB)");
-    assert(overrides.mangaId != null, "Manga ID must be specified");
+	logger.info("getFeed($overrides, $checkDB)");
+	assert(overrides.mangaId != null, "Manga ID must be specified");
 
-    // Manga ID in the filter should be ignored, since id is part of the path segments.
-    final filters = defaultFilters.copyWithSelf(overrides)..mangaId = null;
-    final mangaId = overrides.mangaId!;
-    final excludedGroups = filters.excludedGroups ?? [];
-    final translatedLangs = filters.translatedLanguages ?? [];
-    final orderByChapterDesc = filters.orderByChapterDesc;
+	// Manga ID in the filter should be ignored, since id is part of the path segments.
+	final filters = defaultFilters.copyWithSelf(overrides)..mangaId = null;
+	final mangaId = overrides.mangaId!;
+	final excludedGroups = filters.excludedGroups ?? [];
+	final translatedLangs = filters.translatedLanguages ?? [];
+	final orderByChapterDesc = filters.orderByChapterDesc;
 
-    if (checkDB) {
-      final inDB = await database
-          .where()
-          .mangaIdEqualTo(mangaId)
-          .filter()
-          .group((q) => q.anyOf(excludedGroups, (q, e) => q.not().groupIdsElementContains(e)))
-          .anyOf(translatedLangs, (q, e) => q.translatedLanguageEqualTo(e))
-          .optional(orderByChapterDesc == true, (q) => q.sortByChapterDesc().thenByVolumeDesc())
-          .findAll();
+	if (checkDB) {
+		final inDB = await database
+			.where()
+			.mangaIdEqualTo(mangaId)
+			.filter()
+			.group((q) => q.anyOf(excludedGroups, (q, e) => q.not().groupIdsElementContains(e)))
+			.anyOf(translatedLangs, (q, e) => q.translatedLanguageEqualTo(e))
+			.optional(orderByChapterDesc == true, (q) => q.sortByChapterDesc().thenByVolumeDesc())
+			.findAll();
+		
+		inDB.sortInDesc();
 
-      if (inDB.isNotEmpty) {
-        final chapterFuture = database.isar.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
+		if (inDB.isNotEmpty) {
+			final chapterFuture = database.isar.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
 
-        return CollectionData(
-          data: await chapterFuture,
-          offset: filters.offset,
-          limit: filters.limit,
-          total: -1,
-        );
-      }
+			return CollectionData(
+				data: await chapterFuture,
+				offset: filters.offset,
+				limit: filters.limit,
+				total: -1,
+			);
+		}
     }
 
-    await rateLimiter.wait("/manga/feed:GET");
-    final tempBaseUrl = mangaUrl.copy().addPathSegments([mangaId, "feed"]);
-    final reqUrl = filters.addFiltersToUrl(tempBaseUrl);
-    final request = await client.get(reqUrl.toUri());
-    final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+	await rateLimiter.wait("/manga/feed:GET");
+	final tempBaseUrl = mangaUrl.copy().addPathSegments([mangaId, "feed"]);
+	final reqUrl = filters.addFiltersToUrl(tempBaseUrl);
+	final request = await client.get(reqUrl.toUri());
+	final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-    final chapters = <ChapterData>[];
-    for (final data in response.data) {
-      try {
-        final chapterData = data.toChapterData();
-        chapters.add(chapterData);
-      } on LanguageNotSupportedException catch (e) {
-        logger.warning(e.toString());
-      }
-    }
+	final chapters = <ChapterData>[];
+	for (final data in response.data) {
+		try {
+			final chapterData = data.toChapterData();
+			chapters.add(chapterData);
+		} on LanguageNotSupportedException catch (e) {
+			logger.warning(e.toString());
+		}
+	}
 
-    await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
-    return CollectionData(
-      data: chapters,
-      offset: response.offset,
-      limit: response.limit,
-      total: response.total,
-    );
+	await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+	return CollectionData(
+		data: chapters,
+		offset: response.offset,
+		limit: response.limit,
+		total: response.total,
+	);
   }
 
   @override

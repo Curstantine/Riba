@@ -1,5 +1,5 @@
-import "package:riba/repositories/local/custom_list.dart";
-import "package:riba/repositories/local/user.dart";
+import "package:riba/repositories/local/models/custom_list.dart";
+import "package:riba/repositories/local/models/user.dart";
 
 class CustomListData {
   final CustomList list;

@@ -1,33 +1,41 @@
-import "package:hive/hive.dart";
+import "package:isar/isar.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/settings/filter.dart";
+import "package:riba/settings/theme.dart";
 
-import "cache.dart";
-import "theme.dart";
 
 class Settings {
-  static late final Settings instance;
-  Settings._internal();
+	static late final Settings instance;
+	Settings._internal({required Isar database}) : _database = database;
 
-  final ThemeSettings theme = ThemeSettings();
-  final CacheSettings caching = CacheSettings();
-  final FilterSettings filter = FilterSettings();
+	final Isar _database;
 
-  static Future<void> init() async {
-    instance = Settings._internal();
+	IsarCollection<CoverCacheSettings> get coverCacheSettings => _database.coverCacheSettings;
+	IsarCollection<ChapterCacheSettings> get chapterCacheSettings => _database.chapterCacheSettings;
+	IsarCollection<MangaFilterSettings> get mangaFilterSettings => _database.mangaFilterSettings;
+	IsarCollection<ThemeSettings> get themeSettings => _database.themeSettings;
 
-    await Future.wait([
-      instance.theme.init(),
-      instance.caching.init(),
-      instance.filter.init(),
-    ]);
-  }
-}
+	static Future<void> init(Isar database) async {
+		final locals = await Future.wait([
+			database.coverCacheSettings.getByKey(CoverCacheSettings.isarKey),
+			database.chapterCacheSettings.getByKey(ChapterCacheSettings.isarKey),
+			database.themeSettings.getByKey(ThemeSettings.isarKey),  
+		]);
 
-abstract class SettingsController<T> {
-  abstract final String id;
-  abstract final Box box;
+		final localCoverCacheSettings = locals[0];
+		final localChapterCacheSettings = locals[1];
+		final localThemeSettings = locals[2];
 
-  T get defaultValue;
+		await database.writeTxn(() => Future.wait([
+			if (localCoverCacheSettings == null)
+				database.coverCacheSettings.put(CoverCacheSettings.defaultSettings),
+			if (localChapterCacheSettings == null)
+				database.chapterCacheSettings.put(ChapterCacheSettings.defaultSettings),
+			if (localThemeSettings == null)
+				database.themeSettings.put(ThemeSettings.defaultSettings),
+		]));
 
-  Future<void> init();
+		/// Run migrations and default initializations here.
+		instance = Settings._internal(database:  database);
+	}
 }

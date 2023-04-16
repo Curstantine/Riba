@@ -2,30 +2,38 @@ import "dart:io";
 
 import "package:http/http.dart";
 import "package:isar/isar.dart";
-import "package:package_info_plus/package_info_plus.dart";
-import "package:riba/repositories/local/chapter.dart";
-import "package:riba/repositories/local/cover_art.dart";
-import "package:riba/repositories/local/custom_list.dart";
-import "package:riba/repositories/local/group.dart";
-import "package:riba/repositories/local/manga.dart";
-import "package:riba/repositories/mangadex/chapter.dart";
-import "package:riba/repositories/mangadex/cover_art.dart";
-import "package:riba/repositories/mangadex/custom_list.dart";
-import "package:riba/repositories/mangadex/group.dart";
-import "package:riba/repositories/mangadex/manga.dart";
+import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/cover_art.dart";
+import "package:riba/repositories/local/models/custom_list.dart";
+import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/manga.dart";
+import "package:riba/repositories/mangadex/services/chapter.dart";
+import "package:riba/repositories/mangadex/services/cover_art.dart";
+import "package:riba/repositories/mangadex/services/custom_list.dart";
+import "package:riba/repositories/mangadex/services/group.dart";
+import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/utils/client.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
+import "package:riba/utils/directories.dart";
+import "package:riba/utils/package_info.dart";
 
 class MangaDex {
   static late final MangaDex instance;
-  MangaDex._internal({required this.database, required this.userAgent, required this.directory});
+  MangaDex._internal({
+    required this.database,
+    required this.userAgent,
+    required this.rootCacheDir,
+    required this.rootDataDir,
+  });
 
   static final url = URL(hostname: "api.mangadex.org", pathSegments: []);
 
   final Isar database;
   final String userAgent;
-  final Directory directory;
+  final Directory rootCacheDir;
+  final Directory rootDataDir;
+
   final RateLimiter rateLimiter = RateLimiter(name: "MangaDex");
   late final Client client = SelfClient(Client(), userAgent);
 
@@ -41,7 +49,8 @@ class MangaDex {
     rateLimiter: rateLimiter,
     database: database.covers,
     rootUrl: url,
-    cache: Directory("${directory.path}/covers"),
+    dataDir: Directory("${rootDataDir.path}/covers"),
+    cacheDir: Directory("${rootCacheDir.path}/covers"),
   );
 
   late final MangaDexChapterService chapter = MangaDexChapterService(
@@ -65,13 +74,14 @@ class MangaDex {
     rootUrl: url,
   );
 
-  static Future<void> init(Isar database, Directory directory, PackageInfo info) async {
+  static Future<void> init(Isar database) async {
+    final pkgInfo = InitPackageInfo.instance.info;
+
     instance = MangaDex._internal(
       database: database,
-      userAgent: "${info.appName}/${info.buildNumber}",
-      directory: directory,
+      userAgent: "${pkgInfo.appName}/${pkgInfo.version}",
+      rootCacheDir: Directory("${InitDirectories.instance.cacheDir.path}/mangadex"),
+      rootDataDir: Directory("${InitDirectories.instance.documentDir.path}/mangadex"),
     );
-
-    await instance.cover.deleteAllTemp();
   }
 }
