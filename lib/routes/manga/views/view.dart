@@ -262,7 +262,6 @@ class _MangaViewState extends State<MangaView> {
 	void onScroll() {
 		final height = expandedAppBarHeight - kToolbarHeight;
 
-
 		if (showAppBar.value && scrollController.offset < height) {
 			showAppBar.value = false;
 		} else if (!showAppBar.value && scrollController.offset > height) {
