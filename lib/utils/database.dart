@@ -56,8 +56,8 @@ class Database {
 		GroupSchema,
 		ChapterSchema,
 		// Settings related models
-		CoverCacheSettingsSchema,
-		ChapterCacheSettingsSchema,
+		CoverPersistenceSettingsSchema,
+		ChapterPersistenceSettingsSchema,
 		MangaFilterSettingsSchema,
 		ThemeSettingsSchema,
 	];

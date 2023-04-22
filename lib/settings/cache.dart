@@ -4,10 +4,10 @@ import "package:riba/settings/settings.dart";
 
 part "cache.g.dart";
 
-@Collection(accessor: "coverCacheSettings")
-class CoverCacheSettings {
-	static final ref = Settings.instance.coverCacheSettings;
-	static const isarKey = "coverCacheSettings";
+@Collection(accessor: "coverPersistenceSettings")
+class CoverPersistenceSettings {
+	static final ref = Settings.instance.coverPersistenceSettings;
+	static const isarKey = "coverPersistenceSettings";
 
 	final Id id = Isar.autoIncrement;
 
@@ -22,35 +22,35 @@ class CoverCacheSettings {
 	@Enumerated(EnumType.ordinal)
 	late CoverSize fullSize;
 
-	CoverCacheSettings({
+	CoverPersistenceSettings({
 		required this.enabled,
 		required this.previewSize,
 		required this.fullSize,
 	});
 
-	CoverCacheSettings copyWith({
+	CoverPersistenceSettings copyWith({
 		bool? enabled,
 		CoverSize? previewSize,
 		CoverSize? fullSize,
 	}) {
-		return CoverCacheSettings(
+		return CoverPersistenceSettings(
 			enabled: enabled ?? this.enabled,
 			previewSize: previewSize ?? this.previewSize,
 			fullSize: fullSize ?? this.fullSize,
 		);
 	}
 
-	static final defaultSettings = CoverCacheSettings(
+	static final defaultSettings = CoverPersistenceSettings(
 		enabled: true,
 		previewSize: CoverSize.medium,
 		fullSize: CoverSize.original,
 	);
 }
 
-@Collection(accessor: "chapterCacheSettings")
-class ChapterCacheSettings {
-	static final ref = Settings.instance.chapterCacheSettings;
-	static const isarKey = "chapterCacheSettings";
+@Collection(accessor: "chapterPersistenceSettings")
+class ChapterPersistenceSettings {
+	static final ref = Settings.instance.chapterPersistenceSettings;
+	static const isarKey = "chapterPersistenceSettings";
 
 	final Id id = Isar.autoIncrement;
 
@@ -59,19 +59,19 @@ class ChapterCacheSettings {
 
 	late bool enabled;
 
-	ChapterCacheSettings({
+	ChapterPersistenceSettings({
 		required this.enabled,
 	});
 
-	ChapterCacheSettings copyWith({
+	ChapterPersistenceSettings copyWith({
 		bool? enabled,
 	}) {
-		return ChapterCacheSettings(
+		return ChapterPersistenceSettings(
 			enabled: enabled ?? this.enabled,
 		);
 	}
 
-	static final defaultSettings = ChapterCacheSettings(
+	static final defaultSettings = ChapterPersistenceSettings(
 		enabled: true,
 	);
 }
