@@ -39,7 +39,7 @@ class MangaDexCustomListService extends MangaDexService<CustomListAttributes, Cu
 
   @override
   late final baseUrl = rootUrl.copyWith(pathSegments: ["list"]);
-  static const String seasonalListId = "44224004-1fad-425e-b416-45b46b74d3d1";
+  static const String seasonalListId = "77430796-6625-4684-b673-ffae5140f337";
 
   @override
   final defaultFilters = MangaDexCustomListQueryFilter(
