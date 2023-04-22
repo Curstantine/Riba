@@ -9,6 +9,7 @@ import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/settings/cache.dart";
 import "package:riba/settings/filter.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/settings/theme.dart";
@@ -55,8 +56,8 @@ class Database {
 		GroupSchema,
 		ChapterSchema,
 		// Settings related models
-		CoverCacheSettingsSchema,
-		ChapterCacheSettingsSchema,
+		CoverPersistenceSettingsSchema,
+		ChapterPersistenceSettingsSchema,
 		MangaFilterSettingsSchema,
 		ThemeSettingsSchema,
 	];
