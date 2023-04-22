@@ -1,29 +1,23 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/routes/settings/widgets/sheet/cover_size.dart";
+import "package:riba/routes/settings/widgets/extra.dart";
+import "package:riba/routes/settings/widgets/list_tile.dart";
+import "package:riba/routes/settings/widgets/sheets/cover_size.dart";
 import "package:riba/settings/cache.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/utils/external.dart";
 import "package:riba/utils/lazy.dart";
 
-class SettingsCachingView extends StatefulWidget {
-  const SettingsCachingView({super.key});
+class SettingsPersistenceSegment extends StatefulWidget {
+	const SettingsPersistenceSegment({super.key});
 
-  @override
-  State<SettingsCachingView> createState() => _SettingsCachingViewState();
+	@override
+	State<SettingsPersistenceSegment> createState() => _SettingsPersistenceSegmentState();
 }
 
-class _SettingsCachingViewState extends State<SettingsCachingView> {
-	Future<DirectoryInfo> coverDir = Future.delayed(
-		const Duration(milliseconds: 500),
-		() => getDirectoryInfo(MangaDex.instance.cover.cacheDir),
-	);
-
+class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment> {
 	final coverCacheEnabledStream = CoverCacheSettings.ref
 		.where()
 		.keyEqualTo(CoverCacheSettings.isarKey)
@@ -44,28 +38,17 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 		.fullSizeProperty()
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
-	
-	Future<CoverCacheSettings> get settingsFuture => CoverCacheSettings.ref
+
+	final settingsFuture = CoverCacheSettings.ref
 		.getByKey(CoverCacheSettings.isarKey)
 		.then((e) => e as CoverCacheSettings);
 
 	@override
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
-		final textTheme = theme.textTheme;
-		final colorScheme = theme.colorScheme;
+		final text = theme.textTheme;
+		final colors = theme.colorScheme;
 
-		return Scaffold(
-			appBar: AppBar(title: const Text("Caching")),
-			body: ListView(
-				children: [
-					buildCoversSegment(textTheme, colorScheme),
-				],
-			),
-		);
-	}
-
-	Widget buildCoversSegment(TextTheme text, ColorScheme colors) {
 		return StreamBuilder(
 			stream: coverCacheEnabledStream,
 			builder: (context, snapshot) {
@@ -96,10 +79,10 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 					mainAxisSize: MainAxisSize.min,
 					crossAxisAlignment: CrossAxisAlignment.start,
 					children: [
-						buildTitle(text, colors, "Covers"),
+						const SegmentTitle(title: "Covers"),
 						ListTile(
 							isThreeLine: true,
-							title: const Text("Cache Covers"),
+							title: const Text("Persist covers"),
 							subtitle: const Text("Locally persist all manga covers downloaded while browsing."),
 							trailing: Switch(
 								value: enabled,
@@ -111,13 +94,12 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 								},
 							),
 						),
-						buildStreamListTile(
-							text, colors,
+						StreamingListTile(
 							enabled: enabled,
-							title: "Preview Cover Size",
+							title: "Preview cover size",
 							stream: coverPreviewSizeStream,
 							contextualSubtitle: (context, size) => Text(
-								"Currently using ${size.asHumanReadable().toLowerCase()} for previews.",
+								"Using ${size.asHumanReadable().toLowerCase()} size.",
 							),
 							onTap: (context, size) => showCoverSizeDialog(
 								isPreview: true,
@@ -128,13 +110,12 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 								},
 							),
 						),
-						buildStreamListTile(
-							text, colors,
+						StreamingListTile(
 							enabled: enabled,
-							title: "Full Cover Size",
+							title: "Full cover size",
 							stream: coverFullSizeStream,
 							contextualSubtitle: (context, size) => Text(
-								"Currently using ${size.asHumanReadable().toLowerCase()} for full sized covers.",
+								"Using ${size.asHumanReadable().toLowerCase()} size.",
 							),
 							onTap: (context, size) => showCoverSizeDialog(
 								isPreview: false,
@@ -145,66 +126,18 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 								},
 							),
 						),
+						Container(
+							width: double.infinity,
+							padding: Edges.horizontalLarge.copyWith(top: Edges.medium),
+							child: OutlinedButton(
+								onPressed: () => deleteCoversCache(context),
+								child: const Text("Clear persistent covers"),
+							),
+						)
 					],
 				);
 			},
 		);
-	}
-
-	Padding buildTitle(TextTheme textTheme, ColorScheme colorScheme, String title) {
-		return Padding(
-			padding: Edges.leftLarge.copyWith(top: Edges.medium, bottom: Edges.extraSmall),
-			child: Text(
-				title,
-				style: textTheme.titleSmall?.copyWith(
-					color: colorScheme.primary,
-					fontWeight: FontWeight.w600,
-				),
-			),
-		);
-	}
-
-	Widget buildStreamListTile<T>(
-		TextTheme text, ColorScheme colors, {
-		required bool enabled,
-		required String title,
-		required Stream<T> stream,
-		bool isThreeLine = false,
-		String? subtitle,
-		Function(BuildContext, T)? contextualSubtitle,
-		FutureOr<void> Function(BuildContext, T)? onTap,
-		Function(BuildContext, T)? builder,
-	}) {
-		assert(subtitle == null || contextualSubtitle == null);
-
-		return StreamBuilder(stream: stream, builder: (context, snapshot) {
-			Widget? child;
-			if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
-				child = const CircularProgressIndicator();
-			}
-
-			if (snapshot.hasError) {
-				child = Icon(Icons.error_outline, color: colors.error);
-			}
-
-			if (child != null) {
-				return SizedBox.fromSize(
-					size: const Size.square(24),
-					child: Center(child: child),
-				);
-			}
-
-			return ListTile(
-				enabled: enabled,
-				title: Text(title),
-				subtitle: subtitle != null
-					? Text(subtitle)
-					: contextualSubtitle!.call(context, snapshot.requireData),
-				isThreeLine: isThreeLine,
-				onTap: onTap != null ? () => onTap(context, snapshot.requireData) : null,
-				trailing: builder?.call(context, snapshot.requireData),
-			);
-		});
 	}
 
 	void showCoverSizeDialog({
@@ -226,7 +159,7 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 		final bool? prompt = await showDialog(
 			context: context,
 			builder: (context) => AlertDialog(
-				title: const Text("Clear Covers Cache"),
+				title: const Text("Clear persistent covers"),
 				content: const Text("Are you sure you want to delete all locally cached manga covers?"),
 				actions: [
 					TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context, false)),
@@ -235,12 +168,10 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 			),
 		);
 
-		if (prompt != true) return;
+		if (prompt == false) return;
 		await MangaDex.instance.cover.deleteAllPersistent();
 		if (mounted) {
 			showLazyBar(context, "Cover cache cleared successfully.");
-			coverDir = getDirectoryInfo(MangaDex.instance.cover.cacheDir);
-			setState(() {});
 		}
   }
 
@@ -250,4 +181,3 @@ class _SettingsCachingViewState extends State<SettingsCachingView> {
 		);
 	}
 }
-
