@@ -1,4 +1,4 @@
-	import "dart:io";
+import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
@@ -21,25 +21,23 @@ class MangaCard extends StatelessWidget {
 
 	final String id;
 
-	late final coverCacheSettingsStream = CoverPersistenceSettings.ref
+	late final mangaFuture = MangaDex.instance.manga.get(id);
+
+	late final Stream<File?> coverStream = CoverPersistenceSettings.ref
 		.where()
 		.keyEqualTo(CoverPersistenceSettings.isarKey)
 		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
+		.asyncMap((e) async {
+			final mangaData = await mangaFuture;
+			if (mangaData.cover == null) return null;
 
-	late final mangaFuture = MangaDex.instance.manga.get(id);
-
-	late final Stream<File?> coverStream = coverCacheSettingsStream.asyncMap((e) async {
-		final mangaData = await mangaFuture;
-		if (mangaData.cover == null) return null;
-
-		return await MangaDex.instance.cover.getImage(
-			mangaData.manga.id,
-			mangaData.cover!,
-			size: e.previewSize,
-			cache: e.enabled,
-		);
-	});
+			return await MangaDex.instance.cover.getImage(
+				mangaData.manga.id,
+				mangaData.cover!,
+				size: e.first.previewSize,
+				cache: e.first.enabled,
+			);
+		});
 
 	@override
 	Widget build(BuildContext context) {
