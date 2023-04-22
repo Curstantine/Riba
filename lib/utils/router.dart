@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:riba/routes/home/views/page.dart";
+import "package:riba/routes/home/views/view.dart";
 import "package:riba/routes/settings/views/page.dart";
 
 class Router {
@@ -9,7 +9,7 @@ class Router {
   static Route? onGenerateRoute(RouteSettings rt) {
     switch (rt.name) {
       case home:
-        return MaterialPageRoute(builder: (_) => const HomeView());
+        return MaterialPageRoute(builder: (_) => HomeView());
       case settings:
         return MaterialPageRoute(builder: (_) => const SettingsView());
     }
