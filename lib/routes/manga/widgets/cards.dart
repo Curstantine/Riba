@@ -3,7 +3,6 @@ import "dart:io";
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
-import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
@@ -17,54 +16,34 @@ import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatelessWidget {
-	MangaCard({super.key, required this.id});
+	const MangaCard({super.key, required this.mangaData});
 
-	final String id;
-
-	late final mangaFuture = MangaDex.instance.manga.get(id);
-
-	late final Stream<File?> coverStream = CoverPersistenceSettings.ref
-		.where()
-		.keyEqualTo(CoverPersistenceSettings.isarKey)
-		.watch(fireImmediately: true)
-		.asyncMap((e) async {
-			final mangaData = await mangaFuture;
-			if (mangaData.cover == null) return null;
-
-			return await MangaDex.instance.cover.getImage(
-				mangaData.manga.id,
-				mangaData.cover!,
-				size: e.first.previewSize,
-				cache: e.first.enabled,
-			);
-		});
+	final MangaData mangaData;
 
 	@override
 	Widget build(BuildContext context) {
-		final theme = Theme.of(context);
+		final manga = mangaData.manga;
+		final coverStream = CoverPersistenceSettings.ref
+			.where()
+			.keyEqualTo(CoverPersistenceSettings.isarKey)
+			.watch(fireImmediately: true)
+			.asyncMap((e) async {
+				if (mangaData.cover == null) return null;
 
-		return FutureBuilder<MangaData>(
-			future: mangaFuture,
-			builder: (context, snapshot) {
-				if (snapshot.connectionState != ConnectionState.done) {
-					return buildCardLayout(
-						theme,
-						child: const Center(child: CircularProgressIndicator()),
-					);
-				}
+				return await MangaDex.instance.cover.getImage(
+					mangaData.manga.id,
+					mangaData.cover!,
+					size: e.first.previewSize,
+					cache: e.first.enabled,
+				);
+			});
 
-				if (snapshot.hasError || !snapshot.hasData) {
-					return buildCardLayout(theme, child: buildError(theme, error: snapshot.error));
-				}
-
-				final data = snapshot.requireData;
-
-				return buildCard(theme, context, data.manga, data.cover);
-			},
-		);
+		return buildCard(context, manga, coverStream);
 	}
 
-	Widget buildCard(ThemeData theme, BuildContext context, Manga manga, CoverArt? cover) {
+	Widget buildCard(BuildContext context, Manga manga, Stream<File?> coverStream) {
+		final theme = Theme.of(context);
+
 		return buildCardLayout(
 			theme,
 			onTap: () => navigateToMangaView(context),
@@ -144,6 +123,8 @@ class MangaCard extends StatelessWidget {
 	}
 
 	void navigateToMangaView(BuildContext context) {
-		Navigator.push(context, sharedAxis(() => MangaView(id: id), SharedAxisTransitionType.vertical));
+		Navigator.of(context).push(
+			sharedAxis(() => MangaView(id: mangaData.manga.id), SharedAxisTransitionType.vertical),
+		);
 	}
 }
