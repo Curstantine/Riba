@@ -30,7 +30,7 @@ class _CoverSheetState extends State<CoverSheet> {
 	final logger = Logger("MangaCoverSheet");
 	Manga get manga => widget.mangaData.manga;
 
-	final coverCacheSettings = CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
+	final coverCacheSettings = CoverPersistenceSettings.ref.getByKey(CoverPersistenceSettings.isarKey);
 	final bigPictureController = StreamController<File?>();
 
 	late final selectedCoverId = ValueNotifier<String?>(

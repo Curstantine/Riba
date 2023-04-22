@@ -10,27 +10,27 @@ class Settings {
 
 	final Isar _database;
 
-	IsarCollection<CoverCacheSettings> get coverCacheSettings => _database.coverCacheSettings;
-	IsarCollection<ChapterCacheSettings> get chapterCacheSettings => _database.chapterCacheSettings;
+	IsarCollection<CoverPersistenceSettings> get coverPersistenceSettings => _database.coverPersistenceSettings;
+	IsarCollection<ChapterPersistenceSettings> get chapterPersistenceSettings => _database.chapterPersistenceSettings;
 	IsarCollection<MangaFilterSettings> get mangaFilterSettings => _database.mangaFilterSettings;
 	IsarCollection<ThemeSettings> get themeSettings => _database.themeSettings;
 
 	static Future<void> init(Isar database) async {
 		final locals = await Future.wait([
-			database.coverCacheSettings.getByKey(CoverCacheSettings.isarKey),
-			database.chapterCacheSettings.getByKey(ChapterCacheSettings.isarKey),
+			database.coverPersistenceSettings.getByKey(CoverPersistenceSettings.isarKey),
+			database.chapterPersistenceSettings.getByKey(ChapterPersistenceSettings.isarKey),
 			database.themeSettings.getByKey(ThemeSettings.isarKey),  
 		]);
 
-		final localCoverCacheSettings = locals[0];
-		final localChapterCacheSettings = locals[1];
+		final localCoverPersistenceSettings = locals[0];
+		final localChapterPersistenceSettings = locals[1];
 		final localThemeSettings = locals[2];
 
 		await database.writeTxn(() => Future.wait([
-			if (localCoverCacheSettings == null)
-				database.coverCacheSettings.put(CoverCacheSettings.defaultSettings),
-			if (localChapterCacheSettings == null)
-				database.chapterCacheSettings.put(ChapterCacheSettings.defaultSettings),
+			if (localCoverPersistenceSettings == null)
+				database.coverPersistenceSettings.put(CoverPersistenceSettings.defaultSettings),
+			if (localChapterPersistenceSettings == null)
+				database.chapterPersistenceSettings.put(ChapterPersistenceSettings.defaultSettings),
 			if (localThemeSettings == null)
 				database.themeSettings.put(ThemeSettings.defaultSettings),
 		]));

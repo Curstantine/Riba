@@ -21,9 +21,9 @@ class MangaCard extends StatelessWidget {
 
 	final String id;
 
-	late final coverCacheSettingsStream = CoverCacheSettings.ref
+	late final coverCacheSettingsStream = CoverPersistenceSettings.ref
 		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
 

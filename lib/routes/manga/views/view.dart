@@ -112,7 +112,7 @@ class _MangaViewState extends State<MangaView> {
 				return coverController.close();
 			}
 
-			final settings = await CoverCacheSettings.ref.getByKey(CoverCacheSettings.isarKey);
+			final settings = await CoverPersistenceSettings.ref.getByKey(CoverPersistenceSettings.isarKey);
 			final image = await MangaDex.instance.cover.getImage(
 				widget.id,
 				cover,

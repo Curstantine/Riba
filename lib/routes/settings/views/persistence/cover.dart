@@ -18,30 +18,30 @@ class SettingsPersistenceSegment extends StatefulWidget {
 }
 
 class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment> {
-	final coverCacheEnabledStream = CoverCacheSettings.ref
+	final coverCacheEnabledStream = CoverPersistenceSettings.ref
 		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
 		.enabledProperty()
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
 
-	final coverPreviewSizeStream = CoverCacheSettings.ref
+	final coverPreviewSizeStream = CoverPersistenceSettings.ref
 		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
 		.previewSizeProperty()
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
 
-	final coverFullSizeStream = CoverCacheSettings.ref
+	final coverFullSizeStream = CoverPersistenceSettings.ref
 		.where()
-		.keyEqualTo(CoverCacheSettings.isarKey)
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
 		.fullSizeProperty()
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
 
-	final settingsFuture = CoverCacheSettings.ref
-		.getByKey(CoverCacheSettings.isarKey)
-		.then((e) => e as CoverCacheSettings);
+	final settingsFuture = CoverPersistenceSettings.ref
+		.getByKey(CoverPersistenceSettings.isarKey)
+		.then((e) => e as CoverPersistenceSettings);
 
 	@override
 	Widget build(BuildContext context) {
@@ -88,8 +88,8 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 								value: enabled,
 								onChanged: (value) async {
 									final settings = (await settingsFuture).copyWith(enabled: value);
-									await CoverCacheSettings.ref.isar.writeTxn(
-										() => CoverCacheSettings.ref.put(settings),
+									await CoverPersistenceSettings.ref.isar.writeTxn(
+										() => CoverPersistenceSettings.ref.put(settings),
 									);
 								},
 							),
@@ -175,9 +175,9 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 		}
   }
 
-	Future<void> setCoverCacheSettings(CoverCacheSettings settings) async {
-		await CoverCacheSettings.ref.isar.writeTxn(
-			() => CoverCacheSettings.ref.put(settings)
+	Future<void> setCoverCacheSettings(CoverPersistenceSettings settings) async {
+		await CoverPersistenceSettings.ref.isar.writeTxn(
+			() => CoverPersistenceSettings.ref.put(settings)
 		);
 	}
 }
