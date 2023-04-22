@@ -18,8 +18,9 @@ import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/button.dart";
 import "package:riba/routes/manga/widgets/chip.dart";
-import "package:riba/routes/manga/widgets/sheet.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
+import "package:riba/routes/manga/widgets/sheets/filter.dart";
+import "package:riba/routes/manga/widgets/sheets/rating.dart";
 import "package:riba/settings/cache.dart";
 import "package:riba/settings/filter.dart";
 import "package:riba/utils/constants.dart";
@@ -731,7 +732,7 @@ class ChapterInfoBar extends StatelessWidget {
 		ColorScheme colors,
 		CollectionData<ChapterData>? chapters,
 	) {
-		return 	StreamBuilder(
+		return StreamBuilder(
 			stream: filterStream,
 			builder: (context, snapshot) {
 				if (snapshot.connectionState != ConnectionState.active || chapters == null) {
@@ -780,7 +781,11 @@ class ChapterInfoBar extends StatelessWidget {
 				onApply: (newFilter) async {
 					await MangaFilterSettings.ref.isar
 						.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
-					onFilterApplied.call();
+					
+					if (context.mounted) {
+						Navigator.pop(context);
+						onFilterApplied.call();
+					}
 				},
 			),
 		);
