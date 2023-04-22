@@ -175,7 +175,8 @@ class _CoverSheetState extends State<CoverSheet> {
 			padding: Edges.allLarge.add(EdgeInsets.only(bottom: widget.padding.bottom)),
 			children: [
 				_BigPicture(
-					cover: covers[selectedCoverId.value]!.cover,
+					covers: covers,
+					selectedCoverId: selectedCoverId,
 					imageStream: bigPictureController.stream,
 				),
 				const SizedBox(height: Edges.medium),
@@ -242,11 +243,13 @@ class _CoverSheetState extends State<CoverSheet> {
 
 class _BigPicture extends StatelessWidget {
 	const _BigPicture({
-		required this.cover,
+		required this.covers,
+		required this.selectedCoverId,
 		required this.imageStream,
 	});
 
-	final CoverArt? cover;
+	final Map<String, CoverArtData> covers;
+	final ValueNotifier<String?> selectedCoverId;
 
 	/// Stream of the big picture.
 	/// 
@@ -267,18 +270,7 @@ class _BigPicture extends StatelessWidget {
 				curve: Curves.easeInOut,
 				child: Stack(alignment: Alignment.bottomRight, children: [
 					buildImage(text, colors),
-					Padding(
-						padding: Edges.horizontalSmall.copyWithSelf(Edges.verticalMedium),
-						child: Wrap(
-							spacing: Edges.extraSmall,
-							children: [
-								if (cover?.volume != null)
-									TinyChip(label: "Vol ${cover!.volume}", onPressed: () => {}),
-								if (cover?.locale != null)
-									TinyChip(label: cover!.locale!.language.human, onPressed: () => {}),
-							],
-						),
-					),
+					buildInfoTags(text, colors),
 				]),
 			),
 	    );
@@ -340,6 +332,28 @@ class _BigPicture extends StatelessWidget {
         );
 	}
 
+	Widget buildInfoTags(TextTheme text, ColorScheme colors) {
+		return ValueListenableBuilder(
+			valueListenable: selectedCoverId,
+			builder: (context, value, _) {
+				final cover = covers[value]?.cover;
+
+				return Padding(
+					padding: Edges.horizontalSmall.copyWithSelf(Edges.verticalMedium),
+					child: Wrap(
+						spacing: Edges.extraSmall,
+						children: [
+							if (cover?.volume != null)
+								TinyChip(label: "Vol ${cover!.volume}", onPressed: () => {}),
+							if (cover?.locale != null)
+								TinyChip(label: cover!.locale!.language.human, onPressed: () => {}),
+						],
+					),
+				);
+			}
+		);
+	}
+	
 	Widget buildZoomablePreview(BuildContext context, File image) {
 		return Stack(
 			children: [
@@ -367,7 +381,7 @@ class _BigPicture extends StatelessWidget {
 						padding: Edges.bottomExtraLarge.copyWith(right: Edges.medium),
 						child: Row(children: [
 							ElevatedButton.icon(
-								onPressed: saveCoverImage,
+								onPressed: () => saveCoverImage(context),
 								icon: const Icon(Icons.save),
 								label: const Text("Save"))
 						]),
@@ -379,7 +393,9 @@ class _BigPicture extends StatelessWidget {
 
 	/// TODO: implement a platform agnostic way to save the image
 	/// to a shared path outside of the app.
-	void saveCoverImage() {}
+	void saveCoverImage(BuildContext context) {
+		showLazyBar(context, "Not implemented yet.");
+	}
 }
 
 class _CoverPreview extends StatelessWidget {
