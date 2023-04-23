@@ -31,14 +31,13 @@ class _CoverSheetState extends State<CoverSheet> {
 	Manga get manga => widget.mangaData.manga;
 
 	final coverCacheSettings = CoverPersistenceSettings.ref.getByKey(CoverPersistenceSettings.isarKey);
-	final bigPictureController = StreamController<File?>();
-
 	late final selectedCoverId = ValueNotifier<String?>(
 		manga.preferredCoverId ?? manga.defaultCoverId,
 	);
 
-	Future<Map<String, CoverArtData>>? coverDataFuture;
-	Future<Map<String, Future<File>>>? coverPreviewsFuture;
+	final bigPictureController = StreamController<File?>();
+	final coverDataController = StreamController<Map<String, CoverArtData>>();
+	final coverPreviewsController = StreamController<Map<String, Future<File>>>();
 
   	@override
   	void initState() {
@@ -50,53 +49,55 @@ class _CoverSheetState extends State<CoverSheet> {
 		await fetchData(init: true);
 
 		final probableCoverId = manga.preferredCoverId ?? manga.defaultCoverId;
-		if (probableCoverId != null) onCoverSelected(probableCoverId);
+		// if (probableCoverId != null) onCoverSelected(probableCoverId);
 
 		// When there aren't any covers, we need to sink a null to the stream and close
 		// its connection, so [_BigPicture] could comprehend the state.
-		if (probableCoverId == null && (await coverDataFuture)!.isEmpty) {
+		if (probableCoverId == null && (await coverDataController.stream.single).isEmpty) {
 			bigPictureController.add(null);
 			bigPictureController.close();			
 		}
 	}
 
 	Future<void> fetchData({bool init = false, bool checkDB = true}) async {
-		if (init) {
-			try {
-	      		final data = await MangaDex.instance.cover.getManyByMangaId(
-	      			checkDB: true,
-	      			overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
-	      		);
-	
-	      		if (data.length <= 1) return fetchData(checkDB: false);
-	      		if (mounted) {
-	      			coverDataFuture = Future.value(
-						{ for (final cover in data) cover.cover.id: cover }
-					);
-	      		}
-	    	} catch (e) {
-	      		if (mounted) coverDataFuture = Future.error(e);
-	  		}
-		} else {
-			coverDataFuture = MangaDex.instance.cover
-				.getManyByMangaId(
+		final settings = await coverCacheSettings;
+		List<CoverArtData>? coverData;
+
+		try {
+			if (init) {
+				coverData = await MangaDex.instance.cover.getManyByMangaId(
+					checkDB: true,
+					overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
+				);
+		
+				if (coverData.length <= 1) return fetchData(checkDB: false);
+			} else {
+				coverData = await MangaDex.instance.cover.getManyByMangaId(
 					checkDB: checkDB,
-					overrides: MangaDexCoverQueryFilter(mangaId: manga.id))
-				.then((data) => { for (final cover in data) cover.cover.id: cover });
+					overrides: MangaDexCoverQueryFilter(mangaId: manga.id)
+				);
+			}
+		} catch (e) {
+			coverDataController.addError(e);
 		}
 
-		coverPreviewsFuture = coverDataFuture?.then((data) async {
-			final settings = await coverCacheSettings;
-			return data.map((key, value) =>
-				MapEntry(key, MangaDex.instance.cover.getImage(
-					manga.id, value.cover,
+		if (coverData == null) return;
+
+		coverDataController.add({ for (final cover in coverData) cover.cover.id: cover });
+		coverPreviewsController.add({
+			for (final cover in coverData)
+				cover.cover.id: MangaDex.instance.cover.getImage(
+					manga.id, cover.cover,
 					size: settings!.previewSize,
 					cache: settings.enabled,
-				))
-			);			
+				)
 		});
-		
-		setState(() => {});
+
+		final probableCoverId = manga.preferredCoverId ?? manga.defaultCoverId;
+		if (probableCoverId != null) {
+			final data = coverData.firstWhere((e) => e.cover.id == probableCoverId);
+			onCoverSelected(data.cover, force: true);
+		}
 	}
 
 	@override
@@ -125,17 +126,17 @@ class _CoverSheetState extends State<CoverSheet> {
 						),
 					],
 				),
-				body: FutureBuilder<Map<String, CoverArtData>>(
-					future: coverDataFuture,
+				body: StreamBuilder<Map<String, CoverArtData>>(
+					stream: coverDataController.stream,
 					builder: (context, snapshot) {
 						Widget? child;
 
-						if (snapshot.connectionState != ConnectionState.done) {
+						if (snapshot.connectionState != ConnectionState.active) {
 							child = const Center(child: CircularProgressIndicator());
 						}
 
 						if ((snapshot.hasError || !snapshot.hasData) &&
-							snapshot.connectionState == ConnectionState.done) {
+							snapshot.connectionState == ConnectionState.active) {
 							final error = handleError(snapshot.error ?? "Data was null without errors.");
 
 							child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -185,7 +186,7 @@ class _CoverSheetState extends State<CoverSheet> {
 				_CoverPreviewList(
 					manga: manga,
 					covers: covers,
-					imageMapStream: coverPreviewsFuture,
+					imageMapStream: coverPreviewsController.stream,
 					selectedCoverId: selectedCoverId,
 					onCoverSelected: onCoverSelected),
 				Padding(
@@ -207,16 +208,16 @@ class _CoverSheetState extends State<CoverSheet> {
 		);
 	}
 
-	void onCoverSelected(String id) async {
-		selectedCoverId.value = id;
+	void onCoverSelected(CoverArt data, {bool force = false}) async {
+		if (data.id == selectedCoverId.value && !force) return;
+
+		selectedCoverId.value = data.id;
 		bigPictureController.add(null);
 		
-		final data = (await coverDataFuture)!;
 		final settings = await coverCacheSettings;
-
 		final image = await MangaDex.instance.cover.getImage(
 			widget.mangaData.manga.id,
-			data[id]!.cover,
+			data,
 			size: settings!.fullSize,
 			cache: settings.enabled,
 		);
@@ -411,7 +412,7 @@ class _CoverPreview extends StatelessWidget {
 	final CoverArt cover;
 	final ValueNotifier<String?> selectedCoverId;
 	final Future<File> imageFuture;
-	final Function(String coverId) onTap;
+	final Function(CoverArt cover) onTap;
 
 	@override
 	Widget build(BuildContext context) {
@@ -455,7 +456,7 @@ class _CoverPreview extends StatelessWidget {
 
 				if (snapshot.hasData) {
 					child = InkWell(
-						onTap: () => onTap.call(cover.id),
+						onTap: () => onTap.call(cover),
 						child: Image.file(
 							snapshot.requireData,
 							fit: BoxFit.fitWidth,
@@ -513,9 +514,9 @@ class _CoverPreviewList extends StatelessWidget {
 
 	final Manga manga;
 	final Map<String, CoverArtData> covers;
-	final Future<Map<String, Future<File>>>? imageMapStream;
+	final Stream<Map<String, Future<File>>>? imageMapStream;
 	final ValueNotifier<String?> selectedCoverId;
-	final Function(String coverId) onCoverSelected;
+	final Function(CoverArt data) onCoverSelected;
 
   	@override
   	Widget build(BuildContext context) {
@@ -537,17 +538,18 @@ class _CoverPreviewList extends StatelessWidget {
 
 		return SizedBox(
 			height: 250,
-			child: FutureBuilder<Map<String, Future<File>>>(
-				future: imageMapStream,
+			child: StreamBuilder<Map<String, Future<File>>>(
+				stream: imageMapStream,
 				builder: (context, snapshot) {
 					Widget? child;
 
-					if (snapshot.connectionState != ConnectionState.done) {
+					if (snapshot.connectionState != ConnectionState.active) {
 						child = const CircularProgressIndicator();
 					}
 
 					if (snapshot.hasError) {
 						final error = handleError(snapshot.error!);
+
 						child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 							Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
 							const SizedBox(height: Edges.small),
