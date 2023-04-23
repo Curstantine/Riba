@@ -1,5 +1,7 @@
 import "package:animations/animations.dart";
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:riba/routes/settings/views/debug/view.dart";
 import "package:riba/routes/settings/views/persistence/view.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/widgets/material/lists.dart";
@@ -27,6 +29,11 @@ class SettingsView extends StatelessWidget {
 								title: "Persistence",
 								leading: const Icon(Icons.save_alt_rounded),
 								onTap: () => navigateTo(context, const SettingsPersistenceView())),
+							if (kDebugMode)
+								ListItem(
+									title: "Debug",
+									leading: const Icon(Icons.bug_report_rounded),
+									onTap: () => navigateTo(context, const SettingsDebugView())),
 						]),
 					),
 				],

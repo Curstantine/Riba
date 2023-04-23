@@ -5,9 +5,9 @@ import "package:flutter/material.dart";
 class StreamingListTile<T> extends StatelessWidget {
 	const StreamingListTile({
 		super.key,
-		required this.enabled,
 		required this.title,
 		required this.stream,
+		this.enabled = true,
 		this.subtitle,
 		this.contextualSubtitle,
 		this.onTap,
