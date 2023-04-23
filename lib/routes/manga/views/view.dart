@@ -859,7 +859,7 @@ class ChapterList extends StatelessWidget {
 					: data.groups.map((e) => e.name).join(", ");
 
 				if (data.chapter.chapter != null && data.chapter.volume != null) {
-					title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter} ";
+					title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter}";
 				} else if (data.chapter.chapter != null) {
 					title = "Chapter ${data.chapter.chapter}";
 				} else {
@@ -867,7 +867,7 @@ class ChapterList extends StatelessWidget {
 				}
 
 				if (data.chapter.title != null) {
-					title += "- ${data.chapter.title!}";
+					title += " - ${data.chapter.title!}";
 				}
 
 				return ListTile(
