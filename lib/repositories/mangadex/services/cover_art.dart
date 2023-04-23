@@ -137,64 +137,66 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     return mapped.cast<String, CoverArtData>()..addAll(res);
   }
 
-  /// Returns all the [CoverArtData] related to a manga.
-  ///
-  /// This method internally handles pagination.
-  Future<List<CoverArtData>> getManyByMangaId({
-    required MangaDexCoverQueryFilter overrides,
-    bool checkDB = true,
-  }) async {
-    logger.info("getManyByMangaId($overrides, $checkDB)");
+	/// Returns all the [CoverArtData] related to a manga.
+	///
+	/// This method internally handles pagination.
+	Future<List<CoverArtData>> getManyByMangaId({
+		required MangaDexCoverQueryFilter overrides,
+		bool checkDB = true,
+	}) async {
+		logger.info("getManyByMangaId($overrides, $checkDB)");
 
-    assert(overrides.mangaId != null, "This method requires the mangaId to be set");
-    assert(overrides.offset == 0, "This method does not support pagination, offset must be 0");
+		assert(overrides.mangaId != null, "This method requires the mangaId to be set");
+		assert(overrides.offset == 0, "This method does not support pagination, offset must be 0");
 
-    final filters = defaultFilters.copyWithSelf(overrides);
-    final locales = filters.locales ?? [];
-    final orderByVolDesc = filters.orderByVolumeDesc == true;
+		final filters = defaultFilters.copyWithSelf(overrides);
+		final locales = filters.locales ?? [];
+		final orderByVolDesc = filters.orderByVolumeDesc == true;
 
-    if (checkDB) {
-      final inDB = await database
-          .where()
-          .mangaIdEqualTo(filters.mangaId!)
-          .filter()
-          .locale((q) => q.anyOf(locales, (q, e) => q.codeEqualTo(e.code)))
-          .optional(orderByVolDesc, (q) => q.sortByVolumeDesc())
-          .offset(filters.offset)
-          .limit(filters.limit)
-          .findAll();
+		if (checkDB) {
+			final inDB = await database
+				.where()
+				.mangaIdEqualTo(filters.mangaId!)
+				.filter()
+				.locale((q) => q.anyOf(locales, (q, e) => q.codeEqualTo(e.code)))
+				.optional(orderByVolDesc, (q) => q.sortByVolumeDesc())
+				.offset(filters.offset)
+				.limit(filters.limit)
+				.findAll();
 
-      if (inDB.isNotEmpty) {
-        final coverFuture = inDB.map(collectMeta).toList();
-        return await Future.wait(coverFuture);
-      }
-    }
+			if (orderByVolDesc) inDB.sortInDesc();
 
-    int offset = 0;
-    final covers = <CoverArtData>[];
+			if (inDB.isNotEmpty) {
+				final coverFuture = inDB.map(collectMeta).toList();
+				return await Future.wait(coverFuture);
+			}
+		}
 
-    while (true) {
-      await rateLimiter.wait("/cover:GET");
-      final reqUrl = filters.copyWith(offset: offset).addFiltersToUrl(baseUrl.copy());
-      final request = await client.get(reqUrl.toUri());
-      final response = CoverArtCollection.fromMap(jsonDecode(request.body));
+		int offset = 0;
+		final covers = <CoverArtData>[];
 
-      for (final cover in response.data) {
-        try {
-          final coverData = cover.asCoverArtData();
-          covers.add(coverData);
-        } on LanguageNotSupportedException catch (e) {
-          logger.warning(e.toString());
-        }
-      }
+		while (true) {
+			await rateLimiter.wait("/cover:GET");
+			final reqUrl = filters.copyWith(offset: offset).addFiltersToUrl(baseUrl.copy());
+			final request = await client.get(reqUrl.toUri());
+			final response = CoverArtCollection.fromMap(jsonDecode(request.body));
 
-      if ((response.offset + response.limit) >= response.total) break;
-      offset += response.limit;
-    }
+			for (final cover in response.data) {
+				try {
+					final coverData = cover.asCoverArtData();
+					covers.add(coverData);
+				} on LanguageNotSupportedException catch (e) {
+					logger.warning(e.toString());
+				}
+			}
 
-    await database.isar.writeTxn(() => Future.wait(covers.map(insertMeta)));
-    return covers;
-  }
+			if ((response.offset + response.limit) >= response.total) break;
+			offset += response.limit;
+		}
+
+		await database.isar.writeTxn(() => Future.wait(covers.map(insertMeta)));
+		return covers;
+	}
 
   @override
   @Deprecated("Will not be implemented, used as a stub for the interface.")

@@ -122,3 +122,16 @@ enum CoverSize {
     }
   }
 }
+
+extension SortCoverArt on List<CoverArt> {
+	void sortInDesc() => sort((a, b) {
+		if (a.volume != null && b.volume != null) {
+			final aVolume = double.parse(a.volume!);
+			final bVolume = double.parse(b.volume!);
+
+			return bVolume.compareTo(aVolume);
+		}
+
+		return 0;
+	});
+}
