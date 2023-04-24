@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
-import "package:riba/routes/manga/widgets/list.dart";
+import "package:riba/routes/manga/widgets/lists/horizontal.dart";
 
 class HomeContent extends StatelessWidget { 
 	const HomeContent({super.key});
