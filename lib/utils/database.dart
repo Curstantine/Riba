@@ -45,7 +45,7 @@ class Database {
 	}
 
 
-	static const schemas =  [
+	static const schemas = [
 		// Local models
 		MangaSchema,
 		AuthorSchema,
