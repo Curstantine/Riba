@@ -44,6 +44,6 @@ class Settings {
 		]));
 
 		/// Run migrations and default initializations here.
-		instance = Settings._internal(database:  database);
+		instance = Settings._internal(database: database);
 	}
 }
