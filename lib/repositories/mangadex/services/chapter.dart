@@ -10,6 +10,7 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/models/chapter.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
@@ -205,6 +206,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
   final bool? orderByChapterDesc;
   final List<Language>? translatedLanguages;
   final List<String>? excludedGroups;
+  final List<MangaContentRating>? contentRatings;
 
   MangaDexChapterQueryFilter({
     this.ids,
@@ -215,6 +217,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     this.orderByChapterDesc,
     this.translatedLanguages,
     this.excludedGroups,
+	this.contentRatings,
   });
 
   @override
@@ -235,6 +238,10 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
       url.setParameter("excludedGroups[]", excludedGroups);
     }
 
+	if (contentRatings != null) {
+	  url.setParameter("contentRating[]", contentRatings);
+	}
+
     final generic = MangaDexGenericQueryFilter(
       ids: ids,
       includes: includes,
@@ -254,6 +261,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     bool? orderByChapterDesc,
     List<Language>? translatedLanguages,
     List<String>? excludedGroups,
+	List<MangaContentRating>? contentRatings,
   }) {
     return MangaDexChapterQueryFilter(
       ids: ids ?? this.ids,
@@ -264,6 +272,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
       orderByChapterDesc: orderByChapterDesc ?? this.orderByChapterDesc,
       translatedLanguages: translatedLanguages ?? this.translatedLanguages,
       excludedGroups: excludedGroups ?? this.excludedGroups,
+	  contentRatings: contentRatings ?? this.contentRatings,
     );
   }
 
@@ -277,11 +286,12 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
       orderByChapterDesc: other.orderByChapterDesc ?? orderByChapterDesc,
       translatedLanguages: other.translatedLanguages ?? translatedLanguages,
       excludedGroups: other.excludedGroups ?? excludedGroups,
+	  contentRatings: other.contentRatings ?? contentRatings,
     );
   }
 
   @override
   String toString() {
-    return "MangaDexChapterQueryFilter(ids: $ids, includes: $includes, limit: $limit, offset: $offset, mangaId: $mangaId, orderByChapterDesc: $orderByChapterDesc, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups)";
+    return "MangaDexChapterQueryFilter(ids: $ids, includes: $includes, limit: $limit, offset: $offset, mangaId: $mangaId, orderByChapterDesc: $orderByChapterDesc, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups, contentRatings: $contentRatings)";
   }
 }

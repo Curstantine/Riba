@@ -31,11 +31,6 @@ class ChapterList extends StatelessWidget {
 		return StreamBuilder<CollectionData<ChapterData>>(
 			stream: chapterStream,
 			builder: (context, snapshot) {
-				// Since the loading indicator is in the header, we don't need to handle other states here.
-				if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
-					return const SliverToBoxAdapter(child: SizedBox.shrink());
-				}
-
 				if (snapshot.hasError) {
 					final error = handleError(snapshot.error!);
 
@@ -51,30 +46,23 @@ class ChapterList extends StatelessWidget {
 					);
 				}
 
-				final chapters = snapshot.requireData;
+				final chapters = snapshot.data;
 
-				if (chapters.data.isEmpty) {
-					return const SliverToBoxAdapter(
-						child: SizedBox(
-							height: 100,
-							child: Center(child: Text("No chapters found")),
-						),
-					);
-				}
+
 
 				return buildList(text, colors, chapters);
 			},
 		);
 	}
 
-	SliverList buildList(TextTheme text, ColorScheme colors, CollectionData<ChapterData> chapters) {
+	SliverList buildList(TextTheme text, ColorScheme colors, CollectionData<ChapterData>? chapters) {
+		final listLength = (chapters?.data.length ?? 0) + 1;
+		
 		return SliverList(delegate: SliverChildBuilderDelegate(
-			childCount: chapters.data.length + 1,
+			childCount: listLength,
 			(context, i) {
 				final actualIndex = i - 1;
-
-				// Exit early since we are at the end of the list.
-				if (actualIndex >= chapters.data.length) return null;
+				if (actualIndex >= (listLength - 1)) return null;
 
 				if (actualIndex == -1) {
 					return ChapterInfoBar(
@@ -83,6 +71,8 @@ class ChapterList extends StatelessWidget {
 						onFilterApplied: onFilterApplied,
 					);
 				}
+
+				if (chapters == null) return null;
 
 				final data = chapters.data[actualIndex];
 

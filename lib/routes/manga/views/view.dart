@@ -10,6 +10,7 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
@@ -42,6 +43,7 @@ class _MangaViewState extends State<MangaView> {
 	final scrollController = ScrollController();
 	final preferredLanguages = [Language.english, Language.japanese];
 	final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
+	final contentRatings = MangaContentRating.values;
 
 	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);
@@ -147,6 +149,7 @@ class _MangaViewState extends State<MangaView> {
 					mangaId: widget.id,
 					translatedLanguages: preferredLanguages,
 					excludedGroups: filters.excludedGroupIds,
+					contentRatings: contentRatings,
 					offset: offset,
 				),
 			);
