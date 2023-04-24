@@ -20,8 +20,8 @@ import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
-import "package:riba/settings/persistence.dart";
 import "package:riba/settings/manga_filter.dart";
+import "package:riba/settings/persistence.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/hash.dart";
@@ -43,7 +43,7 @@ class _MangaViewState extends State<MangaView> {
 	final scrollController = ScrollController();
 	final preferredLanguages = [Language.english, Language.japanese];
 	final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
-	final contentRatings = MangaContentRating.values;
+	final contentRatings = ContentRating.values;
 
 	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);

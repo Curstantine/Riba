@@ -47,7 +47,7 @@ class Manga {
   late MangaPublicationDemographic publicationDemographic;
 
   @Enumerated(EnumType.ordinal)
-  late MangaContentRating contentRating;
+  late ContentRating contentRating;
 
   Manga({
     required this.id,

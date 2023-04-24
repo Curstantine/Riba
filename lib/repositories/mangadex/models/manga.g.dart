@@ -21,8 +21,7 @@ MangaAttributes _$MangaAttributesFromJson(Map<String, dynamic> json) =>
       publicationDemographic: $enumDecodeNullable(
           _$MangaPublicationDemographicEnumMap, json["publicationDemographic"]),
       status: $enumDecode(_$MangaStatusEnumMap, json["status"]),
-      contentRating:
-          $enumDecode(_$MangaContentRatingEnumMap, json["contentRating"]),
+      contentRating: $enumDecode(_$ContentRatingEnumMap, json["contentRating"]),
       version: json["version"] as int,
     );
 
@@ -41,9 +40,9 @@ const _$MangaStatusEnumMap = {
   MangaStatus.cancelled: "cancelled",
 };
 
-const _$MangaContentRatingEnumMap = {
-  MangaContentRating.safe: "safe",
-  MangaContentRating.suggestive: "suggestive",
-  MangaContentRating.erotica: "erotica",
-  MangaContentRating.pornographic: "pornographic",
+const _$ContentRatingEnumMap = {
+  ContentRating.safe: "safe",
+  ContentRating.suggestive: "suggestive",
+  ContentRating.erotica: "erotica",
+  ContentRating.pornographic: "pornographic",
 };

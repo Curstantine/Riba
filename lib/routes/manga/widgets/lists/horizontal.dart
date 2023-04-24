@@ -31,10 +31,10 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 		overrides: MangaDexMangaQueryFilter(
 			ids: widget.mangaIds,
 			contentRatings: [
-				MangaContentRating.safe,
-				MangaContentRating.suggestive,
-				MangaContentRating.erotica,
-				MangaContentRating.pornographic
+				ContentRating.safe,
+				ContentRating.suggestive,
+				ContentRating.erotica,
+				ContentRating.pornographic
 			]
 		),
 	);

@@ -206,7 +206,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
   final bool? orderByChapterDesc;
   final List<Language>? translatedLanguages;
   final List<String>? excludedGroups;
-  final List<MangaContentRating>? contentRatings;
+  final List<ContentRating>? contentRatings;
 
   MangaDexChapterQueryFilter({
     this.ids,
@@ -261,7 +261,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     bool? orderByChapterDesc,
     List<Language>? translatedLanguages,
     List<String>? excludedGroups,
-	List<MangaContentRating>? contentRatings,
+	List<ContentRating>? contentRatings,
   }) {
     return MangaDexChapterQueryFilter(
       ids: ids ?? this.ids,

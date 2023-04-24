@@ -44,7 +44,7 @@ void main() {
     url.setParameter("includes[]", [EntityType.artist, EntityType.author]);
     url.setParameter("status", MangaStatus.cancelled);
     url.setParameter("publicationDemographic", MangaPublicationDemographic.shounen);
-    url.setParameter("contentRating", MangaContentRating.safe);
+    url.setParameter("contentRating", ContentRating.safe);
 
     final uri = url.toUri();
     expect(

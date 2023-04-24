@@ -24,7 +24,7 @@ class MangaAttributes {
   final String originalLanguage;
   final MangaPublicationDemographic? publicationDemographic;
   final MangaStatus status;
-  final MangaContentRating contentRating;
+  final ContentRating contentRating;
   final List<MDResponseData<TagAttributes>> tags;
   final int version;
 
@@ -108,32 +108,32 @@ enum MangaPublicationDemographic implements TwoWayEnumSerde {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(alwaysCreate: true)
-enum MangaContentRating implements TwoWayEnumSerde {
-  safe,
-  suggestive,
-  erotica,
-  pornographic;
+enum ContentRating implements TwoWayEnumSerde {
+	safe,
+	suggestive,
+	erotica,
+	pornographic;
 
-  @override
-  factory MangaContentRating.fromJsonValue(String source) =>
-      $enumDecode(_$MangaContentRatingEnumMap, source);
+	@override
+	factory ContentRating.fromJsonValue(String source) =>
+		$enumDecode(_$MangaContentRatingEnumMap, source);
 
-  @override
-  String toJson() => _$MangaContentRatingEnumMap[this]!;
+	@override
+	String toJson() => _$MangaContentRatingEnumMap[this]!;
 
-  @override
-  String asHumanReadable() {
-    switch (this) {
-      case MangaContentRating.safe:
-        return "Safe";
-      case MangaContentRating.suggestive:
-        return "Suggestive";
-      case MangaContentRating.erotica:
-        return "Erotica";
-      case MangaContentRating.pornographic:
-        return "Pornographic";
-    }
-  }
+	@override
+	String asHumanReadable() {
+		switch (this) {
+		case ContentRating.safe:
+			return "Safe";
+		case ContentRating.suggestive:
+			return "Suggestive";
+		case ContentRating.erotica:
+			return "Erotica";
+		case ContentRating.pornographic:
+			return "Pornographic";
+		}
+	}
 }
 
 extension ToManga on MDResponseData<MangaAttributes> {

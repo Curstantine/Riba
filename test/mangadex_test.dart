@@ -49,10 +49,10 @@ void main() async {
 
       final withRatingFilters = await mangadex.manga.getMany(
         overrides: MangaDexMangaQueryFilter(ids: mangaIds, contentRatings: [
-          MangaContentRating.safe,
-          MangaContentRating.suggestive,
-          MangaContentRating.erotica,
-          MangaContentRating.pornographic,
+          ContentRating.safe,
+          ContentRating.suggestive,
+          ContentRating.erotica,
+          ContentRating.pornographic,
         ]),
       );
 

@@ -265,7 +265,7 @@ Manga _mangaDeserialize(
     authorIds: reader.readStringList(offsets[2]) ?? [],
     contentRating:
         _MangacontentRatingValueEnumMap[reader.readByteOrNull(offsets[3])] ??
-            MangaContentRating.safe,
+            ContentRating.safe,
     defaultCoverId: reader.readStringOrNull(offsets[4]),
     description: reader.readObjectOrNull<Localizations>(
           offsets[5],
@@ -316,7 +316,7 @@ P _mangaDeserializeProp<P>(
       return (reader.readStringList(offset) ?? []) as P;
     case 3:
       return (_MangacontentRatingValueEnumMap[reader.readByteOrNull(offset)] ??
-          MangaContentRating.safe) as P;
+          ContentRating.safe) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
@@ -364,10 +364,10 @@ const _MangacontentRatingEnumValueMap = {
   "pornographic": 3,
 };
 const _MangacontentRatingValueEnumMap = {
-  0: MangaContentRating.safe,
-  1: MangaContentRating.suggestive,
-  2: MangaContentRating.erotica,
-  3: MangaContentRating.pornographic,
+  0: ContentRating.safe,
+  1: ContentRating.suggestive,
+  2: ContentRating.erotica,
+  3: ContentRating.pornographic,
 };
 const _MangaoriginalLanguageEnumValueMap = {
   "none": 0,
@@ -1158,7 +1158,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> contentRatingEqualTo(
-      MangaContentRating value) {
+      ContentRating value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"contentRating",
@@ -1168,7 +1168,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> contentRatingGreaterThan(
-    MangaContentRating value, {
+    ContentRating value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1181,7 +1181,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> contentRatingLessThan(
-    MangaContentRating value, {
+    ContentRating value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1194,8 +1194,8 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> contentRatingBetween(
-    MangaContentRating lower,
-    MangaContentRating upper, {
+    ContentRating lower,
+    ContentRating upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -2445,8 +2445,7 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Manga, MangaContentRating, QQueryOperations>
-      contentRatingProperty() {
+  QueryBuilder<Manga, ContentRating, QQueryOperations> contentRatingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"contentRating");
     });

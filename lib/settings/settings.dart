@@ -1,8 +1,11 @@
 import "package:isar/isar.dart";
-import "package:riba/settings/persistence.dart";
-import "package:riba/settings/manga_filter.dart";
-import "package:riba/settings/theme.dart";
 
+import "content_filters.dart";
+import "manga_filter.dart";
+import "persistence.dart";
+import "theme.dart";
+
+typedef I<T> = IsarCollection<T>;
 
 class Settings {
 	static late final Settings instance;
@@ -10,23 +13,28 @@ class Settings {
 
 	final Isar _database;
 
-	IsarCollection<CoverPersistenceSettings> get coverPersistenceSettings => _database.coverPersistenceSettings;
-	IsarCollection<ChapterPersistenceSettings> get chapterPersistenceSettings => _database.chapterPersistenceSettings;
-	IsarCollection<MangaFilterSettings> get mangaFilterSettings => _database.mangaFilterSettings;
-	IsarCollection<ThemeSettings> get themeSettings => _database.themeSettings;
+	I<ContentFilterSettings> get contentFilterSettings => _database.contentFilterSettings;
+	I<CoverPersistenceSettings> get coverPersistenceSettings => _database.coverPersistenceSettings;
+	I<ChapterPersistenceSettings> get chapterPersistenceSettings => _database.chapterPersistenceSettings;
+	I<MangaFilterSettings> get mangaFilterSettings => _database.mangaFilterSettings;
+	I<ThemeSettings> get themeSettings => _database.themeSettings;
 
 	static Future<void> init(Isar database) async {
 		final locals = await Future.wait([
+			database.contentFilterSettings.getByKey(ContentFilterSettings.isarKey),
 			database.coverPersistenceSettings.getByKey(CoverPersistenceSettings.isarKey),
 			database.chapterPersistenceSettings.getByKey(ChapterPersistenceSettings.isarKey),
 			database.themeSettings.getByKey(ThemeSettings.isarKey),  
 		]);
 
-		final localCoverPersistenceSettings = locals[0];
-		final localChapterPersistenceSettings = locals[1];
-		final localThemeSettings = locals[2];
+		final localContentFilterSettings = locals[0];
+		final localCoverPersistenceSettings = locals[1];
+		final localChapterPersistenceSettings = locals[2];
+		final localThemeSettings = locals[3];
 
 		await database.writeTxn(() => Future.wait([
+			if (localContentFilterSettings == null)
+				database.contentFilterSettings.put(ContentFilterSettings.defaultSettings),
 			if (localCoverPersistenceSettings == null)
 				database.coverPersistenceSettings.put(CoverPersistenceSettings.defaultSettings),
 			if (localChapterPersistenceSettings == null)

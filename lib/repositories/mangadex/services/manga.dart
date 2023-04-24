@@ -53,9 +53,9 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
   @override
   final defaultFilters = MangaDexMangaQueryFilter(
     contentRatings: [
-      MangaContentRating.safe,
-      MangaContentRating.suggestive,
-      MangaContentRating.erotica,
+      ContentRating.safe,
+      ContentRating.suggestive,
+      ContentRating.erotica,
     ],
     includes: [
       EntityType.artist,
@@ -281,7 +281,7 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
   final String? authorOrArtist;
 
   final List<MangaStatus>? statuses;
-  final List<MangaContentRating>? contentRatings;
+  final List<ContentRating>? contentRatings;
   final List<MangaPublicationDemographic>? publicationDemographics;
 
   final List<Language>? excludedOriginalLanguages;
@@ -344,7 +344,7 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
     String? artistId,
     String? artistOrAuthorId,
     List<MangaStatus>? statuses,
-    List<MangaContentRating>? contentRatings,
+    List<ContentRating>? contentRatings,
     List<MangaPublicationDemographic>? publicationDemographics,
     List<Language>? excludedOriginalLanguages,
     List<Language>? availableTranslatedLanguages,

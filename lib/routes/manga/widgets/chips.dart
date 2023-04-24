@@ -7,7 +7,7 @@ import "package:riba/widgets/material/chip.dart";
 class ContentRatingChip extends StatelessWidget {
 	const ContentRatingChip({super.key, required this.contentRating});
 
-	final MangaContentRating contentRating;
+	final ContentRating contentRating;
 
 	@override
 	Widget build(BuildContext context) {
@@ -24,12 +24,12 @@ class ContentRatingChip extends StatelessWidget {
 
 	Color getBackgroundColor(ThemeData theme) {
 		switch (contentRating) {
-			case MangaContentRating.safe:
+			case ContentRating.safe:
 				return theme.colorScheme.primary;
-			case MangaContentRating.suggestive:
+			case ContentRating.suggestive:
 				return Colors.orange;
-			case MangaContentRating.erotica:
-			case MangaContentRating.pornographic:
+			case ContentRating.erotica:
+			case ContentRating.pornographic:
 				return Colors.red;
 		}
 	}
