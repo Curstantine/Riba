@@ -116,10 +116,10 @@ enum ContentRating implements TwoWayEnumSerde {
 
 	@override
 	factory ContentRating.fromJsonValue(String source) =>
-		$enumDecode(_$MangaContentRatingEnumMap, source);
+		$enumDecode(_$ContentRatingEnumMap, source);
 
 	@override
-	String toJson() => _$MangaContentRatingEnumMap[this]!;
+	String toJson() => _$ContentRatingEnumMap[this]!;
 
 	@override
 	String asHumanReadable() {
