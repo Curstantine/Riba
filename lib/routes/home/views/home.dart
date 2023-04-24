@@ -2,9 +2,12 @@ import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/routes/manga/widgets/lists/horizontal.dart";
+import "package:riba/utils/errors.dart";
 
 class HomeContent extends StatelessWidget { 
-	const HomeContent({super.key});
+	const HomeContent({super.key, required this.scrollOffset});
+
+	final ValueNotifier<double> scrollOffset;
 
 	@override
 	Widget build(BuildContext context) {
@@ -17,6 +20,9 @@ class HomeContent extends StatelessWidget {
 	}
 
   Widget buildSeasonal(BuildContext context) {
+	final theme = Theme.of(context);
+	final text = theme.textTheme;
+
     return FutureBuilder<CustomListData>(
 		future: MangaDex.instance.customList.getSeasonal(),
 		builder: (context, snapshot) {
@@ -25,10 +31,19 @@ class HomeContent extends StatelessWidget {
 			}
 
 			if (snapshot.hasError || !snapshot.hasData) {
-				return const Center(child: Text("Error"));
+				final error = handleError(snapshot.error ?? "Data was null without errors.");
+
+				return Center(child: Column(children: [
+					Text(error.title, style: text.titleLarge),
+					Text(error.description, style: text.bodyMedium),
+				]));
 			}
 
-			return MangaHorizontalList(title: "Seasonal", mangaIds: snapshot.data!.list.mangaIds);
+			return MangaHorizontalList(
+				title: "Seasonal",
+				scrollOffset: scrollOffset,
+				mangaIds: snapshot.data!.list.mangaIds,
+			);
 		},
     );
   }

@@ -1,5 +1,6 @@
 import "package:animations/animations.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:riba/routes/home/views/library.dart";
 import "package:riba/routes/home/widgets/user_bar.dart";
 import "package:riba/utils/constants.dart";
@@ -7,10 +8,22 @@ import "package:riba/utils/constants.dart";
 import "home.dart";
 import "search.dart";
 
-class HomeView extends StatelessWidget {
-	HomeView({super.key});
+class HomeView extends StatefulWidget {
+	const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+	final logger = Logger("HomeView");
 	
-	final ValueNotifier<int> _currentPageIndex = ValueNotifier(0);
+	final ValueNotifier<int> currentPage = ValueNotifier(0);
+	
+	// Hoists the scroll offset of the home page.
+	// Changing this value won't actively change the scroll offset of the home page,
+	// but will be used in the widget initialization step.
+	final ValueNotifier<double> homeScrollOffset = ValueNotifier(0);
 
 	@override
 	Widget build(BuildContext context) {
@@ -21,10 +34,10 @@ class HomeView extends StatelessWidget {
 				preferredSize: Size.fromHeight(media.padding.top + 64),
 				child: const SafeArea(child: HomeUserBar())),
 			bottomNavigationBar: ValueListenableBuilder(
-				valueListenable: _currentPageIndex,
+				valueListenable: currentPage,
 				builder: (context, value, _) => NavigationBar(
 					selectedIndex: value,
-					onDestinationSelected: (i) => _currentPageIndex.value = i,
+					onDestinationSelected: (i) => currentPage.value = i,
 					destinations: const [
 						NavigationDestination(
 							label: "Home",
@@ -42,13 +55,13 @@ class HomeView extends StatelessWidget {
 				),
 			),
 			body: ValueListenableBuilder(
-				valueListenable: _currentPageIndex,
+				valueListenable: currentPage,
 				builder: (context, value, _) => PageTransitionSwitcher(
 					reverse: value < 1,
 					duration: Durations.slow,
-					transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-						animation: animation,
-						secondaryAnimation: secondaryAnimation,
+					transitionBuilder: (child, x, y) => SharedAxisTransition(
+						animation: x,
+						secondaryAnimation: y,
 						transitionType: SharedAxisTransitionType.horizontal,
 						child: child,
 					),
@@ -61,7 +74,7 @@ class HomeView extends StatelessWidget {
 	Widget buildPageView(int index) {
 		switch (index) {
 			case 0:
-				return const HomeContent();
+				return HomeContent(scrollOffset: homeScrollOffset);
 			case 1:
 				return const LibraryContent();
 			case 2:

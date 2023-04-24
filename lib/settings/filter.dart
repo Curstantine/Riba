@@ -32,3 +32,9 @@ class MangaFilterSettings {
 		);
 	}
 }
+
+extension MangaFilterDefaults on MangaFilterSettings? {
+	MangaFilterSettings orDefault(String id) {
+		return this ?? MangaFilterSettings(id: id, excludedGroupIds: []);
+	}
+}
