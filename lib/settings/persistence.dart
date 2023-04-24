@@ -2,7 +2,7 @@ import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/settings/settings.dart";
 
-part "cache.g.dart";
+part "persistence.g.dart";
 
 @Collection(accessor: "coverPersistenceSettings")
 class CoverPersistenceSettings {

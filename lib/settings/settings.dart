@@ -1,6 +1,6 @@
 import "package:isar/isar.dart";
-import "package:riba/settings/cache.dart";
-import "package:riba/settings/filter.dart";
+import "package:riba/settings/persistence.dart";
+import "package:riba/settings/manga_filter.dart";
 import "package:riba/settings/theme.dart";
 
 

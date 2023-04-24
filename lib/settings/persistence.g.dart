@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "cache.dart";
+part of "persistence.dart";
 
 // **************************************************************************
 // IsarCollectionGenerator

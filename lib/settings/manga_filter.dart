@@ -3,7 +3,7 @@ import "package:riba/utils/hash.dart";
 
 import "settings.dart";
 
-part "filter.g.dart";
+part "manga_filter.g.dart";
 
 @Collection(accessor: "mangaFilterSettings")
 class MangaFilterSettings {

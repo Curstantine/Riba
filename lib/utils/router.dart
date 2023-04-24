@@ -9,7 +9,7 @@ class Router {
   static Route? onGenerateRoute(RouteSettings rt) {
     switch (rt.name) {
       case home:
-        return MaterialPageRoute(builder: (_) => HomeView());
+        return MaterialPageRoute(builder: (_) => const HomeView());
       case settings:
         return MaterialPageRoute(builder: (_) => const SettingsView());
     }

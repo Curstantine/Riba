@@ -8,7 +8,7 @@ import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
-import "package:riba/settings/cache.dart";
+import "package:riba/settings/persistence.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";

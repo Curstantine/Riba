@@ -4,7 +4,7 @@ import "package:intl/intl.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/routes/manga/widgets/sheets/filter.dart";
-import "package:riba/settings/filter.dart";
+import "package:riba/settings/manga_filter.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/hash.dart";

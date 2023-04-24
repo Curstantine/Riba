@@ -9,7 +9,7 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/settings/cache.dart";
+import "package:riba/settings/persistence.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";

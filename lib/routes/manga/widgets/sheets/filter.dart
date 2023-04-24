@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
-import "package:riba/settings/filter.dart";
+import "package:riba/settings/manga_filter.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 

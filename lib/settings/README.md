@@ -14,10 +14,10 @@ Models here are categorized into 2 types:
 -   'getByKey` should be used to query from Isar.
 -   `static const isarKey` should be populated with same `key` to expose to the rest of the app.
 
-As an example, `CoverCacheSettings` is unique per collection:
+As an example, `CoverPersistence` is unique per collection:
 
 ```
-CoverCacheSettings ->
+CoverPersistence ->
     id = auto
     key = "coverCacheSettings" (unchangeable, unique)
 ```

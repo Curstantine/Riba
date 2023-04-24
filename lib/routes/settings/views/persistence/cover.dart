@@ -5,7 +5,7 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/routes/settings/widgets/sheets/cover_size.dart";
-import "package:riba/settings/cache.dart";
+import "package:riba/settings/persistence.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/lazy.dart";
 
