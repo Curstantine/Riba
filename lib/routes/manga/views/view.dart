@@ -1,10 +1,8 @@
 import "dart:async";
 import "dart:io";
 
-import "package:dash_flags/dash_flags.dart" as flags;
 import "package:flutter/material.dart" hide Locale, Localizations;
 import "package:flutter/services.dart";
-import "package:intl/intl.dart" show DateFormat;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/author.dart";
@@ -18,8 +16,8 @@ import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/buttons.dart";
 import "package:riba/routes/manga/widgets/chips.dart";
+import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
-import "package:riba/routes/manga/widgets/sheets/filter.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
 import "package:riba/settings/cache.dart";
 import "package:riba/settings/filter.dart";
@@ -49,10 +47,6 @@ class _MangaViewState extends State<MangaView> {
 	final isDescriptionExpanded = ValueNotifier(false);
 	final areFiltersApplied = ValueNotifier(false);
 
-	late final mangaFilterSettingsStream = MangaFilterSettings.ref
-		.watchObject(fastHash(widget.id), fireImmediately: true)
-		.asyncMap((e) => e ?? MangaFilterSettings(id: widget.id, excludedGroupIds: []));
-
 	late final preferredCoverIdStream = MangaDex.instance.manga.database.where()
 		.isarIdEqualTo(fastHash(widget.id))
 		.preferredCoverIdProperty()
@@ -63,11 +57,14 @@ class _MangaViewState extends State<MangaView> {
 	late Future<Statistics> statisticsFuture;
 
 	final coverController = StreamController<File?>();
-	final chapterController = StreamController<CollectionData<ChapterData>>.broadcast();
+	final chapterController = StreamController<CollectionData<ChapterData>>();
 
 	final isFollowed = ValueNotifier(false);
 	final hasTrackers = ValueNotifier(false);
 	final hasCustomLists = ValueNotifier(false);
+
+	int chapterOffset = 0;
+	bool areChaptersEntirelyFetched = false;
 
 	@override
 	void initState() {
@@ -93,15 +90,17 @@ class _MangaViewState extends State<MangaView> {
 		super.dispose();
 	}
 
-	void fetchMangaData({bool reload = false}) {
+	Future<void> fetchMangaData({bool reload = false}) async {
 		mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
 		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
 
-		fetchCover();
-		fetchChapters(reload: reload);
+		await Future.wait([
+			fetchCover(),
+			fetchChapters(reload: reload),
+		]);
 	}
 
-	void fetchCover([String? coverId]) async {
+	Future<void> fetchCover([String? coverId]) async {
 		try {
 			final data = await mangaFuture;
 			final cover = coverId == null
@@ -126,21 +125,35 @@ class _MangaViewState extends State<MangaView> {
 		}
 	}
 
-	void fetchChapters({bool reload = false, int offset = 0}) async {
+	/// The initial fetch will first check if there are data available in the database, if it is,
+	/// it will display everything available without prioritizing [offset] or [limit].
+	///
+	/// If there are no data available in the database, it will fetch everything from the API, 
+	/// where it will [limit] accordingly.
+	///
+	/// In all cases, [areChaptersEntirelyFetched] will be set to true if the total number of
+	/// chapters displayed is equal to the number of chapters available. This will not account
+	/// for chapters that are out-of-sync from the server
+	/// (e.g. deleted chapters, chapters published after the last sync.)
+	/// 
+	/// [chapterOffset] is only used for memo-ing the last offset. Instead, use [offset]
+	/// to specify the offset to fetch from.
+	Future<void> fetchChapters({bool reload = false, int offset = 0}) async {
 		try {
-			final filters = await MangaFilterSettings.ref.get(fastHash(widget.id)) ??
-				MangaFilterSettings(id: widget.id, excludedGroupIds: []);
-
+			final filters = (await MangaFilterSettings.ref.get(fastHash(widget.id))).orDefault(widget.id);
 			final data = await MangaDex.instance.chapter.getFeed(
 				checkDB: !reload,
 				overrides: MangaDexChapterQueryFilter(
 					mangaId: widget.id,
 					translatedLanguages: preferredLanguages,
 					excludedGroups: filters.excludedGroupIds,
+					offset: offset,
 				),
 			);
 
+			chapterOffset += data.data.length;
 			chapterController.add(data);
+			areChaptersEntirelyFetched = data.total <= chapterOffset;
 		} catch (e) {
 			chapterController.addError(e);
 		}
@@ -184,9 +197,7 @@ class _MangaViewState extends State<MangaView> {
 					final mangaData = snapshot.requireData;
 
 					return RefreshIndicator(
-						onRefresh: () async {
-							fetchMangaData(reload: true);
-						},
+						onRefresh: refresh,
 						child: CustomScrollView(controller: scrollController, slivers: [
 							buildAppBar(text, colors, media, mangaData),
 							SliverToBoxAdapter(child: DescriptionSection(
@@ -195,16 +206,11 @@ class _MangaViewState extends State<MangaView> {
 								preferredLocales: preferredLocales,
 							)),
 							SliverToBoxAdapter(child: buildReadButton()),
-							SliverToBoxAdapter(child: ChapterInfoBar(
+							ChapterList(
 								mangaId: widget.id,
 								chapterStream: chapterController.stream,
-								filterStream: mangaFilterSettingsStream,
-								onFilterApplied: onFiltersApplied,
-							)),
-							ChapterList(
-								chapterStream: chapterController.stream,
-								onBottomReached: onChapterListBottomReached,
-							)
+								onFilterApplied: onFiltersApplied
+							),
 						]),
 					);
 				},
@@ -268,12 +274,24 @@ class _MangaViewState extends State<MangaView> {
 		} else if (!showAppBar.value && scrollController.offset > height) {
 			showAppBar.value = true;
 		}
+
+		if (scrollController.offset >= scrollController.position.maxScrollExtent) {
+			onChapterListBottomReached();
+		}
 	}
 
-	void onChapterListBottomReached() {}
+	void onChapterListBottomReached() {
+		if (!areChaptersEntirelyFetched) fetchChapters(offset: chapterOffset);
+	}
 
 	void onFiltersApplied() async {
 		fetchChapters(reload: true);
+	}
+
+	Future<void> refresh() async {
+		areChaptersEntirelyFetched = false;
+		chapterOffset = 0;
+		await fetchMangaData(reload: true);
 	}
 }
 
@@ -681,219 +699,4 @@ class DescriptionSection extends StatelessWidget {
 		);
 	}
 	
-}
-
-class ChapterInfoBar extends StatelessWidget {
-	const ChapterInfoBar({
-		super.key,
-		required this.mangaId,
-		required this.filterStream,
-		required this.chapterStream,
-		required this.onFilterApplied,
-	});
-
-	final String mangaId;
-	final Stream<MangaFilterSettings> filterStream;
-	final Stream<CollectionData<ChapterData>> chapterStream;
-	final VoidCallback onFilterApplied;
-
-	@override
-	Widget build(BuildContext context) {
-		final theme = Theme.of(context);
-		final text = theme.textTheme;
-		final colors = theme.colorScheme;
-
-		return StreamBuilder<CollectionData<ChapterData>>(
-			stream: chapterStream,
-			builder: (context, snapshot) {
-				if (snapshot.connectionState == ConnectionState.none) {
-					return const SizedBox.shrink();
-				}
-
-				final chapters = snapshot.data;
-				final chapterCount = chapters?.data.length ?? 0;
-
-				return Container(
-					height: 40,
-					padding: Edges.horizontalMedium,
-					child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-						Text("$chapterCount Chapters",
-							style: text.titleMedium?.withColorOpacity(chapters != null ? 1 : 0.5)),
-						buildFilterButton(context, text, colors, chapters),
-					]),
-				);
-			},
-		);
-	}
-
-	Widget buildFilterButton(
-		BuildContext context,
-		TextTheme text,
-		ColorScheme colors,
-		CollectionData<ChapterData>? chapters,
-	) {
-		return StreamBuilder(
-			stream: filterStream,
-			builder: (context, snapshot) {
-				if (snapshot.connectionState != ConnectionState.active || chapters == null) {
-					return const SizedBox.square(
-						dimension: 24,
-						child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
-					);
-				}
-
-				final filterData = snapshot.requireData;
-				return IconButton(
-					isSelected: !filterData.isDefault,
-					icon: const Icon(Icons.filter_list_rounded),
-					selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
-					visualDensity: VisualDensity.comfortable,
-					onPressed: () => showFilterSheet(context, chapters.data, filterData),
-				);
-			},
-		);
-	}
-
-	void showFilterSheet(
-		BuildContext context,
-		List<ChapterData> chapters,
-		MangaFilterSettings filterSettings,
-	) {
-		final media = MediaQuery.of(context);
-		final groupIds = chapters
-			.map((e) => e.groups)
-			.expand((e) => e)
-			.map((e) => e.id)
-			.toSet();
-		
-		groupIds.addAll(filterSettings.excludedGroupIds);
-
-		showModalBottomSheet(
-			context: context,
-			isScrollControlled: true,
-			builder: (context) => ChapterFilterSheet(
-				padding: EdgeInsets.only(bottom: media.padding.bottom),
-				data: ChapterFilterSheetData(
-					mangaId: mangaId,
-					groupIds: groupIds.toList(),
-					filterSettings: filterSettings,
-				),
-				onApply: (newFilter) async {
-					await MangaFilterSettings.ref.isar
-						.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
-					
-					if (context.mounted) {
-						Navigator.pop(context);
-						onFilterApplied.call();
-					}
-				},
-			),
-		);
-	}
-}
-
-class ChapterList extends StatelessWidget {
-	const ChapterList({
-		super.key,
-		required this.chapterStream,
-		required this.onBottomReached,
-	});
-
-	final Stream<CollectionData<ChapterData>> chapterStream;
-	final VoidCallback onBottomReached;
-
-	@override
-	Widget build(BuildContext context) {
-		final theme = Theme.of(context);
-		final text = theme.textTheme;
-		final colors = theme.colorScheme;
-
-		return StreamBuilder<CollectionData<ChapterData>>(
-			stream: chapterStream,
-			builder: (context, snapshot) {
-				// Since the loading indicator is in the header, we don't need to handle other states here.
-				if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
-					return const SliverToBoxAdapter(child: SizedBox.shrink());
-				}
-
-				if (snapshot.hasError) {
-					final error = handleError(snapshot.error!);
-
-					return SliverToBoxAdapter(
-						child: SizedBox(
-							height: 150,
-							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-								Text(error.title, style: text.titleLarge?.copyWith(color: colors.error)),
-								const SizedBox(height: 8),
-								Text(error.description, style: text.bodySmall),
-							]),
-						),
-					);
-				}
-
-				final chapters = snapshot.requireData;
-
-				if (chapters.data.isEmpty) {
-					return const SliverToBoxAdapter(
-						child: SizedBox(
-							height: 100,
-							child: Center(child: Text("No chapters found")),
-						),
-					);
-				}
-
-				return buildList(text, colors, chapters);
-			},
-		);
-	}
-
-	SliverList buildList(TextTheme text, ColorScheme colors, CollectionData<ChapterData> chapters) {
-		return SliverList(delegate: SliverChildBuilderDelegate(
-			childCount: chapters.data.length,
-			(context, i) {
-				final data = chapters.data[i];
-
-				late String title;
-				final groups = data.groups.isEmpty 
-					? "No group"
-					: data.groups.map((e) => e.name).join(", ");
-
-				if (data.chapter.chapter != null && data.chapter.volume != null) {
-					title = "Vol. ${data.chapter.volume} Ch. ${data.chapter.chapter}";
-				} else if (data.chapter.chapter != null) {
-					title = "Chapter ${data.chapter.chapter}";
-				} else {
-					title = "Oneshot";
-				}
-
-				if (data.chapter.title != null) {
-					title += " - ${data.chapter.title!}";
-				}
-
-				return ListTile(
-					onTap: () {},
-					title: Text(title, style: text.bodyMedium),
-					leading: SizedBox.square(
-						dimension: 40,
-						child: Center(
-							child: flags.LanguageFlag(
-								height: 18,
-								language: data.chapter.translatedLanguage.flagLanguage,
-							),
-						),
-					),
-					subtitle: Text.rich(TextSpan(
-						style: text.bodySmall?.withColorOpacity(0.75),
-						children: [
-							TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
-							const TextSpan(text: "  -  "),
-							TextSpan(text: data.uploader.username),
-							const TextSpan(text: " • "),
-							TextSpan(text: groups),
-						],
-					)),
-				);
-			},
-		));
-	}
 }

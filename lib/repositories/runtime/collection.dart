@@ -10,7 +10,7 @@ class CollectionData<T> {
   /// When the value is `-1`, the underlying method does not know the total amount of results
   /// up front, and the value should be ignored.
   final int total;
-
+	
   /// Runtime type used to return data that is stored in a collection, that could be paginated.
   const CollectionData({
     required this.data,
