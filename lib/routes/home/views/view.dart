@@ -58,7 +58,7 @@ class _HomeViewState extends State<HomeView> {
 				valueListenable: currentPage,
 				builder: (context, value, _) => PageTransitionSwitcher(
 					reverse: value < 1,
-					duration: Durations.slow,
+					duration: Durations.emphasized,
 					transitionBuilder: (child, x, y) => SharedAxisTransition(
 						animation: x,
 						secondaryAnimation: y,

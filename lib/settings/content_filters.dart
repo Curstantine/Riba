@@ -45,8 +45,8 @@ class ContentFilterSettings {
 	}
 
 	static final defaultSettings = ContentFilterSettings(
-		originalLanguages: Language.values.toList(),
-		chapterLanguages: Language.values.toList(),
+		originalLanguages: [],
+		chapterLanguages: [],
 		contentRatings: [
 			ContentRating.safe,
 			ContentRating.suggestive,

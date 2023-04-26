@@ -8,7 +8,7 @@ typedef PageBuilder = Function();
 Route<T> sharedAxis<T>(
   PageBuilder page, [
   SharedAxisTransitionType type = SharedAxisTransitionType.scaled,
-  Duration duration = Durations.normal,
+  Duration duration = Durations.standard,
 ]) {
   return PageRouteBuilder<T>(
     transitionDuration: duration,

@@ -7,6 +7,7 @@ class StreamingListTile<T> extends StatelessWidget {
 		super.key,
 		required this.title,
 		required this.stream,
+		this.isThreeLine = false,
 		this.enabled = true,
 		this.subtitle,
 		this.contextualSubtitle,
@@ -17,7 +18,7 @@ class StreamingListTile<T> extends StatelessWidget {
 	final bool enabled;
 	final String title;
 	final Stream<T> stream;
-	final bool isThreeLine = false;
+	final bool isThreeLine;
 	final String? subtitle;
 	final Function(BuildContext, T)? contextualSubtitle;
 	final FutureOr<void> Function(BuildContext, T)? onTap;

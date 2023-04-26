@@ -238,7 +238,7 @@ class _MangaViewState extends State<MangaView> {
 				),
 				builder: (context, value, child) => AnimatedOpacity(
 					opacity: value ? 1 : 0,
-					duration: Durations.normal,
+					duration: Durations.standard,
 					child: child,
 				),
 			),
@@ -517,7 +517,7 @@ class DetailsHeader extends StatelessWidget {
 
 	Widget buildFollowButton() {
 		return AnimatedSize(
-			duration: Durations.slow,
+			duration: Durations.emphasized,
 			curve: Curves.easeInOut,
 			alignment: Alignment.centerLeft,
 			child: ValueListenableBuilder(
@@ -535,7 +535,7 @@ class DetailsHeader extends StatelessWidget {
 
 	Widget buildTrackerButton() {
 		return AnimatedSize(
-			duration: Durations.slow,
+			duration: Durations.emphasized,
 			curve: Curves.easeInOut,
 			alignment: Alignment.centerLeft,
 			child: ValueListenableBuilder(
@@ -657,8 +657,8 @@ class DescriptionSection extends StatelessWidget {
 	) {
 		return AnimatedContainer(
 			height: expanded ? maxTp.height + Edges.extraLarge : minTp.height,
-			curve: Curves.easeInOutCubic,
-			duration: Durations.slow,
+			curve: const Cubic(0.2, 0.0, 0, 1.0),
+			duration: Durations.emphasized,
 			clipBehavior: Clip.hardEdge,
 			decoration: const BoxDecoration(),
 			foregroundDecoration: BoxDecoration(
@@ -687,7 +687,7 @@ class DescriptionSection extends StatelessWidget {
 			child: IconButton(
 				isSelected: expanded,
 				icon: AnimatedRotation(
-					duration: Durations.slow,
+					duration: Durations.emphasized,
 					turns: expanded ? 0.5 : 0,
 					curve: Curves.easeInOutCubic,
 					child: const Icon(Icons.expand_more_rounded),
