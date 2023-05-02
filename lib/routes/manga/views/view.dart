@@ -657,7 +657,7 @@ class DescriptionSection extends StatelessWidget {
 	) {
 		return AnimatedContainer(
 			height: expanded ? maxTp.height + Edges.extraLarge : minTp.height,
-			curve: const Cubic(0.2, 0.0, 0, 1.0),
+			curve: Easing.emphasized,
 			duration: Durations.emphasized,
 			clipBehavior: Clip.hardEdge,
 			decoration: const BoxDecoration(),

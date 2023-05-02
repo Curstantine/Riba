@@ -96,8 +96,13 @@ class ChapterList extends StatelessWidget {
 				return ListTile(
 					key: ValueKey(data.chapter.id),
 					onTap: () {},
-					isThreeLine: true,
-					title: Text(title, style: text.bodyMedium),
+					isThreeLine: false,
+					title: Text(
+						title,
+						style: text.bodyMedium,
+						maxLines: 1,
+						overflow: TextOverflow.ellipsis,
+					),
 					leading: SizedBox(
 						width: 40,
 						height: 88,
@@ -125,8 +130,6 @@ class ChapterList extends StatelessWidget {
 						style: text.bodySmall?.withColorOpacity(0.75),
 						children: [
 							TextSpan(text: DateFormat.yMMMd().format(data.chapter.createdAt)),
-							const TextSpan(text: "  -  "),
-							TextSpan(text: data.uploader.username),
 							const TextSpan(text: " • "),
 							TextSpan(text: groups),
 						],

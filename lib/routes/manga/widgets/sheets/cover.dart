@@ -267,8 +267,8 @@ class _BigPicture extends StatelessWidget {
 		
 		return OutlinedCard(
 			child: AnimatedSize(
-				duration: Durations.standard,
-				curve: Curves.easeInOut,
+				duration: Durations.emphasized,
+				curve: Easing.emphasized,
 				child: Stack(alignment: Alignment.bottomRight, children: [
 					buildImage(text, colors),
 					buildInfoTags(text, colors),
