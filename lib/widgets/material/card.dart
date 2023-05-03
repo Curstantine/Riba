@@ -30,27 +30,27 @@ class FilledCard extends StatelessWidget {
 }
 
 class OutlinedCard extends StatelessWidget {
-  const OutlinedCard({
-    super.key,
-    required this.child,
-    this.margin,
-    this.clipBehavior = Clip.antiAlias,
-  });
+	const OutlinedCard({
+		super.key,
+		required this.child,
+		this.margin,
+		this.clipBehavior = Clip.antiAlias,
+	});
 
-  final Widget child;
-  final EdgeInsets? margin;
-  final Clip clipBehavior;
+	final Widget child;
+	final EdgeInsets? margin;
+	final Clip clipBehavior;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
 
-    return Card(
-      elevation: 0,
-      shape: Shapes.outlinedCard(theme),
-      clipBehavior: clipBehavior,
-      margin: margin,
-      child: child,
-    );
-  }
+		return Card(
+			elevation: 0,
+			shape: Shapes.outlinedCard(theme),
+			clipBehavior: clipBehavior,
+			margin: margin,
+			child: child,
+		);
+	}
 }

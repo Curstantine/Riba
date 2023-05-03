@@ -1,12 +1,13 @@
 
 import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
+import "package:riba/settings/content_filters.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
+import "package:riba/widgets/material/card.dart";
 
 class MangaHorizontalList extends StatefulWidget {
 	const MangaHorizontalList({
@@ -27,40 +28,49 @@ class MangaHorizontalList extends StatefulWidget {
 class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
 	
-	late final dataFuture = MangaDex.instance.manga.getMany(
-		overrides: MangaDexMangaQueryFilter(
-			ids: widget.mangaIds,
-			contentRatings: [
-				ContentRating.safe,
-				ContentRating.suggestive,
-				ContentRating.erotica,
-				ContentRating.pornographic
-			]
-		),
-	);
+	Future<Map<String, MangaData>>? dataFuture;
 
 	@override
 	void initState() {
 		super.initState();
 		scrollController.addListener(() => widget.scrollOffset.value = scrollController.offset);
+		initialize();
+	}
+
+	@override
+	void dispose() {
+		scrollController.dispose();
+		super.dispose();
+	}
+
+	void initialize() async {
+		final contentFilters = (await ContentFilterSettings.ref.getByKey(ContentFilterSettings.isarKey))!;
+
+		dataFuture = MangaDex.instance.manga.getMany(
+			overrides: MangaDexMangaQueryFilter(
+				ids: widget.mangaIds,
+				contentRatings: contentFilters.contentRatings,
+			),
+		);
+
+		setState(() => {});
 	}
 
 	@override
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final text = theme.textTheme;
+		final colors = theme.colorScheme;
 
 		return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 			Padding(
 				padding: Edges.leftMedium,
 				child: Text(widget.title, style: text.titleMedium)),
-			SizedBox(
-				height: 275,
-				child: buildList(text)),
+			SizedBox(height: 275, child: buildList(text, colors)),
 		]);
 	}
 
-	Widget buildList(TextTheme text) {		
+	Widget buildList(TextTheme text, ColorScheme colors) {		
 		return FutureBuilder<Map<String, MangaData>>(
 			future: dataFuture,
 			builder: (context, snapshot) {
@@ -77,27 +87,54 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 					]));
 				}
 
-
 				// Since global filters are applied to these requests,
 				// there are chances that data might not contain all the 
 				// mangaIds requested. As such, it is a good idea to completely
 				// ignore the ids given to this widget after the fetch.
 				final data = snapshot.requireData;
 				final ids = data.keys.toList();
+				final missingCount = widget.mangaIds.length - ids.length;
+				final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
 
 				return ListView.separated(
 					controller: scrollController,
-					itemCount: ids.length,
+					itemCount: itemCount,
 					padding: Edges.horizontalMedium,
 					scrollDirection: Axis.horizontal,
 					separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
 					itemBuilder: (_, i) {
-						final id = ids[i];
+						if (i >= ids.length) {
+							return buildOutOfIndex(text, colors, missingCount);
+						}
 
+						final id = ids[i];
 						return MangaCard(key: ValueKey(id), mangaData: data[id]!);
 					},
 				);
 			}
+		);
+	}
+
+	Widget buildOutOfIndex(TextTheme text, ColorScheme colors, int count) {
+		final message = "$count ${count > 1 ? "titles are" : "title is"} hidden";
+		const description = "Configure your content filters to see them";
+
+		return SizedBox(
+			height: 275,
+			width: 175,
+			child: OutlinedCard(child: Padding(
+				padding: Edges.horizontalMedium,
+				child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+					Text(
+						message,
+						textAlign: TextAlign.center,
+						style: text.titleMedium?.copyWith(color: colors.tertiary)),
+					Text(
+						description,
+						style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+						textAlign: TextAlign.center)
+				]),
+			)),
 		);
 	}
 }

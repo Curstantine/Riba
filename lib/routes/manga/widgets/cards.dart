@@ -15,34 +15,37 @@ import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
-class MangaCard extends StatelessWidget {
+class MangaCard extends StatefulWidget {
 	const MangaCard({super.key, required this.mangaData});
 
 	final MangaData mangaData;
 
+  @override
+  State<MangaCard> createState() => _MangaCardState();
+}
+
+class _MangaCardState extends State<MangaCard> {
+	Manga get manga => widget.mangaData.manga;
+	
+	late final coverStream = CoverPersistenceSettings.ref
+		.where()
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
+		.watch(fireImmediately: true)  
+		.asyncMap((e) async {
+			if (widget.mangaData.cover == null) return null;
+
+			return await MangaDex.instance.cover.getImage(
+				widget.mangaData.manga.id,
+				widget.mangaData.cover!,
+				size: e.first.previewSize,
+				cache: e.first.enabled,
+			);
+		});
+
 	@override
 	Widget build(BuildContext context) {
-		final manga = mangaData.manga;
-		final coverStream = CoverPersistenceSettings.ref
-			.where()
-			.keyEqualTo(CoverPersistenceSettings.isarKey)
-			.watch(fireImmediately: true)
-			.asyncMap((e) async {
-				if (mangaData.cover == null) return null;
-
-				return await MangaDex.instance.cover.getImage(
-					mangaData.manga.id,
-					mangaData.cover!,
-					size: e.first.previewSize,
-					cache: e.first.enabled,
-				);
-			});
-
-		return buildCard(context, manga, coverStream);
-	}
-
-	Widget buildCard(BuildContext context, Manga manga, Stream<File?> coverStream) {
 		final theme = Theme.of(context);
+		final text = theme.textTheme;
 
 		return buildCardLayout(
 			theme,
@@ -64,7 +67,7 @@ class MangaCard extends StatelessWidget {
 						return Center(
 							child: Text(
 								"Cover art not found.",
-								style: theme.textTheme.bodySmall?.withColorOpacity(0.85),
+								style: text.bodySmall?.withColorOpacity(0.85),
 								textAlign: TextAlign.center,
 							),
 						);
@@ -124,7 +127,7 @@ class MangaCard extends StatelessWidget {
 
 	void navigateToMangaView(BuildContext context) {
 		Navigator.of(context).push(
-			sharedAxis(() => MangaView(id: mangaData.manga.id), SharedAxisTransitionType.vertical),
+			sharedAxis(() => MangaView(id: widget.mangaData.manga.id), SharedAxisTransitionType.vertical),
 		);
 	}
 }
