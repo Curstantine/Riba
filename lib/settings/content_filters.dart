@@ -30,8 +30,6 @@ class ContentFilterSettings {
 		required this.contentRatings,
 	});
 
-	
-
 	ContentFilterSettings copyWith({
 		List<Language>? originalLanguages,
 		List<Language>? chapterLanguages,
