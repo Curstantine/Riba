@@ -345,6 +345,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
       ids: ids,
       includes: includes,
       limit: limit,
+	  offset: offset,
     );
 
     return generic.addFiltersToUrl(url);
