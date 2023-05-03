@@ -1,28 +1,28 @@
 import "package:flutter/material.dart";
-import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/utils/constants.dart";
 
-class LanguageSelectionSheet extends StatefulWidget {
-	const LanguageSelectionSheet({
+class ListSelectionDialog<T extends TwoWayEnumSerde> extends StatefulWidget {
+	const ListSelectionDialog({
 		super.key,
 		required this.title,
 		required this.description,
+		required this.values,
 		required this.currentValue,
-		required this.onConfirm,
 	});
 
 	final String title;
 	final String description;
-	final List<Language> currentValue;
-	final ValueChanged<List<Language>> onConfirm;
+	final List<T> values;
+	final List<T> currentValue;
 
-  @override
-  State<LanguageSelectionSheet> createState() => _LanguageSelectionSheetState();
+	@override
+	State<ListSelectionDialog> createState() => _ListSelectionDialogState<T>();
 }
 
-class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
-	late final Map<Language, ValueNotifier<bool>> selectionMap = { 
-		for (final e in Language.values) e : ValueNotifier(widget.currentValue.contains(e))
+class _ListSelectionDialogState<T extends TwoWayEnumSerde> extends State<ListSelectionDialog> {
+	late final Map<T, ValueNotifier<bool>> selectionMap = { 
+		for (final e in widget.values) e as T : ValueNotifier(widget.currentValue.contains(e))
 	};
 
 	@override
@@ -58,8 +58,8 @@ class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
 		return SliverList(delegate: SliverChildBuilderDelegate(
 			childCount: selectionMap.length,
 			(context, i) {
-				final lang = selectionMap.keys.elementAt(i);
-				final isSelected = selectionMap[lang]!;
+				final item = selectionMap.keys.elementAt(i);
+				final isSelected = selectionMap[item]!;
 				
 				return ValueListenableBuilder(
 					valueListenable: isSelected,
@@ -68,17 +68,16 @@ class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
 						value: isSelected.value,
 						onChanged: (value) {
 							if (value == null) return;
-							selectionMap[lang]!.value = value;
+							selectionMap[item]!.value = value;
 						},
 					),
-					child: Text(lang.human)
+					child: Text(item.asHumanReadable())
 				);
 		}));
 	}
 
 	void handleConfirm() {
 		final selected = selectionMap.entries.where((e) => e.value.value).map((e) => e.key).toList();
-		widget.onConfirm(selected);
-		Navigator.pop(context);
+		Navigator.pop(context, selected);
 	}
 }

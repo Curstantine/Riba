@@ -109,7 +109,7 @@ class ChapterList extends StatelessWidget {
 						child: Center(
 							child: LanguageFlag(
 								height: 18,
-								language: data.chapter.translatedLanguage.flagLanguage,
+								language: data.chapter.translatedLanguage.getFlag(),
 							),
 						),
 					),

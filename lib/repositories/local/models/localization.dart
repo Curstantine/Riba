@@ -1,6 +1,7 @@
 import "package:dash_flags/dash_flags.dart" as flag;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
+import "package:riba/repositories/mangadex/utils/enum.dart";
 import "package:riba/repositories/utils/exception.dart";
 
 part "localization.g.dart";
@@ -124,57 +125,63 @@ class Locale {
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
-enum Language {
-  english("en"),
-  japanese("ja"),
-  simpleChinese("zh"),
-  traditionalChinese("zh-hk"),
-  korean("ko"),
-  french("fr"),
-  russian("ru"),
-  vietnamese("vi"),
-  portugueseBrazil("pt-br"),
-  indonesian("id");
+enum Language implements TwoWayEnumSerde {
+	english("en"),
+	japanese("ja"),
+	simpleChinese("zh"),
+	traditionalChinese("zh-hk"),
+	korean("ko"),
+	french("fr"),
+	russian("ru"),
+	vietnamese("vi"),
+	portugueseBrazil("pt-br"),
+	indonesian("id");
 
-  final String isoCode;
-  const Language(this.isoCode);
+	final String isoCode;
+	const Language(this.isoCode);
 
-  /// Returns a language based on an ISO code.
-  ///
-  /// Throws a [LanguageNotSupportedException] if the language is not supported.
-  static Language fromIsoCode(String isoCode) {
-    return values.firstWhere(
-      (e) => e.isoCode == isoCode,
-      orElse: () => throw LanguageNotSupportedException(isoCode),
-    );
-  }
+	/// Returns a language based on an ISO code.
+	///
+	/// Throws a [LanguageNotSupportedException] if the language is not supported.
+	static Language fromIsoCode(String isoCode) {
+		return values.firstWhere(
+			(e) => e.isoCode == isoCode,
+			orElse: () => throw LanguageNotSupportedException(isoCode),
+		);
+	}
 
-  static Map<Language, String> _humanNames = {
-    Language.english: "English",
-    Language.japanese: "Japanese",
-    Language.simpleChinese: "Simplified Chinese",
-    Language.traditionalChinese: "Traditional Chinese",
-    Language.korean: "Korean",
-    Language.french: "French",
-    Language.russian: "Russian",
-    Language.vietnamese: "Vietnamese",
-    Language.portugueseBrazil: "Portuguese (Brazil)",
-    Language.indonesian: "Indonesian",
-  };
+	static Map<Language, String> _humanNames = {
+		Language.english: "English",
+		Language.japanese: "Japanese",
+		Language.simpleChinese: "Simplified Chinese",
+		Language.traditionalChinese: "Traditional Chinese",
+		Language.korean: "Korean",
+		Language.french: "French",
+		Language.russian: "Russian",
+		Language.vietnamese: "Vietnamese",
+		Language.portugueseBrazil: "Portuguese (Brazil)",
+		Language.indonesian: "Indonesian",
+	};
 
-  static Map<Language, flag.Language> _flagLanguages = {
-    Language.english: flag.Language.en,
-    Language.japanese: flag.Language.ja,
-    Language.simpleChinese: flag.Language.zh,
-    Language.traditionalChinese: flag.Language.zh_TW,
-    Language.korean: flag.Language.ko,
-    Language.french: flag.Language.fr,
-    Language.russian: flag.Language.ru,
-    Language.vietnamese: flag.Language.vi,
-    Language.portugueseBrazil: flag.Language.pt_br,
-    Language.indonesian: flag.Language.id,
-  };
+	static Map<Language, flag.Language> _flagLanguages = {
+		Language.english: flag.Language.en,
+		Language.japanese: flag.Language.ja,
+		Language.simpleChinese: flag.Language.zh,
+		Language.traditionalChinese: flag.Language.zh_TW,
+		Language.korean: flag.Language.ko,
+		Language.french: flag.Language.fr,
+		Language.russian: flag.Language.ru,
+		Language.vietnamese: flag.Language.vi,
+		Language.portugueseBrazil: flag.Language.pt_br,
+		Language.indonesian: flag.Language.id,
+	};
 
-  String get human => _humanNames[this]!;
-  flag.Language get flagLanguage => _flagLanguages[this]!;
+
+	@override
+	String toJson() => isoCode;
+
+	@override
+	String asHumanReadable() => _humanNames[this]!;
+
+	flag.Language getFlag() => _flagLanguages[this]!;
 }

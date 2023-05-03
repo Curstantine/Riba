@@ -347,7 +347,7 @@ class _BigPicture extends StatelessWidget {
 							if (cover?.volume != null)
 								TinyChip(label: "Vol ${cover!.volume}", onPressed: () => {}),
 							if (cover?.locale != null)
-								TinyChip(label: cover!.locale!.language.human, onPressed: () => {}),
+								TinyChip(label: cover!.locale!.language.asHumanReadable(), onPressed: () => {}),
 						],
 					),
 				);
