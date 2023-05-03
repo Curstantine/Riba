@@ -4,10 +4,17 @@ import "package:riba/repositories/runtime/custom_list.dart";
 import "package:riba/routes/manga/widgets/lists/horizontal.dart";
 import "package:riba/utils/errors.dart";
 
-class HomeContent extends StatelessWidget { 
+class HomeContent extends StatefulWidget { 
 	const HomeContent({super.key, required this.scrollOffset});
 
 	final ValueNotifier<double> scrollOffset;
+
+	@override
+	State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+	final seasonal = MangaDex.instance.customList.getSeasonal();
 
 	@override
 	Widget build(BuildContext context) {
@@ -24,7 +31,7 @@ class HomeContent extends StatelessWidget {
 	final text = theme.textTheme;
 
     return FutureBuilder<CustomListData>(
-		future: MangaDex.instance.customList.getSeasonal(),
+		future: seasonal,
 		builder: (context, snapshot) {
 			if (snapshot.connectionState != ConnectionState.done) {
 				return const Center(child: CircularProgressIndicator());
@@ -41,7 +48,7 @@ class HomeContent extends StatelessWidget {
 
 			return MangaHorizontalList(
 				title: "Seasonal",
-				scrollOffset: scrollOffset,
+				scrollOffset: widget.scrollOffset,
 				mangaIds: snapshot.data!.list.mangaIds,
 			);
 		},

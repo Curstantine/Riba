@@ -1,5 +1,6 @@
 
 import "package:flutter/material.dart";
+import "package:isar/isar.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
@@ -28,32 +29,32 @@ class MangaHorizontalList extends StatefulWidget {
 class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
 	
-	Future<Map<String, MangaData>>? dataFuture;
+	late final Stream<Map<String, MangaData>> dataFuture = ContentFilterSettings.ref
+		.where()
+		.keyEqualTo(ContentFilterSettings.isarKey)
+		.watch(fireImmediately: true)
+		.asyncMap((e) {
+			final contentFilter = e.first;
+
+			return MangaDex.instance.manga.getMany(
+				overrides: MangaDexMangaQueryFilter(
+					ids: widget.mangaIds,
+					contentRatings: contentFilter.contentRatings,
+					// excludedOriginalLanguages: contentFilter.excludedOriginalLanguages,
+				),
+			);
+		});
 
 	@override
 	void initState() {
 		super.initState();
 		scrollController.addListener(() => widget.scrollOffset.value = scrollController.offset);
-		initialize();
 	}
 
 	@override
 	void dispose() {
 		scrollController.dispose();
 		super.dispose();
-	}
-
-	void initialize() async {
-		final contentFilters = (await ContentFilterSettings.ref.getByKey(ContentFilterSettings.isarKey))!;
-
-		dataFuture = MangaDex.instance.manga.getMany(
-			overrides: MangaDexMangaQueryFilter(
-				ids: widget.mangaIds,
-				contentRatings: contentFilters.contentRatings,
-			),
-		);
-
-		setState(() => {});
 	}
 
 	@override
@@ -71,10 +72,10 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	}
 
 	Widget buildList(TextTheme text, ColorScheme colors) {		
-		return FutureBuilder<Map<String, MangaData>>(
-			future: dataFuture,
+		return StreamBuilder<Map<String, MangaData>>(
+			stream: dataFuture,
 			builder: (context, snapshot) {
-				if (snapshot.connectionState != ConnectionState.done) {
+				if (snapshot.connectionState != ConnectionState.active) {
 					return const Center(child: CircularProgressIndicator());
 				}
 
