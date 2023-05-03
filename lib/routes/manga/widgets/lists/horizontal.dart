@@ -40,7 +40,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 				overrides: MangaDexMangaQueryFilter(
 					ids: widget.mangaIds,
 					contentRatings: contentFilter.contentRatings,
-					// excludedOriginalLanguages: contentFilter.excludedOriginalLanguages,
+					originalLanguages: contentFilter.originalLanguages,
 				),
 			);
 		});
