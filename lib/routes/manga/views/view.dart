@@ -68,6 +68,11 @@ class _MangaViewState extends State<MangaView> {
 	int chapterOffset = 0;
 	bool areChaptersEntirelyFetched = false;
 
+	/// Cache of all the chapters fetched in this view.
+	/// This is useful since the [chapterController] used is a one-time stream that
+	/// discards rendered data.
+	CollectionData<ChapterData>? chapterCache;
+
 	@override
 	void initState() {
 		super.initState();
@@ -141,10 +146,12 @@ class _MangaViewState extends State<MangaView> {
 	/// [chapterOffset] is only used for memo-ing the last offset. Instead, use [offset]
 	/// to specify the offset to fetch from.
 	Future<void> fetchChapters({bool reload = false, int offset = 0}) async {
+		logger.info("Fetching chapters with offset $offset");
+	
 		try {
 			final filters = (await MangaFilterSettings.ref.get(fastHash(widget.id))).orDefault(widget.id);
 			final data = await MangaDex.instance.chapter.getFeed(
-				checkDB: !reload,
+				checkDB: !reload &&  offset == 0,
 				overrides: MangaDexChapterQueryFilter(
 					mangaId: widget.id,
 					translatedLanguages: preferredLanguages,
@@ -155,8 +162,15 @@ class _MangaViewState extends State<MangaView> {
 			);
 
 			chapterOffset += data.data.length;
-			chapterController.add(data);
 			areChaptersEntirelyFetched = data.total <= chapterOffset;
+			chapterCache = chapterCache == null ? data : CollectionData(
+				data: chapterCache!.data..addAll(data.data),
+				total: data.total,
+				limit: data.limit,
+				offset: data.offset,
+			);
+
+			chapterController.add(chapterCache!);
 		} catch (e) {
 			chapterController.addError(e);
 		}
@@ -292,8 +306,9 @@ class _MangaViewState extends State<MangaView> {
 	}
 
 	Future<void> refresh() async {
-		areChaptersEntirelyFetched = false;
 		chapterOffset = 0;
+		chapterCache = null;
+		areChaptersEntirelyFetched = false;
 		await fetchMangaData(reload: true);
 	}
 }
