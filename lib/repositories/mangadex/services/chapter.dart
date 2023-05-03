@@ -212,7 +212,7 @@ class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
     this.ids,
     this.includes,
     this.offset = 0,
-    this.limit = 100,
+    this.limit = 250,
     this.mangaId,
     this.orderByChapterDesc,
     this.translatedLanguages,

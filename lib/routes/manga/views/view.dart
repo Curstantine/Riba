@@ -152,6 +152,12 @@ class _MangaViewState extends State<MangaView> {
 	/// 
 	/// [chapterOffset] is only used for memo-ing the last offset. Instead, use [offset]
 	/// to specify the offset to fetch from.
+	/// 
+	/// Issues:
+	/// 1. When the whole list is not fetched from the get go, any session that
+	/// did not load the data from the server will not be able to get chapters after the
+	/// initial [offset] since the [areChaptersEntirelyFetched] is true in a database fetch.
+	/// Reloading will fix this issue.
 	Future<void> fetchChapters({bool reload = false, int offset = 0}) async {
 		logger.info("Fetching chapters with offset $offset");
 	
