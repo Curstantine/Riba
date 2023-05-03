@@ -9,36 +9,41 @@ import "package:riba/settings/persistence.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/lazy.dart";
 
-class SettingsPersistenceSegment extends StatelessWidget {
+class SettingsPersistenceSegment extends StatefulWidget {
 	const SettingsPersistenceSegment({super.key});
+
+  @override
+  State<SettingsPersistenceSegment> createState() => _SettingsPersistenceSegmentState();
+}
+
+class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment> {
+	final coverCacheEnabledStream = CoverPersistenceSettings.ref
+		.where()
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
+		.enabledProperty()
+		.watch(fireImmediately: true)
+		.asyncMap((e) => e.first);
+
+	final coverPreviewSizeStream = CoverPersistenceSettings.ref
+		.where()
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
+		.previewSizeProperty()
+		.watch(fireImmediately: true)
+		.asyncMap((e) => e.first);
+
+	final coverFullSizeStream = CoverPersistenceSettings.ref
+		.where()
+		.keyEqualTo(CoverPersistenceSettings.isarKey)
+		.fullSizeProperty()
+		.watch(fireImmediately: true)
+		.asyncMap((e) => e.first);
+
+	Future<CoverPersistenceSettings> get settingsFuture => CoverPersistenceSettings.ref
+		.getByKey(CoverPersistenceSettings.isarKey)
+		.then((e) => e as CoverPersistenceSettings);
 
 	@override
 	Widget build(BuildContext context) {
-		final coverCacheEnabledStream = CoverPersistenceSettings.ref
-			.where()
-			.keyEqualTo(CoverPersistenceSettings.isarKey)
-			.enabledProperty()
-			.watch(fireImmediately: true)
-			.asyncMap((e) => e.first);
-
-		final coverPreviewSizeStream = CoverPersistenceSettings.ref
-			.where()
-			.keyEqualTo(CoverPersistenceSettings.isarKey)
-			.previewSizeProperty()
-			.watch(fireImmediately: true)
-			.asyncMap((e) => e.first);
-
-		final coverFullSizeStream = CoverPersistenceSettings.ref
-			.where()
-			.keyEqualTo(CoverPersistenceSettings.isarKey)
-			.fullSizeProperty()
-			.watch(fireImmediately: true)
-			.asyncMap((e) => e.first);
-
-		final settingsFuture = CoverPersistenceSettings.ref
-			.getByKey(CoverPersistenceSettings.isarKey)
-			.then((e) => e as CoverPersistenceSettings);
-
 		return Column(
 			mainAxisSize: MainAxisSize.min,
 			crossAxisAlignment: CrossAxisAlignment.start,

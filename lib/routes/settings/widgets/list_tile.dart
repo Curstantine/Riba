@@ -14,7 +14,7 @@ class StreamingListTile<T> extends StatelessWidget {
 		this.onTap,
 		this.builder,
 	}) : assert(subtitle == null || contextualSubtitle == null);
-	
+
 	final bool enabled;
 	final String title;
 	final Stream<T> stream;
@@ -28,12 +28,11 @@ class StreamingListTile<T> extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final colors = theme.colorScheme;
-
-		Widget? sub = subtitle != null ? Text(subtitle!) : null;
 		
 		return StreamBuilder(stream: stream, builder: (context, snapshot) {
 			Widget? trailing;
 			FutureOr<void> Function()? onTapL;
+			Widget? sub =  subtitle != null ? Text(subtitle!) : null;
 
 			if (snapshot.connectionState != ConnectionState.active && !snapshot.hasData) {
 				trailing = const CircularProgressIndicator();
@@ -47,8 +46,7 @@ class StreamingListTile<T> extends StatelessWidget {
 				sub ??= contextualSubtitle!.call(context, snapshot.requireData);
 				onTapL = () => onTap?.call(context, snapshot.requireData);
 				trailing = builder?.call(context, snapshot.requireData);
-			} 
-			
+			}
 
 			return ListTile(
 				enabled: snapshot.hasData && enabled,
