@@ -276,7 +276,7 @@ Manga _mangaDeserialize(
     id: reader.readString(offsets[6]),
     originalLanguage:
         _MangaoriginalLanguageValueEnumMap[reader.readByteOrNull(offsets[7])] ??
-            Language.none,
+            Language.english,
     preferredCoverId: reader.readStringOrNull(offsets[8]),
     publicationDemographic: _MangapublicationDemographicValueEnumMap[
             reader.readByteOrNull(offsets[9])] ??
@@ -331,7 +331,7 @@ P _mangaDeserializeProp<P>(
     case 7:
       return (_MangaoriginalLanguageValueEnumMap[
               reader.readByteOrNull(offset)] ??
-          Language.none) as P;
+          Language.english) as P;
     case 8:
       return (reader.readStringOrNull(offset)) as P;
     case 9:
@@ -370,30 +370,28 @@ const _MangacontentRatingValueEnumMap = {
   3: ContentRating.pornographic,
 };
 const _MangaoriginalLanguageEnumValueMap = {
-  "none": 0,
-  "english": 1,
-  "japanese": 2,
-  "simpleChinese": 3,
-  "traditionalChinese": 4,
-  "korean": 5,
-  "french": 6,
-  "russian": 7,
-  "vietnamese": 8,
-  "portugueseBrazil": 9,
-  "indonesian": 10,
+  "english": 0,
+  "japanese": 1,
+  "simpleChinese": 2,
+  "traditionalChinese": 3,
+  "korean": 4,
+  "french": 5,
+  "russian": 6,
+  "vietnamese": 7,
+  "portugueseBrazil": 8,
+  "indonesian": 9,
 };
 const _MangaoriginalLanguageValueEnumMap = {
-  0: Language.none,
-  1: Language.english,
-  2: Language.japanese,
-  3: Language.simpleChinese,
-  4: Language.traditionalChinese,
-  5: Language.korean,
-  6: Language.french,
-  7: Language.russian,
-  8: Language.vietnamese,
-  9: Language.portugueseBrazil,
-  10: Language.indonesian,
+  0: Language.english,
+  1: Language.japanese,
+  2: Language.simpleChinese,
+  3: Language.traditionalChinese,
+  4: Language.korean,
+  5: Language.french,
+  6: Language.russian,
+  7: Language.vietnamese,
+  8: Language.portugueseBrazil,
+  9: Language.indonesian,
 };
 const _MangapublicationDemographicEnumValueMap = {
   "unknown": 0,

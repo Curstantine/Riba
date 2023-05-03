@@ -34,6 +34,10 @@ class _SettingsContentFilteringLanguageSegmentState extends State<SettingsConten
 		.contentRatingsProperty()
 		.watch(fireImmediately: true)
 		.asyncMap((e) => e.first);
+
+	Future<ContentFilterSettings> get settingsFuture => ContentFilterSettings.ref
+		.getByKey(ContentFilterSettings.isarKey)
+		.then((e) => e as ContentFilterSettings);
 	
 	@override
 	Widget build(BuildContext context) {
@@ -61,7 +65,10 @@ class _SettingsContentFilteringLanguageSegmentState extends State<SettingsConten
 				title: "Original languages",
 				description: "Only titles published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
-				onConfirm: (newLanguages) => {},
+				onConfirm: (newLanguages) => ContentFilterSettings.ref.isar.writeTxn(() async {
+					final newSettings = (await settingsFuture).copyWith(originalLanguages: newLanguages);
+					await ContentFilterSettings.ref.put(newSettings);
+				})
 			),
 		);
 	}

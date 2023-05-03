@@ -83,7 +83,7 @@ class Locale {
   Language language;
   bool romanized;
 
-  Locale({this.language = Language.none, this.romanized = false});
+  Locale({this.language = Language.english, this.romanized = false});
 
   String get code => romanized ? "${language.isoCode}-ro" : language.isoCode;
 
@@ -125,7 +125,6 @@ class Locale {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
 enum Language {
-  none("none"),
   english("en"),
   japanese("ja"),
   simpleChinese("zh"),
@@ -151,7 +150,6 @@ enum Language {
   }
 
   static Map<Language, String> _humanNames = {
-    Language.none: "None",
     Language.english: "English",
     Language.japanese: "Japanese",
     Language.simpleChinese: "Simplified Chinese",

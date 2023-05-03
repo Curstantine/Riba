@@ -233,7 +233,7 @@ Chapter _chapterDeserialize(
     title: reader.readStringOrNull(offsets[9]),
     translatedLanguage: _ChaptertranslatedLanguageValueEnumMap[
             reader.readByteOrNull(offsets[10])] ??
-        Language.none,
+        Language.english,
     updatedAt: reader.readDateTime(offsets[11]),
     uploaderId: reader.readString(offsets[12]),
     version: reader.readLong(offsets[13]),
@@ -272,7 +272,7 @@ P _chapterDeserializeProp<P>(
     case 10:
       return (_ChaptertranslatedLanguageValueEnumMap[
               reader.readByteOrNull(offset)] ??
-          Language.none) as P;
+          Language.english) as P;
     case 11:
       return (reader.readDateTime(offset)) as P;
     case 12:
@@ -287,30 +287,28 @@ P _chapterDeserializeProp<P>(
 }
 
 const _ChaptertranslatedLanguageEnumValueMap = {
-  "none": 0,
-  "english": 1,
-  "japanese": 2,
-  "simpleChinese": 3,
-  "traditionalChinese": 4,
-  "korean": 5,
-  "french": 6,
-  "russian": 7,
-  "vietnamese": 8,
-  "portugueseBrazil": 9,
-  "indonesian": 10,
+  "english": 0,
+  "japanese": 1,
+  "simpleChinese": 2,
+  "traditionalChinese": 3,
+  "korean": 4,
+  "french": 5,
+  "russian": 6,
+  "vietnamese": 7,
+  "portugueseBrazil": 8,
+  "indonesian": 9,
 };
 const _ChaptertranslatedLanguageValueEnumMap = {
-  0: Language.none,
-  1: Language.english,
-  2: Language.japanese,
-  3: Language.simpleChinese,
-  4: Language.traditionalChinese,
-  5: Language.korean,
-  6: Language.french,
-  7: Language.russian,
-  8: Language.vietnamese,
-  9: Language.portugueseBrazil,
-  10: Language.indonesian,
+  0: Language.english,
+  1: Language.japanese,
+  2: Language.simpleChinese,
+  3: Language.traditionalChinese,
+  4: Language.korean,
+  5: Language.french,
+  6: Language.russian,
+  7: Language.vietnamese,
+  8: Language.portugueseBrazil,
+  9: Language.indonesian,
 };
 
 Id _chapterGetId(Chapter object) {

@@ -33,9 +33,8 @@ class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
 
 		return Scaffold(
 			body: CustomScrollView(slivers: [
-				SliverAppBar.large(
-					title: Text(widget.title),
-					
+				SliverAppBar.medium(
+					title: Text(widget.title, overflow: TextOverflow.visible),
 					automaticallyImplyLeading: false,
 					leading: IconButton(
 						icon: const Icon(Icons.close_rounded),
@@ -48,7 +47,7 @@ class _LanguageSelectionSheetState extends State<LanguageSelectionSheet> {
 				),
 				SliverToBoxAdapter(child: Padding(
 					padding: Edges.horizontalLarge.copyWith(bottom: Edges.medium),
-					child: Text(widget.description, style: text.bodyMedium),
+					child: Text(widget.description, style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
 				)),
 			    buildList(),
 			]),

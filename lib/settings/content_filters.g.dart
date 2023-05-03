@@ -109,7 +109,7 @@ ContentFilterSettings _contentFilterSettingsDeserialize(
             .readByteList(offsets[0])
             ?.map((e) =>
                 _ContentFilterSettingschapterLanguagesValueEnumMap[e] ??
-                Language.none)
+                Language.english)
             .toList() ??
         [],
     contentRatings: reader
@@ -123,7 +123,7 @@ ContentFilterSettings _contentFilterSettingsDeserialize(
             .readByteList(offsets[3])
             ?.map((e) =>
                 _ContentFilterSettingsoriginalLanguagesValueEnumMap[e] ??
-                Language.none)
+                Language.english)
             .toList() ??
         [],
   );
@@ -142,7 +142,7 @@ P _contentFilterSettingsDeserializeProp<P>(
               .readByteList(offset)
               ?.map((e) =>
                   _ContentFilterSettingschapterLanguagesValueEnumMap[e] ??
-                  Language.none)
+                  Language.english)
               .toList() ??
           []) as P;
     case 1:
@@ -160,7 +160,7 @@ P _contentFilterSettingsDeserializeProp<P>(
               .readByteList(offset)
               ?.map((e) =>
                   _ContentFilterSettingsoriginalLanguagesValueEnumMap[e] ??
-                  Language.none)
+                  Language.english)
               .toList() ??
           []) as P;
     default:
@@ -169,30 +169,28 @@ P _contentFilterSettingsDeserializeProp<P>(
 }
 
 const _ContentFilterSettingschapterLanguagesEnumValueMap = {
-  "none": 0,
-  "english": 1,
-  "japanese": 2,
-  "simpleChinese": 3,
-  "traditionalChinese": 4,
-  "korean": 5,
-  "french": 6,
-  "russian": 7,
-  "vietnamese": 8,
-  "portugueseBrazil": 9,
-  "indonesian": 10,
+  "english": 0,
+  "japanese": 1,
+  "simpleChinese": 2,
+  "traditionalChinese": 3,
+  "korean": 4,
+  "french": 5,
+  "russian": 6,
+  "vietnamese": 7,
+  "portugueseBrazil": 8,
+  "indonesian": 9,
 };
 const _ContentFilterSettingschapterLanguagesValueEnumMap = {
-  0: Language.none,
-  1: Language.english,
-  2: Language.japanese,
-  3: Language.simpleChinese,
-  4: Language.traditionalChinese,
-  5: Language.korean,
-  6: Language.french,
-  7: Language.russian,
-  8: Language.vietnamese,
-  9: Language.portugueseBrazil,
-  10: Language.indonesian,
+  0: Language.english,
+  1: Language.japanese,
+  2: Language.simpleChinese,
+  3: Language.traditionalChinese,
+  4: Language.korean,
+  5: Language.french,
+  6: Language.russian,
+  7: Language.vietnamese,
+  8: Language.portugueseBrazil,
+  9: Language.indonesian,
 };
 const _ContentFilterSettingscontentRatingsEnumValueMap = {
   "safe": 0,
@@ -207,30 +205,28 @@ const _ContentFilterSettingscontentRatingsValueEnumMap = {
   3: ContentRating.pornographic,
 };
 const _ContentFilterSettingsoriginalLanguagesEnumValueMap = {
-  "none": 0,
-  "english": 1,
-  "japanese": 2,
-  "simpleChinese": 3,
-  "traditionalChinese": 4,
-  "korean": 5,
-  "french": 6,
-  "russian": 7,
-  "vietnamese": 8,
-  "portugueseBrazil": 9,
-  "indonesian": 10,
+  "english": 0,
+  "japanese": 1,
+  "simpleChinese": 2,
+  "traditionalChinese": 3,
+  "korean": 4,
+  "french": 5,
+  "russian": 6,
+  "vietnamese": 7,
+  "portugueseBrazil": 8,
+  "indonesian": 9,
 };
 const _ContentFilterSettingsoriginalLanguagesValueEnumMap = {
-  0: Language.none,
-  1: Language.english,
-  2: Language.japanese,
-  3: Language.simpleChinese,
-  4: Language.traditionalChinese,
-  5: Language.korean,
-  6: Language.french,
-  7: Language.russian,
-  8: Language.vietnamese,
-  9: Language.portugueseBrazil,
-  10: Language.indonesian,
+  0: Language.english,
+  1: Language.japanese,
+  2: Language.simpleChinese,
+  3: Language.traditionalChinese,
+  4: Language.korean,
+  5: Language.french,
+  6: Language.russian,
+  7: Language.vietnamese,
+  8: Language.portugueseBrazil,
+  9: Language.indonesian,
 };
 
 Id _contentFilterSettingsGetId(ContentFilterSettings object) {
