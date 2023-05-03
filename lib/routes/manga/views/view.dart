@@ -10,7 +10,6 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
@@ -20,6 +19,7 @@ import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
+import "package:riba/settings/content_filters.dart";
 import "package:riba/settings/manga_filter.dart";
 import "package:riba/settings/persistence.dart";
 import "package:riba/utils/constants.dart";
@@ -41,9 +41,9 @@ class _MangaViewState extends State<MangaView> {
 	final expandedAppBarHeight = 500.0;
 	final logger = Logger("MangaView");
 	final scrollController = ScrollController();
-	final preferredLanguages = [Language.english, Language.japanese];
+
+	// TODO: Rewove after implementing localization.
 	final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
-	final contentRatings = ContentRating.values;
 
 	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);
@@ -54,6 +54,13 @@ class _MangaViewState extends State<MangaView> {
 		.preferredCoverIdProperty()
 		.watch()
 		.asyncMap((e) => e.first);
+
+	late final mangaFilterSettings = MangaFilterSettings.ref.get(fastHash(widget.id))
+		.then((value) => value.orDefault(widget.id));
+
+	late final contentFilterSettings = ContentFilterSettings.ref
+		.getByKey(ContentFilterSettings.isarKey)
+		.then((e) => e!);
 
 	late Future<MangaData> mangaFuture;
 	late Future<Statistics> statisticsFuture;
@@ -149,15 +156,22 @@ class _MangaViewState extends State<MangaView> {
 		logger.info("Fetching chapters with offset $offset");
 	
 		try {
-			final filters = (await MangaFilterSettings.ref.get(fastHash(widget.id))).orDefault(widget.id);
+			final filters = await Future.wait([
+				mangaFilterSettings,
+				contentFilterSettings,
+			]);
+
+			final mangaFilters = filters[0] as MangaFilterSettings;
+			final contentFilters = filters[1] as ContentFilterSettings;
+
 			final data = await MangaDex.instance.chapter.getFeed(
 				checkDB: !reload &&  offset == 0,
 				overrides: MangaDexChapterQueryFilter(
 					mangaId: widget.id,
-					translatedLanguages: preferredLanguages,
-					excludedGroups: filters.excludedGroupIds,
-					contentRatings: contentRatings,
 					offset: offset,
+					excludedGroups: mangaFilters.excludedGroupIds,
+					contentRatings: contentFilters.contentRatings,
+					translatedLanguages: contentFilters.chapterLanguages,
 				),
 			);
 

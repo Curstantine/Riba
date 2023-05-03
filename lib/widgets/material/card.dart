@@ -20,10 +20,11 @@ class FilledCard extends StatelessWidget {
 		final theme = Theme.of(context);
 
 		return Card(
-			margin: margin,
 			shape: shape,
+			margin: margin,
 			clipBehavior: clipBehavior,
 			color: theme.colorScheme.surfaceVariant,
+			elevation: 0,
 			child: child,
 		);
 	}

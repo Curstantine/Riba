@@ -46,17 +46,15 @@ class ChapterList extends StatelessWidget {
 					);
 				}
 
-				final chapters = snapshot.data;
-
-
-
-				return buildList(text, colors, chapters);
+				return buildList(text, colors, snapshot.data);
 			},
 		);
 	}
 
 	SliverList buildList(TextTheme text, ColorScheme colors, CollectionData<ChapterData>? chapters) {
-		final listLength = (chapters?.data.length ?? 0) + 1;
+		final listLength = (chapters?.data.length ?? 0) + 1 + (
+			chapters?.data.isEmpty == true ? 1 : 0
+		);
 		
 		return SliverList(delegate: SliverChildBuilderDelegate(
 			childCount: listLength,
@@ -73,6 +71,19 @@ class ChapterList extends StatelessWidget {
 				}
 
 				if (chapters == null) return null;
+
+				if (chapters.data.isEmpty) {
+					return Container(
+						height: 150,
+						padding: Edges.horizontalSmall,
+						child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+							Text("No chapters found", style: text.titleMedium),
+							Text(
+								"Try changing content filters to see more chapters",
+								style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant)),
+						]),
+					);
+				}
 
 				final data = chapters.data[actualIndex];
 
