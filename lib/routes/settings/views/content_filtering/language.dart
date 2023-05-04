@@ -80,7 +80,7 @@ class _SettingsContentFilteringLanguageSegmentState extends State<SettingsConten
 			context: context,
 			useSafeArea: false,
 			builder: (context) => ListSelectionDialog(
-				title: "Original languages",
+				title: "Chapter languages",
 				description: "Only chapters published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
 				values: Language.values,
