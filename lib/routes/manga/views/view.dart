@@ -325,8 +325,7 @@ class _MangaViewState extends State<MangaView> {
 	Future<void> onFiltersApplied() async {
 		chapterOffset = 0;
 		chapterCache = null;
-		areChaptersEntirelyFetched = false;
-		await fetchChapters(offset: 0, reload: true);
+		await fetchChapters(offset: 0, reload: !areChaptersEntirelyFetched);
 	}
 
 	Future<void> refresh() async {
