@@ -6,14 +6,14 @@ import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/settings/content_filters.dart";
 
-class SettingsContentFilteringLanguageSegment extends StatefulWidget {
-	const SettingsContentFilteringLanguageSegment({super.key});
+class SettingsFilteringLanguageSegment extends StatefulWidget {
+	const SettingsFilteringLanguageSegment({super.key});
 
 	@override
-	State<SettingsContentFilteringLanguageSegment> createState() => _SettingsContentFilteringLanguageSegmentState();
+	State<SettingsFilteringLanguageSegment> createState() => _SettingsFilteringLanguageSegmentState();
 }
 
-class _SettingsContentFilteringLanguageSegmentState extends State<SettingsContentFilteringLanguageSegment> {
+class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLanguageSegment> {
 	final originalLanguagesStream = ContentFilterSettings.ref
 		.where()
 		.keyEqualTo(ContentFilterSettings.isarKey)

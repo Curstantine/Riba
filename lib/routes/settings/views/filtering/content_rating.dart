@@ -6,14 +6,14 @@ import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/settings/content_filters.dart";
 
-class SettingsContentFilteringContentRatingSegment extends StatefulWidget {
-	const SettingsContentFilteringContentRatingSegment({super.key});
+class SettingsFilteringContentRatingSegment extends StatefulWidget {
+	const SettingsFilteringContentRatingSegment({super.key});
 
 	@override
-	State<SettingsContentFilteringContentRatingSegment> createState() => _SettingsContentFilteringContentRatingSegmentState();
+	State<SettingsFilteringContentRatingSegment> createState() => _SettingsFilteringContentRatingSegmentState();
 }
 
-class _SettingsContentFilteringContentRatingSegmentState extends State<SettingsContentFilteringContentRatingSegment> {
+class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilteringContentRatingSegment> {
 	final contentRatingsStream = ContentFilterSettings.ref
 		.where()
 		.keyEqualTo(ContentFilterSettings.isarKey)
