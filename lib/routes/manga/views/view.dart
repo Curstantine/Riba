@@ -55,13 +55,6 @@ class _MangaViewState extends State<MangaView> {
 		.watch()
 		.asyncMap((e) => e.first);
 
-	late final mangaFilterSettings = MangaFilterSettings.ref.get(fastHash(widget.id))
-		.then((value) => value.orDefault(widget.id));
-
-	late final contentFilterSettings = ContentFilterSettings.ref
-		.getByKey(ContentFilterSettings.isarKey)
-		.then((e) => e!);
-
 	late Future<MangaData> mangaFuture;
 	late Future<Statistics> statisticsFuture;
 
@@ -79,6 +72,14 @@ class _MangaViewState extends State<MangaView> {
 	/// This is useful since the [chapterController] used is a one-time stream that
 	/// discards rendered data.
 	CollectionData<ChapterData>? chapterCache;
+
+	Future<MangaFilterSettings> get mangaFilterSettings => MangaFilterSettings.ref
+		.get(fastHash(widget.id))
+		.then((value) => value.orDefault(widget.id));
+
+	Future<ContentFilterSettings> get contentFilterSettings => ContentFilterSettings.ref
+		.getByKey(ContentFilterSettings.isarKey)
+		.then((e) => e!);
 
 	@override
 	void initState() {
@@ -321,8 +322,11 @@ class _MangaViewState extends State<MangaView> {
 		if (!areChaptersEntirelyFetched) fetchChapters(offset: chapterOffset);
 	}
 
-	void onFiltersApplied() async {
-		fetchChapters(reload: true);
+	Future<void> onFiltersApplied() async {
+		chapterOffset = 0;
+		chapterCache = null;
+		areChaptersEntirelyFetched = false;
+		await fetchChapters(offset: 0, reload: true);
 	}
 
 	Future<void> refresh() async {
