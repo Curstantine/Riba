@@ -16,8 +16,4 @@ class Router {
 
 		return null;
 	}
-
-	static void push(BuildContext context, String route) {
-		Navigator.of(context).pushNamed(route);
-	}
 }

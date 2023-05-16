@@ -3,6 +3,137 @@
 part of "persistence.dart";
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$CoverPersistenceSettingsCWProxy {
+  CoverPersistenceSettings enabled(bool enabled);
+
+  CoverPersistenceSettings previewSize(CoverSize previewSize);
+
+  CoverPersistenceSettings fullSize(CoverSize fullSize);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CoverPersistenceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// CoverPersistenceSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  CoverPersistenceSettings call({
+    bool? enabled,
+    CoverSize? previewSize,
+    CoverSize? fullSize,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfCoverPersistenceSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfCoverPersistenceSettings.copyWith.fieldName(...)`
+class _$CoverPersistenceSettingsCWProxyImpl
+    implements _$CoverPersistenceSettingsCWProxy {
+  const _$CoverPersistenceSettingsCWProxyImpl(this._value);
+
+  final CoverPersistenceSettings _value;
+
+  @override
+  CoverPersistenceSettings enabled(bool enabled) => this(enabled: enabled);
+
+  @override
+  CoverPersistenceSettings previewSize(CoverSize previewSize) =>
+      this(previewSize: previewSize);
+
+  @override
+  CoverPersistenceSettings fullSize(CoverSize fullSize) =>
+      this(fullSize: fullSize);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `CoverPersistenceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// CoverPersistenceSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  CoverPersistenceSettings call({
+    Object? enabled = const $CopyWithPlaceholder(),
+    Object? previewSize = const $CopyWithPlaceholder(),
+    Object? fullSize = const $CopyWithPlaceholder(),
+  }) {
+    return CoverPersistenceSettings(
+      enabled: enabled == const $CopyWithPlaceholder() || enabled == null
+          ? _value.enabled
+          // ignore: cast_nullable_to_non_nullable
+          : enabled as bool,
+      previewSize:
+          previewSize == const $CopyWithPlaceholder() || previewSize == null
+              ? _value.previewSize
+              // ignore: cast_nullable_to_non_nullable
+              : previewSize as CoverSize,
+      fullSize: fullSize == const $CopyWithPlaceholder() || fullSize == null
+          ? _value.fullSize
+          // ignore: cast_nullable_to_non_nullable
+          : fullSize as CoverSize,
+    );
+  }
+}
+
+extension $CoverPersistenceSettingsCopyWith on CoverPersistenceSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfCoverPersistenceSettings.copyWith(...)` or like so:`instanceOfCoverPersistenceSettings.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$CoverPersistenceSettingsCWProxy get copyWith =>
+      _$CoverPersistenceSettingsCWProxyImpl(this);
+}
+
+abstract class _$ChapterPersistenceSettingsCWProxy {
+  ChapterPersistenceSettings enabled(bool enabled);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ChapterPersistenceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ChapterPersistenceSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ChapterPersistenceSettings call({
+    bool? enabled,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfChapterPersistenceSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfChapterPersistenceSettings.copyWith.fieldName(...)`
+class _$ChapterPersistenceSettingsCWProxyImpl
+    implements _$ChapterPersistenceSettingsCWProxy {
+  const _$ChapterPersistenceSettingsCWProxyImpl(this._value);
+
+  final ChapterPersistenceSettings _value;
+
+  @override
+  ChapterPersistenceSettings enabled(bool enabled) => this(enabled: enabled);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ChapterPersistenceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ChapterPersistenceSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ChapterPersistenceSettings call({
+    Object? enabled = const $CopyWithPlaceholder(),
+  }) {
+    return ChapterPersistenceSettings(
+      enabled: enabled == const $CopyWithPlaceholder() || enabled == null
+          ? _value.enabled
+          // ignore: cast_nullable_to_non_nullable
+          : enabled as bool,
+    );
+  }
+}
+
+extension $ChapterPersistenceSettingsCopyWith on ChapterPersistenceSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfChapterPersistenceSettings.copyWith(...)` or like so:`instanceOfChapterPersistenceSettings.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ChapterPersistenceSettingsCWProxy get copyWith =>
+      _$ChapterPersistenceSettingsCWProxyImpl(this);
+}
+
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 

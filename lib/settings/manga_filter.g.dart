@@ -3,6 +3,73 @@
 part of "manga_filter.dart";
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$MangaFilterSettingsCWProxy {
+  MangaFilterSettings id(String id);
+
+  MangaFilterSettings excludedGroupIds(List<String> excludedGroupIds);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaFilterSettings call({
+    String? id,
+    List<String>? excludedGroupIds,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaFilterSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaFilterSettings.copyWith.fieldName(...)`
+class _$MangaFilterSettingsCWProxyImpl implements _$MangaFilterSettingsCWProxy {
+  const _$MangaFilterSettingsCWProxyImpl(this._value);
+
+  final MangaFilterSettings _value;
+
+  @override
+  MangaFilterSettings id(String id) => this(id: id);
+
+  @override
+  MangaFilterSettings excludedGroupIds(List<String> excludedGroupIds) =>
+      this(excludedGroupIds: excludedGroupIds);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaFilterSettings call({
+    Object? id = const $CopyWithPlaceholder(),
+    Object? excludedGroupIds = const $CopyWithPlaceholder(),
+  }) {
+    return MangaFilterSettings(
+      id: id == const $CopyWithPlaceholder() || id == null
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      excludedGroupIds: excludedGroupIds == const $CopyWithPlaceholder() ||
+              excludedGroupIds == null
+          ? _value.excludedGroupIds
+          // ignore: cast_nullable_to_non_nullable
+          : excludedGroupIds as List<String>,
+    );
+  }
+}
+
+extension $MangaFilterSettingsCopyWith on MangaFilterSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfMangaFilterSettings.copyWith(...)` or like so:`instanceOfMangaFilterSettings.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$MangaFilterSettingsCWProxy get copyWith =>
+      _$MangaFilterSettingsCWProxyImpl(this);
+}
+
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 

@@ -1,3 +1,4 @@
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:isar/isar.dart";
 import "package:riba/utils/hash.dart";
 
@@ -5,6 +6,7 @@ import "settings.dart";
 
 part "manga_filter.g.dart";
 
+@CopyWith()
 @Collection(accessor: "mangaFilterSettings")
 class MangaFilterSettings {
 	static final ref = Settings.instance.mangaFilterSettings;
@@ -13,7 +15,7 @@ class MangaFilterSettings {
 	final String id;
 	Id get isarId => fastHash(id);
 
-	late List<String> excludedGroupIds;
+	final List<String> excludedGroupIds;
 
 	bool get isDefault => excludedGroupIds.isEmpty;
 
@@ -21,16 +23,6 @@ class MangaFilterSettings {
 		required this.id,
 		required this.excludedGroupIds,
 	});
-
-	MangaFilterSettings copyWith({
-		String? id,
-		List<String>? excludedGroupIds,
-	}) {
-		return MangaFilterSettings(
-			id: id ?? this.id,
-			excludedGroupIds: excludedGroupIds ?? this.excludedGroupIds,
-		);
-	}
 }
 
 extension MangaFilterDefaults on MangaFilterSettings? {

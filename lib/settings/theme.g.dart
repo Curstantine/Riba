@@ -3,6 +3,70 @@
 part of "theme.dart";
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$ThemeSettingsCWProxy {
+  ThemeSettings themeId(ThemeId themeId);
+
+  ThemeSettings themeMode(ThemeMode themeMode);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ThemeSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ThemeSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ThemeSettings call({
+    ThemeId? themeId,
+    ThemeMode? themeMode,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfThemeSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfThemeSettings.copyWith.fieldName(...)`
+class _$ThemeSettingsCWProxyImpl implements _$ThemeSettingsCWProxy {
+  const _$ThemeSettingsCWProxyImpl(this._value);
+
+  final ThemeSettings _value;
+
+  @override
+  ThemeSettings themeId(ThemeId themeId) => this(themeId: themeId);
+
+  @override
+  ThemeSettings themeMode(ThemeMode themeMode) => this(themeMode: themeMode);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ThemeSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ThemeSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ThemeSettings call({
+    Object? themeId = const $CopyWithPlaceholder(),
+    Object? themeMode = const $CopyWithPlaceholder(),
+  }) {
+    return ThemeSettings(
+      themeId: themeId == const $CopyWithPlaceholder() || themeId == null
+          ? _value.themeId
+          // ignore: cast_nullable_to_non_nullable
+          : themeId as ThemeId,
+      themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
+          ? _value.themeMode
+          // ignore: cast_nullable_to_non_nullable
+          : themeMode as ThemeMode,
+    );
+  }
+}
+
+extension $ThemeSettingsCopyWith on ThemeSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfThemeSettings.copyWith(...)` or like so:`instanceOfThemeSettings.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ThemeSettingsCWProxy get copyWith => _$ThemeSettingsCWProxyImpl(this);
+}
+
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 

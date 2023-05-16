@@ -1,9 +1,11 @@
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/settings/settings.dart";
 
 part "persistence.g.dart";
 
+@CopyWith()
 @Collection(accessor: "coverPersistenceSettings")
 class CoverPersistenceSettings {
 	static final ref = Settings.instance.coverPersistenceSettings;
@@ -14,31 +16,19 @@ class CoverPersistenceSettings {
 	@Index(unique: true, replace: true)
 	final String key = isarKey;
 
-	late bool enabled;
+	final bool enabled;
 
 	@Enumerated(EnumType.ordinal)
-	late CoverSize previewSize;
+	final CoverSize previewSize;
 
 	@Enumerated(EnumType.ordinal)
-	late CoverSize fullSize;
+	final CoverSize fullSize;
 
 	CoverPersistenceSettings({
 		required this.enabled,
 		required this.previewSize,
 		required this.fullSize,
 	});
-
-	CoverPersistenceSettings copyWith({
-		bool? enabled,
-		CoverSize? previewSize,
-		CoverSize? fullSize,
-	}) {
-		return CoverPersistenceSettings(
-			enabled: enabled ?? this.enabled,
-			previewSize: previewSize ?? this.previewSize,
-			fullSize: fullSize ?? this.fullSize,
-		);
-	}
 
 	static final defaultSettings = CoverPersistenceSettings(
 		enabled: true,
@@ -47,6 +37,7 @@ class CoverPersistenceSettings {
 	);
 }
 
+@CopyWith()
 @Collection(accessor: "chapterPersistenceSettings")
 class ChapterPersistenceSettings {
 	static final ref = Settings.instance.chapterPersistenceSettings;
@@ -57,19 +48,11 @@ class ChapterPersistenceSettings {
 	@Index(unique: true, replace: true)
 	final String key = isarKey;
 
-	late bool enabled;
+	final bool enabled;
 
 	ChapterPersistenceSettings({
 		required this.enabled,
 	});
-
-	ChapterPersistenceSettings copyWith({
-		bool? enabled,
-	}) {
-		return ChapterPersistenceSettings(
-			enabled: enabled ?? this.enabled,
-		);
-	}
 
 	static final defaultSettings = ChapterPersistenceSettings(
 		enabled: true,

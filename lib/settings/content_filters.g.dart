@@ -3,6 +3,89 @@
 part of "content_filters.dart";
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$ContentFilterSettingsCWProxy {
+  ContentFilterSettings originalLanguages(List<Language> originalLanguages);
+
+  ContentFilterSettings chapterLanguages(List<Language> chapterLanguages);
+
+  ContentFilterSettings contentRatings(List<ContentRating> contentRatings);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContentFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ContentFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ContentFilterSettings call({
+    List<Language>? originalLanguages,
+    List<Language>? chapterLanguages,
+    List<ContentRating>? contentRatings,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfContentFilterSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfContentFilterSettings.copyWith.fieldName(...)`
+class _$ContentFilterSettingsCWProxyImpl
+    implements _$ContentFilterSettingsCWProxy {
+  const _$ContentFilterSettingsCWProxyImpl(this._value);
+
+  final ContentFilterSettings _value;
+
+  @override
+  ContentFilterSettings originalLanguages(List<Language> originalLanguages) =>
+      this(originalLanguages: originalLanguages);
+
+  @override
+  ContentFilterSettings chapterLanguages(List<Language> chapterLanguages) =>
+      this(chapterLanguages: chapterLanguages);
+
+  @override
+  ContentFilterSettings contentRatings(List<ContentRating> contentRatings) =>
+      this(contentRatings: contentRatings);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContentFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// ContentFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// ````
+  ContentFilterSettings call({
+    Object? originalLanguages = const $CopyWithPlaceholder(),
+    Object? chapterLanguages = const $CopyWithPlaceholder(),
+    Object? contentRatings = const $CopyWithPlaceholder(),
+  }) {
+    return ContentFilterSettings(
+      originalLanguages: originalLanguages == const $CopyWithPlaceholder() ||
+              originalLanguages == null
+          ? _value.originalLanguages
+          // ignore: cast_nullable_to_non_nullable
+          : originalLanguages as List<Language>,
+      chapterLanguages: chapterLanguages == const $CopyWithPlaceholder() ||
+              chapterLanguages == null
+          ? _value.chapterLanguages
+          // ignore: cast_nullable_to_non_nullable
+          : chapterLanguages as List<Language>,
+      contentRatings: contentRatings == const $CopyWithPlaceholder() ||
+              contentRatings == null
+          ? _value.contentRatings
+          // ignore: cast_nullable_to_non_nullable
+          : contentRatings as List<ContentRating>,
+    );
+  }
+}
+
+extension $ContentFilterSettingsCopyWith on ContentFilterSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfContentFilterSettings.copyWith(...)` or like so:`instanceOfContentFilterSettings.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ContentFilterSettingsCWProxy get copyWith =>
+      _$ContentFilterSettingsCWProxyImpl(this);
+}
+
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 

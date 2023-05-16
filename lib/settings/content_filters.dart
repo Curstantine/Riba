@@ -1,10 +1,13 @@
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
-import "package:riba/settings/settings.dart";
+
+import "settings.dart";
 
 part "content_filters.g.dart";
 
+@CopyWith()
 @Collection(accessor: "contentFilterSettings")
 class ContentFilterSettings {
 	static final ref = Settings.instance.contentFilterSettings;
@@ -16,31 +19,19 @@ class ContentFilterSettings {
 	final String key = isarKey;
 
 	@Enumerated(EnumType.ordinal)
-	late List<Language> originalLanguages;
+	final List<Language> originalLanguages;
 	
 	@Enumerated(EnumType.ordinal)
-	late List<Language> chapterLanguages;
+	final List<Language> chapterLanguages;
 
 	@Enumerated(EnumType.ordinal)
-	late List<ContentRating> contentRatings;
+	final List<ContentRating> contentRatings;
 
 	ContentFilterSettings({
 		required this.originalLanguages,
 		required this.chapterLanguages,
 		required this.contentRatings,
 	});
-
-	ContentFilterSettings copyWith({
-		List<Language>? originalLanguages,
-		List<Language>? chapterLanguages,
-		List<ContentRating>? contentRatings,
-	}) {
-		return ContentFilterSettings(
-			originalLanguages: originalLanguages ?? this.originalLanguages,
-			chapterLanguages: chapterLanguages ?? this.chapterLanguages,
-			contentRatings: contentRatings ?? this.contentRatings,
-		);
-	}
 
 	static final defaultSettings = ContentFilterSettings(
 		originalLanguages: [],

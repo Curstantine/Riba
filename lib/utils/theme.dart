@@ -1,4 +1,5 @@
 import "package:dynamic_color/dynamic_color.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:google_fonts/google_fonts.dart";
@@ -54,7 +55,7 @@ class ThemeManager with ChangeNotifier {
 			scheme = themes[themeId]!;
 		}
 
-		settings = settings.copyWith(themeId: themeId);
+		settings = settings.copyWith.themeId(themeId);
 		ThemeSettings.ref.isar.writeTxn(() async {
 			await ThemeSettings.ref.put(settings);
 		});
@@ -138,7 +139,7 @@ extension ToBrightness on ThemeMode {
 		case ThemeMode.dark:
 			return Brightness.dark;
 		case ThemeMode.system:
-			return WidgetsBinding.instance.window.platformBrightness;
+			return PlatformDispatcher.instance.platformBrightness;
 		}
 	}
 }
