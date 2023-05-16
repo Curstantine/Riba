@@ -1,19 +1,18 @@
 # Riba
 
-Cross-platform mobile MangaDex client.
+MangaDex client written in Flutter from the ground up with the goal of being fast and MD3 compliant.
 
 ## Commands
 
 To generate required type adapters and such:
 
 ```fish
-flutter packages pub run build_runner build && dart fix . --apply
+dart run build_runner build && dart fix . --apply
 ```
 
 ## Prerequisites
 
--   `flutter` version 3.7 or higher.
-    -   Target the latest version possible.
+-   Latest version of Flutter.
 
 ## Formatting
 
@@ -27,3 +26,8 @@ This project will format according to the [flutter style](https://github.com/flu
 
 Since this project was using `dartfmt` with 2 space indent prior to the migration,
 the codebase as of now is not consistent with the above rules.
+
+## Targets other than Android
+
+The project is written in a platform agnostic way, so it should be possible to build for other platform
+with a little bit of messing around.

@@ -38,6 +38,9 @@
 	"explorer.fileNesting.patterns": {
 		"*.dart": "${capture}.*.dart"
 	},
+	"files.exclude": {
+		"build/": true,
+	},
 	"cSpell.words": [
 		"curstantine",
 		"deduped",
