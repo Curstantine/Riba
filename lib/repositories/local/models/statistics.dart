@@ -4,58 +4,53 @@ import "package:riba/utils/hash.dart";
 
 part "statistics.g.dart";
 
-/// Generic statistic model to be stored in the local database.
-///
-/// ### Note
-/// This model doesn't implement an eq operator, as it is impossible to do that
-/// without losing performance.
 @collection
 class Statistics {
-  late String id;
-  Id get isarId => fastHash(id);
+	final String id;
+	Id get isarId => fastHash(id);
 
-  @Enumerated(EnumType.ordinal)
-  late EntityType type;
+	@Enumerated(EnumType.ordinal)
+	final EntityType type;
 
-  late CommentStatistics? comments;
-  late RatingStatistics? rating;
-  late int? follows;
+	final CommentStatistics? comments;
+	final RatingStatistics? rating;
+	final int? follows;
 
-  Statistics({
-    required this.id,
-    required this.type,
-    this.comments,
-    this.rating,
-    this.follows,
-  });
-
-  @override
-  // ignore: hash_and_equals
-  operator ==(Object other) {
-    throw UnimplementedError();
-  }
+	Statistics({
+		required this.id,
+		required this.type,
+		this.comments,
+		this.rating,
+		this.follows,
+	});
 }
 
 @embedded
 class CommentStatistics {
-  late int id;
-  late int total;
+	final int id;
+	final int total;
 
-  CommentStatistics({
-    this.id = 0,
-    this.total = 0,
-  });
+	CommentStatistics({this.id = 0, this.total = 0});
 }
 
 @embedded
 class RatingStatistics {
-  late double average;
-  late double bayesian;
-  late List<int> distribution;
+	final double average;
+	final double bayesian;
+	final List<int> distribution;
 
-  RatingStatistics({
-    this.average = 0.0,
-    this.bayesian = 0.0,
-    this.distribution = const [],
-  });
+	/// Used by isar to instantiate the class on the database.
+	/// 
+	/// Do not use the default constructor.
+	RatingStatistics({
+		this.average = 0,
+		this.bayesian = 0,
+		this.distribution = const [],
+	});
+
+	RatingStatistics.withValues({
+		required this.average,
+		required this.bayesian,
+		required this.distribution,
+	});
 }

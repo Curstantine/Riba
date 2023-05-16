@@ -1054,8 +1054,8 @@ RatingStatistics _ratingStatisticsDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = RatingStatistics(
-    average: reader.readDoubleOrNull(offsets[0]) ?? 0.0,
-    bayesian: reader.readDoubleOrNull(offsets[1]) ?? 0.0,
+    average: reader.readDoubleOrNull(offsets[0]) ?? 0,
+    bayesian: reader.readDoubleOrNull(offsets[1]) ?? 0,
     distribution: reader.readLongList(offsets[2]) ?? const [],
   );
   return object;
@@ -1069,9 +1069,9 @@ P _ratingStatisticsDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     case 1:
-      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     case 2:
       return (reader.readLongList(offset) ?? const []) as P;
     default:

@@ -230,7 +230,7 @@ class _CoverSheetState extends State<CoverSheet> {
 
     	try {
 			await MangaDex.instance.database.writeTxn(
-				() => MangaDex.instance.database.manga.put(manga..preferredCoverId = id),
+				() => MangaDex.instance.database.manga.put(manga.copyWith.preferredCoverId(id)),
 			);
 
 			if (mounted) Navigator.pop(context);

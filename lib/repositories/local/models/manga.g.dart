@@ -3,6 +3,215 @@
 part of "manga.dart";
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$MangaCWProxy {
+  Manga id(String id);
+
+  Manga titles(Localizations titles);
+
+  Manga description(Localizations description);
+
+  Manga altTitles(List<Localizations> altTitles);
+
+  Manga authorIds(List<String> authorIds);
+
+  Manga artistIds(List<String> artistIds);
+
+  Manga tagsIds(List<String> tagsIds);
+
+  Manga defaultCoverId(String? defaultCoverId);
+
+  Manga preferredCoverId(String? preferredCoverId);
+
+  Manga originalLanguage(Language originalLanguage);
+
+  Manga version(int version);
+
+  Manga status(MangaStatus status);
+
+  Manga publicationDemographic(
+      MangaPublicationDemographic publicationDemographic);
+
+  Manga contentRating(ContentRating contentRating);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Manga(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// Manga(...).copyWith(id: 12, name: "My name")
+  /// ````
+  Manga call({
+    String? id,
+    Localizations? titles,
+    Localizations? description,
+    List<Localizations>? altTitles,
+    List<String>? authorIds,
+    List<String>? artistIds,
+    List<String>? tagsIds,
+    String? defaultCoverId,
+    String? preferredCoverId,
+    Language? originalLanguage,
+    int? version,
+    MangaStatus? status,
+    MangaPublicationDemographic? publicationDemographic,
+    ContentRating? contentRating,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfManga.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfManga.copyWith.fieldName(...)`
+class _$MangaCWProxyImpl implements _$MangaCWProxy {
+  const _$MangaCWProxyImpl(this._value);
+
+  final Manga _value;
+
+  @override
+  Manga id(String id) => this(id: id);
+
+  @override
+  Manga titles(Localizations titles) => this(titles: titles);
+
+  @override
+  Manga description(Localizations description) =>
+      this(description: description);
+
+  @override
+  Manga altTitles(List<Localizations> altTitles) => this(altTitles: altTitles);
+
+  @override
+  Manga authorIds(List<String> authorIds) => this(authorIds: authorIds);
+
+  @override
+  Manga artistIds(List<String> artistIds) => this(artistIds: artistIds);
+
+  @override
+  Manga tagsIds(List<String> tagsIds) => this(tagsIds: tagsIds);
+
+  @override
+  Manga defaultCoverId(String? defaultCoverId) =>
+      this(defaultCoverId: defaultCoverId);
+
+  @override
+  Manga preferredCoverId(String? preferredCoverId) =>
+      this(preferredCoverId: preferredCoverId);
+
+  @override
+  Manga originalLanguage(Language originalLanguage) =>
+      this(originalLanguage: originalLanguage);
+
+  @override
+  Manga version(int version) => this(version: version);
+
+  @override
+  Manga status(MangaStatus status) => this(status: status);
+
+  @override
+  Manga publicationDemographic(
+          MangaPublicationDemographic publicationDemographic) =>
+      this(publicationDemographic: publicationDemographic);
+
+  @override
+  Manga contentRating(ContentRating contentRating) =>
+      this(contentRating: contentRating);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Manga(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// Manga(...).copyWith(id: 12, name: "My name")
+  /// ````
+  Manga call({
+    Object? id = const $CopyWithPlaceholder(),
+    Object? titles = const $CopyWithPlaceholder(),
+    Object? description = const $CopyWithPlaceholder(),
+    Object? altTitles = const $CopyWithPlaceholder(),
+    Object? authorIds = const $CopyWithPlaceholder(),
+    Object? artistIds = const $CopyWithPlaceholder(),
+    Object? tagsIds = const $CopyWithPlaceholder(),
+    Object? defaultCoverId = const $CopyWithPlaceholder(),
+    Object? preferredCoverId = const $CopyWithPlaceholder(),
+    Object? originalLanguage = const $CopyWithPlaceholder(),
+    Object? version = const $CopyWithPlaceholder(),
+    Object? status = const $CopyWithPlaceholder(),
+    Object? publicationDemographic = const $CopyWithPlaceholder(),
+    Object? contentRating = const $CopyWithPlaceholder(),
+  }) {
+    return Manga(
+      id: id == const $CopyWithPlaceholder() || id == null
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      titles: titles == const $CopyWithPlaceholder() || titles == null
+          ? _value.titles
+          // ignore: cast_nullable_to_non_nullable
+          : titles as Localizations,
+      description:
+          description == const $CopyWithPlaceholder() || description == null
+              ? _value.description
+              // ignore: cast_nullable_to_non_nullable
+              : description as Localizations,
+      altTitles: altTitles == const $CopyWithPlaceholder() || altTitles == null
+          ? _value.altTitles
+          // ignore: cast_nullable_to_non_nullable
+          : altTitles as List<Localizations>,
+      authorIds: authorIds == const $CopyWithPlaceholder() || authorIds == null
+          ? _value.authorIds
+          // ignore: cast_nullable_to_non_nullable
+          : authorIds as List<String>,
+      artistIds: artistIds == const $CopyWithPlaceholder() || artistIds == null
+          ? _value.artistIds
+          // ignore: cast_nullable_to_non_nullable
+          : artistIds as List<String>,
+      tagsIds: tagsIds == const $CopyWithPlaceholder() || tagsIds == null
+          ? _value.tagsIds
+          // ignore: cast_nullable_to_non_nullable
+          : tagsIds as List<String>,
+      defaultCoverId: defaultCoverId == const $CopyWithPlaceholder()
+          ? _value.defaultCoverId
+          // ignore: cast_nullable_to_non_nullable
+          : defaultCoverId as String?,
+      preferredCoverId: preferredCoverId == const $CopyWithPlaceholder()
+          ? _value.preferredCoverId
+          // ignore: cast_nullable_to_non_nullable
+          : preferredCoverId as String?,
+      originalLanguage: originalLanguage == const $CopyWithPlaceholder() ||
+              originalLanguage == null
+          ? _value.originalLanguage
+          // ignore: cast_nullable_to_non_nullable
+          : originalLanguage as Language,
+      version: version == const $CopyWithPlaceholder() || version == null
+          ? _value.version
+          // ignore: cast_nullable_to_non_nullable
+          : version as int,
+      status: status == const $CopyWithPlaceholder() || status == null
+          ? _value.status
+          // ignore: cast_nullable_to_non_nullable
+          : status as MangaStatus,
+      publicationDemographic:
+          publicationDemographic == const $CopyWithPlaceholder() ||
+                  publicationDemographic == null
+              ? _value.publicationDemographic
+              // ignore: cast_nullable_to_non_nullable
+              : publicationDemographic as MangaPublicationDemographic,
+      contentRating:
+          contentRating == const $CopyWithPlaceholder() || contentRating == null
+              ? _value.contentRating
+              // ignore: cast_nullable_to_non_nullable
+              : contentRating as ContentRating,
+    );
+  }
+}
+
+extension $MangaCopyWith on Manga {
+  /// Returns a callable class that can be used as follows: `instanceOfManga.copyWith(...)` or like so:`instanceOfManga.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$MangaCWProxy get copyWith => _$MangaCWProxyImpl(this);
+}
+
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 

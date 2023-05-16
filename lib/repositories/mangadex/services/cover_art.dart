@@ -280,7 +280,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
     final sizeSuffix = size.size != null ? ".${size.size}" : "";
     final typeSuffix = size.size != null ? ".jpg" : "";
 
-    return "$fileId.${type.extension}$sizeSuffix$typeSuffix";
+    return "$fileId.${type.getExtension()}$sizeSuffix$typeSuffix";
   }
 
   /// Returns the file for the given [mangaId], [fileId], [type], [size] and persistence type.

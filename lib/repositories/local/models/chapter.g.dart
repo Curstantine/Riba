@@ -113,19 +113,6 @@ const ChapterSchema = CollectionSchema(
         )
       ],
     ),
-    r"uploaderId": IndexSchema(
-      id: -2905442145074141949,
-      name: r"uploaderId",
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r"uploaderId",
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
     r"groupIds": IndexSchema(
       id: 336612842135500568,
       name: r"groupIds",
@@ -140,7 +127,14 @@ const ChapterSchema = CollectionSchema(
       ],
     )
   },
-  links: {},
+  links: {
+    r"meta": LinkSchema(
+      id: -8732774238545635490,
+      name: r"meta",
+      target: r"ChapterLocalMeta",
+      single: true,
+    )
+  },
   embeddedSchemas: {},
   getId: _chapterGetId,
   getLinks: _chapterGetLinks,
@@ -316,10 +310,12 @@ Id _chapterGetId(Chapter object) {
 }
 
 List<IsarLinkBase<dynamic>> _chapterGetLinks(Chapter object) {
-  return [];
+  return [object.meta];
 }
 
-void _chapterAttach(IsarCollection<dynamic> col, Id id, Chapter object) {}
+void _chapterAttach(IsarCollection<dynamic> col, Id id, Chapter object) {
+  object.meta.attach(col, col.isar.collection<ChapterLocalMeta>(), r"meta", id);
+}
 
 extension ChapterQueryWhereSort on QueryBuilder<Chapter, Chapter, QWhere> {
   QueryBuilder<Chapter, Chapter, QAfterWhere> anyIsarId() {
@@ -435,51 +431,6 @@ extension ChapterQueryWhere on QueryBuilder<Chapter, Chapter, QWhereClause> {
               indexName: r"mangaId",
               lower: [],
               upper: [mangaId],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Chapter, Chapter, QAfterWhereClause> uploaderIdEqualTo(
-      String uploaderId) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r"uploaderId",
-        value: [uploaderId],
-      ));
-    });
-  }
-
-  QueryBuilder<Chapter, Chapter, QAfterWhereClause> uploaderIdNotEqualTo(
-      String uploaderId) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"uploaderId",
-              lower: [],
-              upper: [uploaderId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"uploaderId",
-              lower: [uploaderId],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"uploaderId",
-              lower: [uploaderId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r"uploaderId",
-              lower: [],
-              upper: [uploaderId],
               includeUpper: false,
             ));
       }
@@ -2159,7 +2110,20 @@ extension ChapterQueryObject
     on QueryBuilder<Chapter, Chapter, QFilterCondition> {}
 
 extension ChapterQueryLinks
-    on QueryBuilder<Chapter, Chapter, QFilterCondition> {}
+    on QueryBuilder<Chapter, Chapter, QFilterCondition> {
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition> meta(
+      FilterQuery<ChapterLocalMeta> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r"meta");
+    });
+  }
+
+  QueryBuilder<Chapter, Chapter, QAfterFilterCondition> metaIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r"meta", 0, true, 0, true);
+    });
+  }
+}
 
 extension ChapterQuerySortBy on QueryBuilder<Chapter, Chapter, QSortBy> {
   QueryBuilder<Chapter, Chapter, QAfterSortBy> sortByChapter() {

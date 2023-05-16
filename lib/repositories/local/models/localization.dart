@@ -23,105 +23,110 @@ part "localization.g.dart";
 /// without losing performance.
 @embedded
 class Localizations {
-  List<Locale> localizations;
-  List<String> values;
+	final List<Locale> localizations;
+	final List<String> values;
 
-  Localizations({this.localizations = const [], this.values = const []});
+	/// Used by isar to instantiate the class on the database.
+	/// 
+	/// Do not use the default constructor.
+	Localizations({
+		this.localizations = const [],
+		this.values = const [],
+	});
 
-  static final logger = Logger("Localizations");
+	Localizations.withValues({
+		required this.localizations,
+		required this.values,
+	});
 
-  String? get(Locale locale) {
-    final index = localizations.indexOf(locale);
-    if (index == -1) return null;
-    return values[index];
-  }
+	static final logger = Logger("Localizations");
 
-  /// Returns the preferred localization based on the list of locales.
-  ///
-  /// If the preferred locale is not found, the first localization is returned.
-  String getPreferred(List<Locale> locales) {
-    for (final locale in locales) {
-      final loc = get(locale);
-      if (loc != null) return loc;
-    }
+	String? get(Locale locale) {
+		final index = localizations.indexOf(locale);
+		if (index == -1) return null;
+		return values[index];
+	}
 
-    return values.first;
-  }
+	/// Returns the preferred localization based on the list of locales.
+	///
+	/// If the preferred locale is not found, the first localization is returned.
+	String getPreferred(List<Locale> locales) {
+		for (final locale in locales) {
+		final loc = get(locale);
+		if (loc != null) return loc;
+		}
 
-  factory Localizations.fromMap(Map<String, String> map) {
-    final List<Locale> localizations = [];
-    final List<String> values = [];
+		return values.first;
+	}
 
-    for (final i in map.entries) {
-      final value = i.value;
-      final key = i.key;
+	factory Localizations.fromMap(Map<String, String> map) {
+		final List<Locale> localizations = [];
+		final List<String> values = [];
 
-      try {
-        localizations.add(Locale.fromJsonValue(key));
-        values.add(value);
-      } on LanguageNotSupportedException catch (e) {
-        logger.warning("Ignoring $key: ${e.toString()}");
-      }
-    }
+		for (final i in map.entries) {
+			final value = i.value;
+			final key = i.key;
 
-    if (localizations.length != values.length) {
-      throw Exception("The length of localizations and values are not the same.");
-    }
+			try {
+				localizations.add(Locale.fromJsonValue(key));
+				values.add(value);
+			} on LanguageNotSupportedException catch (e) {
+				logger.warning("Ignoring $key: ${e.toString()}");
+			}
+		}
 
-    return Localizations(localizations: localizations, values: values);
-  }
+		if (localizations.length != values.length) {
+			throw Exception("The length of localizations and values are not the same.");
+		}
 
-  @override
-  // ignore: hash_and_equals
-  operator ==(Object other) {
-    throw UnimplementedError();
-  }
+		return Localizations.withValues(localizations: localizations, values: values);
+	}
 }
 
 @embedded
 class Locale {
-  @Enumerated(EnumType.ordinal)
-  Language language;
-  bool romanized;
+	@Enumerated(EnumType.ordinal)
+	Language language;
+	bool romanized;
 
-  Locale({this.language = Language.english, this.romanized = false});
+	Locale({this.language = Language.english, this.romanized = false});
 
-  String get code => romanized ? "${language.isoCode}-ro" : language.isoCode;
+	String get code => romanized ? "${language.isoCode}-ro" : language.isoCode;
 
-  /// Returns a locale based on a string.
-  ///
-  /// Throws a [LanguageNotSupportedException] if the language is not supported.
-  factory Locale.fromJsonValue(String locale) {
-    final roman = locale.endsWith("-ro");
-    final language = Language.fromIsoCode(roman ? locale.substring(0, locale.length - 3) : locale);
-    return Locale(language: language, romanized: roman);
-  }
+	/// Returns a locale based on a string.
+	///
+	/// Throws a [LanguageNotSupportedException] if the language is not supported.
+	factory Locale.fromJsonValue(String locale) {
+		final roman = locale.endsWith("-ro");
+		final language = Language.fromIsoCode(roman ? locale.substring(0, locale.length - 3) : locale);
+		return Locale(language: language, romanized: roman);
+	}
 
-  @override
-  int get hashCode => language.hashCode ^ romanized.hashCode;
+	@override
+	int get hashCode => language.hashCode ^ romanized.hashCode;
 
-  @override
-  operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Locale &&
-          runtimeType == other.runtimeType &&
-          language == other.language &&
-          romanized == other.romanized);
+	@override
+	operator ==(Object other) =>
+		identical(this, other) ||
+		(other is Locale &&
+			runtimeType == other.runtimeType &&
+			language == other.language &&
+			romanized == other.romanized);
 
-  static Locale en = Locale(language: Language.english, romanized: false);
-  static Locale ja = Locale(language: Language.japanese, romanized: false);
-  static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
-  static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
-  static Locale ko = Locale(language: Language.korean, romanized: false);
-  static Locale fr = Locale(language: Language.french, romanized: false);
-  static Locale ru = Locale(language: Language.russian, romanized: false);
-  static Locale vi = Locale(language: Language.vietnamese, romanized: false);
-  static Locale ptBr = Locale(language: Language.portugueseBrazil, romanized: false);
-  static Locale id = Locale(language: Language.indonesian, romanized: false);
+	static Locale en = Locale(language: Language.english, romanized: false);
+	static Locale ja = Locale(language: Language.japanese, romanized: false);
+	static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
+	static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
+	static Locale ko = Locale(language: Language.korean, romanized: false);
+	static Locale fr = Locale(language: Language.french, romanized: false);
+	static Locale ru = Locale(language: Language.russian, romanized: false);
+	static Locale vi = Locale(language: Language.vietnamese, romanized: false);
+	static Locale ptBr = Locale(language: Language.portugueseBrazil, romanized: false);
+	static Locale id = Locale(language: Language.indonesian, romanized: false);
 
-  static Locale jaRo = Locale(language: Language.japanese, romanized: true);
-  static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
-  static Locale zhHkRo = Locale(language: Language.traditionalChinese, romanized: true);
+	static Locale jaRo = Locale(language: Language.japanese, romanized: true);
+	static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
+	static Locale zhHkRo = Locale(language: Language.traditionalChinese, romanized: true);
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS

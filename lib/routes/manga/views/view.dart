@@ -92,7 +92,7 @@ class _MangaViewState extends State<MangaView> {
 			// want from this is to temporarily set the preferred id
 			// so that the internal events could be triggered with
 			// the fresh value.
-			mangaFuture.then((x) => x.manga.preferredCoverId = e);
+			mangaFuture.then((x) => x.manga.copyWith.preferredCoverId(e));
 			fetchCover(e);
 		});
 	}

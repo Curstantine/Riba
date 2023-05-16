@@ -6,35 +6,24 @@ part "custom_list.g.dart";
 
 @collection
 class CustomList {
-  late String id;
-  Id get isarId => fastHash(id);
+	final String id;
+	Id get isarId => fastHash(id);
 
-  late String name;
-  @Enumerated(EnumType.ordinal)
-  late CustomListVisibility visibility;
+	final String name;
+	@Enumerated(EnumType.ordinal)
+	final CustomListVisibility visibility;
 
-  late String userId;
-  late List<String> mangaIds;
+	final String userId;
+	final List<String> mangaIds;
 
-  late int version;
+	final int version;
 
-  CustomList({
-    required this.id,
-    required this.name,
-    required this.userId,
-    required this.mangaIds,
-    required this.version,
-    required this.visibility,
-  });
-
-  /// Checks if the given [CustomList] has the same [id] and the [version] as this.
-  bool isLooselyEqual(CustomList other) {
-    return id == other.id && version == other.version;
-  }
-
-  @override
-  // ignore: hash_and_equals
-  operator ==(Object other) {
-    throw UnimplementedError();
-  }
+	CustomList({
+		required this.id,
+		required this.name,
+		required this.userId,
+		required this.mangaIds,
+		required this.version,
+		required this.visibility,
+	});
 }
