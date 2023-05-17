@@ -24,23 +24,16 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 		super.dispose();
 	}
 
-	void onThemeChange() {
-		setState(() => {});
-	}
-
+	void onThemeChange() =>	setState(() => {});
+	
 	@override
 	Widget build(BuildContext context) {
-		return ValueListenableBuilder(
-			valueListenable: ExperimentalThemeManager.instance.pref,
-			builder: (context, value, _) {
-				return MaterialApp(
-					theme: ExperimentalThemeManager.instance.theme,
-					themeMode: value.themeMode,
-					debugShowCheckedModeBanner: false,
-					initialRoute: Router.home,
-					onGenerateRoute: Router.onGenerateRoute,
-				);
-			},
+		return MaterialApp(
+			theme: ExperimentalThemeManager.instance.theme,
+			themeMode: ExperimentalThemeManager.instance.pref.value.themeMode,
+			debugShowCheckedModeBanner: false,
+			initialRoute: Router.home,
+			onGenerateRoute: Router.onGenerateRoute,
 		);
 	}
 

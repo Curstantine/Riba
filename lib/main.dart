@@ -17,6 +17,6 @@ void main() async {
 	]);
 
 	await Database.init();
-	ExperimentalThemeManager.init();
+	await ExperimentalThemeManager.init();
 	runApp(const App());
 }
