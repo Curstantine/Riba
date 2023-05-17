@@ -116,29 +116,32 @@ class MDResponseData<T> {
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(fieldRename: FieldRename.snake, alwaysCreate: true)
 enum EntityType implements TwoWayEnumSerde {
-  manga,
-  chapter,
-  customList,
-  author,
-  artist,
-  user,
-  tag,
-  coverArt,
-  scanlationGroup,
+	manga,
+	chapter,
+	customList,
+	author,
+	artist,
+	user,
+	tag,
+	coverArt,
+	scanlationGroup,
 
-  /// Special entity type for group relationships, stored here for convenience.
-  leader,
+	/// Special entity type for group relationships, stored here for convenience.
+	leader,
 
-  /// Special entity type for group relationships, stored here for convenience.
-  member;
+	/// Special entity type for group relationships, stored here for convenience.
+	member,
+	
+	@Deprecated("DO NOT USE THIS. This is a stub used for legacy purposes.")
+	creator;
 
-  @override
-  factory EntityType.fromJson(String source) => $enumDecode(_$EntityTypeEnumMap, source);
+	@override
+	factory EntityType.fromJson(String source) => $enumDecode(_$EntityTypeEnumMap, source);
 
-  @override
-  String toJson() => _$EntityTypeEnumMap[this]!;
+	@override
+	String toJson() => _$EntityTypeEnumMap[this]!;
 
-  @override
-  @Deprecated("Will not be implemented, used as a stub for the interface.")
-  String asHumanReadable() => throw UnimplementedError();
+	@override
+	@Deprecated("Will not be implemented, used as a stub for the interface.")
+	String asHumanReadable() => throw UnimplementedError();
 }

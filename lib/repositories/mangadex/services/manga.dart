@@ -91,7 +91,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 
 		final filters = defaultFilters.copyWithSelf(overrides);
 		final ids = filters.ids!;
-		final contentRatings = filters.contentRatings!;
+		final contentRatings = filters.contentRatings ?? [];
 		final originalLangs = filters.originalLanguages ?? [];
 
 		final mapped = <String, MangaData?>{for (final e in ids) e: null};

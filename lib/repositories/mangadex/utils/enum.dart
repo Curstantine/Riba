@@ -1,5 +1,5 @@
-abstract class TwoWayEnumSerde extends Enum {
-  TwoWayEnumSerde.fromJson(String value);
-  String toJson();
-  String asHumanReadable();
+abstract class TwoWayEnumSerde implements Enum {
+	TwoWayEnumSerde.fromJson(String value);
+	String toJson();
+	String asHumanReadable();
 }

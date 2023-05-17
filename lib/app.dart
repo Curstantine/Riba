@@ -14,28 +14,39 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 	void initState() {
 		super.initState();
 		WidgetsBinding.instance.addObserver(this);
+		ExperimentalThemeManager.instance.pref.addListener(onThemeChange);
 	}
 
 	@override
 	void dispose() {
 		WidgetsBinding.instance.removeObserver(this);
+		ExperimentalThemeManager.instance.pref.removeListener(onThemeChange);
 		super.dispose();
+	}
+
+	void onThemeChange() {
+		setState(() => {});
 	}
 
 	@override
 	Widget build(BuildContext context) {
-		return MaterialApp(
-			theme: ThemeManager.instance.theme,
-			themeMode: ThemeManager.instance.settings.themeMode,
-			debugShowCheckedModeBanner: false,
-			initialRoute: Router.home,
-			onGenerateRoute: Router.onGenerateRoute,
+		return ValueListenableBuilder(
+			valueListenable: ExperimentalThemeManager.instance.pref,
+			builder: (context, value, _) {
+				return MaterialApp(
+					theme: ExperimentalThemeManager.instance.theme,
+					themeMode: value.themeMode,
+					debugShowCheckedModeBanner: false,
+					initialRoute: Router.home,
+					onGenerateRoute: Router.onGenerateRoute,
+				);
+			},
 		);
 	}
 
 	@override
 	void didChangePlatformBrightness() {
-		ThemeManager.instance.refresh().then((_) => setState(() => {}));
+		ExperimentalThemeManager.instance.refreshBrightness();
 		super.didChangePlatformBrightness();
 	}
 }

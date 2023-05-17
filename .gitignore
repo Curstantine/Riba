@@ -37,4 +37,4 @@ isar.dll
 libisar.so
 
 # Test related
-tmp/
+temp/

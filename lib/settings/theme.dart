@@ -37,5 +37,14 @@ class ThemeSettings {
 /// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
 enum ThemeId {
 	dynamic,
-	lavender,
+	lavender;
+
+	String toHumanReadable() {
+		switch (this) {
+			case ThemeId.dynamic:
+				return "Dynamic";
+			case ThemeId.lavender:
+				return "Lavender";
+		}
+	}
 }

@@ -31,5 +31,9 @@ class InitDirectories {
 			Directory("${cwd.path}/temp/documents"),
 			Directory("${cwd.path}/temp/cache"),
 		);
+
+		instance.supportDir.createSync(recursive: true);
+		instance.documentDir.createSync(recursive: true);
+		instance.cacheDir.createSync(recursive: true);
 	}
 }

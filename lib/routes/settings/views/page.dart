@@ -1,11 +1,13 @@
 import "package:animations/animations.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
-import "package:riba/routes/settings/views/debug/view.dart";
-import "package:riba/routes/settings/views/filtering/view.dart";
-import "package:riba/routes/settings/views/persistence/view.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/widgets/material/lists.dart";
+
+import "appearance/view.dart";
+import "debug/view.dart";
+import "filtering/view.dart";
+import "persistence/view.dart";
 
 class SettingsView extends StatelessWidget {
 	const SettingsView({super.key});
@@ -21,7 +23,7 @@ class SettingsView extends StatelessWidget {
 							ListItem(
 								title: "Appearance", 
 								leading: const Icon(Icons.palette_rounded),
-								onTap: () => {}),
+								onTap: () => navigateTo(context, const SettingsAppearanceView())),
 							ListItem(
 								title: "Filtering",
 								leading: const Icon(Icons.filter_alt_rounded),
