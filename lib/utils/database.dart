@@ -1,6 +1,7 @@
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/chapter.dart";
+import "package:riba/repositories/local/models/chapter_local_meta.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/custom_list.dart";
 import "package:riba/repositories/local/models/group.dart";
@@ -55,6 +56,7 @@ class Database {
 		UserSchema,
 		StatisticsSchema,
 		GroupSchema,
+		ChapterLocalMetaSchema,
 		ChapterSchema,
 		// Settings related models
 		ContentFilterSettingsSchema,
