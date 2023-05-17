@@ -8,9 +8,8 @@ import "package:isar/isar.dart";
 import "package:riba/settings/theme.dart";
 
 typedef ThemePreference = ({ThemeId id, ColorScheme scheme, ThemeMode themeMode});
-
-class ExperimentalThemeManager {
-	static late final ExperimentalThemeManager instance;
+class ThemeManager {
+	static late final ThemeManager instance;
 
 	final themeSettingsStream = ThemeSettings.ref.where()
 		.keyEqualTo(ThemeSettings.isarKey)
@@ -27,7 +26,7 @@ class ExperimentalThemeManager {
 		brightness: pref.value.themeMode.asBrightness(),
 	);
 
-	ExperimentalThemeManager._internal(ThemePreference preference) {
+	ThemeManager._internal(ThemePreference preference) {
 		pref = ValueNotifier(preference);
 
 		SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -54,7 +53,7 @@ class ExperimentalThemeManager {
 	static Future<void> init() async {
 		final settings = (await ThemeSettings.ref.getByKey(ThemeSettings.isarKey))!;
 
-		instance = ExperimentalThemeManager._internal((
+		instance = ThemeManager._internal((
 			id: settings.themeId,
 			themeMode: settings.themeMode,
 			scheme: await getColorScheme(settings.themeId, settings.themeMode.asBrightness()),

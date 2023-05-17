@@ -18,9 +18,9 @@ class SettingsAppearanceView extends StatelessWidget {
 						ColorSchemePreviewCard(
 							key: ValueKey(themeId),
 							name: themeId.toHumanReadable(),
-							colorScheme: ExperimentalThemeManager.getColorScheme(
+							colorScheme: ThemeManager.getColorScheme(
 								themeId,
-								ExperimentalThemeManager.instance.pref.value.themeMode.asBrightness(),
+								ThemeManager.instance.pref.value.themeMode.asBrightness(),
 							),
 							onSelect: () => ThemeSettings.ref.isar.writeTxn(() async {
 								final current = (await ThemeSettings.ref.getByKey(ThemeSettings.isarKey))!;
