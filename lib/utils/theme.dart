@@ -7,80 +7,99 @@ import "package:flutter/services.dart";
 import "package:isar/isar.dart";
 import "package:riba/settings/theme.dart";
 
-typedef ThemePreference = ({ThemeId id, ColorScheme scheme, ThemeMode themeMode});
+typedef ThemePreference = ({ThemeId id, ThemeMode themeMode});
+typedef AccompanyingColorSchemes = ({ColorScheme light, ColorScheme dark});
+
 class ThemeManager {
 	static late final ThemeManager instance;
 
 	final themeSettingsStream = ThemeSettings.ref.where()
 		.keyEqualTo(ThemeSettings.isarKey)
-		.watch(fireImmediately: false);
+		.watch(fireImmediately: false)
+		.asyncMap((event) => event.first);
 
-	/// The current theme preference
-	/// 
-	/// Hoisted for the sake of listening to changes.
-	late final ValueNotifier<ThemePreference> pref;
+	late final ValueNotifier<ThemeId> themeId;
+	late final ValueNotifier<ThemeMode> themeMode;
+	late AccompanyingColorSchemes schemes;
 
-	ThemeData get theme => ThemeData(
+	ThemeData get lightTheme => ThemeData(
 		useMaterial3: true,
-		colorScheme: pref.value.scheme,
-		brightness: pref.value.themeMode.asBrightness(),
+		colorScheme: schemes.light,
+		brightness: Brightness.light
 	);
 
-	ThemeManager._internal(ThemePreference preference) {
-		pref = ValueNotifier(preference);
+	ThemeData get darkTheme => ThemeData(
+		useMaterial3: true,
+		colorScheme: schemes.dark,
+		brightness: Brightness.dark,
+	);
+
+	ThemeManager._internal(ThemePreference preference, AccompanyingColorSchemes colorSchemes) {
+		themeId = ValueNotifier(preference.id);
+		themeMode = ValueNotifier(preference.themeMode);
+		schemes = colorSchemes;
 
 		SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-		themeSettingsStream.asyncMap((e) => e.first).listen((e) async {
-			pref.value = (
-				id: e.themeId,
-				scheme: await getColorScheme(e.themeId, e.themeMode.asBrightness()),
-				themeMode: e.themeMode,
-			);
+		SystemChrome.setSystemUIOverlayStyle(getOverlayStyles(themeMode: preference.themeMode));
+		themeSettingsStream.listen((e) async {
+			if (themeId.value != e.themeId) {
+				schemes = await getAccompanyingColorSchemes(e.themeId);
+			}
+			
+			themeId.value = e.themeId;
+			themeMode.value = e.themeMode;
 		});
 	}
 
-	/// Updates the current theme preference according to the current preferred brightness.
-	/// Useful for cases where [ThemeMode] is `system`, and the user changes the system brightness.
-	Future<void> refreshBrightness() async {	
-		final pref = this.pref.value;
-		this.pref.value = (
-			id: pref.id,
-			scheme: await getColorScheme(pref.id, pref.themeMode.asBrightness()),
-			themeMode: pref.themeMode,
+		/// Returns a [SystemUiOverlayStyle] with the given options while applying preferred defaults.
+	SystemUiOverlayStyle getOverlayStyles({
+		required ThemeMode themeMode,
+		Color statusBarColor = Colors.transparent,
+		Color systemNavigationBarColor = Colors.transparent,
+		Brightness? statusBarBrightness,
+		Brightness? statusBarIconBrightness,
+		Brightness? systemNavigationBarIconBrightness,
+	}) {
+		final brightness = themeMode.asBrightness();
+
+		return SystemUiOverlayStyle(
+			statusBarColor: statusBarColor,
+			statusBarBrightness: statusBarBrightness ?? brightness,
+			statusBarIconBrightness: statusBarIconBrightness ?? brightness.toOpposite(),
+			systemNavigationBarColor: systemNavigationBarColor,
+			systemNavigationBarDividerColor: systemNavigationBarColor,
+			systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? brightness,
 		);
 	}
 
 	static Future<void> init() async {
 		final settings = (await ThemeSettings.ref.getByKey(ThemeSettings.isarKey))!;
+		final schemes = await getAccompanyingColorSchemes(settings.themeId); 
 
-		instance = ThemeManager._internal((
-			id: settings.themeId,
-			themeMode: settings.themeMode,
-			scheme: await getColorScheme(settings.themeId, settings.themeMode.asBrightness()),
-		));
+		instance = ThemeManager._internal(
+			(id: settings.themeId, themeMode: settings.themeMode),
+			schemes,
+		);
 	}
 
-	static FutureOr<ColorScheme> getColorScheme(ThemeId themeId, Brightness brightness) {
-		if (themeId == ThemeId.dynamic) {
-			return getDynamicColorScheme(brightness);
-		} 
-	
-		return ColorScheme.fromSeed(seedColor: swatches[themeId]!, brightness: brightness);
+	static FutureOr<AccompanyingColorSchemes> getAccompanyingColorSchemes(ThemeId id) async {
+		if (id == ThemeId.dynamic) {
+			return getAccompanyingDynamicColorSchemes();
+		}
+
+		final swatch = swatches[id]!;
+		final light = ColorScheme.fromSeed(seedColor: swatch, brightness: Brightness.light);
+		final dark = ColorScheme.fromSeed(seedColor: swatch, brightness: Brightness.dark);
+
+		return (light: light, dark: dark);
 	}
 
-	static Future<ColorScheme> getDynamicColorScheme(Brightness brightness) async {
+	static Future<AccompanyingColorSchemes> getAccompanyingDynamicColorSchemes() async {
 		final palette = await DynamicColorPlugin.getCorePalette();
-
-		if (palette != null) {
-			return palette.toColorScheme(brightness: brightness);
-		}
+		final light = palette?.toColorScheme(brightness: Brightness.light) ?? const ColorScheme.light();
+		final dark = palette?.toColorScheme(brightness: Brightness.dark) ?? const ColorScheme.dark();
 		
-		switch (brightness) {
-			case Brightness.light:
-		    	return const ColorScheme.light();
-			case Brightness.dark:
-				return const ColorScheme.dark();
-		}
+		return (light: light, dark: dark);
 	}
 
 	static Map<ThemeId, Color> swatches = {
@@ -108,6 +127,17 @@ extension ToBrightness on ThemeMode {
 				return Brightness.dark;
 			case ThemeMode.system:
 				return PlatformDispatcher.instance.platformBrightness;
+		}
+	}
+}
+
+extension OfBrightness on AccompanyingColorSchemes {
+	ColorScheme ofBrightness(Brightness brightness) {
+		switch (brightness) {
+			case Brightness.light:
+				return light;
+			case Brightness.dark:
+				return dark;
 		}
 	}
 }
