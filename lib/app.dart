@@ -5,24 +5,24 @@ import "package:riba/utils/theme.dart";
 class App extends StatefulWidget {
 	const App({super.key});
 
-  @override
-  State<App> createState() => _AppState();
+	@override
+	State<App> createState() => _AppState();
 }
 
 class _AppState extends State<App> {
+	late final themeRefreshHook = ThemeManager.useAppRefreshHook(setState: setState);
+
 	@override
 	void initState() {
 		super.initState();
-		ThemeManager.instance.themeId.addListener(onThemeChange);
+		themeRefreshHook.init();
 	}
 
 	@override
 	void dispose() {
-		ThemeManager.instance.themeId.removeListener(onThemeChange);
+		themeRefreshHook.dispose();
 		super.dispose();
 	}
-
-	void onThemeChange() => setState(() => {});
 
 	@override
 	Widget build(BuildContext context) {

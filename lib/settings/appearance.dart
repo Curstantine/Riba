@@ -18,18 +18,23 @@ class AppearanceSettings {
 	final String key = isarKey;
 
 	@Enumerated(EnumType.ordinal)
-	final SchemeId schemeId;
+	final SchemeId lightSchemeId;
+
+	@Enumerated(EnumType.ordinal)
+	final SchemeId darkSchemeId;
 
 	@Enumerated(EnumType.ordinal)
 	final ThemeMode themeMode;
 
 	AppearanceSettings({
-		required this.schemeId,
+		required this.lightSchemeId,
+		required this.darkSchemeId,
 		required this.themeMode,
 	});
 
 	static final defaultSettings = AppearanceSettings(
-		schemeId: SchemeId.dynamic,
+		lightSchemeId: SchemeId.dynamic,
+		darkSchemeId: SchemeId.dynamic,
 		themeMode: ThemeMode.system,
 	);
 }
@@ -37,7 +42,8 @@ class AppearanceSettings {
 /// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
 enum SchemeId {
 	dynamic,
-	lavender;
+	lavender,
+	brittlePink;
 
 	String asHumanReadable() {
 		switch (this) {
@@ -45,6 +51,8 @@ enum SchemeId {
 				return "Dynamic";
 			case SchemeId.lavender:
 				return "Lavender";
+			case SchemeId.brittlePink:
+				return "Brittle Pink";
 		}
 	}
 }

@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/settings/appearance.dart";
 import "package:riba/utils/constants.dart";
@@ -16,20 +15,20 @@ class SettingsAppearanceView extends StatelessWidget {
 			body: CustomScrollView(
 				slivers: [
 					const SliverAppBar(title: Text("Appearance")),
-					const SliverToBoxAdapter(child: SegmentTitle(title: "Color Scheme")),
-					SliverToBoxAdapter(child: buildColorSchemeCards())
+					const SliverToBoxAdapter(child: SegmentTitle(title: "Light Color Scheme")),
+					SliverToBoxAdapter(child: buildColorSchemeCards(Brightness.light)),
+					const SliverToBoxAdapter(child: SegmentTitle(title: "Dark Color Scheme")),
+					SliverToBoxAdapter(child: buildColorSchemeCards(Brightness.dark))
 				],
 			),
 		);
 	}
 
-	Widget buildColorSchemeCards() {
+	Widget buildColorSchemeCards(Brightness brightness) {
 		final children = SchemeId.values.map((themeId) => ColorSchemePreviewCard(
 			id: themeId,
-			onSelect: () => AppearanceSettings.ref.isar.writeTxn(() async {
-				final current = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
-				await AppearanceSettings.ref.put(current.copyWith.schemeId(themeId));
-			}),
+			brightness: brightness,
+			onSelect: () => handleSchemeIdSelection(themeId, brightness),
 		));
 
 		return Padding(
@@ -37,74 +36,80 @@ class SettingsAppearanceView extends StatelessWidget {
 			child: SingleChildScrollView(child: Row(children:children.toList())),
 		);
 	}
+
+	Future<void> handleSchemeIdSelection(SchemeId id, Brightness brightness) => AppearanceSettings.ref.isar.writeTxn(() async {
+		final current = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
+		
+		AppearanceSettings newSettings;
+		switch (brightness) {
+			case Brightness.light:
+				newSettings = current.copyWith.lightSchemeId(id);
+				break;
+			case Brightness.dark:
+				newSettings = current.copyWith.darkSchemeId(id);
+				break;
+		}
+
+		await AppearanceSettings.ref.put(newSettings);
+	});
 }
 
 class ColorSchemePreviewCard extends StatelessWidget {
 	final SchemeId id;
+	final Brightness brightness;
 	final bool isSelected;
 	final void Function() onSelect;
 
   	const ColorSchemePreviewCard({
 		super.key,
 		required this.id,
+		required this.brightness,
 		this.isSelected = false,
 		required this.onSelect,
 	});
 
 	@override
 	Widget build(context) {
-	Logger.root.warning("start id: $id");
 		final text = Theme.of(context).textTheme;
+		final colorScheme = ThemeManager.getColorScheme(id, brightness);
 
-		return ValueListenableBuilder(
-			valueListenable: ThemeManager.instance.themeMode,
-			builder: (context, mode, child) {
-				final colorScheme = ThemeManager.getAccompanyingColorSchemes(id);
-				
-				return FutureBuilder<AccompanyingColorSchemes>(
-					future: colorScheme is Future<AccompanyingColorSchemes> ? colorScheme : null,
-					initialData: colorScheme is AccompanyingColorSchemes ? colorScheme : null,
-					builder: (context, snapshot) {
-						if (snapshot.hasData) {
-							return buildCard(text, snapshot.requireData, mode);
-						} else {
-							return const SizedBox.shrink();
-						}
-					}
-				);
-			},
+		return FutureBuilder<ColorScheme>(
+			future: colorScheme,
+			builder: (context, snapshot) {
+				if (snapshot.hasData) {
+					return buildCard(text, snapshot.requireData);
+				} else {
+					return const SizedBox.shrink();
+				}
+			}
 		);
 	}
 
-	Widget buildCard(TextTheme text, AccompanyingColorSchemes schemes, ThemeMode mode) {
-		final scheme = schemes.ofBrightness(mode.asBrightness());
-
-	Logger.root.warning("buildcard id: $id");
-		return Card(
-			elevation: 0,
-			color: scheme.background,
-			shape: RoundedRectangleBorder(
-				borderRadius: Corners.allLarge,
-				side: BorderSide(
-					color: scheme.primary,
-					width: 2,
-				),
-			),
-			child: SizedBox(
-				width: 110,
-				height: 150,
-				child: InkWell(
-					onTap: onSelect,
+	Widget buildCard(TextTheme text, ColorScheme scheme) {
+		return Column(mainAxisSize: MainAxisSize.min,children: [
+			Card(
+				elevation: 0,
+				color: scheme.background,
+				shape: RoundedRectangleBorder(
 					borderRadius: Corners.allLarge,
-					splashColor: scheme.primary.withOpacity(0.25),
-					child: Column(children: [
-						Text(id.asHumanReadable(), style: text.bodySmall),
+					side: BorderSide(color: scheme.primary, width: 2)
+				),
+				child: InkWell(
+				  onTap: onSelect,
+				  borderRadius: Corners.allLarge,
+				  splashColor: scheme.primary.withOpacity(0.25),
+				  child: SizedBox(
+				    width: 110,
+				    height: 150,
+				    child: Column(children: [
 						const Spacer(),
 						buildNavigationBar(scheme),
 					]),
+				  ),
 				),
 			),
-		);
+			Text(id.asHumanReadable(), style: text.bodySmall),
+		]);
 	}
 
 	Widget buildNavigationBar(ColorScheme scheme) {
@@ -112,6 +117,9 @@ class ColorSchemePreviewCard extends StatelessWidget {
 			elevation: 2,
 			color: scheme.background,
 			surfaceTintColor: scheme.surfaceTint,
+			shape: const RoundedRectangleBorder(
+				borderRadius: Corners.bottomLarge,
+			),
 			child: SizedBox(
 				height: 32,
 				child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [

@@ -7,7 +7,9 @@ part of "appearance.dart";
 // **************************************************************************
 
 abstract class _$AppearanceSettingsCWProxy {
-  AppearanceSettings schemeId(SchemeId schemeId);
+  AppearanceSettings lightSchemeId(SchemeId lightSchemeId);
+
+  AppearanceSettings darkSchemeId(SchemeId darkSchemeId);
 
   AppearanceSettings themeMode(ThemeMode themeMode);
 
@@ -18,7 +20,8 @@ abstract class _$AppearanceSettingsCWProxy {
   /// AppearanceSettings(...).copyWith(id: 12, name: "My name")
   /// ````
   AppearanceSettings call({
-    SchemeId? schemeId,
+    SchemeId? lightSchemeId,
+    SchemeId? darkSchemeId,
     ThemeMode? themeMode,
   });
 }
@@ -30,7 +33,12 @@ class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
   final AppearanceSettings _value;
 
   @override
-  AppearanceSettings schemeId(SchemeId schemeId) => this(schemeId: schemeId);
+  AppearanceSettings lightSchemeId(SchemeId lightSchemeId) =>
+      this(lightSchemeId: lightSchemeId);
+
+  @override
+  AppearanceSettings darkSchemeId(SchemeId darkSchemeId) =>
+      this(darkSchemeId: darkSchemeId);
 
   @override
   AppearanceSettings themeMode(ThemeMode themeMode) =>
@@ -45,14 +53,21 @@ class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
   /// AppearanceSettings(...).copyWith(id: 12, name: "My name")
   /// ````
   AppearanceSettings call({
-    Object? schemeId = const $CopyWithPlaceholder(),
+    Object? lightSchemeId = const $CopyWithPlaceholder(),
+    Object? darkSchemeId = const $CopyWithPlaceholder(),
     Object? themeMode = const $CopyWithPlaceholder(),
   }) {
     return AppearanceSettings(
-      schemeId: schemeId == const $CopyWithPlaceholder() || schemeId == null
-          ? _value.schemeId
-          // ignore: cast_nullable_to_non_nullable
-          : schemeId as SchemeId,
+      lightSchemeId:
+          lightSchemeId == const $CopyWithPlaceholder() || lightSchemeId == null
+              ? _value.lightSchemeId
+              // ignore: cast_nullable_to_non_nullable
+              : lightSchemeId as SchemeId,
+      darkSchemeId:
+          darkSchemeId == const $CopyWithPlaceholder() || darkSchemeId == null
+              ? _value.darkSchemeId
+              // ignore: cast_nullable_to_non_nullable
+              : darkSchemeId as SchemeId,
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
@@ -84,19 +99,25 @@ const AppearanceSettingsSchema = CollectionSchema(
   name: r"AppearanceSettings",
   id: 6428802170289617316,
   properties: {
-    r"key": PropertySchema(
+    r"darkSchemeId": PropertySchema(
       id: 0,
+      name: r"darkSchemeId",
+      type: IsarType.byte,
+      enumMap: _AppearanceSettingsdarkSchemeIdEnumValueMap,
+    ),
+    r"key": PropertySchema(
+      id: 1,
       name: r"key",
       type: IsarType.string,
     ),
-    r"schemeId": PropertySchema(
-      id: 1,
-      name: r"schemeId",
+    r"lightSchemeId": PropertySchema(
+      id: 2,
+      name: r"lightSchemeId",
       type: IsarType.byte,
-      enumMap: _AppearanceSettingsschemeIdEnumValueMap,
+      enumMap: _AppearanceSettingslightSchemeIdEnumValueMap,
     ),
     r"themeMode": PropertySchema(
-      id: 2,
+      id: 3,
       name: r"themeMode",
       type: IsarType.byte,
       enumMap: _AppearanceSettingsthemeModeEnumValueMap,
@@ -146,9 +167,10 @@ void _appearanceSettingsSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.key);
-  writer.writeByte(offsets[1], object.schemeId.index);
-  writer.writeByte(offsets[2], object.themeMode.index);
+  writer.writeByte(offsets[0], object.darkSchemeId.index);
+  writer.writeString(offsets[1], object.key);
+  writer.writeByte(offsets[2], object.lightSchemeId.index);
+  writer.writeByte(offsets[3], object.themeMode.index);
 }
 
 AppearanceSettings _appearanceSettingsDeserialize(
@@ -158,11 +180,14 @@ AppearanceSettings _appearanceSettingsDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = AppearanceSettings(
-    schemeId: _AppearanceSettingsschemeIdValueEnumMap[
-            reader.readByteOrNull(offsets[1])] ??
+    darkSchemeId: _AppearanceSettingsdarkSchemeIdValueEnumMap[
+            reader.readByteOrNull(offsets[0])] ??
+        SchemeId.dynamic,
+    lightSchemeId: _AppearanceSettingslightSchemeIdValueEnumMap[
+            reader.readByteOrNull(offsets[2])] ??
         SchemeId.dynamic,
     themeMode: _AppearanceSettingsthemeModeValueEnumMap[
-            reader.readByteOrNull(offsets[2])] ??
+            reader.readByteOrNull(offsets[3])] ??
         ThemeMode.system,
   );
   return object;
@@ -176,12 +201,16 @@ P _appearanceSettingsDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
-    case 1:
-      return (_AppearanceSettingsschemeIdValueEnumMap[
+      return (_AppearanceSettingsdarkSchemeIdValueEnumMap[
               reader.readByteOrNull(offset)] ??
           SchemeId.dynamic) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
     case 2:
+      return (_AppearanceSettingslightSchemeIdValueEnumMap[
+              reader.readByteOrNull(offset)] ??
+          SchemeId.dynamic) as P;
+    case 3:
       return (_AppearanceSettingsthemeModeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           ThemeMode.system) as P;
@@ -190,11 +219,19 @@ P _appearanceSettingsDeserializeProp<P>(
   }
 }
 
-const _AppearanceSettingsschemeIdEnumValueMap = {
+const _AppearanceSettingsdarkSchemeIdEnumValueMap = {
   "dynamic": 0,
   "lavender": 1,
 };
-const _AppearanceSettingsschemeIdValueEnumMap = {
+const _AppearanceSettingsdarkSchemeIdValueEnumMap = {
+  0: SchemeId.dynamic,
+  1: SchemeId.lavender,
+};
+const _AppearanceSettingslightSchemeIdEnumValueMap = {
+  "dynamic": 0,
+  "lavender": 1,
+};
+const _AppearanceSettingslightSchemeIdValueEnumMap = {
   0: SchemeId.dynamic,
   1: SchemeId.lavender,
 };
@@ -404,6 +441,62 @@ extension AppearanceSettingsQueryWhere
 extension AppearanceSettingsQueryFilter
     on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      darkSchemeIdEqualTo(SchemeId value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r"darkSchemeId",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      darkSchemeIdGreaterThan(
+    SchemeId value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r"darkSchemeId",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      darkSchemeIdLessThan(
+    SchemeId value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r"darkSchemeId",
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      darkSchemeIdBetween(
+    SchemeId lower,
+    SchemeId upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r"darkSchemeId",
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -596,45 +689,45 @@ extension AppearanceSettingsQueryFilter
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
-      schemeIdEqualTo(SchemeId value) {
+      lightSchemeIdEqualTo(SchemeId value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"schemeId",
+        property: r"lightSchemeId",
         value: value,
       ));
     });
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
-      schemeIdGreaterThan(
+      lightSchemeIdGreaterThan(
     SchemeId value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"schemeId",
+        property: r"lightSchemeId",
         value: value,
       ));
     });
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
-      schemeIdLessThan(
+      lightSchemeIdLessThan(
     SchemeId value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"schemeId",
+        property: r"lightSchemeId",
         value: value,
       ));
     });
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
-      schemeIdBetween(
+      lightSchemeIdBetween(
     SchemeId lower,
     SchemeId upper, {
     bool includeLower = true,
@@ -642,7 +735,7 @@ extension AppearanceSettingsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"schemeId",
+        property: r"lightSchemeId",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -717,6 +810,20 @@ extension AppearanceSettingsQueryLinks
 extension AppearanceSettingsQuerySortBy
     on QueryBuilder<AppearanceSettings, AppearanceSettings, QSortBy> {
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortByDarkSchemeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"darkSchemeId", Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortByDarkSchemeIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"darkSchemeId", Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
       sortByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
@@ -731,16 +838,16 @@ extension AppearanceSettingsQuerySortBy
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
-      sortBySchemeId() {
+      sortByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"schemeId", Sort.asc);
+      return query.addSortBy(r"lightSchemeId", Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
-      sortBySchemeIdDesc() {
+      sortByLightSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"schemeId", Sort.desc);
+      return query.addSortBy(r"lightSchemeId", Sort.desc);
     });
   }
 
@@ -761,6 +868,20 @@ extension AppearanceSettingsQuerySortBy
 
 extension AppearanceSettingsQuerySortThenBy
     on QueryBuilder<AppearanceSettings, AppearanceSettings, QSortThenBy> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByDarkSchemeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"darkSchemeId", Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByDarkSchemeIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r"darkSchemeId", Sort.desc);
+    });
+  }
+
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
       thenById() {
     return QueryBuilder.apply(this, (query) {
@@ -790,16 +911,16 @@ extension AppearanceSettingsQuerySortThenBy
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
-      thenBySchemeId() {
+      thenByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"schemeId", Sort.asc);
+      return query.addSortBy(r"lightSchemeId", Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
-      thenBySchemeIdDesc() {
+      thenByLightSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"schemeId", Sort.desc);
+      return query.addSortBy(r"lightSchemeId", Sort.desc);
     });
   }
 
@@ -820,6 +941,13 @@ extension AppearanceSettingsQuerySortThenBy
 
 extension AppearanceSettingsQueryWhereDistinct
     on QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct>
+      distinctByDarkSchemeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r"darkSchemeId");
+    });
+  }
+
   QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct> distinctByKey(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -828,9 +956,9 @@ extension AppearanceSettingsQueryWhereDistinct
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct>
-      distinctBySchemeId() {
+      distinctByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"schemeId");
+      return query.addDistinctBy(r"lightSchemeId");
     });
   }
 
@@ -850,6 +978,13 @@ extension AppearanceSettingsQueryProperty
     });
   }
 
+  QueryBuilder<AppearanceSettings, SchemeId, QQueryOperations>
+      darkSchemeIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"darkSchemeId");
+    });
+  }
+
   QueryBuilder<AppearanceSettings, String, QQueryOperations> keyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"key");
@@ -857,9 +992,9 @@ extension AppearanceSettingsQueryProperty
   }
 
   QueryBuilder<AppearanceSettings, SchemeId, QQueryOperations>
-      schemeIdProperty() {
+      lightSchemeIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"schemeId");
+      return query.addPropertyName(r"lightSchemeId");
     });
   }
 
