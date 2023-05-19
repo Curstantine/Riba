@@ -221,19 +221,19 @@ P _appearanceSettingsDeserializeProp<P>(
 
 const _AppearanceSettingsdarkSchemeIdEnumValueMap = {
   "dynamic": 0,
-  "lavender": 1,
+  "brittlePink": 1,
 };
 const _AppearanceSettingsdarkSchemeIdValueEnumMap = {
   0: SchemeId.dynamic,
-  1: SchemeId.lavender,
+  1: SchemeId.brittlePink,
 };
 const _AppearanceSettingslightSchemeIdEnumValueMap = {
   "dynamic": 0,
-  "lavender": 1,
+  "brittlePink": 1,
 };
 const _AppearanceSettingslightSchemeIdValueEnumMap = {
   0: SchemeId.dynamic,
-  1: SchemeId.lavender,
+  1: SchemeId.brittlePink,
 };
 const _AppearanceSettingsthemeModeEnumValueMap = {
   "system": 0,

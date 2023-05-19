@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:async";
 
 import "package:dynamic_color/dynamic_color.dart";
@@ -103,7 +104,8 @@ class ThemeManager {
 			return getDynamicColorScheme(brightness);
 		}
 
-		return ColorScheme.fromSeed(seedColor: swatches[id]!, brightness: brightness);
+		final swatch = swatches[id]!;
+		return ColorScheme.fromSeed(seedColor: swatch, brightness: brightness);
 	}
 
 	static Future<ColorScheme> getDynamicColorScheme(Brightness brightness) async {
@@ -138,11 +140,28 @@ class ThemeManager {
 		);
 	}
 
-	static Map<SchemeId, Color> swatches = {
-		SchemeId.lavender: Colors.deepPurple.shade500,
-		SchemeId.brittlePink: Colors.pink.shade500,
+	static Map<SchemeId, Color> get swatches => {
+		SchemeId.brittlePink: const Color(0xFFE14E4E),
 	};
 }
+
+class Swatch {
+	final Color light;
+	final Color dark;
+
+	const Swatch({required this.light, required this.dark});
+
+	Color get(Brightness brightness) {
+		switch (brightness) {
+			case Brightness.light:
+				return light;
+			case Brightness.dark:
+				return dark;
+		}
+	}
+}
+
+
 
 extension ColorSchemeDefaults on ColorScheme {
 	static ColorScheme getBrightnessDefault(Brightness brightness) {

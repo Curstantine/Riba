@@ -42,15 +42,12 @@ class AppearanceSettings {
 /// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
 enum SchemeId {
 	dynamic,
-	lavender,
 	brittlePink;
 
 	String asHumanReadable() {
 		switch (this) {
 			case SchemeId.dynamic:
 				return "Dynamic";
-			case SchemeId.lavender:
-				return "Lavender";
 			case SchemeId.brittlePink:
 				return "Brittle Pink";
 		}
