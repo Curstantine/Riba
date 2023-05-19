@@ -4,11 +4,11 @@ import "package:isar/isar.dart";
 
 import "settings.dart";
 
-part "theme.g.dart";
+part "appearance.g.dart";
 
 @CopyWith()
-@Collection(accessor: "themeSettings")
-class ThemeSettings {
+@Collection(accessor: "appearanceSettings")
+class AppearanceSettings {
 	static final ref = Settings.instance.themeSettings;
 	static const isarKey = "themeSettings";
 
@@ -18,32 +18,32 @@ class ThemeSettings {
 	final String key = isarKey;
 
 	@Enumerated(EnumType.ordinal)
-	final ThemeId themeId;
+	final SchemeId schemeId;
 
 	@Enumerated(EnumType.ordinal)
 	final ThemeMode themeMode;
 
-	ThemeSettings({
-		required this.themeId,
+	AppearanceSettings({
+		required this.schemeId,
 		required this.themeMode,
 	});
 
-	static final defaultSettings = ThemeSettings(
-		themeId: ThemeId.dynamic,
+	static final defaultSettings = AppearanceSettings(
+		schemeId: SchemeId.dynamic,
 		themeMode: ThemeMode.system,
 	);
 }
 
 /// NOTE: DO NOT CHANGE THE ORDER OF THE ENUM
-enum ThemeId {
+enum SchemeId {
 	dynamic,
 	lavender;
 
-	String toHumanReadable() {
+	String asHumanReadable() {
 		switch (this) {
-			case ThemeId.dynamic:
+			case SchemeId.dynamic:
 				return "Dynamic";
-			case ThemeId.lavender:
+			case SchemeId.lavender:
 				return "Lavender";
 		}
 	}

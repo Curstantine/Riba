@@ -1,7 +1,9 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:riba/settings/theme.dart";
+import "package:logging/logging.dart";
+import "package:riba/routes/settings/widgets/extra.dart";
+import "package:riba/settings/appearance.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/theme.dart";
 
@@ -11,27 +13,34 @@ class SettingsAppearanceView extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
-			appBar: AppBar(title: const Text("Appearance")),
-			body: ListView(children: [
-				SingleChildScrollView(child: Row(children: [
-					for (final themeId in ThemeId.values)
-						ColorSchemePreviewCard(
-							key: ValueKey(themeId),
-							id: themeId,
-							onSelect: () => ThemeSettings.ref.isar.writeTxn(() async {
-								final current = (await ThemeSettings.ref.getByKey(ThemeSettings.isarKey))!;
-								await ThemeSettings.ref.put(current.copyWith.themeId(themeId));
-							}),
-						)
-					]),
-				)
-			]),
+			body: CustomScrollView(
+				slivers: [
+					const SliverAppBar(title: Text("Appearance")),
+					const SliverToBoxAdapter(child: SegmentTitle(title: "Color Scheme")),
+					SliverToBoxAdapter(child: buildColorSchemeCards())
+				],
+			),
+		);
+	}
+
+	Widget buildColorSchemeCards() {
+		final children = SchemeId.values.map((themeId) => ColorSchemePreviewCard(
+			id: themeId,
+			onSelect: () => AppearanceSettings.ref.isar.writeTxn(() async {
+				final current = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
+				await AppearanceSettings.ref.put(current.copyWith.schemeId(themeId));
+			}),
+		));
+
+		return Padding(
+			padding: Edges.horizontalMedium,
+			child: SingleChildScrollView(child: Row(children:children.toList())),
 		);
 	}
 }
 
 class ColorSchemePreviewCard extends StatelessWidget {
-	final ThemeId id;
+	final SchemeId id;
 	final bool isSelected;
 	final void Function() onSelect;
 
@@ -44,6 +53,9 @@ class ColorSchemePreviewCard extends StatelessWidget {
 
 	@override
 	Widget build(context) {
+	Logger.root.warning("start id: $id");
+		final text = Theme.of(context).textTheme;
+
 		return ValueListenableBuilder(
 			valueListenable: ThemeManager.instance.themeMode,
 			builder: (context, mode, child) {
@@ -54,7 +66,7 @@ class ColorSchemePreviewCard extends StatelessWidget {
 					initialData: colorScheme is AccompanyingColorSchemes ? colorScheme : null,
 					builder: (context, snapshot) {
 						if (snapshot.hasData) {
-							return buildCard(context, snapshot.requireData, mode);
+							return buildCard(text, snapshot.requireData, mode);
 						} else {
 							return const SizedBox.shrink();
 						}
@@ -64,138 +76,62 @@ class ColorSchemePreviewCard extends StatelessWidget {
 		);
 	}
 
-	Widget buildCard(BuildContext context, AccompanyingColorSchemes schemes, ThemeMode mode) {
+	Widget buildCard(TextTheme text, AccompanyingColorSchemes schemes, ThemeMode mode) {
 		final scheme = schemes.ofBrightness(mode.asBrightness());
 
-		return Theme(
-			data: Theme.of(context).copyWith(colorScheme: scheme),
-				  child: GestureDetector(
+	Logger.root.warning("buildcard id: $id");
+		return Card(
+			elevation: 0,
+			color: scheme.background,
+			shape: RoundedRectangleBorder(
+				borderRadius: Corners.allLarge,
+				side: BorderSide(
+					color: scheme.primary,
+					width: 2,
+				),
+			),
+			child: SizedBox(
+				width: 110,
+				height: 150,
+				child: InkWell(
 					onTap: onSelect,
-					child: Padding(
-						padding: const EdgeInsets.symmetric(horizontal: 5),
-						child: Column(
-							mainAxisSize: MainAxisSize.min,					
-							children: [
-								Container(
-									width: 120,
-									height: 170,
-									padding: const EdgeInsets.all(5),
-									decoration: BoxDecoration(
-										color: scheme.background,
-										// border: Border.all(color: borderColor, width: borderWidth),
-										borderRadius: Corners.allSmall),
-								child: Column(
-									children: [
-									Column(
-										crossAxisAlignment: CrossAxisAlignment.start,
-										children: [
-										Container(
-											height: 10,
-											width: 60,
-											decoration: BoxDecoration(
-											color: scheme.onBackground,
-											borderRadius: Corners.allExtraLarge,
-											),
-										),
-										const SizedBox(height: 10),
-										Container(
-											height: 40,
-											padding: const EdgeInsets.all(5),
-											decoration: BoxDecoration(
-											color: scheme.surfaceVariant,
-											// borderRadius: Consts.borderRadiusMin,
-											),
-											child: Column(
-											crossAxisAlignment: CrossAxisAlignment.start,
-											children: [
-												Container(
-												height: 8,
-												width: 40,
-												decoration: BoxDecoration(
-													color: scheme.surfaceVariant,
-													// borderRadius: Consts.borderRadiusMax,
-												),
-												),
-												const SizedBox(height: 5),
-												Container(
-												height: 6,
-												width: 110,
-												decoration: BoxDecoration(
-													color: scheme.onSurfaceVariant,
-													// borderRadius: Consts.borderRadiusMax,
-												),
-												),
-											],
-											),
-										),
-										],
-									),
-									const Spacer(),
-									Row(
-										mainAxisAlignment: MainAxisAlignment.end,
-										children: [
-										Container(
-											width: 16,
-											height: 16,
-											margin: const EdgeInsets.only(right: 7, bottom: 7),
-											decoration: BoxDecoration(
-											shape: BoxShape.circle,
-											color: scheme.primary,
-											),
-											child: Center(
-											child: Container(
-												width: 6,
-												height: 2,
-												decoration: BoxDecoration(
-												shape: BoxShape.rectangle,
-												// borderRadius: Consts.borderRadiusMin,
-												color: scheme.onPrimary,
-												),
-											),
-											),
-										),
-										],
-									),
-									SizedBox(
-										height: 15,
-										child: Row(
-										mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-										children: [
-											Container(
-											height: 8,
-											width: 8,
-											decoration: BoxDecoration(
-												color: scheme.primary,
-												shape: BoxShape.rectangle,
-											),
-											),
-											Container(
-											height: 8,
-											width: 8,
-											decoration: BoxDecoration(
-												color: scheme.surfaceVariant,
-												shape: BoxShape.circle,
-											),
-											),
-											Container(
-											height: 8,
-											width: 8,
-											decoration: BoxDecoration(
-												color: scheme.surfaceVariant,
-												shape: BoxShape.circle,
-											),
-											),
-										],
-										),
-									)
-									],
-								),
-								),
-								Text(id.toHumanReadable()),
-							],
-						),
-					),
-				  ),
-				);
+					borderRadius: Corners.allLarge,
+					splashColor: scheme.primary.withOpacity(0.25),
+					child: Column(children: [
+						Text(id.asHumanReadable(), style: text.bodySmall),
+						const Spacer(),
+						buildNavigationBar(scheme),
+					]),
+				),
+			),
+		);
+	}
+
+	Widget buildNavigationBar(ColorScheme scheme) {
+		return Material(
+			elevation: 2,
+			color: scheme.background,
+			surfaceTintColor: scheme.surfaceTint,
+			child: SizedBox(
+				height: 32,
+				child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+					createShape(scheme, usePrimary: true),
+					createShape(scheme),
+					createShape(scheme),
+				]),
+			),
+		);
+	}
+
+	Widget createShape(ColorScheme scheme, {bool usePrimary = false}) {
+		return Container(
+			width: 12,
+			height: 12,
+			decoration: BoxDecoration(
+				color: usePrimary ? scheme.primary : scheme.primary.withOpacity(0.25),
+				borderRadius: Corners.allExtraLarge,
+			),
+			child: const SizedBox.expand(),
+		);
 	}
 }

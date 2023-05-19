@@ -180,6 +180,7 @@ const _StatisticstypeEnumValueMap = {
   "scanlationGroup": 8,
   "leader": 9,
   "member": 10,
+  "creator": 11,
 };
 const _StatisticstypeValueEnumMap = {
   0: EntityType.manga,
@@ -193,6 +194,7 @@ const _StatisticstypeValueEnumMap = {
   8: EntityType.scanlationGroup,
   9: EntityType.leader,
   10: EntityType.member,
+  11: EntityType.creator,
 };
 
 Id _statisticsGetId(Statistics object) {

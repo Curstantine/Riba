@@ -10,7 +10,7 @@ class SegmentTitle extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final text = theme.textTheme;
-		final colors = theme.colorScheme;
+		final colors = theme.colorScheme;		
 
 		return Padding(
 			padding: Edges.leftLarge.copyWith(top: Edges.medium, bottom: Edges.extraSmall),

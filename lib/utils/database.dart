@@ -10,11 +10,11 @@ import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/settings/appearance.dart";
 import "package:riba/settings/content_filters.dart";
 import "package:riba/settings/manga_filter.dart";
 import "package:riba/settings/persistence.dart";
 import "package:riba/settings/settings.dart";
-import "package:riba/settings/theme.dart";
 import "package:riba/utils/directories.dart";
 
 /// Database instance used throughout the app.
@@ -63,6 +63,6 @@ class Database {
 		CoverPersistenceSettingsSchema,
 		ChapterPersistenceSettingsSchema,
 		MangaFilterSettingsSchema,
-		ThemeSettingsSchema,
+		AppearanceSettingsSchema,
 	];
 }

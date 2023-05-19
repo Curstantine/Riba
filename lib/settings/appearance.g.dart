@@ -1,57 +1,58 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "theme.dart";
+part of "appearance.dart";
 
 // **************************************************************************
 // CopyWithGenerator
 // **************************************************************************
 
-abstract class _$ThemeSettingsCWProxy {
-  ThemeSettings themeId(ThemeId themeId);
+abstract class _$AppearanceSettingsCWProxy {
+  AppearanceSettings schemeId(SchemeId schemeId);
 
-  ThemeSettings themeMode(ThemeMode themeMode);
+  AppearanceSettings themeMode(ThemeMode themeMode);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ThemeSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AppearanceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// ThemeSettings(...).copyWith(id: 12, name: "My name")
+  /// AppearanceSettings(...).copyWith(id: 12, name: "My name")
   /// ````
-  ThemeSettings call({
-    ThemeId? themeId,
+  AppearanceSettings call({
+    SchemeId? schemeId,
     ThemeMode? themeMode,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfThemeSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfThemeSettings.copyWith.fieldName(...)`
-class _$ThemeSettingsCWProxyImpl implements _$ThemeSettingsCWProxy {
-  const _$ThemeSettingsCWProxyImpl(this._value);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfAppearanceSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfAppearanceSettings.copyWith.fieldName(...)`
+class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
+  const _$AppearanceSettingsCWProxyImpl(this._value);
 
-  final ThemeSettings _value;
-
-  @override
-  ThemeSettings themeId(ThemeId themeId) => this(themeId: themeId);
+  final AppearanceSettings _value;
 
   @override
-  ThemeSettings themeMode(ThemeMode themeMode) => this(themeMode: themeMode);
+  AppearanceSettings schemeId(SchemeId schemeId) => this(schemeId: schemeId);
+
+  @override
+  AppearanceSettings themeMode(ThemeMode themeMode) =>
+      this(themeMode: themeMode);
 
   @override
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ThemeSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AppearanceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// ThemeSettings(...).copyWith(id: 12, name: "My name")
+  /// AppearanceSettings(...).copyWith(id: 12, name: "My name")
   /// ````
-  ThemeSettings call({
-    Object? themeId = const $CopyWithPlaceholder(),
+  AppearanceSettings call({
+    Object? schemeId = const $CopyWithPlaceholder(),
     Object? themeMode = const $CopyWithPlaceholder(),
   }) {
-    return ThemeSettings(
-      themeId: themeId == const $CopyWithPlaceholder() || themeId == null
-          ? _value.themeId
+    return AppearanceSettings(
+      schemeId: schemeId == const $CopyWithPlaceholder() || schemeId == null
+          ? _value.schemeId
           // ignore: cast_nullable_to_non_nullable
-          : themeId as ThemeId,
+          : schemeId as SchemeId,
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
@@ -60,10 +61,11 @@ class _$ThemeSettingsCWProxyImpl implements _$ThemeSettingsCWProxy {
   }
 }
 
-extension $ThemeSettingsCopyWith on ThemeSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfThemeSettings.copyWith(...)` or like so:`instanceOfThemeSettings.copyWith.fieldName(...)`.
+extension $AppearanceSettingsCopyWith on AppearanceSettings {
+  /// Returns a callable class that can be used as follows: `instanceOfAppearanceSettings.copyWith(...)` or like so:`instanceOfAppearanceSettings.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$ThemeSettingsCWProxy get copyWith => _$ThemeSettingsCWProxyImpl(this);
+  _$AppearanceSettingsCWProxy get copyWith =>
+      _$AppearanceSettingsCWProxyImpl(this);
 }
 
 // **************************************************************************
@@ -73,36 +75,37 @@ extension $ThemeSettingsCopyWith on ThemeSettings {
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetThemeSettingsCollection on Isar {
-  IsarCollection<ThemeSettings> get themeSettings => this.collection();
+extension GetAppearanceSettingsCollection on Isar {
+  IsarCollection<AppearanceSettings> get appearanceSettings =>
+      this.collection();
 }
 
-const ThemeSettingsSchema = CollectionSchema(
-  name: r"ThemeSettings",
-  id: 815540309993789807,
+const AppearanceSettingsSchema = CollectionSchema(
+  name: r"AppearanceSettings",
+  id: 6428802170289617316,
   properties: {
     r"key": PropertySchema(
       id: 0,
       name: r"key",
       type: IsarType.string,
     ),
-    r"themeId": PropertySchema(
+    r"schemeId": PropertySchema(
       id: 1,
-      name: r"themeId",
+      name: r"schemeId",
       type: IsarType.byte,
-      enumMap: _ThemeSettingsthemeIdEnumValueMap,
+      enumMap: _AppearanceSettingsschemeIdEnumValueMap,
     ),
     r"themeMode": PropertySchema(
       id: 2,
       name: r"themeMode",
       type: IsarType.byte,
-      enumMap: _ThemeSettingsthemeModeEnumValueMap,
+      enumMap: _AppearanceSettingsthemeModeEnumValueMap,
     )
   },
-  estimateSize: _themeSettingsEstimateSize,
-  serialize: _themeSettingsSerialize,
-  deserialize: _themeSettingsDeserialize,
-  deserializeProp: _themeSettingsDeserializeProp,
+  estimateSize: _appearanceSettingsEstimateSize,
+  serialize: _appearanceSettingsSerialize,
+  deserialize: _appearanceSettingsDeserialize,
+  deserializeProp: _appearanceSettingsDeserializeProp,
   idName: r"id",
   indexes: {
     r"key": IndexSchema(
@@ -121,14 +124,14 @@ const ThemeSettingsSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _themeSettingsGetId,
-  getLinks: _themeSettingsGetLinks,
-  attach: _themeSettingsAttach,
+  getId: _appearanceSettingsGetId,
+  getLinks: _appearanceSettingsGetLinks,
+  attach: _appearanceSettingsAttach,
   version: "3.1.0+1",
 );
 
-int _themeSettingsEstimateSize(
-  ThemeSettings object,
+int _appearanceSettingsEstimateSize(
+  AppearanceSettings object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -137,35 +140,35 @@ int _themeSettingsEstimateSize(
   return bytesCount;
 }
 
-void _themeSettingsSerialize(
-  ThemeSettings object,
+void _appearanceSettingsSerialize(
+  AppearanceSettings object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.key);
-  writer.writeByte(offsets[1], object.themeId.index);
+  writer.writeByte(offsets[1], object.schemeId.index);
   writer.writeByte(offsets[2], object.themeMode.index);
 }
 
-ThemeSettings _themeSettingsDeserialize(
+AppearanceSettings _appearanceSettingsDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = ThemeSettings(
-    themeId:
-        _ThemeSettingsthemeIdValueEnumMap[reader.readByteOrNull(offsets[1])] ??
-            ThemeId.dynamic,
-    themeMode: _ThemeSettingsthemeModeValueEnumMap[
+  final object = AppearanceSettings(
+    schemeId: _AppearanceSettingsschemeIdValueEnumMap[
+            reader.readByteOrNull(offsets[1])] ??
+        SchemeId.dynamic,
+    themeMode: _AppearanceSettingsthemeModeValueEnumMap[
             reader.readByteOrNull(offsets[2])] ??
         ThemeMode.system,
   );
   return object;
 }
 
-P _themeSettingsDeserializeProp<P>(
+P _appearanceSettingsDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -175,11 +178,11 @@ P _themeSettingsDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (_ThemeSettingsthemeIdValueEnumMap[
+      return (_AppearanceSettingsschemeIdValueEnumMap[
               reader.readByteOrNull(offset)] ??
-          ThemeId.dynamic) as P;
+          SchemeId.dynamic) as P;
     case 2:
-      return (_ThemeSettingsthemeModeValueEnumMap[
+      return (_AppearanceSettingsthemeModeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           ThemeMode.system) as P;
     default:
@@ -187,42 +190,43 @@ P _themeSettingsDeserializeProp<P>(
   }
 }
 
-const _ThemeSettingsthemeIdEnumValueMap = {
+const _AppearanceSettingsschemeIdEnumValueMap = {
   "dynamic": 0,
   "lavender": 1,
 };
-const _ThemeSettingsthemeIdValueEnumMap = {
-  0: ThemeId.dynamic,
-  1: ThemeId.lavender,
+const _AppearanceSettingsschemeIdValueEnumMap = {
+  0: SchemeId.dynamic,
+  1: SchemeId.lavender,
 };
-const _ThemeSettingsthemeModeEnumValueMap = {
+const _AppearanceSettingsthemeModeEnumValueMap = {
   "system": 0,
   "light": 1,
   "dark": 2,
 };
-const _ThemeSettingsthemeModeValueEnumMap = {
+const _AppearanceSettingsthemeModeValueEnumMap = {
   0: ThemeMode.system,
   1: ThemeMode.light,
   2: ThemeMode.dark,
 };
 
-Id _themeSettingsGetId(ThemeSettings object) {
+Id _appearanceSettingsGetId(AppearanceSettings object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _themeSettingsGetLinks(ThemeSettings object) {
+List<IsarLinkBase<dynamic>> _appearanceSettingsGetLinks(
+    AppearanceSettings object) {
   return [];
 }
 
-void _themeSettingsAttach(
-    IsarCollection<dynamic> col, Id id, ThemeSettings object) {}
+void _appearanceSettingsAttach(
+    IsarCollection<dynamic> col, Id id, AppearanceSettings object) {}
 
-extension ThemeSettingsByIndex on IsarCollection<ThemeSettings> {
-  Future<ThemeSettings?> getByKey(String key) {
+extension AppearanceSettingsByIndex on IsarCollection<AppearanceSettings> {
+  Future<AppearanceSettings?> getByKey(String key) {
     return getByIndex(r"key", [key]);
   }
 
-  ThemeSettings? getByKeySync(String key) {
+  AppearanceSettings? getByKeySync(String key) {
     return getByIndexSync(r"key", [key]);
   }
 
@@ -234,12 +238,12 @@ extension ThemeSettingsByIndex on IsarCollection<ThemeSettings> {
     return deleteByIndexSync(r"key", [key]);
   }
 
-  Future<List<ThemeSettings?>> getAllByKey(List<String> keyValues) {
+  Future<List<AppearanceSettings?>> getAllByKey(List<String> keyValues) {
     final values = keyValues.map((e) => [e]).toList();
     return getAllByIndex(r"key", values);
   }
 
-  List<ThemeSettings?> getAllByKeySync(List<String> keyValues) {
+  List<AppearanceSettings?> getAllByKeySync(List<String> keyValues) {
     final values = keyValues.map((e) => [e]).toList();
     return getAllByIndexSync(r"key", values);
   }
@@ -254,37 +258,37 @@ extension ThemeSettingsByIndex on IsarCollection<ThemeSettings> {
     return deleteAllByIndexSync(r"key", values);
   }
 
-  Future<Id> putByKey(ThemeSettings object) {
+  Future<Id> putByKey(AppearanceSettings object) {
     return putByIndex(r"key", object);
   }
 
-  Id putByKeySync(ThemeSettings object, {bool saveLinks = true}) {
+  Id putByKeySync(AppearanceSettings object, {bool saveLinks = true}) {
     return putByIndexSync(r"key", object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByKey(List<ThemeSettings> objects) {
+  Future<List<Id>> putAllByKey(List<AppearanceSettings> objects) {
     return putAllByIndex(r"key", objects);
   }
 
-  List<Id> putAllByKeySync(List<ThemeSettings> objects,
+  List<Id> putAllByKeySync(List<AppearanceSettings> objects,
       {bool saveLinks = true}) {
     return putAllByIndexSync(r"key", objects, saveLinks: saveLinks);
   }
 }
 
-extension ThemeSettingsQueryWhereSort
-    on QueryBuilder<ThemeSettings, ThemeSettings, QWhere> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhere> anyId() {
+extension AppearanceSettingsQueryWhereSort
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QWhere> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension ThemeSettingsQueryWhere
-    on QueryBuilder<ThemeSettings, ThemeSettings, QWhereClause> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> idEqualTo(
-      Id id) {
+extension AppearanceSettingsQueryWhere
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QWhereClause> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -293,8 +297,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -316,9 +320,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -326,9 +329,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -336,7 +338,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> idBetween(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -352,8 +355,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> keyEqualTo(
-      String key) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      keyEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r"key",
@@ -362,8 +365,8 @@ extension ThemeSettingsQueryWhere
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterWhereClause> keyNotEqualTo(
-      String key) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterWhereClause>
+      keyNotEqualTo(String key) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -398,10 +401,10 @@ extension ThemeSettingsQueryWhere
   }
 }
 
-extension ThemeSettingsQueryFilter
-    on QueryBuilder<ThemeSettings, ThemeSettings, QFilterCondition> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> idEqualTo(
-      Id value) {
+extension AppearanceSettingsQueryFilter
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"id",
@@ -410,7 +413,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       idGreaterThan(
     Id value, {
     bool include = false,
@@ -424,7 +427,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> idLessThan(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -437,7 +441,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> idBetween(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -454,7 +459,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyEqualTo(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -467,7 +473,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       keyGreaterThan(
     String value, {
     bool include = false,
@@ -483,7 +489,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyLessThan(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -498,7 +505,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyBetween(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -517,7 +525,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       keyStartsWith(
     String value, {
     bool caseSensitive = true,
@@ -531,7 +539,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyEndsWith(
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -544,9 +553,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r"key",
@@ -556,9 +564,8 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition> keyMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      keyMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r"key",
@@ -568,7 +575,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       keyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -578,7 +585,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       keyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
@@ -588,54 +595,54 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
-      themeIdEqualTo(ThemeId value) {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      schemeIdEqualTo(SchemeId value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"themeId",
+        property: r"schemeId",
         value: value,
       ));
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
-      themeIdGreaterThan(
-    ThemeId value, {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      schemeIdGreaterThan(
+    SchemeId value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"themeId",
+        property: r"schemeId",
         value: value,
       ));
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
-      themeIdLessThan(
-    ThemeId value, {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      schemeIdLessThan(
+    SchemeId value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"themeId",
+        property: r"schemeId",
         value: value,
       ));
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
-      themeIdBetween(
-    ThemeId lower,
-    ThemeId upper, {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      schemeIdBetween(
+    SchemeId lower,
+    SchemeId upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"themeId",
+        property: r"schemeId",
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -644,7 +651,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       themeModeEqualTo(ThemeMode value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -654,7 +661,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       themeModeGreaterThan(
     ThemeMode value, {
     bool include = false,
@@ -668,7 +675,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       themeModeLessThan(
     ThemeMode value, {
     bool include = false,
@@ -682,7 +689,7 @@ extension ThemeSettingsQueryFilter
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterFilterCondition>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       themeModeBetween(
     ThemeMode lower,
     ThemeMode upper, {
@@ -701,45 +708,50 @@ extension ThemeSettingsQueryFilter
   }
 }
 
-extension ThemeSettingsQueryObject
-    on QueryBuilder<ThemeSettings, ThemeSettings, QFilterCondition> {}
+extension AppearanceSettingsQueryObject
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {}
 
-extension ThemeSettingsQueryLinks
-    on QueryBuilder<ThemeSettings, ThemeSettings, QFilterCondition> {}
+extension AppearanceSettingsQueryLinks
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {}
 
-extension ThemeSettingsQuerySortBy
-    on QueryBuilder<ThemeSettings, ThemeSettings, QSortBy> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> sortByKey() {
+extension AppearanceSettingsQuerySortBy
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QSortBy> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> sortByKeyDesc() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> sortByThemeId() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortBySchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeId", Sort.asc);
+      return query.addSortBy(r"schemeId", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> sortByThemeIdDesc() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortBySchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeId", Sort.desc);
+      return query.addSortBy(r"schemeId", Sort.desc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> sortByThemeMode() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      sortByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"themeMode", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
       sortByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"themeMode", Sort.desc);
@@ -747,51 +759,58 @@ extension ThemeSettingsQuerySortBy
   }
 }
 
-extension ThemeSettingsQuerySortThenBy
-    on QueryBuilder<ThemeSettings, ThemeSettings, QSortThenBy> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenById() {
+extension AppearanceSettingsQuerySortThenBy
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QSortThenBy> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByKey() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByKeyDesc() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByKeyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"key", Sort.desc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByThemeId() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenBySchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeId", Sort.asc);
+      return query.addSortBy(r"schemeId", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByThemeIdDesc() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenBySchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeId", Sort.desc);
+      return query.addSortBy(r"schemeId", Sort.desc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy> thenByThemeMode() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
+      thenByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"themeMode", Sort.asc);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QAfterSortBy>
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterSortBy>
       thenByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"themeMode", Sort.desc);
@@ -799,49 +818,53 @@ extension ThemeSettingsQuerySortThenBy
   }
 }
 
-extension ThemeSettingsQueryWhereDistinct
-    on QueryBuilder<ThemeSettings, ThemeSettings, QDistinct> {
-  QueryBuilder<ThemeSettings, ThemeSettings, QDistinct> distinctByKey(
+extension AppearanceSettingsQueryWhereDistinct
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct> distinctByKey(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"key", caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QDistinct> distinctByThemeId() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct>
+      distinctBySchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"themeId");
+      return query.addDistinctBy(r"schemeId");
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeSettings, QDistinct> distinctByThemeMode() {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QDistinct>
+      distinctByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"themeMode");
     });
   }
 }
 
-extension ThemeSettingsQueryProperty
-    on QueryBuilder<ThemeSettings, ThemeSettings, QQueryProperty> {
-  QueryBuilder<ThemeSettings, int, QQueryOperations> idProperty() {
+extension AppearanceSettingsQueryProperty
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QQueryProperty> {
+  QueryBuilder<AppearanceSettings, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"id");
     });
   }
 
-  QueryBuilder<ThemeSettings, String, QQueryOperations> keyProperty() {
+  QueryBuilder<AppearanceSettings, String, QQueryOperations> keyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"key");
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeId, QQueryOperations> themeIdProperty() {
+  QueryBuilder<AppearanceSettings, SchemeId, QQueryOperations>
+      schemeIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"themeId");
+      return query.addPropertyName(r"schemeId");
     });
   }
 
-  QueryBuilder<ThemeSettings, ThemeMode, QQueryOperations> themeModeProperty() {
+  QueryBuilder<AppearanceSettings, ThemeMode, QQueryOperations>
+      themeModeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"themeMode");
     });

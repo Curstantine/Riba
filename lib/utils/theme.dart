@@ -5,20 +5,20 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:isar/isar.dart";
-import "package:riba/settings/theme.dart";
+import "package:riba/settings/appearance.dart";
 
-typedef ThemePreference = ({ThemeId id, ThemeMode themeMode});
+typedef ThemePreference = ({SchemeId id, ThemeMode themeMode});
 typedef AccompanyingColorSchemes = ({ColorScheme light, ColorScheme dark});
 
 class ThemeManager {
 	static late final ThemeManager instance;
 
-	final themeSettingsStream = ThemeSettings.ref.where()
-		.keyEqualTo(ThemeSettings.isarKey)
+	final themeSettingsStream = AppearanceSettings.ref.where()
+		.keyEqualTo(AppearanceSettings.isarKey)
 		.watch(fireImmediately: false)
 		.asyncMap((event) => event.first);
 
-	late final ValueNotifier<ThemeId> themeId;
+	late final ValueNotifier<SchemeId> themeId;
 	late final ValueNotifier<ThemeMode> themeMode;
 	late AccompanyingColorSchemes schemes;
 
@@ -42,11 +42,11 @@ class ThemeManager {
 		SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 		SystemChrome.setSystemUIOverlayStyle(getOverlayStyles(themeMode: preference.themeMode));
 		themeSettingsStream.listen((e) async {
-			if (themeId.value != e.themeId) {
-				schemes = await getAccompanyingColorSchemes(e.themeId);
+			if (themeId.value != e.schemeId) {
+				schemes = await getAccompanyingColorSchemes(e.schemeId);
 			}
 			
-			themeId.value = e.themeId;
+			themeId.value = e.schemeId;
 			themeMode.value = e.themeMode;
 		});
 	}
@@ -73,17 +73,17 @@ class ThemeManager {
 	}
 
 	static Future<void> init() async {
-		final settings = (await ThemeSettings.ref.getByKey(ThemeSettings.isarKey))!;
-		final schemes = await getAccompanyingColorSchemes(settings.themeId); 
+		final settings = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
+		final schemes = await getAccompanyingColorSchemes(settings.schemeId); 
 
 		instance = ThemeManager._internal(
-			(id: settings.themeId, themeMode: settings.themeMode),
+			(id: settings.schemeId, themeMode: settings.themeMode),
 			schemes,
 		);
 	}
 
-	static FutureOr<AccompanyingColorSchemes> getAccompanyingColorSchemes(ThemeId id) async {
-		if (id == ThemeId.dynamic) {
+	static FutureOr<AccompanyingColorSchemes> getAccompanyingColorSchemes(SchemeId id) async {
+		if (id == SchemeId.dynamic) {
 			return getAccompanyingDynamicColorSchemes();
 		}
 
@@ -102,8 +102,8 @@ class ThemeManager {
 		return (light: light, dark: dark);
 	}
 
-	static Map<ThemeId, Color> swatches = {
-		ThemeId.lavender: Colors.deepPurple.shade500,
+	static Map<SchemeId, Color> swatches = {
+		SchemeId.lavender: Colors.deepPurple.shade500,
 	};
 }
 

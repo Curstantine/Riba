@@ -18,4 +18,5 @@ const _$EntityTypeEnumMap = {
   EntityType.scanlationGroup: "scanlation_group",
   EntityType.leader: "leader",
   EntityType.member: "member",
+  EntityType.creator: "creator",
 };
