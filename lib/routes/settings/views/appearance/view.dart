@@ -1,7 +1,7 @@
 import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
-import "package:riba/routes/settings/widgets/dialogs/list_selection.dart";
+import "package:riba/routes/settings/widgets/dialogs/list_sortable.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/routes/settings/widgets/lists/color_preview_list.dart";
@@ -71,11 +71,19 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 		final newLocales = await showDialog<List<Locale>>(
 			context: context,
 			useSafeArea: false,
-			builder: (context) => ListSelectionDialog<Locale>(
+			builder: (context) => ListSortableDialog<Locale>(
 				title: "Preferred Display Locales",
 				description: "The locales that should take precedence when displaying textual content.",
 				currentValue: locales,
 				values: Locale.values,
+				itemBuilder: (locale) => ListItemData(
+					locale.language.asHumanReadable(),
+					subtitle: locale.romanized ? "Romanized" : "Native",
+				),
+				onReset: () => AppearanceSettings.ref.isar.writeTxn(() async {
+					final settings = (await settingsFuture).copyWith.preferredLocales(AppearanceSettings.defaultSettings.preferredLocales);
+					await AppearanceSettings.ref.put(settings);
+				}),
 			),
 		);
 

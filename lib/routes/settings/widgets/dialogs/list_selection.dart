@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/utils/constants.dart";
 
+import "list_sortable.dart" show ListItemData;
+
 class ListSelectionDialog<T extends SerializableDataExt> extends StatefulWidget {
 	const ListSelectionDialog({
 		super.key,
@@ -9,20 +11,24 @@ class ListSelectionDialog<T extends SerializableDataExt> extends StatefulWidget 
 		required this.description,
 		required this.values,
 		required this.currentValue,
+		this.itemBuilder,
+		this.onReset,
 	});
 
 	final String title;
 	final String description;
 	final List<T> values;
 	final List<T> currentValue;
+	final ListItemData Function(T)? itemBuilder;
+	final void Function()? onReset;
 
 	@override
 	State<ListSelectionDialog> createState() => _ListSelectionDialogState<T>();
 }
 
-class _ListSelectionDialogState<T extends SerializableDataExt> extends State<ListSelectionDialog> {
+class _ListSelectionDialogState<T extends SerializableDataExt> extends State<ListSelectionDialog<T>> {
 	late final Map<T, ValueNotifier<bool>> selectionMap = { 
-		for (final e in widget.values) e as T : ValueNotifier(widget.currentValue.contains(e))
+		for (final e in widget.values) e : ValueNotifier(widget.currentValue.contains(e))
 	};
 
 	@override
@@ -34,14 +40,13 @@ class _ListSelectionDialogState<T extends SerializableDataExt> extends State<Lis
 		return Scaffold(
 			body: CustomScrollView(slivers: [
 				SliverAppBar.medium(
-					title: Text(widget.title, overflow: TextOverflow.visible),
-					automaticallyImplyLeading: false,
+					title: Text(widget.title, overflow: TextOverflow.visible, maxLines: 1),
 					leading: IconButton(
 						icon: const Icon(Icons.close_rounded),
 						onPressed: () => Navigator.pop(context),
 					),
 					actions: [
-						IconButton(onPressed: () => {}, icon: const Icon(Icons.restore_rounded)),
+						IconButton(onPressed: widget.onReset, icon: const Icon(Icons.restore_rounded)),
 						IconButton(onPressed: handleConfirm, icon: const Icon(Icons.check_rounded)),
 					],
 				),
@@ -60,18 +65,22 @@ class _ListSelectionDialogState<T extends SerializableDataExt> extends State<Lis
 			(context, i) {
 				final item = selectionMap.keys.elementAt(i);
 				final isSelected = selectionMap[item]!;
+				final itemData = widget.itemBuilder?.call(item) ?? ListItemData(item.asHumanReadable());
 				
 				return ValueListenableBuilder(
 					valueListenable: isSelected,
 					builder: (context, value, child) => CheckboxListTile(
 						title: child,
 						value: isSelected.value,
+						subtitle: itemData.subtitle == null
+							? null
+							: Text(itemData.subtitle!),
 						onChanged: (value) {
 							if (value == null) return;
 							selectionMap[item]!.value = value;
 						},
 					),
-					child: Text(item.asHumanReadable())
+					child: Text(itemData.title),
 				);
 		}));
 	}
