@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/models/user.dart";
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/repositories/utils/exception.dart";
 
 import "relationship.dart";
@@ -20,7 +20,7 @@ class UserAttributes {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(alwaysCreate: true)
-enum UserRole implements TwoWayEnumSerde {
+enum UserRole implements SerializableDataExt {
   @JsonValue("ROLE_USER")
   user,
   @JsonValue("ROLE_MEMBER")

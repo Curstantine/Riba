@@ -1,4 +1,4 @@
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 
 class URL {
 	final String hostname;
@@ -27,7 +27,7 @@ class URL {
 
 	/// Supports `List<String>`, `String`, `int`, `double` as values.
 	///
-	/// Enums are supported if [TwoWayEnumSerde] is implemented.
+	/// Enums are supported if [SerializableDataExt] is implemented.
 	///
 	/// Adding a single value to a key will append it to the list of values.
 	/// But adding a list of values will replace the existing list.
@@ -37,9 +37,9 @@ class URL {
 		assert(value is String ||
 			value is int ||
 			value is double ||
-			value is TwoWayEnumSerde ||
+			value is SerializableDataExt ||
 			value is List<String> ||
-			value is List<TwoWayEnumSerde> ||
+			value is List<SerializableDataExt> ||
 			value is List<dynamic> && value.isEmpty);
 		// ^^ is for cases where an empty list is passed in, but the type is not inferred.
 		// This case is handled below.
@@ -58,12 +58,12 @@ class URL {
 				break;
 
 			default:
-				if (value is TwoWayEnumSerde) {
+				if (value is SerializableDataExt) {
 					parameters[key] ??= [];
 					parameters[key]!.add(value.toJson());
 				}
 
-				if (value is List<TwoWayEnumSerde>) {
+				if (value is List<SerializableDataExt>) {
 					parameters[key] = value.map((e) => e.toJson()).toList();
 				}
 

@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/utils/constants.dart";
 
-class ListSelectionDialog<T extends TwoWayEnumSerde> extends StatefulWidget {
+class ListSelectionDialog<T extends SerializableDataExt> extends StatefulWidget {
 	const ListSelectionDialog({
 		super.key,
 		required this.title,
@@ -20,7 +20,7 @@ class ListSelectionDialog<T extends TwoWayEnumSerde> extends StatefulWidget {
 	State<ListSelectionDialog> createState() => _ListSelectionDialogState<T>();
 }
 
-class _ListSelectionDialogState<T extends TwoWayEnumSerde> extends State<ListSelectionDialog> {
+class _ListSelectionDialogState<T extends SerializableDataExt> extends State<ListSelectionDialog> {
 	late final Map<T, ValueNotifier<bool>> selectionMap = { 
 		for (final e in widget.values) e as T : ValueNotifier(widget.currentValue.contains(e))
 	};

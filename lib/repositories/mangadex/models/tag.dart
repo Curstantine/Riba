@@ -1,7 +1,7 @@
 import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 
 import "general.dart";
 
@@ -36,7 +36,7 @@ extension ToTag on MDResponseData<TagAttributes> {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(alwaysCreate: true)
-enum TagGroup implements TwoWayEnumSerde {
+enum TagGroup implements SerializableDataExt {
   content,
   format,
   genre,

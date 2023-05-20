@@ -1,6 +1,6 @@
 import "package:json_annotation/json_annotation.dart";
 import "package:riba/repositories/mangadex/models/relationship.dart";
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/repositories/mangadex/utils/transformer.dart";
 import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/url.dart";
@@ -115,7 +115,7 @@ class MDResponseData<T> {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(fieldRename: FieldRename.snake, alwaysCreate: true)
-enum EntityType implements TwoWayEnumSerde {
+enum EntityType implements SerializableDataExt {
 	manga,
 	chapter,
 	customList,

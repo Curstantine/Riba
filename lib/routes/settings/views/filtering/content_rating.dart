@@ -44,7 +44,7 @@ class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilterin
 	}
 
 	Future<void> showContentRatingDialog(BuildContext context, List<ContentRating> contentRatings) async {
-		final newContentRating = await showDialog(
+		final newContentRating = await showDialog<List<ContentRating>>(
 			context: context,
 			useSafeArea: false,
 			builder: (context) => ListSelectionDialog<ContentRating>(
@@ -55,6 +55,7 @@ class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilterin
 			),
 		);
 
+		if (newContentRating == null) return;
 		await ContentFilterSettings.ref.isar.writeTxn(() async {
 			final newSettings = (await settingsFuture).copyWith(contentRatings: newContentRating);
 			await ContentFilterSettings.ref.put(newSettings);

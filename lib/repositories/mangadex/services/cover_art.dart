@@ -96,7 +96,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
           .where()
           .anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
           .filter()
-          .locale((q) => q.allOf(locales, (q, e) => q.codeEqualTo(e.code)))
+          .locale((q) => q.allOf(locales, (q, e) => q.languageEqualTo(e.language).romanizedEqualTo(e.romanized)))
           .optional(orderByVolDesc, (q) => q.sortByMangaId().thenByVolumeDesc())
           .findAll();
 
@@ -158,7 +158,7 @@ class MangaDexCoverService extends MangaDexService<CoverArtAttributes, CoverArt,
 				.where()
 				.mangaIdEqualTo(filters.mangaId!)
 				.filter()
-				.locale((q) => q.anyOf(locales, (q, e) => q.codeEqualTo(e.code)))
+				.locale((q) => q.anyOf(locales, (q, e) => q.languageEqualTo(e.language).romanizedEqualTo(e.romanized)))
 				.optional(orderByVolDesc, (q) => q.sortByVolumeDesc())
 				.offset(filters.offset)
 				.limit(filters.limit)
@@ -334,7 +334,7 @@ class MangaDexCoverQueryFilter extends MangaDexQueryFilter {
     }
 
     if (locales != null) {
-      url.setParameter("locales[]", locales!.map((e) => e.code).toList());
+      url.setParameter("locales[]", locales!.map((e) => e.toJson()).toList());
     }
 
     if (orderByVolumeDesc == true) {

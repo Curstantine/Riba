@@ -1,7 +1,7 @@
 import "package:dash_flags/dash_flags.dart" as flag;
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
-import "package:riba/repositories/mangadex/utils/enum.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/repositories/utils/exception.dart";
 
 part "localization.g.dart";
@@ -68,7 +68,7 @@ class Localizations {
 			final key = i.key;
 
 			try {
-				localizations.add(Locale.fromJsonValue(key));
+				localizations.add(Locale.fromJson(key));
 				values.add(value);
 			} on LanguageNotSupportedException catch (e) {
 				logger.warning("Ignoring $key: ${e.toString()}");
@@ -84,19 +84,17 @@ class Localizations {
 }
 
 @embedded
-class Locale {
+class Locale implements SerializableDataExt {
 	@Enumerated(EnumType.ordinal)
 	Language language;
 	bool romanized;
 
 	Locale({this.language = Language.english, this.romanized = false});
 
-	String get code => romanized ? "${language.isoCode}-ro" : language.isoCode;
-
 	/// Returns a locale based on a string.
 	///
 	/// Throws a [LanguageNotSupportedException] if the language is not supported.
-	factory Locale.fromJsonValue(String locale) {
+	factory Locale.fromJson(String locale) {
 		final roman = locale.endsWith("-ro");
 		final language = Language.fromIsoCode(roman ? locale.substring(0, locale.length - 3) : locale);
 		return Locale(language: language, romanized: roman);
@@ -127,10 +125,34 @@ class Locale {
 	static Locale jaRo = Locale(language: Language.japanese, romanized: true);
 	static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
 	static Locale zhHkRo = Locale(language: Language.traditionalChinese, romanized: true);
+
+	static final values = [
+		en,
+		ja,
+		jaRo,
+		zh,
+		zhRo,
+		zhHk,
+		zhHkRo,
+		ko,
+		fr,
+		ru,
+		vi,
+		ptBr,
+		id,
+	];
+	
+	@override
+	String asHumanReadable() {
+		return romanized ? "Romanized ${language.asHumanReadable()}" : language.asHumanReadable();
+	}
+	
+	@override
+	String toJson() => romanized ? "${language.isoCode}-ro" : language.isoCode;
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
-enum Language implements TwoWayEnumSerde {
+enum Language implements SerializableDataExt {
 	english("en"),
 	japanese("ja"),
 	simpleChinese("zh"),

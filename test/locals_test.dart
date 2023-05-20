@@ -10,15 +10,15 @@ void main() {
 
   group("Locale", () {
     test("fromJsonValue", () {
-      expect(Locale.fromJsonValue("en"), Locale.en);
+      expect(Locale.fromJson("en"), Locale.en);
 
-      expect(Locale.fromJsonValue("ja"), Locale.ja);
-      expect(Locale.fromJsonValue("zh"), Locale.zh);
-      expect(Locale.fromJsonValue("zh-hk"), Locale.zhHk);
+      expect(Locale.fromJson("ja"), Locale.ja);
+      expect(Locale.fromJson("zh"), Locale.zh);
+      expect(Locale.fromJson("zh-hk"), Locale.zhHk);
 
-      expect(Locale.fromJsonValue("ja-ro"), Locale.jaRo);
-      expect(Locale.fromJsonValue("zh-ro"), Locale.zhRo);
-      expect(Locale.fromJsonValue("zh-hk-ro"), Locale.zhHkRo);
+      expect(Locale.fromJson("ja-ro"), Locale.jaRo);
+      expect(Locale.fromJson("zh-ro"), Locale.zhRo);
+      expect(Locale.fromJson("zh-hk-ro"), Locale.zhHkRo);
     });
   });
 

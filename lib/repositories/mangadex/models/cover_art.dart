@@ -50,7 +50,7 @@ extension ToCoverArt on MDResponseData<CoverArtAttributes> {
       fileId: file.first,
       fileType: ImageFileType.fromExtension(file.last),
       description: attributes.description,
-      locale: attributes.locale == null ? null : Locale.fromJsonValue(attributes.locale!),
+      locale: attributes.locale == null ? null : Locale.fromJson(attributes.locale!),
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,
       version: attributes.version,
