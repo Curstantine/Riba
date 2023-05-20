@@ -1,6 +1,7 @@
 import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/routes/settings/widgets/dialogs/general.dart";
 import "package:riba/routes/settings/widgets/dialogs/list_sortable.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
