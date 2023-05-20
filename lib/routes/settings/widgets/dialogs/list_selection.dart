@@ -1,8 +1,7 @@
 import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/utils/serde_ext.dart";
-import "package:riba/utils/constants.dart";
 
-import "list_sortable.dart" show ListItemData;
+import "general.dart";
 
 class ListSelectionDialog<T extends SerializableDataExt> extends StatefulWidget {
 	const ListSelectionDialog({
@@ -33,29 +32,12 @@ class _ListSelectionDialogState<T extends SerializableDataExt> extends State<Lis
 
 	@override
 	Widget build(BuildContext context) {
-		final theme = Theme.of(context);
-		final text = theme.textTheme;
-		final colors = theme.colorScheme;
-
-		return Scaffold(
-			body: CustomScrollView(slivers: [
-				SliverAppBar.medium(
-					title: Text(widget.title, overflow: TextOverflow.visible, maxLines: 1),
-					leading: IconButton(
-						icon: const Icon(Icons.close_rounded),
-						onPressed: () => Navigator.pop(context),
-					),
-					actions: [
-						IconButton(onPressed: widget.onReset, icon: const Icon(Icons.restore_rounded)),
-						IconButton(onPressed: handleConfirm, icon: const Icon(Icons.check_rounded)),
-					],
-				),
-				SliverToBoxAdapter(child: Padding(
-					padding: Edges.horizontalLarge.copyWith(bottom: Edges.medium),
-					child: Text(widget.description, style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
-				)),
-			    buildList(),
-			]),
+		return FullScreenDialog(
+			title: widget.title,
+			description: widget.description,
+			onReset: widget.onReset,
+			onConfirm: handleConfirm,
+			sliver: buildList(),
 		);
 	}
 

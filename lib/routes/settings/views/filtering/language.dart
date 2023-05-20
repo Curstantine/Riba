@@ -66,11 +66,17 @@ class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLang
 				description: "Only titles published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
 				values: Language.values,
+				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
+					final settings = (await settingsFuture)
+						.copyWith
+						.originalLanguages(ContentFilterSettings.defaultSettings.originalLanguages);
+					await ContentFilterSettings.ref.put(settings);
+				}),
 			),
 		);
 
 		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith(originalLanguages: newLanguages);
+			final newSettings = (await settingsFuture).copyWith.originalLanguages(newLanguages);
 			await ContentFilterSettings.ref.put(newSettings);
 		});
 	}
@@ -84,11 +90,17 @@ class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLang
 				description: "Only chapters published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
 				values: Language.values,
+				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
+					final settings = (await settingsFuture)
+						.copyWith
+						.chapterLanguages(ContentFilterSettings.defaultSettings.chapterLanguages);
+					await ContentFilterSettings.ref.put(settings);
+				}),
 			),
 		);
 		
 		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith(chapterLanguages: newLanguages);
+			final newSettings = (await settingsFuture).copyWith.chapterLanguages(newLanguages);
 			await ContentFilterSettings.ref.put(newSettings);
 		});
 	}

@@ -52,12 +52,18 @@ class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilterin
 				description: "Only titles rated with the below ratings will be shown. Leave this empty to allow all.",
 				currentValue: contentRatings,
 				values: ContentRating.values,
+				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
+					final settings = (await settingsFuture)
+						.copyWith
+						.contentRatings(ContentFilterSettings.defaultSettings.contentRatings);
+					await ContentFilterSettings.ref.put(settings);
+				}),
 			),
 		);
 
 		if (newContentRating == null) return;
 		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith(contentRatings: newContentRating);
+			final newSettings = (await settingsFuture).copyWith.contentRatings(newContentRating);
 			await ContentFilterSettings.ref.put(newSettings);
 		});
 	}
