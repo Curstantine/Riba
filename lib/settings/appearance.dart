@@ -1,6 +1,7 @@
 import "package:copy_with_extension/copy_with_extension.dart";
-import "package:flutter/material.dart";
+import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
+import "package:riba/repositories/local/models/localization.dart";
 
 import "settings.dart";
 
@@ -26,16 +27,21 @@ class AppearanceSettings {
 	@Enumerated(EnumType.ordinal)
 	final ThemeMode themeMode;
 
-	AppearanceSettings({
+	@Enumerated(EnumType.ordinal)
+	final List<Locale> preferredLocales;
+
+	const AppearanceSettings({
 		required this.lightSchemeId,
 		required this.darkSchemeId,
 		required this.themeMode,
+		required this.preferredLocales,
 	});
 
 	static final defaultSettings = AppearanceSettings(
 		lightSchemeId: SchemeId.dynamic,
 		darkSchemeId: SchemeId.dynamic,
 		themeMode: ThemeMode.system,
+		preferredLocales: [Locale.en, Locale.jaRo],
 	);
 }
 

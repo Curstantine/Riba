@@ -13,6 +13,8 @@ abstract class _$AppearanceSettingsCWProxy {
 
   AppearanceSettings themeMode(ThemeMode themeMode);
 
+  AppearanceSettings preferredLocales(List<Locale> preferredLocales);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AppearanceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$AppearanceSettingsCWProxy {
     SchemeId? lightSchemeId,
     SchemeId? darkSchemeId,
     ThemeMode? themeMode,
+    List<Locale>? preferredLocales,
   });
 }
 
@@ -45,6 +48,10 @@ class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
       this(themeMode: themeMode);
 
   @override
+  AppearanceSettings preferredLocales(List<Locale> preferredLocales) =>
+      this(preferredLocales: preferredLocales);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `AppearanceSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -56,6 +63,7 @@ class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
     Object? lightSchemeId = const $CopyWithPlaceholder(),
     Object? darkSchemeId = const $CopyWithPlaceholder(),
     Object? themeMode = const $CopyWithPlaceholder(),
+    Object? preferredLocales = const $CopyWithPlaceholder(),
   }) {
     return AppearanceSettings(
       lightSchemeId:
@@ -72,6 +80,11 @@ class _$AppearanceSettingsCWProxyImpl implements _$AppearanceSettingsCWProxy {
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
           : themeMode as ThemeMode,
+      preferredLocales: preferredLocales == const $CopyWithPlaceholder() ||
+              preferredLocales == null
+          ? _value.preferredLocales
+          // ignore: cast_nullable_to_non_nullable
+          : preferredLocales as List<Locale>,
     );
   }
 }
@@ -116,8 +129,14 @@ const AppearanceSettingsSchema = CollectionSchema(
       type: IsarType.byte,
       enumMap: _AppearanceSettingslightSchemeIdEnumValueMap,
     ),
-    r"themeMode": PropertySchema(
+    r"preferredLocales": PropertySchema(
       id: 3,
+      name: r"preferredLocales",
+      type: IsarType.objectList,
+      target: r"Locale",
+    ),
+    r"themeMode": PropertySchema(
+      id: 4,
       name: r"themeMode",
       type: IsarType.byte,
       enumMap: _AppearanceSettingsthemeModeEnumValueMap,
@@ -144,7 +163,7 @@ const AppearanceSettingsSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r"Locale": LocaleSchema},
   getId: _appearanceSettingsGetId,
   getLinks: _appearanceSettingsGetLinks,
   attach: _appearanceSettingsAttach,
@@ -158,6 +177,14 @@ int _appearanceSettingsEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.key.length * 3;
+  bytesCount += 3 + object.preferredLocales.length * 3;
+  {
+    final offsets = allOffsets[Locale]!;
+    for (var i = 0; i < object.preferredLocales.length; i++) {
+      final value = object.preferredLocales[i];
+      bytesCount += LocaleSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   return bytesCount;
 }
 
@@ -170,7 +197,13 @@ void _appearanceSettingsSerialize(
   writer.writeByte(offsets[0], object.darkSchemeId.index);
   writer.writeString(offsets[1], object.key);
   writer.writeByte(offsets[2], object.lightSchemeId.index);
-  writer.writeByte(offsets[3], object.themeMode.index);
+  writer.writeObjectList<Locale>(
+    offsets[3],
+    allOffsets,
+    LocaleSchema.serialize,
+    object.preferredLocales,
+  );
+  writer.writeByte(offsets[4], object.themeMode.index);
 }
 
 AppearanceSettings _appearanceSettingsDeserialize(
@@ -186,8 +219,15 @@ AppearanceSettings _appearanceSettingsDeserialize(
     lightSchemeId: _AppearanceSettingslightSchemeIdValueEnumMap[
             reader.readByteOrNull(offsets[2])] ??
         SchemeId.dynamic,
+    preferredLocales: reader.readObjectList<Locale>(
+          offsets[3],
+          LocaleSchema.deserialize,
+          allOffsets,
+          Locale(),
+        ) ??
+        [],
     themeMode: _AppearanceSettingsthemeModeValueEnumMap[
-            reader.readByteOrNull(offsets[3])] ??
+            reader.readByteOrNull(offsets[4])] ??
         ThemeMode.system,
   );
   return object;
@@ -211,6 +251,14 @@ P _appearanceSettingsDeserializeProp<P>(
               reader.readByteOrNull(offset)] ??
           SchemeId.dynamic) as P;
     case 3:
+      return (reader.readObjectList<Locale>(
+            offset,
+            LocaleSchema.deserialize,
+            allOffsets,
+            Locale(),
+          ) ??
+          []) as P;
+    case 4:
       return (_AppearanceSettingsthemeModeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           ThemeMode.system) as P;
@@ -745,6 +793,95 @@ extension AppearanceSettingsQueryFilter
   }
 
   QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r"preferredLocales",
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
       themeModeEqualTo(ThemeMode value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -802,7 +939,14 @@ extension AppearanceSettingsQueryFilter
 }
 
 extension AppearanceSettingsQueryObject
-    on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {}
+    on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {
+  QueryBuilder<AppearanceSettings, AppearanceSettings, QAfterFilterCondition>
+      preferredLocalesElement(FilterQuery<Locale> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r"preferredLocales");
+    });
+  }
+}
 
 extension AppearanceSettingsQueryLinks
     on QueryBuilder<AppearanceSettings, AppearanceSettings, QFilterCondition> {}
@@ -995,6 +1139,13 @@ extension AppearanceSettingsQueryProperty
       lightSchemeIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"lightSchemeId");
+    });
+  }
+
+  QueryBuilder<AppearanceSettings, List<Locale>, QQueryOperations>
+      preferredLocalesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r"preferredLocales");
     });
   }
 
