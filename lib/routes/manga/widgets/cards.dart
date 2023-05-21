@@ -16,12 +16,13 @@ import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatefulWidget {
-	const MangaCard({super.key, required this.mangaData});
+	const MangaCard({super.key, required this.mangaData, required this.preferredDisplayLocales});
 
+	final List<Locale> preferredDisplayLocales;
 	final MangaData mangaData;
 
-  @override
-  State<MangaCard> createState() => _MangaCardState();
+	@override
+	State<MangaCard> createState() => _MangaCardState();
 }
 
 class _MangaCardState extends State<MangaCard> {
@@ -50,8 +51,7 @@ class _MangaCardState extends State<MangaCard> {
 		return buildCardLayout(
 			theme,
 			onTap: () => navigateToMangaView(context),
-			// TODO: dynamic preferred locale
-			title: manga.titles.getPreferred([Locale.en, Locale.ja]),
+			title: manga.titles.getPreferred(widget.preferredDisplayLocales),
 			child: StreamBuilder<File?>(
 				stream: coverStream,
 				builder: (context, snapshot) {

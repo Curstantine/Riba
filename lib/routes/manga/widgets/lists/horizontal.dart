@@ -1,14 +1,14 @@
-
-import "package:flutter/material.dart";
+import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
+import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
+import "package:riba/settings/appearance.dart";
 import "package:riba/settings/content_filters.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/widgets/material/card.dart";
 
 class MangaHorizontalList extends StatefulWidget {
 	const MangaHorizontalList({
@@ -22,14 +22,21 @@ class MangaHorizontalList extends StatefulWidget {
 	final List<String> mangaIds;
 	final ValueNotifier<double> scrollOffset;
 
-  @override
-  State<MangaHorizontalList> createState() => _MangaHorizontalListState();
+	@override
+	State<MangaHorizontalList> createState() => _MangaHorizontalListState();
 }
 
 class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
 	
-	late final Stream<Map<String, MangaData>> dataFuture = ContentFilterSettings.ref
+	final preferredDisplayLocaleStream = AppearanceSettings.ref
+		.where()
+		.keyEqualTo(AppearanceSettings.isarKey)
+		.preferredLocalesProperty()
+		.watch(fireImmediately: true)
+		.asyncMap((e) => e.first);
+
+	late final Stream<Map<String, MangaData>> dataStream = ContentFilterSettings.ref
 		.where()
 		.keyEqualTo(ContentFilterSettings.isarKey)
 		.watch(fireImmediately: true)
@@ -43,7 +50,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 					originalLanguages: contentFilter.originalLanguages,
 				),
 			);
-		});
+		});	
 
 	@override
 	void initState() {
@@ -71,48 +78,62 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 		]);
 	}
 
-	Widget buildList(TextTheme text, ColorScheme colors) {		
-		return StreamBuilder<Map<String, MangaData>>(
-			stream: dataFuture,
-			builder: (context, snapshot) {
-				if (snapshot.connectionState != ConnectionState.active) {
-					return const Center(child: CircularProgressIndicator());
+	Widget buildList(TextTheme text, ColorScheme colors) {
+		return StreamBuilder<List<Locale>>(
+			stream: preferredDisplayLocaleStream,
+			builder: (context, localeSnapshot) => StreamBuilder<Map<String, MangaData>>(
+				stream: dataStream,
+				builder: (context, dataSnapshot) {
+					if (localeSnapshot.connectionState != ConnectionState.active || dataSnapshot.connectionState != ConnectionState.active) {
+						return const Center(child: CircularProgressIndicator());
+					}
+
+					if ((localeSnapshot.hasError || !localeSnapshot.hasData) || (dataSnapshot.hasError || !dataSnapshot.hasData)) {
+						final error = handleError(dataSnapshot.error ?? "Data was null without errors.");
+
+						return Center(child: Column(children: [
+							Text(error.title, style: text.titleLarge),
+							Text(error.description, style: text.bodyMedium),
+						]));
+					}
+
+					// Since global filters are applied to these requests,
+					// there are chances that data might not contain all the 
+					// mangaIds requested. As such, it is a good idea to completely
+					// ignore the ids given to this widget after the fetch.
+					final preferredDisplayLocales = localeSnapshot.requireData;
+					final data = dataSnapshot.requireData;
+					final ids = data.keys.toList();
+					final missingCount = widget.mangaIds.length - ids.length;
+					final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
+
+					return ListView.separated(
+						cacheExtent: 30,
+						controller: scrollController,
+						itemCount: itemCount,
+						padding: Edges.horizontalMedium,
+						scrollDirection: Axis.horizontal,
+						findChildIndexCallback: (k) {
+							final key = k as ValueKey<String>;
+							if (key.value == "out-of-index") return itemCount - 1;
+							return ids.indexOf(key.value);
+						},
+						separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
+						itemBuilder: (_, i) {
+							if (i >= ids.length) {
+								return buildOutOfIndex(text, colors, missingCount);
+							}
+
+							final id = ids[i];
+							return MangaCard(
+								key: ValueKey(id),
+								mangaData: data[id]!,
+								preferredDisplayLocales: preferredDisplayLocales,
+							);
+						},
+					);
 				}
-
-				if (snapshot.hasError || !snapshot.hasData) {
-					final error = handleError(snapshot.error ?? "Data was null without errors.");
-
-					return Center(child: Column(children: [
-						Text(error.title, style: text.titleLarge),
-						Text(error.description, style: text.bodyMedium),
-					]));
-				}
-
-				// Since global filters are applied to these requests,
-				// there are chances that data might not contain all the 
-				// mangaIds requested. As such, it is a good idea to completely
-				// ignore the ids given to this widget after the fetch.
-				final data = snapshot.requireData;
-				final ids = data.keys.toList();
-				final missingCount = widget.mangaIds.length - ids.length;
-				final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
-
-				return ListView.separated(
-					controller: scrollController,
-					itemCount: itemCount,
-					padding: Edges.horizontalMedium,
-					scrollDirection: Axis.horizontal,
-					separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-					itemBuilder: (_, i) {
-						if (i >= ids.length) {
-							return buildOutOfIndex(text, colors, missingCount);
-						}
-
-						final id = ids[i];
-						return MangaCard(key: ValueKey(id), mangaData: data[id]!);
-					},
-				);
-			}
+			),
 		);
 	}
 
@@ -120,22 +141,21 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 		final message = "$count ${count > 1 ? "titles are" : "title is"} hidden";
 		const description = "Configure your content filters to see them";
 
-		return SizedBox(
+		return Container(
+			key: const ValueKey("out-of-index"),
 			height: 275,
-			width: 175,
-			child: OutlinedCard(child: Padding(
-				padding: Edges.horizontalMedium,
-				child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-					Text(
-						message,
-						textAlign: TextAlign.center,
-						style: text.titleMedium?.copyWith(color: colors.tertiary)),
-					Text(
-						description,
-						style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
-						textAlign: TextAlign.center)
-				]),
-			)),
+			width: 200,
+			padding: Edges.horizontalMedium,
+			child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+				Text(
+					message,
+					textAlign: TextAlign.center,
+					style: text.titleMedium?.copyWith(color: colors.tertiary)),
+				Text(
+					description,
+					style: text.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+					textAlign: TextAlign.center)
+			]),
 		);
 	}
 }
