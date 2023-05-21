@@ -61,19 +61,18 @@ class _ListSortableDialogState<T extends SerializableDataExt> extends State<List
 				T item;
 
 				if (i > selectionMap.length) {
-					item = idleMap.elementAt(actualIndex - (selectionMap.length - 1));
+					item = idleMap.elementAt(actualIndex - selectionMap.length);
 				} else {
 					item = selectionMap.elementAt(i);
 				}
 
-				// ignore: unnecessary_cast
-				final itemData = widget.itemBuilder(item as T);
+				final itemData = widget.itemBuilder(item);
 				
 				return Material(
 					key: ValueKey(item),
 					child: ListTile(
 						isThreeLine: itemData.isThreeLine,
-						title: Text(itemData.title),
+						title: Text("$i.${itemData.title}"),
 						subtitle: itemData.subtitle == null 
 							? null
 							: Text(itemData.subtitle!, style: text.bodySmall?.withColorOpacity(0.75)),
@@ -91,35 +90,34 @@ class _ListSortableDialogState<T extends SerializableDataExt> extends State<List
 		// Accounts for the divider, so anything larger than selectionMap.length
 		// is in the idleMap. Subtract by selectionMap.length to get the index relative to
 		// the idleMap.
-		final actualIndex = oldIndex > selectionMap.length ? oldIndex - 1 : oldIndex;
-		final selectionMapMaxIndex = selectionMap.length - 1;
+		final oldActualIndex = oldIndex > selectionMap.length ? oldIndex - 1 : oldIndex;
+		final newActualIndex = newIndex > selectionMap.length ? newIndex - 1 : newIndex;
 
-		final wasInSelection = oldIndex <= selectionMapMaxIndex;
-		final wasInIdle = oldIndex > selectionMapMaxIndex;
-
+		final wasInSelection = oldIndex < selectionMap.length;
+		final wasInIdle = oldIndex >= selectionMap.length;
 		// Since these two depend on a list that could be grown by +1, 
 		// we will be using length instead of max index.
 		final isInSelection = newIndex <= selectionMap.length;
 		final isInIdle = newIndex > selectionMap.length;
 
-		switch ((wasInSelection, wasInIdle, isInSelection, isInIdle)) {
-			case (true, false, true, false):
-				selectionMap.insert(newIndex, selectionMap.removeAt(oldIndex));
-				break;
-			case (true, false, false, true):
-				idleMap.insert(newIndex - selectionMap.length, selectionMap.removeAt(oldIndex));
-				break;
-			case (false, true, true, false):
-				selectionMap.insert(newIndex, idleMap.removeAt(actualIndex - selectionMapMaxIndex));
-				break;
-			case (false, true, false, true):
-				idleMap.insert(newIndex - selectionMap.length, idleMap.removeAt(actualIndex - selectionMapMaxIndex));
-				break;
-			default:
-				throw Exception("Invalid reorder combination");
-		}
-
-		setState(() => {});
+		setState(() {
+			switch ((wasInSelection, wasInIdle, isInSelection, isInIdle)) {
+				case (true, false, true, false):
+					selectionMap.insert(newActualIndex, selectionMap.removeAt(oldIndex));
+					break;
+				case (true, false, false, true):
+					idleMap.insert(newActualIndex - selectionMap.length, selectionMap.removeAt(oldIndex));
+					break;
+				case (false, true, true, false):
+					selectionMap.insert(newActualIndex, idleMap.removeAt(oldActualIndex - selectionMap.length));
+					break;
+				case (false, true, false, true):
+					idleMap.insert(newActualIndex - selectionMap.length, idleMap.removeAt(oldActualIndex - selectionMap.length));
+					break;
+				default:
+					throw Exception("Invalid reorder combination");
+			}
+		});
 	}
 }
 
