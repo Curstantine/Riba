@@ -67,7 +67,7 @@ class _ListSortableDialogState<T extends SerializableDataExt> extends State<List
 					key: ValueKey(item),
 					child: ListTile(
 						isThreeLine: itemData.isThreeLine,
-						title: Text("$i.${itemData.title}"),
+						title: Text(itemData.title),
 						subtitle: itemData.subtitle == null 
 							? null
 							: Text(itemData.subtitle!, style: text.bodySmall?.withColorOpacity(0.75)),
