@@ -127,7 +127,7 @@ class _MangaCardState extends State<MangaCard> {
 
 	void navigateToMangaView(BuildContext context) {
 		Navigator.of(context).push(
-			sharedAxis(() => MangaView(id: widget.mangaData.manga.id), SharedAxisTransitionType.vertical),
+			sharedAxis((_) => MangaView(id: widget.mangaData.manga.id), SharedAxisTransitionType.vertical),
 		);
 	}
 }

@@ -46,7 +46,7 @@ class SettingsView extends StatelessWidget {
 
 	void navigateTo(BuildContext context, Widget page) {
 		Navigator.of(context).push(
-			sharedAxis(() => page, SharedAxisTransitionType.horizontal),
+			sharedAxis((_) => page, SharedAxisTransitionType.horizontal),
 		);
 	}
 }
