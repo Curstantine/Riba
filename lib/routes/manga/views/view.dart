@@ -496,7 +496,13 @@ class DetailsHeader extends StatelessWidget {
 							scrollDirection: Axis.horizontal,
 							children: [
 								buildFollowButton(),
-								const SizedBox(width: 8),
+								const SizedBox(width: Edges.small),
+								// ValueListenableBuilder(
+								// 	valueListenable: isFollowed,
+								// 	builder: (context, value, _) => value 
+								// 		? buildTrackerButton()
+								// 		: const SizedBox.shrink(),
+								// ),
 								buildCustomListButton(),
 							],
 						),
@@ -562,37 +568,33 @@ class DetailsHeader extends StatelessWidget {
 	}
 
 	Widget buildFollowButton() {
-		return AnimatedSize(
-			duration: Durations.emphasized,
-			curve: Curves.easeInOut,
-			alignment: Alignment.centerLeft,
-			child: ValueListenableBuilder(
-				valueListenable: isFollowed,
-				builder: (context, value, _) {
-					return FilledButton.icon(
-						onPressed: handleFollowTap,
-						icon: value ? const Icon(Icons.check_rounded) : const Icon(Icons.add_rounded),
-						label: value ?  const Text("Reading") : const Text("Add to Library"),
-					);
-				},
+		return ValueListenableBuilder(
+			valueListenable: isFollowed,
+			builder: (context, value, _) => FilledButton.icon(
+				onPressed: handleFollowTap,
+				icon: value ? const Icon(Icons.check_rounded) : const Icon(Icons.add_rounded),
+				label: AnimatedSize(
+					duration: Durations.standard,
+					curve: Easing.standard,
+					alignment: Alignment.centerLeft,
+					child: value ?  const Text("Reading") : const Text("Add to Library"),
+				),
 			),
 		);
 	}
 
 	Widget buildTrackerButton() {
-		return AnimatedSize(
-			duration: Durations.emphasized,
-			curve: Curves.easeInOut,
-			alignment: Alignment.centerLeft,
-			child: ValueListenableBuilder(
-				valueListenable: hasTrackers,
-				builder: (context, value, _) {
-					return OutlinedButton.icon(
-						onPressed: handleTrackerPress,
-						icon: value ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
-						label: value ? const Text("Tracking") : const Text("Track"),
-					);
-				},
+		return ValueListenableBuilder(
+			valueListenable: hasTrackers,
+			builder: (context, value, _) => OutlinedButton.icon(
+				onPressed: handleTrackerPress,
+				icon: value ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
+				label: AnimatedSize(
+					duration: Durations.standard,
+					curve: Easing.standard,
+					alignment: Alignment.centerLeft,
+					child: value ?  const Text("Tracking") : const Text("Track"),
+				),
 			),
 		);
 	}
@@ -627,9 +629,13 @@ class DetailsHeader extends StatelessWidget {
 		);
   }
 
-	void handleTrackerPress() {}
+	void handleTrackerPress() {
+		hasTrackers.value = !hasTrackers.value;
+	}
 
-	void handleFollowTap() {}
+	void handleFollowTap() {
+		isFollowed.value = !isFollowed.value;
+	}
 }
 
 class DescriptionSection extends StatelessWidget {
