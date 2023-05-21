@@ -19,6 +19,7 @@ import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
+import "package:riba/settings/appearance.dart";
 import "package:riba/settings/content_filters.dart";
 import "package:riba/settings/manga_filter.dart";
 import "package:riba/settings/persistence.dart";
@@ -42,12 +43,16 @@ class _MangaViewState extends State<MangaView> {
 	final logger = Logger("MangaView");
 	final scrollController = ScrollController();
 
-	// TODO: Rewove after implementing localization.
-	final preferredLocales = [Locale.en, Locale.jaRo, Locale.ja];
-
 	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);
 	final areFiltersApplied = ValueNotifier(false);
+
+	final Future<List<Locale>> preferredDisplayLocaleFuture = AppearanceSettings.ref
+		.where()
+		.keyEqualTo(AppearanceSettings.isarKey)
+		.preferredLocalesProperty()
+		.findFirst()
+		.then((e) => e!);
 
 	late final preferredCoverIdStream = MangaDex.instance.manga.database.where()
 		.isarIdEqualTo(fastHash(widget.id))
@@ -207,51 +212,53 @@ class _MangaViewState extends State<MangaView> {
 
 		return Scaffold(
 			backgroundColor: theme.colorScheme.background,
-			body: FutureBuilder(
-				// Lol. Don't setState for anything other than fetchMangaData.
-				// Shit will break, badly.
-				future: mangaFuture,
-				builder: (context, snapshot) {
-					if (snapshot.connectionState != ConnectionState.done) {
-						return const Center(child: CircularProgressIndicator());
-					}
+			body: FutureBuilder<List<Locale>>(
+				future: preferredDisplayLocaleFuture,
+				builder: (context, localeSnapshot) => FutureBuilder(
+					future: mangaFuture,
+					builder: (context, mangaSnapshot) {
+						if (localeSnapshot.connectionState != ConnectionState.done || mangaSnapshot.connectionState != ConnectionState.done) {
+							return const Center(child: CircularProgressIndicator());
+						}
 
-					if (snapshot.hasError || !snapshot.hasData) {
-						final error = handleError(snapshot.error ?? "Data was null without errors.");
+						if (mangaSnapshot.hasError || !mangaSnapshot.hasData) {
+							final error = handleError(mangaSnapshot.error ?? "Data was null without errors.");
 
-						return Center(
-							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-								Text(error.title, style: theme.textTheme.titleLarge),
-								Text(error.description, style: theme.textTheme.bodyMedium),
-								const SizedBox(height: Edges.large),
-								ElevatedButton(
-									onPressed: () => setState(() => fetchMangaData(reload: true)),
-									child: const Text("Retry"),
+							return Center(
+								child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+									Text(error.title, style: theme.textTheme.titleLarge),
+									Text(error.description, style: theme.textTheme.bodyMedium),
+									const SizedBox(height: Edges.large),
+									ElevatedButton(
+										onPressed: () => setState(() => fetchMangaData(reload: true)),
+										child: const Text("Retry"),
+									),
+								]),
+							);
+						}
+
+						final preferredDisplayLocales = localeSnapshot.requireData;
+						final mangaData = mangaSnapshot.requireData;
+
+						return RefreshIndicator(
+							onRefresh: refresh,
+							child: CustomScrollView(controller: scrollController, slivers: [
+								buildAppBar(text, colors, media, preferredDisplayLocales, mangaData),
+								SliverToBoxAdapter(child: DescriptionSection(
+									description: mangaData.manga.description,
+									isExpanded: isDescriptionExpanded,
+									preferredLocales: preferredDisplayLocales,
+								)),
+								SliverToBoxAdapter(child: buildReadButton()),
+								ChapterList(
+									mangaId: widget.id,
+									chapterStream: chapterController.stream,
+									onFilterApplied: onFiltersApplied
 								),
 							]),
 						);
-					}
-
-					final mangaData = snapshot.requireData;
-
-					return RefreshIndicator(
-						onRefresh: refresh,
-						child: CustomScrollView(controller: scrollController, slivers: [
-							buildAppBar(text, colors, media, mangaData),
-							SliverToBoxAdapter(child: DescriptionSection(
-								description: mangaData.manga.description,
-								isExpanded: isDescriptionExpanded,
-								preferredLocales: preferredLocales,
-							)),
-							SliverToBoxAdapter(child: buildReadButton()),
-							ChapterList(
-								mangaId: widget.id,
-								chapterStream: chapterController.stream,
-								onFilterApplied: onFiltersApplied
-							),
-						]),
-					);
-				},
+					},
+				),
 			),
 		);
 	}
@@ -260,6 +267,7 @@ class _MangaViewState extends State<MangaView> {
 		TextTheme text,
 		ColorScheme colors,
 		MediaQueryData media,
+		List<Locale> preferredDisplayLocales,
 		MangaData mangaData,
 	) {
 		return SliverAppBar(
@@ -268,7 +276,7 @@ class _MangaViewState extends State<MangaView> {
 			title: ValueListenableBuilder(
 				valueListenable: showAppBar,
 				child: Text(
-					mangaData.manga.titles.getPreferred(preferredLocales),
+					mangaData.manga.titles.getPreferred(preferredDisplayLocales),
 					style: text.titleMedium,
 				),
 				builder: (context, value, child) => AnimatedOpacity(
@@ -285,7 +293,7 @@ class _MangaViewState extends State<MangaView> {
 					isFollowed: isFollowed,
 					hasTrackers: hasTrackers,
 					hasCustomLists: hasCustomLists,
-					preferredLocales: preferredLocales,
+					preferredLocales: preferredDisplayLocales,
 					mangaData: mangaData,
 					coverStream: coverController.stream,
 					statisticsFuture: statisticsFuture,
