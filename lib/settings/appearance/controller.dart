@@ -76,4 +76,11 @@ class AppearanceSettingsController extends CollectionSettingsController<Store> {
 
 		return isar.writeTxn(() => isar.appearanceSettings.put(store));
 	}
+
+	Future<void> resetPreferredDisplayLocales() {
+		store = store.copyWith.preferredDisplayLocales(AppearanceSettingsStore.defaultSettings.preferredDisplayLocales);
+		_preferredDisplayLocales.value = store.preferredDisplayLocales;
+
+		return isar.writeTxn(() => isar.appearanceSettings.put(store));
+	}
 }

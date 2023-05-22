@@ -55,7 +55,7 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 					locale.language.asHumanReadable(),
 					subtitle: locale.romanized ? "Romanized" : "Native",
 				),
-				onReset: controller.reset,
+				onReset: controller.resetPreferredDisplayLocales,
 			),
 		);
 
