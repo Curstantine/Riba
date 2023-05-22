@@ -15,9 +15,8 @@ import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 
 class MangaCard extends StatefulWidget {
-	const MangaCard({super.key, required this.mangaData, required this.preferredDisplayLocales});
+	const MangaCard({super.key, required this.mangaData});
 
-	final List<Locale> preferredDisplayLocales;
 	final MangaData mangaData;
 
 	@override
@@ -28,7 +27,7 @@ class _MangaCardState extends State<MangaCard> {
 	Manga get manga => widget.mangaData.manga;
 	
 	late final coverStream = Settings.instance.coverPersistence
-		.watch()
+		.watch(fireImmediately: true)
 		.asyncMap((e) async {
 			if (widget.mangaData.cover == null) return null;
 
@@ -48,7 +47,6 @@ class _MangaCardState extends State<MangaCard> {
 		return buildCardLayout(
 			theme,
 			onTap: () => navigateToMangaView(context),
-			title: manga.titles.getPreferred(widget.preferredDisplayLocales),
 			child: StreamBuilder<File?>(
 				stream: coverStream,
 				builder: (context, snapshot) {
@@ -57,7 +55,7 @@ class _MangaCardState extends State<MangaCard> {
 					}
 
 					if (snapshot.hasError) {
-						return buildError(theme, error: snapshot.error);
+						return buildError(theme, source: snapshot.error);
 					}
 
 					if (!snapshot.hasData) {
@@ -76,7 +74,7 @@ class _MangaCardState extends State<MangaCard> {
 		);
 	}
 
-	Widget buildCardLayout(ThemeData theme, {void Function()? onTap, Widget? child, String? title}) {
+	Widget buildCardLayout(ThemeData theme, {void Function()? onTap, Widget? child}) {
 		return Container(
 			width: 150,
 			constraints: const BoxConstraints(maxHeight: 275),
@@ -92,31 +90,31 @@ class _MangaCardState extends State<MangaCard> {
 							margin: Edges.verticalExtraSmall,
 							child: InkWell(onTap: onTap, child: child ?? const Placeholder())),
 					),
-					SizedBox(
-						height: 50,
-						child: title == null
-							? null
-							: Text(title,
-								maxLines: 2,
-								softWrap: true,
-								overflow: TextOverflow.ellipsis,
-								style: theme.textTheme.bodySmall),
-					),
+					SizedBox(height: 50, child: ValueListenableBuilder<List<Locale>>(
+						valueListenable:  Settings.instance.appearance.preferredDisplayLocales,
+						builder: (context, locales, _) => Text(
+							manga.titles.getPreferred(locales),
+							maxLines: 2,
+							softWrap: true,
+							overflow: TextOverflow.ellipsis,
+							style: theme.textTheme.bodySmall,
+						),
+					)),
 				],
 			),
 		);
 	}
 
-	Widget buildError(ThemeData theme, {Object? error}) {
-		final errorEx = handleError(error ?? "Data was null without errors.");
+	Widget buildError(ThemeData theme, {Object? source}) {
+		final error = handleError(source ?? "Data was null without errors.");
 
 		return Center(
 			child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-				Text(errorEx.title,
+				Text(error.title,
 					style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error, height: 1),
 					textAlign: TextAlign.center),
 				const SizedBox(height: Edges.small),
-				Text(errorEx.description,
+				Text(error.description,
 					style: theme.textTheme.bodySmall?.copyWith(height: 1), textAlign: TextAlign.center),
 			]),
 		);
@@ -124,7 +122,7 @@ class _MangaCardState extends State<MangaCard> {
 
 	void navigateToMangaView(BuildContext context) {
 		Navigator.of(context).push(
-			sharedAxis((_) => MangaView(id: widget.mangaData.manga.id), SharedAxisTransitionType.vertical),
+			sharedAxis((_) => MangaView(id: manga.id), SharedAxisTransitionType.vertical),
 		);
 	}
 }

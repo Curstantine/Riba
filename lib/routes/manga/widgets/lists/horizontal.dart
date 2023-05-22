@@ -27,7 +27,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
 
 	late final Stream<Map<String, MangaData>> dataStream = Settings.instance.contentFilter
-		.watch()
+		.watch(fireImmediately: true)
 		.asyncMap((e) => MangaDex.instance.manga.getMany(
 			overrides: MangaDexMangaQueryFilter(
 				ids: widget.mangaIds,
@@ -63,9 +63,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	}
 
 	Widget buildList(TextTheme text, ColorScheme colors) {
-		return ValueListenableBuilder(
-			valueListenable: Settings.instance.appearance.preferredDisplayLocales,
-			builder: (context, preferredDisplayLocales, _) => StreamBuilder<Map<String, MangaData>>(
+		return StreamBuilder<Map<String, MangaData>>(
 				stream: dataStream,
 				builder: (context, dataSnapshot) {
 					if (dataSnapshot.connectionState != ConnectionState.active) {
@@ -108,15 +106,10 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 							}
 
 							final id = ids[i];
-							return MangaCard(
-								key: ValueKey(id),
-								mangaData: data[id]!,
-								preferredDisplayLocales: preferredDisplayLocales,
-							);
+							return MangaCard(key: ValueKey(id), mangaData: data[id]!);
 						},
 					);
 				}
-			),
 		);
 	}
 
