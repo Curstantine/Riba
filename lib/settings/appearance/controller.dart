@@ -50,7 +50,9 @@ class AppearanceSettingsController extends CollectionSettingsController<Store> {
 
 	@override
 	Stream<Store> watch({bool fireImmediately = false}) {
-		return isar.appearanceSettings.watchObject(1, fireImmediately: fireImmediately) as Stream<Store>;
+		return isar.appearanceSettings
+			.watchObject(1, fireImmediately: fireImmediately)
+			.map((e) => e!);
 	}
 
 	Future<void> setSchemeId(SchemeId id, Brightness brightness) {

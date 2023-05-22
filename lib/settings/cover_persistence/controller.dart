@@ -44,7 +44,9 @@ class CoverPersistenceSettingsController extends CollectionSettingsController<St
 
 	@override
 	Stream<Store> watch({bool fireImmediately = false}) {
-		return isar.coverPersistenceSettings.watchObject(1, fireImmediately: fireImmediately) as Stream<Store>;
+		return isar.coverPersistenceSettings
+			.watchObject(1, fireImmediately: fireImmediately)
+			.map((e) => e!);
 	}
 
 	Future<void> setEnabled(bool enabled) async {

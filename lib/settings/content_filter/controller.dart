@@ -45,7 +45,9 @@ class ContentFilterSettingsController extends CollectionSettingsController<Store
 
 	@override
 	Stream<Store> watch({bool fireImmediately = false}) {
-		return isar.contentFilterSettings.watchObject(1, fireImmediately: fireImmediately) as Stream<Store>;
+		return isar.contentFilterSettings
+			.watchObject(1, fireImmediately: fireImmediately)
+			.map((e) => e!);
 	}
 
 	Future<void> setOriginalLanguages(List<Language> originalLanguages) async {
