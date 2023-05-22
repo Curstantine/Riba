@@ -52,8 +52,8 @@ class Localizations {
 	/// If the preferred locale is not found, the first localization is returned.
 	String getPreferred(List<Locale> locales) {
 		for (final locale in locales) {
-		final loc = get(locale);
-		if (loc != null) return loc;
+			final loc = get(locale);
+			if (loc != null) return loc;
 		}
 
 		return values.first;
