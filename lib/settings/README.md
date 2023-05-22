@@ -1,24 +1,39 @@
-## Settings
+# Settings
 
-This directory should only contain models and convenience methods used to persist
-the settings state.
+A setting must contain two classes that are bound together:
 
-Models here are categorized into 2 types:
+-   [SettingsController](#settingscontroller)
+-   [SettingsStore](#settingsstore)
+
+## SettingsController
+
+The controller bound to a [SettingsStore](#settingsstore) to load, mutate and persist the settings state.
+
+### But why?
+
+-   Allows the consumer to easily mutate a single property of the settings using the convenience methods.
+-   Ability to hoist a property to a `ValueNotifier` to listen to changes done to a single property.
+    -   [Isar does not support this yet](https://github.com/isar/isar/issues/1237).
+
+## SettingsStore
+
+The collection model and extensions used by isar and the bound controller for persistance.
+
+Models are categorized into 2 types:
 
 1. [Unique per collection](###Unique-Per-Collection)
 2. [Unique per entity](###Unique-Per-Entity)
 
 ### Unique Per Collection
 
--   Id is auto-incremented and the model itself is replaced by an unchangeable `key`.
--   'getByKey` should be used to query from Isar.
--   `static const isarKey` should be populated with same `key` to expose to the rest of the app.
+-   This type is exists only once per collection.
+-   Id is always `1`.
 
 As an example, `CoverPersistence` is unique per collection:
 
 ```
 CoverPersistence ->
-    id = auto
+    id = 1
     key = "coverCacheSettings" (unchangeable, unique)
 ```
 

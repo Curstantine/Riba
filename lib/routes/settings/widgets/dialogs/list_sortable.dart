@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/utils/theme.dart";
@@ -20,7 +22,7 @@ class ListSortableDialog<T extends SerializableDataExt> extends StatefulWidget {
 	final List<T> values;
 	final List<T> currentValue;
 	final ListItemData Function(T) itemBuilder;
-	final void Function()? onReset;
+	final FutureOr<void> Function()? onReset;
 
 	@override
 	State<ListSortableDialog<T>> createState() => _ListSortableDialogState<T>();

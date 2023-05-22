@@ -3,20 +3,12 @@ import "package:flutter/material.dart" hide Locale;
 import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 
-import "settings.dart";
-
-part "appearance.g.dart";
+part "store.g.dart";
 
 @CopyWith()
 @Collection(accessor: "appearanceSettings")
-class AppearanceSettings {
-	static final ref = Settings.instance.themeSettings;
-	static const isarKey = "themeSettings";
-
-	final Id id = Isar.autoIncrement;
-
-	@Index(unique: true, replace: true)
-	final String key = isarKey;
+class AppearanceSettingsStore {
+	final Id id = 1;
 
 	@Enumerated(EnumType.ordinal)
 	final SchemeId lightSchemeId;
@@ -28,20 +20,20 @@ class AppearanceSettings {
 	final ThemeMode themeMode;
 
 	@Enumerated(EnumType.ordinal)
-	final List<Locale> preferredLocales;
+	final List<Locale> preferredDisplayLocales;
 
-	const AppearanceSettings({
+	const AppearanceSettingsStore({
 		required this.lightSchemeId,
 		required this.darkSchemeId,
 		required this.themeMode,
-		required this.preferredLocales,
+		required this.preferredDisplayLocales,
 	});
 
-	static final defaultSettings = AppearanceSettings(
+	static final defaultSettings = AppearanceSettingsStore(
 		lightSchemeId: SchemeId.dynamic,
 		darkSchemeId: SchemeId.dynamic,
 		themeMode: ThemeMode.system,
-		preferredLocales: [Locale.en, Locale.jaRo],
+		preferredDisplayLocales: [Locale.en, Locale.jaRo],
 	);
 }
 

@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
-import "package:isar/isar.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/routes/settings/widgets/dialogs/list_selection.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
-import "package:riba/settings/content_filters.dart";
+import "package:riba/settings/content_filter/controller.dart";
+import "package:riba/settings/settings.dart";
 
 class SettingsFilteringContentRatingSegment extends StatefulWidget {
 	const SettingsFilteringContentRatingSegment({super.key});
@@ -14,16 +14,7 @@ class SettingsFilteringContentRatingSegment extends StatefulWidget {
 }
 
 class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilteringContentRatingSegment> {
-	final contentRatingsStream = ContentFilterSettings.ref
-		.where()
-		.keyEqualTo(ContentFilterSettings.isarKey)
-		.contentRatingsProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	Future<ContentFilterSettings> get settingsFuture => ContentFilterSettings.ref
-		.getByKey(ContentFilterSettings.isarKey)
-		.then((e) => e as ContentFilterSettings);
+	ContentFilterSettingsController get controller => Settings.instance.contentFilter;
 
 	@override
 	Widget build(BuildContext context) {
@@ -32,10 +23,10 @@ class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilterin
 			crossAxisAlignment: CrossAxisAlignment.start,
 			children: [
 				const SegmentTitle(title: "Content Rating"),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.contentRatings,
 					isThreeLine: false,
 					title: "Allowed content ratings",
-					stream: contentRatingsStream,
 					subtitle: "Controls which type of explicit content is allowed.",
 					onTap: showContentRatingDialog,
 				)
@@ -52,19 +43,11 @@ class _SettingsFilteringContentRatingSegmentState extends State<SettingsFilterin
 				description: "Only titles rated with the below ratings will be shown. Leave this empty to allow all.",
 				currentValue: contentRatings,
 				values: ContentRating.values,
-				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
-					final settings = (await settingsFuture)
-						.copyWith
-						.contentRatings(ContentFilterSettings.defaultSettings.contentRatings);
-					await ContentFilterSettings.ref.put(settings);
-				}),
+				onReset: controller.resetContentRatings,
 			),
 		);
 
 		if (newContentRating == null) return;
-		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith.contentRatings(newContentRating);
-			await ContentFilterSettings.ref.put(newSettings);
-		});
+		await controller.setContentRatings(newContentRating);
 	}
 }

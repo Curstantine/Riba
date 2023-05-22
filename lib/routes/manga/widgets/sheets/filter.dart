@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
-import "package:riba/settings/manga_filter.dart";
+import "package:riba/settings/manga_filter/store.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 
@@ -16,7 +16,7 @@ class ChapterFilterSheet extends StatefulWidget {
 
 	final EdgeInsets padding;
 	final ChapterFilterSheetData data;
-	final void Function(MangaFilterSettings) onApply;
+	final void Function(MangaFilterSettingsStore) onApply;
 
 	@override
 	State<ChapterFilterSheet> createState() => _ChapterFilterSheetState();
@@ -114,7 +114,7 @@ class ChapterFilterSheetData {
 	/// Group IDs belonging to the chapter list.
 	/// Regardless of whether they are excluded or not.
 	final List<String> groupIds;
-	final MangaFilterSettings filterSettings;
+	final MangaFilterSettingsStore filterSettings;
 
 	const ChapterFilterSheetData({
 		required this.filterSettings,

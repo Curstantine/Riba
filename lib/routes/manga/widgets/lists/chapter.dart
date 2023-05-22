@@ -4,10 +4,10 @@ import "package:intl/intl.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/routes/manga/widgets/sheets/filter.dart";
-import "package:riba/settings/manga_filter.dart";
+import "package:riba/settings/manga_filter/store.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/utils/hash.dart";
 import "package:riba/utils/theme.dart";
 
 class ChapterList extends StatelessWidget {
@@ -188,9 +188,7 @@ class ChapterInfoBar extends StatelessWidget {
 		List<ChapterData>? chapters,
 	) {
 		return StreamBuilder(
-			stream: MangaFilterSettings.ref
-				.watchObject(fastHash(mangaId), fireImmediately: true)
-				.asyncMap((e) => e.orDefault(mangaId)),
+			stream: Settings.instance.mangaFilter.watch(mangaId, fireImmediately: true),
 			builder: (context, snapshot) {
 				if (snapshot.connectionState != ConnectionState.active || chapters == null) {
 					return const SizedBox.square(
@@ -214,7 +212,7 @@ class ChapterInfoBar extends StatelessWidget {
 	void showFilterSheet(
 		BuildContext context,
 		List<ChapterData> chapters,
-		MangaFilterSettings filterSettings,
+		MangaFilterSettingsStore filterSettings,
 	) {
 		final media = MediaQuery.of(context);
 		final groupIds = chapters
@@ -236,8 +234,7 @@ class ChapterInfoBar extends StatelessWidget {
 					filterSettings: filterSettings,
 				),
 				onApply: (newFilter) async {
-					await MangaFilterSettings.ref.isar
-						.writeTxn(() => MangaFilterSettings.ref.put(newFilter));
+					await Settings.instance.mangaFilter.update(newFilter);
 					
 					if (context.mounted) {
 						Navigator.pop(context);

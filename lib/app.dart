@@ -2,6 +2,8 @@ import "package:flutter/material.dart" hide Router;
 import "package:riba/utils/router.dart";
 import "package:riba/utils/theme.dart";
 
+import "settings/settings.dart";
+
 class App extends StatefulWidget {
 	const App({super.key});
 
@@ -29,7 +31,7 @@ class _AppState extends State<App> {
 		return MaterialApp(
 			theme: ThemeManager.instance.lightTheme,
 			darkTheme: ThemeManager.instance.darkTheme,
-			themeMode: ThemeManager.instance.themeMode.value,
+			themeMode: Settings.instance.appearance.themeMode.value,
 			debugShowCheckedModeBanner: false,
 			initialRoute: Router.home,
 			onGenerateRoute: Router.onGenerateRoute,

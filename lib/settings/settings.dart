@@ -1,49 +1,53 @@
 import "package:isar/isar.dart";
 
-import "appearance.dart";
-import "content_filters.dart";
-import "manga_filter.dart";
-import "persistence.dart";
-
-typedef I<T> = IsarCollection<T>;
+import "appearance/controller.dart";
+import "content_filter/controller.dart";
+import "cover_persistence/controller.dart";
+import "manga_filter/controller.dart";
 
 class Settings {
 	static late final Settings instance;
-	Settings._internal({required Isar database}) : _database = database;
+	Settings._internal({required this.isar});
 
-	final Isar _database;
+	final Isar isar;
 
-	I<ContentFilterSettings> get contentFilterSettings => _database.contentFilterSettings;
-	I<CoverPersistenceSettings> get coverPersistenceSettings => _database.coverPersistenceSettings;
-	I<ChapterPersistenceSettings> get chapterPersistenceSettings => _database.chapterPersistenceSettings;
-	I<MangaFilterSettings> get mangaFilterSettings => _database.mangaFilterSettings;
-	I<AppearanceSettings> get themeSettings => _database.appearanceSettings;
+	late final appearance = AppearanceSettingsController(isar: isar);
+	late final contentFilter = ContentFilterSettingsController(isar: isar);
+	late final coverPersistence = CoverPersistenceSettingsController(isar: isar);
+	late final mangaFilter = MangaFilterSettingsController(isar: isar);
 
-	static Future<void> init(Isar database) async {
-		final locals = await Future.wait([
-			database.contentFilterSettings.getByKey(ContentFilterSettings.isarKey),
-			database.coverPersistenceSettings.getByKey(CoverPersistenceSettings.isarKey),
-			database.chapterPersistenceSettings.getByKey(ChapterPersistenceSettings.isarKey),
-			database.appearanceSettings.getByKey(AppearanceSettings.isarKey),  
+	static Future<void> init(Isar isar) async {
+		instance = Settings._internal(isar: isar);
+		
+		await Future.wait([
+			instance.appearance.load(),
+			instance.contentFilter.load(),
+			instance.coverPersistence.load(),
 		]);
-
-		final localContentFilterSettings = locals[0];
-		final localCoverPersistenceSettings = locals[1];
-		final localChapterPersistenceSettings = locals[2];
-		final localAppearanceSettings = locals[3];
-
-		await database.writeTxn(() => Future.wait([
-			if (localContentFilterSettings == null)
-				database.contentFilterSettings.put(ContentFilterSettings.defaultSettings),
-			if (localCoverPersistenceSettings == null)
-				database.coverPersistenceSettings.put(CoverPersistenceSettings.defaultSettings),
-			if (localChapterPersistenceSettings == null)
-				database.chapterPersistenceSettings.put(ChapterPersistenceSettings.defaultSettings),
-			if (localAppearanceSettings == null)
-				database.appearanceSettings.put(AppearanceSettings.defaultSettings),
-		]));
-
-		/// Run migrations and default initializations here.
-		instance = Settings._internal(database: database);
 	}
+}
+
+/// Base controller to extend for settings that are unique per collection.
+abstract class CollectionSettingsController<T> {
+	final Isar isar;
+	/// The store that contains all the settings.
+	/// This variable should be updated along with the other state variables derived from it.
+	late T store;
+
+	CollectionSettingsController({required this.isar});
+
+	Future<void> load();
+	Future<void> reset();
+	Stream<T> watch({bool fireImmediately = false});
+}
+
+/// Base controller to extend for settings that are unique per entity.
+abstract class EntitySettingsController<T> {
+	final Isar isar;
+	EntitySettingsController({required this.isar});
+	
+	Future<T> get(String id);
+	Future<void> reset(String id);
+	Stream<T> watch(String id, {bool fireImmediately = false});
+	Future<void> update(T settings, {bool silent = false});
 }

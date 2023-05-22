@@ -2,13 +2,12 @@ import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
-import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/views/view.dart";
-import "package:riba/settings/persistence.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
@@ -28,18 +27,16 @@ class MangaCard extends StatefulWidget {
 class _MangaCardState extends State<MangaCard> {
 	Manga get manga => widget.mangaData.manga;
 	
-	late final coverStream = CoverPersistenceSettings.ref
-		.where()
-		.keyEqualTo(CoverPersistenceSettings.isarKey)
-		.watch(fireImmediately: true)  
+	late final coverStream = Settings.instance.coverPersistence
+		.watch()
 		.asyncMap((e) async {
 			if (widget.mangaData.cover == null) return null;
 
 			return await MangaDex.instance.cover.getImage(
 				widget.mangaData.manga.id,
 				widget.mangaData.cover!,
-				size: e.first.previewSize,
-				cache: e.first.enabled,
+				size: e.previewSize,
+				cache: e.enabled,
 			);
 		});
 

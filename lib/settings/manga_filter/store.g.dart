@@ -1,54 +1,55 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "manga_filter.dart";
+part of "store.dart";
 
 // **************************************************************************
 // CopyWithGenerator
 // **************************************************************************
 
-abstract class _$MangaFilterSettingsCWProxy {
-  MangaFilterSettings id(String id);
+abstract class _$MangaFilterSettingsStoreCWProxy {
+  MangaFilterSettingsStore id(String id);
 
-  MangaFilterSettings excludedGroupIds(List<String> excludedGroupIds);
+  MangaFilterSettingsStore excludedGroupIds(List<String> excludedGroupIds);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettingsStore(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// MangaFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// MangaFilterSettingsStore(...).copyWith(id: 12, name: "My name")
   /// ````
-  MangaFilterSettings call({
+  MangaFilterSettingsStore call({
     String? id,
     List<String>? excludedGroupIds,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaFilterSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaFilterSettings.copyWith.fieldName(...)`
-class _$MangaFilterSettingsCWProxyImpl implements _$MangaFilterSettingsCWProxy {
-  const _$MangaFilterSettingsCWProxyImpl(this._value);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaFilterSettingsStore.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaFilterSettingsStore.copyWith.fieldName(...)`
+class _$MangaFilterSettingsStoreCWProxyImpl
+    implements _$MangaFilterSettingsStoreCWProxy {
+  const _$MangaFilterSettingsStoreCWProxyImpl(this._value);
 
-  final MangaFilterSettings _value;
-
-  @override
-  MangaFilterSettings id(String id) => this(id: id);
+  final MangaFilterSettingsStore _value;
 
   @override
-  MangaFilterSettings excludedGroupIds(List<String> excludedGroupIds) =>
+  MangaFilterSettingsStore id(String id) => this(id: id);
+
+  @override
+  MangaFilterSettingsStore excludedGroupIds(List<String> excludedGroupIds) =>
       this(excludedGroupIds: excludedGroupIds);
 
   @override
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaFilterSettingsStore(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// MangaFilterSettings(...).copyWith(id: 12, name: "My name")
+  /// MangaFilterSettingsStore(...).copyWith(id: 12, name: "My name")
   /// ````
-  MangaFilterSettings call({
+  MangaFilterSettingsStore call({
     Object? id = const $CopyWithPlaceholder(),
     Object? excludedGroupIds = const $CopyWithPlaceholder(),
   }) {
-    return MangaFilterSettings(
+    return MangaFilterSettingsStore(
       id: id == const $CopyWithPlaceholder() || id == null
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
@@ -62,11 +63,11 @@ class _$MangaFilterSettingsCWProxyImpl implements _$MangaFilterSettingsCWProxy {
   }
 }
 
-extension $MangaFilterSettingsCopyWith on MangaFilterSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfMangaFilterSettings.copyWith(...)` or like so:`instanceOfMangaFilterSettings.copyWith.fieldName(...)`.
+extension $MangaFilterSettingsStoreCopyWith on MangaFilterSettingsStore {
+  /// Returns a callable class that can be used as follows: `instanceOfMangaFilterSettingsStore.copyWith(...)` or like so:`instanceOfMangaFilterSettingsStore.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$MangaFilterSettingsCWProxy get copyWith =>
-      _$MangaFilterSettingsCWProxyImpl(this);
+  _$MangaFilterSettingsStoreCWProxy get copyWith =>
+      _$MangaFilterSettingsStoreCWProxyImpl(this);
 }
 
 // **************************************************************************
@@ -76,14 +77,14 @@ extension $MangaFilterSettingsCopyWith on MangaFilterSettings {
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetMangaFilterSettingsCollection on Isar {
-  IsarCollection<MangaFilterSettings> get mangaFilterSettings =>
+extension GetMangaFilterSettingsStoreCollection on Isar {
+  IsarCollection<MangaFilterSettingsStore> get mangaFilterSettings =>
       this.collection();
 }
 
-const MangaFilterSettingsSchema = CollectionSchema(
-  name: r"MangaFilterSettings",
-  id: 3978961410874775324,
+const MangaFilterSettingsStoreSchema = CollectionSchema(
+  name: r"MangaFilterSettingsStore",
+  id: -7852478692418679483,
   properties: {
     r"excludedGroupIds": PropertySchema(
       id: 0,
@@ -101,22 +102,22 @@ const MangaFilterSettingsSchema = CollectionSchema(
       type: IsarType.bool,
     )
   },
-  estimateSize: _mangaFilterSettingsEstimateSize,
-  serialize: _mangaFilterSettingsSerialize,
-  deserialize: _mangaFilterSettingsDeserialize,
-  deserializeProp: _mangaFilterSettingsDeserializeProp,
+  estimateSize: _mangaFilterSettingsStoreEstimateSize,
+  serialize: _mangaFilterSettingsStoreSerialize,
+  deserialize: _mangaFilterSettingsStoreDeserialize,
+  deserializeProp: _mangaFilterSettingsStoreDeserializeProp,
   idName: r"isarId",
   indexes: {},
   links: {},
   embeddedSchemas: {},
-  getId: _mangaFilterSettingsGetId,
-  getLinks: _mangaFilterSettingsGetLinks,
-  attach: _mangaFilterSettingsAttach,
+  getId: _mangaFilterSettingsStoreGetId,
+  getLinks: _mangaFilterSettingsStoreGetLinks,
+  attach: _mangaFilterSettingsStoreAttach,
   version: "3.1.0+1",
 );
 
-int _mangaFilterSettingsEstimateSize(
-  MangaFilterSettings object,
+int _mangaFilterSettingsStoreEstimateSize(
+  MangaFilterSettingsStore object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -132,8 +133,8 @@ int _mangaFilterSettingsEstimateSize(
   return bytesCount;
 }
 
-void _mangaFilterSettingsSerialize(
-  MangaFilterSettings object,
+void _mangaFilterSettingsStoreSerialize(
+  MangaFilterSettingsStore object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
@@ -143,20 +144,20 @@ void _mangaFilterSettingsSerialize(
   writer.writeBool(offsets[2], object.isDefault);
 }
 
-MangaFilterSettings _mangaFilterSettingsDeserialize(
+MangaFilterSettingsStore _mangaFilterSettingsStoreDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = MangaFilterSettings(
+  final object = MangaFilterSettingsStore(
     excludedGroupIds: reader.readStringList(offsets[0]) ?? [],
     id: reader.readString(offsets[1]),
   );
   return object;
 }
 
-P _mangaFilterSettingsDeserializeProp<P>(
+P _mangaFilterSettingsStoreDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -174,21 +175,21 @@ P _mangaFilterSettingsDeserializeProp<P>(
   }
 }
 
-Id _mangaFilterSettingsGetId(MangaFilterSettings object) {
+Id _mangaFilterSettingsStoreGetId(MangaFilterSettingsStore object) {
   return object.isarId;
 }
 
-List<IsarLinkBase<dynamic>> _mangaFilterSettingsGetLinks(
-    MangaFilterSettings object) {
+List<IsarLinkBase<dynamic>> _mangaFilterSettingsStoreGetLinks(
+    MangaFilterSettingsStore object) {
   return [];
 }
 
-void _mangaFilterSettingsAttach(
-    IsarCollection<dynamic> col, Id id, MangaFilterSettings object) {}
+void _mangaFilterSettingsStoreAttach(
+    IsarCollection<dynamic> col, Id id, MangaFilterSettingsStore object) {}
 
-extension MangaFilterSettingsQueryWhereSort
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QWhere> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhere>
+extension MangaFilterSettingsStoreQueryWhereSort on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QWhere> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterWhere>
       anyIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
@@ -196,10 +197,10 @@ extension MangaFilterSettingsQueryWhereSort
   }
 }
 
-extension MangaFilterSettingsQueryWhere
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QWhereClause> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhereClause>
-      isarIdEqualTo(Id isarId) {
+extension MangaFilterSettingsStoreQueryWhere on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QWhereClause> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterWhereClause> isarIdEqualTo(Id isarId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: isarId,
@@ -208,8 +209,8 @@ extension MangaFilterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhereClause>
-      isarIdNotEqualTo(Id isarId) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterWhereClause> isarIdNotEqualTo(Id isarId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -231,8 +232,8 @@ extension MangaFilterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhereClause>
-      isarIdGreaterThan(Id isarId, {bool include = false}) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterWhereClause> isarIdGreaterThan(Id isarId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: isarId, includeLower: include),
@@ -240,8 +241,8 @@ extension MangaFilterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhereClause>
-      isarIdLessThan(Id isarId, {bool include = false}) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterWhereClause> isarIdLessThan(Id isarId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: isarId, includeUpper: include),
@@ -249,8 +250,8 @@ extension MangaFilterSettingsQueryWhere
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterWhereClause>
-      isarIdBetween(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterWhereClause> isarIdBetween(
     Id lowerIsarId,
     Id upperIsarId, {
     bool includeLower = true,
@@ -267,10 +268,10 @@ extension MangaFilterSettingsQueryWhere
   }
 }
 
-extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
-    MangaFilterSettings, QFilterCondition> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementEqualTo(
+extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QFilterCondition> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -283,8 +284,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementGreaterThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -299,8 +300,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementLessThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -315,8 +316,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementBetween(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -335,8 +336,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementStartsWith(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -349,8 +350,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementEndsWith(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -363,7 +364,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+          QAfterFilterCondition>
       excludedGroupIdsElementContains(String value,
           {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -375,7 +377,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+          QAfterFilterCondition>
       excludedGroupIdsElementMatches(String pattern,
           {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -387,8 +390,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementIsEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"excludedGroupIds",
@@ -397,8 +400,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsElementIsNotEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r"excludedGroupIds",
@@ -407,8 +410,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsLengthEqualTo(int length) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r"excludedGroupIds",
@@ -420,8 +423,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsIsEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r"excludedGroupIds",
@@ -433,8 +436,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsIsNotEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r"excludedGroupIds",
@@ -446,8 +449,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsLengthLessThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsLengthLessThan(
     int length, {
     bool include = false,
   }) {
@@ -462,8 +465,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsLengthGreaterThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
@@ -478,8 +481,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      excludedGroupIdsLengthBetween(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> excludedGroupIdsLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -496,8 +499,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idEqualTo(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -510,8 +513,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idGreaterThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -526,8 +529,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idLessThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -542,8 +545,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idBetween(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -562,8 +565,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idStartsWith(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -576,8 +579,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idEndsWith(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -590,7 +593,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+          QAfterFilterCondition>
       idContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -601,7 +605,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+          QAfterFilterCondition>
       idMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -612,8 +617,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idIsEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"id",
@@ -622,8 +627,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      idIsNotEmpty() {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r"id",
@@ -632,8 +637,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      isDefaultEqualTo(bool value) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> isDefaultEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"isDefault",
@@ -642,8 +647,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      isarIdEqualTo(Id value) {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"isarId",
@@ -652,8 +657,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      isarIdGreaterThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> isarIdGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -666,8 +671,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      isarIdLessThan(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> isarIdLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -680,8 +685,8 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterFilterCondition>
-      isarIdBetween(
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore,
+      QAfterFilterCondition> isarIdBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -699,36 +704,36 @@ extension MangaFilterSettingsQueryFilter on QueryBuilder<MangaFilterSettings,
   }
 }
 
-extension MangaFilterSettingsQueryObject on QueryBuilder<MangaFilterSettings,
-    MangaFilterSettings, QFilterCondition> {}
+extension MangaFilterSettingsStoreQueryObject on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QFilterCondition> {}
 
-extension MangaFilterSettingsQueryLinks on QueryBuilder<MangaFilterSettings,
-    MangaFilterSettings, QFilterCondition> {}
+extension MangaFilterSettingsStoreQueryLinks on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QFilterCondition> {}
 
-extension MangaFilterSettingsQuerySortBy
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QSortBy> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+extension MangaFilterSettingsStoreQuerySortBy on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QSortBy> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.asc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIsDefault() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isDefault", Sort.asc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIsDefaultDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isDefault", Sort.desc);
@@ -736,44 +741,44 @@ extension MangaFilterSettingsQuerySortBy
   }
 }
 
-extension MangaFilterSettingsQuerySortThenBy
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QSortThenBy> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+extension MangaFilterSettingsStoreQuerySortThenBy on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QSortThenBy> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.asc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"id", Sort.desc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsDefault() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isDefault", Sort.asc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsDefaultDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isDefault", Sort.desc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isarId", Sort.asc);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QAfterSortBy>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r"isarId", Sort.desc);
@@ -781,23 +786,23 @@ extension MangaFilterSettingsQuerySortThenBy
   }
 }
 
-extension MangaFilterSettingsQueryWhereDistinct
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QDistinct> {
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QDistinct>
+extension MangaFilterSettingsStoreQueryWhereDistinct on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct> {
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctByExcludedGroupIds() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"excludedGroupIds");
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QDistinct>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctById({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<MangaFilterSettings, MangaFilterSettings, QDistinct>
+  QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctByIsDefault() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r"isDefault");
@@ -805,28 +810,30 @@ extension MangaFilterSettingsQueryWhereDistinct
   }
 }
 
-extension MangaFilterSettingsQueryProperty
-    on QueryBuilder<MangaFilterSettings, MangaFilterSettings, QQueryProperty> {
-  QueryBuilder<MangaFilterSettings, int, QQueryOperations> isarIdProperty() {
+extension MangaFilterSettingsStoreQueryProperty on QueryBuilder<
+    MangaFilterSettingsStore, MangaFilterSettingsStore, QQueryProperty> {
+  QueryBuilder<MangaFilterSettingsStore, int, QQueryOperations>
+      isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"isarId");
     });
   }
 
-  QueryBuilder<MangaFilterSettings, List<String>, QQueryOperations>
+  QueryBuilder<MangaFilterSettingsStore, List<String>, QQueryOperations>
       excludedGroupIdsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"excludedGroupIds");
     });
   }
 
-  QueryBuilder<MangaFilterSettings, String, QQueryOperations> idProperty() {
+  QueryBuilder<MangaFilterSettingsStore, String, QQueryOperations>
+      idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"id");
     });
   }
 
-  QueryBuilder<MangaFilterSettings, bool, QQueryOperations>
+  QueryBuilder<MangaFilterSettingsStore, bool, QQueryOperations>
       isDefaultProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"isDefault");

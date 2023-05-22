@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
-import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/routes/settings/widgets/sheets/cover_size.dart";
-import "package:riba/settings/persistence.dart";
+import "package:riba/settings/cover_persistence/controller.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/lazy.dart";
 
@@ -17,30 +17,7 @@ class SettingsPersistenceSegment extends StatefulWidget {
 }
 
 class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment> {
-	final coverCacheEnabledStream = CoverPersistenceSettings.ref
-		.where()
-		.keyEqualTo(CoverPersistenceSettings.isarKey)
-		.enabledProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	final coverPreviewSizeStream = CoverPersistenceSettings.ref
-		.where()
-		.keyEqualTo(CoverPersistenceSettings.isarKey)
-		.previewSizeProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	final coverFullSizeStream = CoverPersistenceSettings.ref
-		.where()
-		.keyEqualTo(CoverPersistenceSettings.isarKey)
-		.fullSizeProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	Future<CoverPersistenceSettings> get settingsFuture => CoverPersistenceSettings.ref
-		.getByKey(CoverPersistenceSettings.isarKey)
-		.then((e) => e as CoverPersistenceSettings);
+	CoverPersistenceSettingsController get controller => Settings.instance.coverPersistence;
 
 	@override
 	Widget build(BuildContext context) {
@@ -49,23 +26,18 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 			crossAxisAlignment: CrossAxisAlignment.start,
 			children: [
 				const SegmentTitle(title: "Covers"),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.enabled,
 					title: "Persist covers",
 					subtitle: "Locally persist all manga covers downloaded while browsing.",
-					stream: coverCacheEnabledStream,
 					builder: (context, enabled) => Switch(
 						value: enabled,
-						onChanged: (value) async {
-							final settings = (await settingsFuture).copyWith(enabled: value);
-							await CoverPersistenceSettings.ref.isar.writeTxn(
-								() => CoverPersistenceSettings.ref.put(settings),
-							);
-						},
+						onChanged: controller.setEnabled,
 					),
 				),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.previewSize,
 					title: "Preview cover size",
-					stream: coverPreviewSizeStream,
 					contextualSubtitle: (context, size) => Text(
 						"Using ${size.asHumanReadable().toLowerCase()} size.",
 					),
@@ -73,15 +45,12 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 						context: context,
 						isPreview: true,
 						current: size,
-						onChanged: (newSize) async {
-							final newSettings = (await settingsFuture).copyWith(previewSize: newSize);
-							await setPersistenceSettings(newSettings);
-						},
+						onChanged: controller.setPreviewSize,
 					),
 				),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.fullSize,
 					title: "Full cover size",
-					stream: coverFullSizeStream,
 					contextualSubtitle: (context, size) => Text(
 						"Using ${size.asHumanReadable().toLowerCase()} size.",
 					),
@@ -89,10 +58,7 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 						context: context,
 						isPreview: false,
 						current: size,
-						onChanged: (newSize) async {
-							final newSettings = (await settingsFuture).copyWith(fullSize: newSize);
-							await setPersistenceSettings(newSettings);
-						},
+						onChanged: controller.setFullSize,
 					),
 				),
 				Container(
@@ -145,11 +111,5 @@ class _SettingsPersistenceSegmentState extends State<SettingsPersistenceSegment>
 		if (context.mounted) {
 			showLazyBar(context, "Cover cache cleared successfully.");
 		}
-	}
-
-	Future<void> setPersistenceSettings(CoverPersistenceSettings settings) async {
-		await CoverPersistenceSettings.ref.isar.writeTxn(
-			() => CoverPersistenceSettings.ref.put(settings)
-		);
 	}
 }

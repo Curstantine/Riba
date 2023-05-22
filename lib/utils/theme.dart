@@ -5,24 +5,14 @@ import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:isar/isar.dart";
-import "package:riba/settings/appearance.dart";
+import "package:riba/settings/appearance/store.dart" show SchemeId;
+import "package:riba/settings/settings.dart";
 
-typedef ThemePreference = ({SchemeId lightSchemeId, SchemeId darkSchemeId, ThemeMode themeMode});
 typedef AccompanyingColorSchemes = ({ColorScheme light, ColorScheme dark});
 typedef AppRefreshHook = ({void Function() init, void Function() dispose});
 
 class ThemeManager {
 	static late final ThemeManager instance;
-
-	final _settingsStream = AppearanceSettings.ref.where()
-		.keyEqualTo(AppearanceSettings.isarKey)
-		.watch(fireImmediately: false)
-		.asyncMap((event) => event.first);
-
-	late final ValueNotifier<SchemeId> lightSchemeId;
-	late final ValueNotifier<SchemeId> darkSchemeId;
-	late final ValueNotifier<ThemeMode> themeMode;
 	
 	late ColorScheme _lightScheme;
 	late ColorScheme _darkScheme;
@@ -39,31 +29,27 @@ class ThemeManager {
 		brightness: Brightness.dark,
 	);
 
-	ThemeManager._internal(ThemePreference preference, AccompanyingColorSchemes colorSchemes) {
-		lightSchemeId = ValueNotifier(preference.lightSchemeId);
-		darkSchemeId = ValueNotifier(preference.darkSchemeId);
-		themeMode = ValueNotifier(preference.themeMode);
+	ThemeManager._internal(ThemeMode themeMode, AccompanyingColorSchemes colorSchemes) {
 		_lightScheme = colorSchemes.light;
 		_darkScheme = colorSchemes.dark;
 
 		SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-		SystemChrome.setSystemUIOverlayStyle(getOverlayStyles(themeMode: preference.themeMode));
-		_settingsStream.listen(_onAppearanceSettingsChanged);
+		SystemChrome.setSystemUIOverlayStyle(getOverlayStyles(themeMode: themeMode));		
 	}
 
-	Future<void> _onAppearanceSettingsChanged(AppearanceSettings e) async {
-		if (lightSchemeId.value != e.lightSchemeId) {
-			_lightScheme = await getColorScheme(e.lightSchemeId, Brightness.light);
-		}
+	// Future<void> _onAppearanceSettingsChanged(AppearanceSettings e) async {
+	// 	if (lightSchemeId.value != e.lightSchemeId) {
+	// 		_lightScheme = await getColorScheme(e.lightSchemeId, Brightness.light);
+	// 	}
 
-		if (darkSchemeId.value != e.darkSchemeId) {
-			_darkScheme = await getColorScheme(e.darkSchemeId, Brightness.dark);
-		}
+	// 	if (darkSchemeId.value != e.darkSchemeId) {
+	// 		_darkScheme = await getColorScheme(e.darkSchemeId, Brightness.dark);
+	// 	}
 		
-		lightSchemeId.value = e.lightSchemeId;
-		darkSchemeId.value = e.darkSchemeId;
-		themeMode.value = e.themeMode;
-	}
+	// 	lightSchemeId.value = e.lightSchemeId;
+	// 	darkSchemeId.value = e.darkSchemeId;
+	// 	themeMode.value = e.themeMode;
+	// }
 
 	/// Returns a [SystemUiOverlayStyle] with the given options while applying preferred defaults.
 	SystemUiOverlayStyle getOverlayStyles({
@@ -87,14 +73,14 @@ class ThemeManager {
 	}
 
 	static Future<void> init() async {
-		final settings = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
+		final settings = Settings.instance.appearance;
 		final schemes = await Future.wait([
-			getColorScheme(settings.lightSchemeId, Brightness.light),
-			getColorScheme(settings.darkSchemeId, Brightness.dark),
+			getColorScheme(settings.lightSchemeId.value, Brightness.light),
+			getColorScheme(settings.darkSchemeId.value, Brightness.dark),
 		]); 
 
 		instance = ThemeManager._internal(
-			(lightSchemeId: settings.lightSchemeId, darkSchemeId: settings.darkSchemeId, themeMode: settings.themeMode),
+			settings.themeMode.value,
 			(light: schemes[0], dark: schemes[1]),
 		);
 	}
@@ -117,25 +103,27 @@ class ThemeManager {
 	/// on the current [ThemeMode] and calls [setState] to update a [MaterialApp] with the new
 	/// [ThemeData].
 	static AppRefreshHook useAppRefreshHook({required void Function(void Function()) setState}) {
-		void Function() createChangeHook(Brightness brightness, ValueNotifier<SchemeId> schemeId) {
+		final settings = Settings.instance.appearance;
+
+		void Function() createChangeHook(Brightness brightness, ValueListenable<SchemeId> schemeId) {
 			return () => {
-				if (brightness == ThemeManager.instance.themeMode.value.asBrightness()) {
+				if (brightness == Settings.instance.appearance.themeMode.value.asBrightness()) {
 					setState(() => {})
 				}
 			};
 		}
 
-		final lightSchemeIdHook = createChangeHook(Brightness.light, instance.lightSchemeId);
-		final darkSchemeIdHook = createChangeHook(Brightness.dark, instance.darkSchemeId);
+		final lightSchemeIdHook = createChangeHook(Brightness.light, settings.lightSchemeId);
+		final darkSchemeIdHook = createChangeHook(Brightness.dark, settings.darkSchemeId);
 
 		return (
 			init: () {
-				instance.lightSchemeId.addListener(lightSchemeIdHook);
-				instance.darkSchemeId.addListener(darkSchemeIdHook);
+				settings.lightSchemeId.addListener(lightSchemeIdHook);
+				settings.darkSchemeId.addListener(darkSchemeIdHook);
 			},
 			dispose: () {
-				instance.lightSchemeId.removeListener(lightSchemeIdHook);
-				instance.darkSchemeId.removeListener(darkSchemeIdHook);
+				settings.lightSchemeId.removeListener(lightSchemeIdHook);
+				settings.darkSchemeId.removeListener(darkSchemeIdHook);
 			},
 		);
 	}

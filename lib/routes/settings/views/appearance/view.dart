@@ -1,12 +1,12 @@
 import "package:flutter/material.dart" hide Locale;
-import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/routes/settings/widgets/dialogs/general.dart";
 import "package:riba/routes/settings/widgets/dialogs/list_sortable.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
 import "package:riba/routes/settings/widgets/lists/color_preview_list.dart";
-import "package:riba/settings/appearance.dart";
+import "package:riba/settings/appearance/controller.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 
 class SettingsAppearanceView extends StatefulWidget {
@@ -17,17 +17,7 @@ class SettingsAppearanceView extends StatefulWidget {
 }
 
 class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
-	final preferredLocaleStream = AppearanceSettings.ref
-		.where()
-		.keyEqualTo(AppearanceSettings.isarKey)
-		.preferredLocalesProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	
-	Future<AppearanceSettings> get settingsFuture => AppearanceSettings.ref
-		.getByKey(AppearanceSettings.isarKey)
-		.then((e) => e as AppearanceSettings);
+	AppearanceSettingsController get controller => Settings.instance.appearance;
 
 	@override
 	Widget build(BuildContext context) {
@@ -35,15 +25,15 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 			body: CustomScrollView(
 				slivers: [
 					const SliverAppBar(title: Text("Appearance")),
-					ColorPreviewList(brightness: Brightness.light, handleSchemeIdSelection: handleSchemeIdSelection),
-					ColorPreviewList(brightness: Brightness.dark, handleSchemeIdSelection: handleSchemeIdSelection),
+					ColorPreviewList(brightness: Brightness.light, handleSchemeIdSelection: controller.setSchemeId),
+					ColorPreviewList(brightness: Brightness.dark, handleSchemeIdSelection: controller.setSchemeId),
 					const SliverToBoxAdapter(child: SizedBox(height: Edges.large)),
 					const SliverToBoxAdapter(child: SegmentTitle(title: "General")),
 					SliverToBoxAdapter(
-						child: StreamingListTile(
+						child: ValueListenableListTile(
+							valueListenable: controller.preferredDisplayLocales,
 							title: "Preferred display locales",
 							subtitle: "Order of precedence locales should take when displaying textual content.",
-							stream: preferredLocaleStream,
 							onTap: showPreferredDisplayLocalesDialog,
 						)
 					)
@@ -51,22 +41,6 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 			),
 		);
 	}
-
-	Future<void> handleSchemeIdSelection(SchemeId id, Brightness brightness) => AppearanceSettings.ref.isar.writeTxn(() async {
-		final current = (await AppearanceSettings.ref.getByKey(AppearanceSettings.isarKey))!;
-		
-		AppearanceSettings newSettings;
-		switch (brightness) {
-			case Brightness.light:
-				newSettings = current.copyWith.lightSchemeId(id);
-				break;
-			case Brightness.dark:
-				newSettings = current.copyWith.darkSchemeId(id);
-				break;
-		}
-
-		await AppearanceSettings.ref.put(newSettings);
-	});
 
 	Future<void> showPreferredDisplayLocalesDialog(BuildContext context, List<Locale> locales) async {
 		final newLocales = await showDialog<List<Locale>>(
@@ -81,18 +55,12 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 					locale.language.asHumanReadable(),
 					subtitle: locale.romanized ? "Romanized" : "Native",
 				),
-				onReset: () => AppearanceSettings.ref.isar.writeTxn(() async {
-					final settings = (await settingsFuture).copyWith.preferredLocales(AppearanceSettings.defaultSettings.preferredLocales);
-					await AppearanceSettings.ref.put(settings);
-				}),
+				onReset: controller.reset,
 			),
 		);
 
 		if (newLocales == null) return;
-		await AppearanceSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith.preferredLocales(newLocales);
-			await AppearanceSettings.ref.put(newSettings);
-		});
+		return controller.setPreferredDisplayLocales(newLocales);
 	}
 }
 

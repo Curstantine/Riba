@@ -1,12 +1,9 @@
 import "package:flutter/material.dart" hide Locale;
-import "package:isar/isar.dart";
-import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
-import "package:riba/settings/appearance.dart";
-import "package:riba/settings/content_filters.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 
@@ -28,29 +25,16 @@ class MangaHorizontalList extends StatefulWidget {
 
 class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
-	
-	final preferredDisplayLocaleStream = AppearanceSettings.ref
-		.where()
-		.keyEqualTo(AppearanceSettings.isarKey)
-		.preferredLocalesProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
 
-	late final Stream<Map<String, MangaData>> dataStream = ContentFilterSettings.ref
-		.where()
-		.keyEqualTo(ContentFilterSettings.isarKey)
-		.watch(fireImmediately: true)
-		.asyncMap((e) {
-			final contentFilter = e.first;
-
-			return MangaDex.instance.manga.getMany(
-				overrides: MangaDexMangaQueryFilter(
-					ids: widget.mangaIds,
-					contentRatings: contentFilter.contentRatings,
-					originalLanguages: contentFilter.originalLanguages,
-				),
-			);
-		});	
+	late final Stream<Map<String, MangaData>> dataStream = Settings.instance.contentFilter
+		.watch()
+		.asyncMap((e) => MangaDex.instance.manga.getMany(
+			overrides: MangaDexMangaQueryFilter(
+				ids: widget.mangaIds,
+				contentRatings: e.contentRatings,
+				originalLanguages: e.originalLanguages,
+			),
+		));	
 
 	@override
 	void initState() {
@@ -79,16 +63,16 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	}
 
 	Widget buildList(TextTheme text, ColorScheme colors) {
-		return StreamBuilder<List<Locale>>(
-			stream: preferredDisplayLocaleStream,
-			builder: (context, localeSnapshot) => StreamBuilder<Map<String, MangaData>>(
+		return ValueListenableBuilder(
+			valueListenable: Settings.instance.appearance.preferredDisplayLocales,
+			builder: (context, preferredDisplayLocales, _) => StreamBuilder<Map<String, MangaData>>(
 				stream: dataStream,
 				builder: (context, dataSnapshot) {
-					if (localeSnapshot.connectionState != ConnectionState.active || dataSnapshot.connectionState != ConnectionState.active) {
+					if (dataSnapshot.connectionState != ConnectionState.active) {
 						return const Center(child: CircularProgressIndicator());
 					}
 
-					if ((localeSnapshot.hasError || !localeSnapshot.hasData) || (dataSnapshot.hasError || !dataSnapshot.hasData)) {
+					if (dataSnapshot.hasError || !dataSnapshot.hasData) {
 						final error = handleError(dataSnapshot.error ?? "Data was null without errors.");
 
 						return Center(child: Column(children: [
@@ -101,7 +85,6 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 					// there are chances that data might not contain all the 
 					// mangaIds requested. As such, it is a good idea to completely
 					// ignore the ids given to this widget after the fetch.
-					final preferredDisplayLocales = localeSnapshot.requireData;
 					final data = dataSnapshot.requireData;
 					final ids = data.keys.toList();
 					final missingCount = widget.mangaIds.length - ids.length;

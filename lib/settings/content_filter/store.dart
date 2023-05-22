@@ -3,20 +3,12 @@ import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 
-import "settings.dart";
-
-part "content_filters.g.dart";
+part "store.g.dart";
 
 @CopyWith()
 @Collection(accessor: "contentFilterSettings")
-class ContentFilterSettings {
-	static final ref = Settings.instance.contentFilterSettings;
-	static const isarKey = "contentFilterSettings";
-
-	final Id id = Isar.autoIncrement;
-
-	@Index(unique: true, replace: true)
-	final String key = isarKey;
+class ContentFilterSettingsStore {
+	final Id id = 1;
 
 	@Enumerated(EnumType.ordinal)
 	final List<Language> originalLanguages;
@@ -27,13 +19,13 @@ class ContentFilterSettings {
 	@Enumerated(EnumType.ordinal)
 	final List<ContentRating> contentRatings;
 
-	ContentFilterSettings({
+	ContentFilterSettingsStore({
 		required this.originalLanguages,
 		required this.chapterLanguages,
 		required this.contentRatings,
 	});
 
-	static final defaultSettings = ContentFilterSettings(
+	static final defaultSettings = ContentFilterSettingsStore(
 		originalLanguages: [],
 		chapterLanguages: [],
 		contentRatings: [

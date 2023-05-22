@@ -1,10 +1,10 @@
 	import "package:flutter/material.dart";
-import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/routes/settings/widgets/dialogs/list_selection.dart";
 import "package:riba/routes/settings/widgets/extra.dart";
 import "package:riba/routes/settings/widgets/list_tile.dart";
-import "package:riba/settings/content_filters.dart";
+import "package:riba/settings/content_filter/controller.dart";
+import "package:riba/settings/settings.dart";
 
 class SettingsFilteringLanguageSegment extends StatefulWidget {
 	const SettingsFilteringLanguageSegment({super.key});
@@ -14,24 +14,8 @@ class SettingsFilteringLanguageSegment extends StatefulWidget {
 }
 
 class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLanguageSegment> {
-	final originalLanguagesStream = ContentFilterSettings.ref
-		.where()
-		.keyEqualTo(ContentFilterSettings.isarKey)
-		.originalLanguagesProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
+	ContentFilterSettingsController get controller => Settings.instance.contentFilter;
 
-	final chapterLanguagesStream = ContentFilterSettings.ref
-		.where()
-		.keyEqualTo(ContentFilterSettings.isarKey)
-		.chapterLanguagesProperty()
-		.watch(fireImmediately: true)
-		.asyncMap((e) => e.first);
-
-	Future<ContentFilterSettings> get settingsFuture => ContentFilterSettings.ref
-		.getByKey(ContentFilterSettings.isarKey)
-		.then((e) => e as ContentFilterSettings);
-	
 	@override
 	Widget build(BuildContext context) {
 		return Column(
@@ -39,17 +23,17 @@ class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLang
 			crossAxisAlignment: CrossAxisAlignment.start,
 			children: [
 				const SegmentTitle(title: "Language"),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.originalLanguages,
 					isThreeLine: true,
 					title: "Allowed original languages",
-					stream: originalLanguagesStream,
 					subtitle: "Filters out titles that are not published in the selected languages.",
 					onTap: showOriginalLanguagesDialog,
 				),
-				StreamingListTile(
+				ValueListenableListTile(
+					valueListenable: controller.chapterLanguages,
 					isThreeLine: true,
 					title: "Allowed chapter languages",
-					stream: chapterLanguagesStream,
 					subtitle: "Filters out chapters that are not released in the selected languages.",
 					onTap: showChapterLanguagesDialog,
 				),
@@ -66,19 +50,12 @@ class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLang
 				description: "Only titles published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
 				values: Language.values,
-				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
-					final settings = (await settingsFuture)
-						.copyWith
-						.originalLanguages(ContentFilterSettings.defaultSettings.originalLanguages);
-					await ContentFilterSettings.ref.put(settings);
-				}),
+				onReset: controller.resetOriginalLanguages,
 			),
 		);
 
-		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith.originalLanguages(newLanguages);
-			await ContentFilterSettings.ref.put(newSettings);
-		});
+		if (newLanguages == null) return;
+		await controller.setOriginalLanguages(newLanguages);
 	}
 
 	Future<void> showChapterLanguagesDialog(BuildContext context, List<Language> languages) async {
@@ -90,18 +67,11 @@ class _SettingsFilteringLanguageSegmentState extends State<SettingsFilteringLang
 				description: "Only chapters published in these languages will be displayed. Leave this empty to allow all.",
 				currentValue: languages,
 				values: Language.values,
-				onReset: () => ContentFilterSettings.ref.isar.writeTxn(() async {
-					final settings = (await settingsFuture)
-						.copyWith
-						.chapterLanguages(ContentFilterSettings.defaultSettings.chapterLanguages);
-					await ContentFilterSettings.ref.put(settings);
-				}),
+				onReset: controller.resetChapterLanguages,
 			),
 		);
 		
-		await ContentFilterSettings.ref.isar.writeTxn(() async {
-			final newSettings = (await settingsFuture).copyWith.chapterLanguages(newLanguages);
-			await ContentFilterSettings.ref.put(newSettings);
-		});
+		if (newLanguages == null) return;
+		await controller.setChapterLanguages(newLanguages);
 	}
 }

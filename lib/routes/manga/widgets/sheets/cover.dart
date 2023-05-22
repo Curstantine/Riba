@@ -9,7 +9,7 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/settings/persistence.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/lazy.dart";
@@ -30,10 +30,7 @@ class _CoverSheetState extends State<CoverSheet> {
 	final logger = Logger("MangaCoverSheet");
 	Manga get manga => widget.mangaData.manga;
 
-	final coverCacheSettings = CoverPersistenceSettings.ref.getByKey(CoverPersistenceSettings.isarKey);
-	late final selectedCoverId = ValueNotifier<String?>(
-		manga.preferredCoverId ?? manga.defaultCoverId,
-	);
+	late final selectedCoverId = ValueNotifier<String?>(manga.preferredCoverId ?? manga.defaultCoverId,);
 
 	final bigPictureController = StreamController<File?>();
 	final coverDataController = StreamController<Map<String, CoverArtData>>();
@@ -60,7 +57,7 @@ class _CoverSheetState extends State<CoverSheet> {
 	}
 
 	Future<void> fetchData({bool init = false, bool checkDB = true}) async {
-		final settings = await coverCacheSettings;
+		final settings = Settings.instance.coverPersistence;
 		List<CoverArtData>? coverData;
 
 		try {
@@ -88,8 +85,8 @@ class _CoverSheetState extends State<CoverSheet> {
 			for (final cover in coverData)
 				cover.cover.id: MangaDex.instance.cover.getImage(
 					manga.id, cover.cover,
-					size: settings!.previewSize,
-					cache: settings.enabled,
+					size: settings.previewSize.value,
+					cache: settings.enabled.value,
 				)
 		});
 
@@ -214,12 +211,12 @@ class _CoverSheetState extends State<CoverSheet> {
 		selectedCoverId.value = data.id;
 		bigPictureController.add(null);
 		
-		final settings = await coverCacheSettings;
+		final settings = Settings.instance.coverPersistence;
 		final image = await MangaDex.instance.cover.getImage(
 			widget.mangaData.manga.id,
 			data,
-			size: settings!.fullSize,
-			cache: settings.enabled,
+			size: settings.fullSize.value,
+			cache: settings.enabled.value,
 		);
 
 		bigPictureController.add(image);

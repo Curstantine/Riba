@@ -19,10 +19,8 @@ import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
-import "package:riba/settings/appearance.dart";
-import "package:riba/settings/content_filters.dart";
-import "package:riba/settings/manga_filter.dart";
-import "package:riba/settings/persistence.dart";
+import "package:riba/settings/manga_filter/store.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/hash.dart";
@@ -46,13 +44,6 @@ class _MangaViewState extends State<MangaView> {
 	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);
 	final areFiltersApplied = ValueNotifier(false);
-
-	final Future<List<Locale>> preferredDisplayLocaleFuture = AppearanceSettings.ref
-		.where()
-		.keyEqualTo(AppearanceSettings.isarKey)
-		.preferredLocalesProperty()
-		.findFirst()
-		.then((e) => e!);
 
 	late final preferredCoverIdStream = MangaDex.instance.manga.database.where()
 		.isarIdEqualTo(fastHash(widget.id))
@@ -78,13 +69,7 @@ class _MangaViewState extends State<MangaView> {
 	/// discards rendered data.
 	CollectionData<ChapterData>? chapterCache;
 
-	Future<MangaFilterSettings> get mangaFilterSettings => MangaFilterSettings.ref
-		.get(fastHash(widget.id))
-		.then((value) => value.orDefault(widget.id));
-
-	Future<ContentFilterSettings> get contentFilterSettings => ContentFilterSettings.ref
-		.getByKey(ContentFilterSettings.isarKey)
-		.then((e) => e!);
+	Future<MangaFilterSettingsStore> get mangaFilterSettingsFuture => Settings.instance.mangaFilter.get(widget.id);
 
 	@override
 	void initState() {
@@ -132,13 +117,14 @@ class _MangaViewState extends State<MangaView> {
 				return coverController.close();
 			}
 
-			final settings = await CoverPersistenceSettings.ref.getByKey(CoverPersistenceSettings.isarKey);
+			final settings = Settings.instance.coverPersistence;
 			final image = await MangaDex.instance.cover.getImage(
 				widget.id,
 				cover,
-				size: settings!.fullSize,
-				cache: settings.enabled,
+				size: settings.fullSize.value,
+				cache: settings.enabled.value,
 			);
+
 			coverController.add(image);
 		} catch (e) {
 			coverController.addError(e);
@@ -168,22 +154,17 @@ class _MangaViewState extends State<MangaView> {
 		logger.info("Fetching chapters with offset $offset");
 	
 		try {
-			final filters = await Future.wait([
-				mangaFilterSettings,
-				contentFilterSettings,
-			]);
-
-			final mangaFilters = filters[0] as MangaFilterSettings;
-			final contentFilters = filters[1] as ContentFilterSettings;
+			final mangaSettings = await mangaFilterSettingsFuture;
+			final contentSettings = Settings.instance.contentFilter;
 
 			final data = await MangaDex.instance.chapter.getFeed(
 				checkDB: !reload &&  offset == 0,
 				overrides: MangaDexChapterQueryFilter(
 					mangaId: widget.id,
 					offset: offset,
-					excludedGroups: mangaFilters.excludedGroupIds,
-					contentRatings: contentFilters.contentRatings,
-					translatedLanguages: contentFilters.chapterLanguages,
+					excludedGroups: mangaSettings.excludedGroupIds,
+					contentRatings: contentSettings.contentRatings.value,
+					translatedLanguages: contentSettings.chapterLanguages.value,
 				),
 			);
 
@@ -209,56 +190,52 @@ class _MangaViewState extends State<MangaView> {
 		final colors = theme.colorScheme;
 
 		final media = MediaQuery.of(context);
+		final preferredDisplayLocales = Settings.instance.appearance.preferredDisplayLocales.value;
 
 		return Scaffold(
-			backgroundColor: theme.colorScheme.background,
-			body: FutureBuilder<List<Locale>>(
-				future: preferredDisplayLocaleFuture,
-				builder: (context, localeSnapshot) => FutureBuilder(
-					future: mangaFuture,
-					builder: (context, mangaSnapshot) {
-						if (localeSnapshot.connectionState != ConnectionState.done || mangaSnapshot.connectionState != ConnectionState.done) {
-							return const Center(child: CircularProgressIndicator());
-						}
+			body: FutureBuilder(
+				future: mangaFuture,
+				builder: (context, mangaSnapshot) {
+					if (mangaSnapshot.connectionState != ConnectionState.done) {
+						return const Center(child: CircularProgressIndicator());
+					}
 
-						if (mangaSnapshot.hasError || !mangaSnapshot.hasData) {
-							final error = handleError(mangaSnapshot.error ?? "Data was null without errors.");
+					if (mangaSnapshot.hasError || !mangaSnapshot.hasData) {
+						final error = handleError(mangaSnapshot.error ?? "Data was null without errors.");
 
-							return Center(
-								child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-									Text(error.title, style: theme.textTheme.titleLarge),
-									Text(error.description, style: theme.textTheme.bodyMedium),
-									const SizedBox(height: Edges.large),
-									ElevatedButton(
-										onPressed: () => setState(() => fetchMangaData(reload: true)),
-										child: const Text("Retry"),
-									),
-								]),
-							);
-						}
-
-						final preferredDisplayLocales = localeSnapshot.requireData;
-						final mangaData = mangaSnapshot.requireData;
-
-						return RefreshIndicator(
-							onRefresh: refresh,
-							child: CustomScrollView(controller: scrollController, slivers: [
-								buildAppBar(text, colors, media, preferredDisplayLocales, mangaData),
-								SliverToBoxAdapter(child: DescriptionSection(
-									description: mangaData.manga.description,
-									isExpanded: isDescriptionExpanded,
-									preferredLocales: preferredDisplayLocales,
-								)),
-								SliverToBoxAdapter(child: buildReadButton()),
-								ChapterList(
-									mangaId: widget.id,
-									chapterStream: chapterController.stream,
-									onFilterApplied: onFiltersApplied
+						return Center(
+							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+								Text(error.title, style: theme.textTheme.titleLarge),
+								Text(error.description, style: theme.textTheme.bodyMedium),
+								const SizedBox(height: Edges.large),
+								ElevatedButton(
+									onPressed: () => setState(() => fetchMangaData(reload: true)),
+									child: const Text("Retry"),
 								),
 							]),
 						);
-					},
-				),
+					}
+
+					final mangaData = mangaSnapshot.requireData;
+
+					return RefreshIndicator(
+						onRefresh: refresh,
+						child: CustomScrollView(controller: scrollController, slivers: [
+							buildAppBar(text, colors, media, preferredDisplayLocales, mangaData),
+							SliverToBoxAdapter(child: DescriptionSection(
+								description: mangaData.manga.description,
+								isExpanded: isDescriptionExpanded,
+								preferredLocales: preferredDisplayLocales,
+							)),
+							SliverToBoxAdapter(child: buildReadButton()),
+							ChapterList(
+								mangaId: widget.id,
+								chapterStream: chapterController.stream,
+								onFilterApplied: onFiltersApplied
+							),
+						]),
+					);
+				},
 			),
 		);
 	}

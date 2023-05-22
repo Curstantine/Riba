@@ -10,10 +10,10 @@ import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/local/models/user.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/settings/appearance.dart";
-import "package:riba/settings/content_filters.dart";
-import "package:riba/settings/manga_filter.dart";
-import "package:riba/settings/persistence.dart";
+import "package:riba/settings/appearance/store.dart";
+import "package:riba/settings/content_filter/store.dart";
+import "package:riba/settings/cover_persistence/store.dart";
+import "package:riba/settings/manga_filter/store.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/directories.dart";
 
@@ -59,10 +59,9 @@ class Database {
 		ChapterLocalMetaSchema,
 		ChapterSchema,
 		// Settings related models
-		ContentFilterSettingsSchema,
-		CoverPersistenceSettingsSchema,
-		ChapterPersistenceSettingsSchema,
-		MangaFilterSettingsSchema,
-		AppearanceSettingsSchema,
+		AppearanceSettingsStoreSchema,
+		ContentFilterSettingsStoreSchema,
+		CoverPersistenceSettingsStoreSchema,
+		MangaFilterSettingsStoreSchema,
 	];
 }

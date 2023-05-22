@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
-import "package:riba/settings/appearance.dart";
+import "package:riba/settings/appearance/store.dart";
+import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/theme.dart";
 
@@ -39,8 +40,8 @@ class ColorSchemePreviewCard extends StatelessWidget {
 
 	Widget buildCard(TextTheme text, ColorScheme scheme) {
 		final listenable = brightness == Brightness.light
-			? ThemeManager.instance.lightSchemeId
-			: ThemeManager.instance.darkSchemeId;
+			? Settings.instance.appearance.lightSchemeId
+			: Settings.instance.appearance.darkSchemeId;
 		
 		return ValueListenableBuilder(
 			valueListenable: listenable,
