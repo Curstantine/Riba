@@ -34,42 +34,7 @@ class ThemeManager {
 		_darkScheme = colorSchemes.dark;
 
 		SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-		SystemChrome.setSystemUIOverlayStyle(getOverlayStyles(themeMode: themeMode));		
-	}
-
-	// Future<void> _onAppearanceSettingsChanged(AppearanceSettings e) async {
-	// 	if (lightSchemeId.value != e.lightSchemeId) {
-	// 		_lightScheme = await getColorScheme(e.lightSchemeId, Brightness.light);
-	// 	}
-
-	// 	if (darkSchemeId.value != e.darkSchemeId) {
-	// 		_darkScheme = await getColorScheme(e.darkSchemeId, Brightness.dark);
-	// 	}
-		
-	// 	lightSchemeId.value = e.lightSchemeId;
-	// 	darkSchemeId.value = e.darkSchemeId;
-	// 	themeMode.value = e.themeMode;
-	// }
-
-	/// Returns a [SystemUiOverlayStyle] with the given options while applying preferred defaults.
-	SystemUiOverlayStyle getOverlayStyles({
-		required ThemeMode themeMode,
-		Color statusBarColor = Colors.transparent,
-		Color systemNavigationBarColor = Colors.transparent,
-		Brightness? statusBarBrightness,
-		Brightness? statusBarIconBrightness,
-		Brightness? systemNavigationBarIconBrightness,
-	}) {
-		final brightness = themeMode.asBrightness();
-
-		return SystemUiOverlayStyle(
-			statusBarColor: statusBarColor,
-			statusBarBrightness: statusBarBrightness ?? brightness,
-			statusBarIconBrightness: statusBarIconBrightness ?? brightness.toOpposite(),
-			systemNavigationBarColor: systemNavigationBarColor,
-			systemNavigationBarDividerColor: systemNavigationBarColor,
-			systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? brightness,
-		);
+		setOverlayStyles(themeMode.asBrightness());
 	}
 
 	static Future<void> init() async {
@@ -99,11 +64,38 @@ class ThemeManager {
 		return palette?.toColorScheme(brightness: brightness) ??  ColorSchemeDefaults.getBrightnessDefault(brightness);
 	}
 
+	/// Returns a [SystemUiOverlayStyle] with the given options while applying preferred defaults.
+	static SystemUiOverlayStyle getOverlayStyles({
+		required Brightness brightness,
+		Color statusBarColor = Colors.transparent,
+		Color systemNavigationBarColor = Colors.transparent,
+		Brightness? statusBarBrightness,
+		Brightness? statusBarIconBrightness,
+		Brightness? systemNavigationBarIconBrightness,
+	}) {
+		return SystemUiOverlayStyle(
+			statusBarColor: statusBarColor,
+			statusBarBrightness: statusBarBrightness ?? brightness,
+			statusBarIconBrightness: statusBarIconBrightness ?? brightness.toOpposite(),
+			systemNavigationBarColor: systemNavigationBarColor,
+			systemNavigationBarDividerColor: systemNavigationBarColor,
+			systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? brightness,
+		);
+	}
+
+	/// Convenience alias for [SystemChrome.setSystemUIOverlayStyle] with
+	/// [getOverlayStyles] as the argument.
+	static void setOverlayStyles(Brightness brightness) => SystemChrome
+		.setSystemUIOverlayStyle(getOverlayStyles(brightness: brightness));
+
 	/// Creates a hook to listen to the changes of [lightSchemeId] and [darkSchemeId] on demand based
 	/// on the current [ThemeMode] and calls [setState] to update a [MaterialApp] with the new
 	/// [ThemeData].
 	static AppRefreshHook useAppRefreshHook({required void Function(void Function()) setState}) {
 		final settings = Settings.instance.appearance;
+		final lightSchemeId = settings.lightSchemeId;
+		final darkSchemeId = settings.darkSchemeId;
+		final themeMode = settings.themeMode;
 
 		void Function() createChangeHook(Brightness brightness, ValueListenable<SchemeId> schemeId) {
 			return () => {
@@ -113,17 +105,47 @@ class ThemeManager {
 			};
 		}
 
-		final lightSchemeIdHook = createChangeHook(Brightness.light, settings.lightSchemeId);
-		final darkSchemeIdHook = createChangeHook(Brightness.dark, settings.darkSchemeId);
+		void Function() createThemeModeHook(ValueListenable<ThemeMode> mode) {
+			bool wasPlatformBrightnessModded = false;
+
+			return () {
+				switch (mode.value) {
+					case ThemeMode.light:
+					case ThemeMode.dark:
+						if (wasPlatformBrightnessModded) {
+							wasPlatformBrightnessModded = false;
+							PlatformDispatcher.instance.onPlatformBrightnessChanged = WidgetsBinding.instance.handlePlatformBrightnessChanged;
+						}
+						ThemeManager.setOverlayStyles(mode.value.asBrightness());
+						break;
+					case ThemeMode.system:
+						wasPlatformBrightnessModded = true;
+						PlatformDispatcher.instance.onPlatformBrightnessChanged = () {
+							ThemeManager.setOverlayStyles(themeMode.value.asBrightness());
+							WidgetsBinding.instance.handlePlatformBrightnessChanged();
+						};
+						break;
+				}
+			};
+		}
+
+		final lightSchemeIdHook = createChangeHook(Brightness.light, lightSchemeId);
+		final darkSchemeIdHook = createChangeHook(Brightness.dark, darkSchemeId);
+		final themeModeHook = createThemeModeHook(themeMode);
+
+		/// Initial call to hook to the current theme mode.
+		themeModeHook.call();
 
 		return (
 			init: () {
-				settings.lightSchemeId.addListener(lightSchemeIdHook);
-				settings.darkSchemeId.addListener(darkSchemeIdHook);
+				lightSchemeId.addListener(lightSchemeIdHook);
+				darkSchemeId.addListener(darkSchemeIdHook);
+				themeMode.addListener(themeModeHook);
 			},
 			dispose: () {
-				settings.lightSchemeId.removeListener(lightSchemeIdHook);
-				settings.darkSchemeId.removeListener(darkSchemeIdHook);
+				lightSchemeId.removeListener(lightSchemeIdHook);
+				darkSchemeId.removeListener(darkSchemeIdHook);
+				themeMode.removeListener(themeModeHook);
 			},
 		);
 	}
