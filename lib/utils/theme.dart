@@ -37,6 +37,19 @@ class ThemeManager {
 		setOverlayStyles(themeMode.asBrightness());
 	}
 
+	Future<void> setColorScheme(SchemeId id, Brightness brightness) async {
+		final scheme = await getColorScheme(id, brightness);
+
+		switch (brightness) {
+			case Brightness.light:
+				_lightScheme = scheme;
+				break;
+			case Brightness.dark:
+				_darkScheme = scheme;
+				break;
+		}
+	}
+
 	static Future<void> init() async {
 		final settings = Settings.instance.appearance;
 		final schemes = await Future.wait([
@@ -98,9 +111,10 @@ class ThemeManager {
 		final themeMode = settings.themeMode;
 
 		void Function() createChangeHook(Brightness brightness, ValueListenable<SchemeId> schemeId) {
-			return () => {
+			return ()  {
 				if (brightness == Settings.instance.appearance.themeMode.value.asBrightness()) {
-					setState(() => {})
+					ThemeManager.instance.setColorScheme(schemeId.value, brightness)
+						.then((_) => setState(() => {}));
 				}
 			};
 		}

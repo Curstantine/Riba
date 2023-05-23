@@ -59,11 +59,11 @@ class AppearanceSettingsController extends CollectionSettingsController<Store> {
 		switch (brightness) {
 			case Brightness.light:
 				store = store.copyWith.lightSchemeId(id);
-				_darkSchemeId.value = id;
+				_lightSchemeId.value = id;
 				break;
 			case Brightness.dark:
 				store = store.copyWith.darkSchemeId(id);
-				_lightSchemeId.value = id;
+				_darkSchemeId.value = id;
 				break;
 		}
 
