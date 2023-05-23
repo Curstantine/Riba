@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:async";
 
 import "package:dynamic_color/dynamic_color.dart";
@@ -37,6 +36,10 @@ class ThemeManager {
 		setOverlayStyles(themeMode.asBrightness());
 	}
 
+	/// Sets the accompanying `_lightScheme` or `_darkScheme` based on the given [id] and [brightness].
+	/// 
+	/// This does not update the [SettingsAppearanceStore] and is only used by the
+	/// [useAppRefreshHook] hook.
 	Future<void> setColorScheme(SchemeId id, Brightness brightness) async {
 		final scheme = await getColorScheme(id, brightness);
 
@@ -111,11 +114,20 @@ class ThemeManager {
 		final themeMode = settings.themeMode;
 
 		void Function() createChangeHook(Brightness brightness, ValueListenable<SchemeId> schemeId) {
-			return ()  {
-				if (brightness == Settings.instance.appearance.themeMode.value.asBrightness()) {
-					ThemeManager.instance.setColorScheme(schemeId.value, brightness)
-						.then((_) => setState(() => {}));
-				}
+			return () {
+				/// I wish I could tell you why there is no guard statement to avoid
+				/// rebuilds when the brightness is not being used, but I can't.
+				/// 
+				/// [MaterialApp] that dissolves the [darkTheme] and [lightTheme]
+				/// does not look at the updated color scheme when [setColorScheme] sets it.
+				/// 
+				/// So, either we have to run a second rebuild when [ThemeMode] changes,
+				/// or run a redundant rebuild when any schemeId changes.
+				/// 
+				/// Luckily, since the widget tree itself is not changed, there are no
+				/// major performance implications.
+				ThemeManager.instance.setColorScheme(schemeId.value, brightness)
+					.then((_) => setState(() => {}));
 			};
 		}
 
@@ -169,24 +181,6 @@ class ThemeManager {
 	};
 }
 
-class Swatch {
-	final Color light;
-	final Color dark;
-
-	const Swatch({required this.light, required this.dark});
-
-	Color get(Brightness brightness) {
-		switch (brightness) {
-			case Brightness.light:
-				return light;
-			case Brightness.dark:
-				return dark;
-		}
-	}
-}
-
-
-
 extension ColorSchemeDefaults on ColorScheme {
 	static ColorScheme getBrightnessDefault(Brightness brightness) {
 		switch (brightness) {
@@ -218,17 +212,6 @@ extension ToBrightness on ThemeMode {
 				return Brightness.dark;
 			case ThemeMode.system:
 				return PlatformDispatcher.instance.platformBrightness;
-		}
-	}
-}
-
-extension OfBrightness on AccompanyingColorSchemes {
-	ColorScheme ofBrightness(Brightness brightness) {
-		switch (brightness) {
-			case Brightness.light:
-				return light;
-			case Brightness.dark:
-				return dark;
 		}
 	}
 }
