@@ -14,6 +14,7 @@ dependencies:
     fl_chart: ^0.62.0
     flutter:
         sdk: flutter
+    flutter_animate: ^4.1.1+1
     google_fonts: ^4.0.4
     http: ^0.13.6
     intl: ^0.18.1

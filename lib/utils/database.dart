@@ -5,6 +5,7 @@ import "package:riba/repositories/local/models/chapter_local_meta.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/custom_list.dart";
 import "package:riba/repositories/local/models/group.dart";
+import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/local/models/tag.dart";
@@ -58,6 +59,7 @@ class Database {
 		GroupSchema,
 		ChapterLocalMetaSchema,
 		ChapterSchema,
+		HistorySchema,
 		// Settings related models
 		AppearanceSettingsStoreSchema,
 		ContentFilterSettingsStoreSchema,

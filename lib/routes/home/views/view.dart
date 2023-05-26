@@ -2,7 +2,7 @@ import "package:animations/animations.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:riba/routes/home/views/library.dart";
-import "package:riba/routes/home/widgets/user_bar.dart";
+import "package:riba/routes/home/widgets/action_bar.dart";
 import "package:riba/utils/constants.dart";
 
 import "home.dart";
@@ -27,12 +27,8 @@ class _HomeViewState extends State<HomeView> {
 
 	@override
 	Widget build(BuildContext context) {
-		final media = MediaQuery.of(context);
-
 		return Scaffold(
-			appBar: PreferredSize(
-				preferredSize: Size.fromHeight(media.padding.top + 64),
-				child: const SafeArea(child: HomeUserBar())),
+			appBar: ActionBar(currentPage: currentPage),
 			bottomNavigationBar: ValueListenableBuilder(
 				valueListenable: currentPage,
 				builder: (context, value, _) => NavigationBar(
@@ -48,9 +44,9 @@ class _HomeViewState extends State<HomeView> {
 							icon: Icon(Icons.library_books_outlined),
 							selectedIcon: Icon(Icons.library_books_rounded)),
 						NavigationDestination(
-							label: "Search",
-							icon: Icon(Icons.search_outlined),
-							selectedIcon: Icon(Icons.search_rounded)),
+							label: "Explore",
+							icon: Icon(Icons.explore_outlined),
+							selectedIcon: Icon(Icons.explore_rounded)),
 					],
 				),
 			),

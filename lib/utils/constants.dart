@@ -152,6 +152,9 @@ class Edges {
 }
 
 class Corners {
+	/// Fully rounded corners
+	static const full = Radius.circular(100);
+
 	/// 28 dp
 	static const extraLarge = Radius.circular(Edges.extraLarge);
 
@@ -170,6 +173,9 @@ class Corners {
 	/// 0 dp
 	static const none = Radius.zero;
 
+	/// All corners fully rounded
+	static const allFull = BorderRadius.all(full);
+
 	/// 28 dp all corners
 	static const allExtraLarge = BorderRadius.all(extraLarge);
 
@@ -187,6 +193,12 @@ class Corners {
 
 	/// 0 dp all corners
 	static const allNone = BorderRadius.all(none);
+
+	/// Fully rounded top left and top right
+	static const topFull = BorderRadius.only(
+		topRight: full,
+		topLeft: full,
+	);
 
 	/// 28 dp top left and top right
 	static const topExtraLarge = BorderRadius.only(
@@ -211,6 +223,12 @@ class Corners {
 
 	/// 0 dp top left and top right
 	static const topNone = BorderRadius.only(topRight: none, topLeft: none);
+
+	/// Fully rounded bottom left and bottom right
+	static const bottomFull = BorderRadius.only(
+		bottomRight: full,
+		bottomLeft: full,
+	);
 
 	/// 28 dp bottom left and bottom right
 	static const bottomExtraLarge = BorderRadius.only(
@@ -239,7 +257,13 @@ class Corners {
 	/// 0 dp bottom left and bottom right
 	static const bottomNone = BorderRadius.only(bottomRight: none, bottomLeft: none);
 
-	/// 28 dp top left and top right
+	/// Fully rounded top left and bottom left
+	static const BorderRadius leftFull = BorderRadius.only(
+		topLeft: full,
+		bottomLeft: full,
+	);
+
+	/// 28 dp top left and bottom left
 	static const BorderRadius leftExtraLarge = BorderRadius.only(
 		topLeft: extraLarge,
 		bottomLeft: extraLarge,
@@ -263,10 +287,16 @@ class Corners {
 	/// 0 dp top left and bottom left
 	static const BorderRadius leftNone = BorderRadius.only(topLeft: none, bottomLeft: none);
 
+	/// Fully rounded top right and bottom right
+	static const BorderRadius rightFull = BorderRadius.only(
+		topRight: full,
+		bottomRight: full,
+	);
+
 	/// 28 dp top right and bottom right
 	static const BorderRadius rightExtraLarge = BorderRadius.only(
 		topRight: extraLarge,
-		bottomRight: extraLarge,
+		bottomRight: extraLarge
 	);
 
 	/// 16 dp top right and bottom right
@@ -332,6 +362,7 @@ class IconButtonStyles {
 class Durations {
 	static const Duration standard = Duration(milliseconds: 300);
 	static const Duration emphasized = Duration(milliseconds: 500);
+	static const Duration long = Duration(milliseconds: 1500);
 }
 
 class Easing {
