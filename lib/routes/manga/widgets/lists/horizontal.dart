@@ -13,7 +13,6 @@ class MangaHorizontalList extends StatefulWidget {
 
 	final String title;
 	final Map<String, MangaData> mangaData;
-
 	final ValueNotifier<double> scrollOffset;
 
 	@override
@@ -56,7 +55,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 		final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
 
 		return ListView.separated(
-			cacheExtent: 30,
+			cacheExtent: 100,
 			controller: scrollController,
 			itemCount: itemCount,
 			padding: Edges.horizontalMedium,
