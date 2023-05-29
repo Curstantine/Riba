@@ -49,6 +49,10 @@ class _SearchBarImplState extends State<SearchBarImpl> {
 				),
 				builder: (context, controller) => SearchBar(
 					controller: controller,
+					// padding: MaterialStateProperty.all(Edges.leftLarge),
+					// shadowColor: MaterialStateProperty.all(Colors.transparent),
+					// leading: const Icon(Icons.search_rounded),
+					// onTap: () => controller.openView(),
 					trailing: const [
 						PopupActionButton()
 					],

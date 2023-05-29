@@ -21,10 +21,13 @@ class SearchBar extends StatelessWidget {
 		final colors = theme.colorScheme;
 
 		return Material(
+			borderRadius: Corners.allFull,
+			// In the spec, the search bar uses surface container high with 3dp elevation.
+			// However, this new color pattern is not supported by the Flutter Material 3 internals.
+			// Tracked in : https://github.com/flutter/flutter/issues/115912
+			elevation: 3,
 			color: colors.surface,
 			surfaceTintColor: colors.surfaceTint,
-			borderRadius: Corners.allFull,
-			elevation: 3,
 			shadowColor: Colors.transparent,
 			child: InkWell(
 				onTap: () => controller.openView(),
@@ -34,7 +37,7 @@ class SearchBar extends StatelessWidget {
 					width: double.infinity,
 					decoration: const BoxDecoration(borderRadius: Corners.allFull),
 					constraints: const BoxConstraints(minWidth: 360, maxHeight: 720),
-					child: Row(children: [
+					child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
 						Padding(
 							padding: Edges.horizontalLarge,
 							child: Icon(Icons.search_rounded, size: 24, color: colors.onSurface)),
@@ -51,7 +54,7 @@ class SearchBar extends StatelessWidget {
 							),
 						),
 						if (trailing != null) ...[
-							const SizedBox(width: Edges.large),
+							const SizedBox(width: Edges.small),
 							...trailing!,
 							const SizedBox(width: Edges.small),
 						],
