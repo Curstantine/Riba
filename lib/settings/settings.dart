@@ -39,6 +39,7 @@ abstract class CollectionSettingsController<T> {
 	Future<void> load();
 	Future<void> reset();
 	Stream<T> watch({bool fireImmediately = false});
+	Stream<void> watchLazily({bool fireImmediately = false});
 }
 
 /// Base controller to extend for settings that are unique per entity.

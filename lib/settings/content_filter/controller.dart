@@ -50,6 +50,12 @@ class ContentFilterSettingsController extends CollectionSettingsController<Store
 			.map((e) => e!);
 	}
 
+	@override
+	Stream<void> watchLazily({bool fireImmediately = false}) {
+		return isar.contentFilterSettings
+			.watchObjectLazy(1, fireImmediately: fireImmediately);
+	}
+
 	Future<void> setOriginalLanguages(List<Language> originalLanguages) async {
 		store = store.copyWith(originalLanguages: originalLanguages);
 		_originalLanguages.value = originalLanguages;

@@ -1,22 +1,19 @@
 import "package:flutter/material.dart" hide Locale;
-import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
-import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
-import "package:riba/utils/errors.dart";
 
 class MangaHorizontalList extends StatefulWidget {
 	const MangaHorizontalList({
 		super.key,
 		required this.title,
-		required this.mangaIds,
+		required this.mangaData,
 		required this.scrollOffset,
 	});
 
 	final String title;
-	final List<String> mangaIds;
+	final Map<String, MangaData> mangaData;
+
 	final ValueNotifier<double> scrollOffset;
 
 	@override
@@ -25,16 +22,6 @@ class MangaHorizontalList extends StatefulWidget {
 
 class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	late final scrollController = ScrollController(initialScrollOffset: widget.scrollOffset.value);
-
-	late final Stream<Map<String, MangaData>> dataStream = Settings.instance.contentFilter
-		.watch(fireImmediately: true)
-		.asyncMap((e) => MangaDex.instance.manga.getMany(
-			overrides: MangaDexMangaQueryFilter(
-				ids: widget.mangaIds,
-				contentRatings: e.contentRatings,
-				originalLanguages: e.originalLanguages,
-			),
-		));	
 
 	@override
 	void initState() {
@@ -63,53 +50,31 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 	}
 
 	Widget buildList(TextTheme text, ColorScheme colors) {
-		return StreamBuilder<Map<String, MangaData>>(
-				stream: dataStream,
-				builder: (context, dataSnapshot) {
-					if (dataSnapshot.connectionState != ConnectionState.active) {
-						return const Center(child: CircularProgressIndicator());
-					}
+		final data = widget.mangaData;
+		final ids = data.keys.toList();
+		final missingCount = widget.mangaData.length - ids.length;
+		final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
 
-					if (dataSnapshot.hasError || !dataSnapshot.hasData) {
-						final error = handleError(dataSnapshot.error ?? "Data was null without errors.");
-
-						return Center(child: Column(children: [
-							Text(error.title, style: text.titleLarge),
-							Text(error.description, style: text.bodyMedium),
-						]));
-					}
-
-					// Since global filters are applied to these requests,
-					// there are chances that data might not contain all the 
-					// mangaIds requested. As such, it is a good idea to completely
-					// ignore the ids given to this widget after the fetch.
-					final data = dataSnapshot.requireData;
-					final ids = data.keys.toList();
-					final missingCount = widget.mangaIds.length - ids.length;
-					final itemCount = missingCount != 0 ? ids.length + 1 : ids.length;
-
-					return ListView.separated(
-						cacheExtent: 30,
-						controller: scrollController,
-						itemCount: itemCount,
-						padding: Edges.horizontalMedium,
-						scrollDirection: Axis.horizontal,
-						findChildIndexCallback: (k) {
-							final key = k as ValueKey<String>;
-							if (key.value == "out-of-index") return itemCount - 1;
-							return ids.indexOf(key.value);
-						},
-						separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-						itemBuilder: (_, i) {
-							if (i >= ids.length) {
-								return buildOutOfIndex(text, colors, missingCount);
-							}
-
-							final id = ids[i];
-							return MangaCard(key: ValueKey(id), mangaData: data[id]!);
-						},
-					);
+		return ListView.separated(
+			cacheExtent: 30,
+			controller: scrollController,
+			itemCount: itemCount,
+			padding: Edges.horizontalMedium,
+			scrollDirection: Axis.horizontal,
+			findChildIndexCallback: (k) {
+				final key = k as ValueKey<String>;
+				if (key.value == "out-of-index") return itemCount - 1;
+				return ids.indexOf(key.value);
+			},
+			separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
+			itemBuilder: (_, i) {
+				if (i >= ids.length) {
+					return buildOutOfIndex(text, colors, missingCount);
 				}
+
+				final id = ids[i];
+				return MangaCard(key: ValueKey(id), mangaData: data[id]!);
+			},
 		);
 	}
 

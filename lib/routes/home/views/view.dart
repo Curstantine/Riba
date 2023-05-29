@@ -5,14 +5,14 @@ import "package:riba/routes/home/views/library.dart";
 import "package:riba/routes/home/widgets/action_bar.dart";
 import "package:riba/utils/constants.dart";
 
+import "explore.dart";
 import "home.dart";
-import "search.dart";
 
 class HomeView extends StatefulWidget {
 	const HomeView({super.key});
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
+	@override
+	State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
@@ -70,11 +70,11 @@ class _HomeViewState extends State<HomeView> {
 	Widget buildPageView(int index) {
 		switch (index) {
 			case 0:
-				return HomeContent(scrollOffset: homeScrollOffset);
+				return const HomeContent();
 			case 1:
 				return const LibraryContent();
 			case 2:
-				return const SearchContent();
+				return const ExploreContent();
 			default:
 				throw Exception("Invalid page index");
 		}

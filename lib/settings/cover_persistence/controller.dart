@@ -49,6 +49,12 @@ class CoverPersistenceSettingsController extends CollectionSettingsController<St
 			.map((e) => e!);
 	}
 
+	@override
+	Stream<void> watchLazily({bool fireImmediately = false}) {
+		return isar.coverPersistenceSettings
+			.watchObjectLazy(1, fireImmediately: fireImmediately);
+	}
+
 	Future<void> setEnabled(bool enabled) async {
 		store = store.copyWith(enabled: enabled);
 		_enabled.value = enabled;

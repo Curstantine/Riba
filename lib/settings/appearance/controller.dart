@@ -55,6 +55,12 @@ class AppearanceSettingsController extends CollectionSettingsController<Store> {
 			.map((e) => e!);
 	}
 
+	@override
+	Stream<void> watchLazily({bool fireImmediately = false}) {
+		return isar.appearanceSettings
+			.watchObjectLazy(1, fireImmediately: fireImmediately);
+	}
+
 	Future<void> setSchemeId(SchemeId id, Brightness brightness) {
 		switch (brightness) {
 			case Brightness.light:

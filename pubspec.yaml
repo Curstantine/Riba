@@ -25,6 +25,7 @@ dependencies:
     meta: ^1.9.1
     package_info_plus: ^4.0.0
     path_provider: ^2.0.15
+    rxdart: ^0.27.7
     url_launcher: ^6.1.11
 
 dev_dependencies:
