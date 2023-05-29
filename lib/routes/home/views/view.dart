@@ -1,8 +1,7 @@
 import "package:animations/animations.dart";
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
+import "package:riba/routes/home/model.dart";
 import "package:riba/routes/home/views/library.dart";
-import "package:riba/routes/home/widgets/action_bar.dart";
 import "package:riba/utils/constants.dart";
 
 import "explore.dart";
@@ -16,24 +15,16 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-	final logger = Logger("HomeView");
-	
-	final ValueNotifier<int> currentPage = ValueNotifier(0);
-	
-	// Hoists the scroll offset of the home page.
-	// Changing this value won't actively change the scroll offset of the home page,
-	// but will be used in the widget initialization step.
-	final ValueNotifier<double> homeScrollOffset = ValueNotifier(0);
+	HomeViewModel get viewModel => HomeViewModel.instance;
 
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
-			appBar: ActionBar(currentPage: currentPage),
 			bottomNavigationBar: ValueListenableBuilder(
-				valueListenable: currentPage,
+				valueListenable: viewModel.currentPage,
 				builder: (context, value, _) => NavigationBar(
-					selectedIndex: value,
-					onDestinationSelected: (i) => currentPage.value = i,
+					selectedIndex: value.index,
+					onDestinationSelected: (i) => viewModel.currentPage.value = HomeViewPage.values[i],
 					destinations: const [
 						NavigationDestination(
 							label: "Home",
@@ -51,9 +42,9 @@ class _HomeViewState extends State<HomeView> {
 				),
 			),
 			body: ValueListenableBuilder(
-				valueListenable: currentPage,
+				valueListenable: viewModel.currentPage,
 				builder: (context, value, _) => PageTransitionSwitcher(
-					reverse: value < 1,
+					reverse: value.index < 1,
 					duration: Durations.emphasized,
 					transitionBuilder: (child, x, y) => SharedAxisTransition(
 						animation: x,
@@ -67,16 +58,20 @@ class _HomeViewState extends State<HomeView> {
 		);
 	}
 
-	Widget buildPageView(int index) {
-		switch (index) {
-			case 0:
+	Widget buildPageView(HomeViewPage page) {
+		switch (page) {
+			case HomeViewPage.home:
 				return const HomeContent();
-			case 1:
+			case HomeViewPage.library:
 				return const LibraryContent();
-			case 2:
+			case HomeViewPage.explore:
 				return const ExploreContent();
-			default:
-				throw Exception("Invalid page index");
 		}
 	}
+}
+
+enum HomeViewPage {
+	home,
+	library,
+	explore,
 }

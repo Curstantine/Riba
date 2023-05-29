@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:riba/routes/home/widgets/action_bar.dart";
 
 class HomeContent extends StatefulWidget { 
 	const HomeContent({super.key});
@@ -10,11 +11,12 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
 	@override
 	Widget build(BuildContext context) {
-		return SafeArea(
-			child: ListView(
-				primary: true,
-				children: const [Text("Home")],
-			),
+		return ListView(
+			primary: true,
+			children: const [
+				ActionBar(),
+				Text("Home"),
+			],
 		);
 	}
 }

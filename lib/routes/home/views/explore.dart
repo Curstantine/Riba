@@ -6,6 +6,7 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/home/model.dart";
+import "package:riba/routes/home/widgets/search_bar.dart";
 import "package:riba/routes/manga/widgets/lists/horizontal.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
@@ -33,12 +34,13 @@ class _ExploreContentState extends State<ExploreContent> {
 		final theme = Theme.of(context);
 		final text = theme.textTheme;
 
-		return SafeArea(
-			child: ListView(
-				primary: true,
-				padding: Edges.topSmall,
-				children: [buildSeasonal(text)],
-			),
+		return ListView(
+			primary: true,
+			children: [
+				const SearchBarImpl(),
+				const SizedBox(height: Edges.medium),
+				buildSeasonal(text),
+			],
 		);
 	}
 
