@@ -1,13 +1,16 @@
+
 import "package:flutter/material.dart" hide SearchBar;
 import "package:flutter_animate/flutter_animate.dart";
-import "package:isar/isar.dart";
 import "package:riba/repositories/local/models/history.dart";
+import "package:riba/routes/home/model.dart";
+import "package:riba/routes/home/views/explore/view.dart";
+import "package:riba/routes/home/widgets/popup_action_button.dart";
 import "package:riba/utils/constants.dart";
-import "package:riba/utils/database.dart";
+import "package:riba/utils/debouncer.dart";
 import "package:riba/widgets/material/search.dart";
 import "package:riba/widgets/material/skeleton_loaders.dart";
+import "package:rxdart/rxdart.dart";
 
-import "popup_action_button.dart";
 
 class SearchBarImpl extends StatefulWidget {
 	const SearchBarImpl({super.key});
@@ -17,42 +20,42 @@ class SearchBarImpl extends StatefulWidget {
 }
 
 class _SearchBarImplState extends State<SearchBarImpl> {
-	final searchController = SearchController();
+	final debouncer = Debounce(duration: const Duration(milliseconds: 500));
 
-	Future<List<History>>? queryHistory;
+	ExploreContentViewModel get viewModel => HomeViewModel.instance.exploreViewModel;
 
 	@override
 	void initState() {
 		super.initState();
-
-		queryHistory = Database.instance.local.history.where()
-			.typeEqualTo(HistoryType.query)
-			.sortByCreatedAt()
-			.limit(5)
-			.findAll();
+		viewModel.quickSearchController.addListener(onInputChange);
+		viewModel.initializeQuickSearch();
 	}
+
+	@override
+	void dispose() {
+		super.dispose();
+		viewModel.quickSearchController.removeListener(onInputChange);
+	}
+
+	void onInputChange() => debouncer.run(() => viewModel.refreshQuickSearch());
 
 	@override
 	Widget build(BuildContext context) {
 		return Padding(
 			padding: Edges.horizontalMedium,
 			child: SearchAnchor(
-				searchController: searchController,
+				searchController: viewModel.quickSearchController,
 				suggestionsBuilder: (_, __) => [],
 				viewBuilder: (_) => _SearchBarSuggestionsView(
-					controller: searchController,
-					queryHistory: queryHistory,
+					controller: viewModel.quickSearchController,
+					historyStream: viewModel.quickSearchHistoryStream,
 				),
 				viewLeading: IconButton(
 					icon: const Icon(Icons.arrow_back_rounded),
-					onPressed: () => searchController.closeView(null)
+					onPressed: () => viewModel.quickSearchController.closeView(null)
 				),
 				builder: (context, controller) => SearchBar(
 					controller: controller,
-					// padding: MaterialStateProperty.all(Edges.leftLarge),
-					// shadowColor: MaterialStateProperty.all(Colors.transparent),
-					// leading: const Icon(Icons.search_rounded),
-					// onTap: () => controller.openView(),
 					trailing: const [
 						PopupActionButton()
 					],
@@ -69,11 +72,11 @@ class _SearchBarImplState extends State<SearchBarImpl> {
 class _SearchBarSuggestionsView extends StatelessWidget {
 	const _SearchBarSuggestionsView({
 		required this.controller,
-		required this.queryHistory,
+		required this.historyStream,
 	});
 
 	final SearchController controller;
-	final Future<List<History>>? queryHistory;
+	final ValueStream<List<History>> historyStream;
 
 	@override
 	Widget build(BuildContext context) {
@@ -89,8 +92,8 @@ class _SearchBarSuggestionsView extends StatelessWidget {
 	}
 
 	Widget buildRecentList(TextTheme text) {
-		return FutureBuilder<List<History>>(
-			future: queryHistory,
+		return StreamBuilder<List<History>>(
+			stream: historyStream,
 			builder: (context, snapshot) {
 				if (!snapshot.hasData) {
 					return SliverToBoxAdapter(

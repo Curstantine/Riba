@@ -1,6 +1,6 @@
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
-import "package:riba/routes/home/views/explore.dart";
+import 'package:riba/routes/home/views/explore/view.dart';
 import "package:riba/routes/home/views/view.dart";
 
 class HomeViewModel {

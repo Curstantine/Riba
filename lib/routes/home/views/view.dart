@@ -4,7 +4,7 @@ import "package:riba/routes/home/model.dart";
 import "package:riba/routes/home/views/library.dart";
 import "package:riba/utils/constants.dart";
 
-import "explore.dart";
+import 'explore/view.dart';
 import "home.dart";
 
 class HomeView extends StatefulWidget {
