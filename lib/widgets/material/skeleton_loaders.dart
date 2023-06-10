@@ -5,11 +5,13 @@ class TextSkeleton extends StatelessWidget {
 	const TextSkeleton({
 		super.key,
 		this.width = 150,
+		this.color,
 		required this.style,
 	});
 
 	final double width;
 	final TextStyle style;
+	final Color? color;
 
 	@override
 	Widget build(context) {
@@ -18,8 +20,9 @@ class TextSkeleton extends StatelessWidget {
 		return Container(
 			height: style.fontSize,
 			width: width,
+			constraints: BoxConstraints(maxWidth: width),
 			decoration: BoxDecoration(
-				color: theme.colorScheme.surface,
+				color: color ?? theme.colorScheme.surface,
 				borderRadius: Corners.allFull,
 			),
 		);

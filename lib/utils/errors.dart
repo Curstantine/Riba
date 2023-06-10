@@ -12,9 +12,15 @@ class ErrorState {
 	String toString() => "$title: $description";
 }
 
-ErrorState handleError(Object object) {
+ErrorState handleError(Object? object) {
 	late String title;
 	late String description;
+
+	if (object == null) {
+		title = "Came across an unknown error!";
+		description = "Object was null without errors.";
+		return ErrorState(title: title, description: description);
+	}
 
 	switch (object.runtimeType) {
 		case MDException:

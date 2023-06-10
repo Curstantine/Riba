@@ -13,6 +13,7 @@ import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
+import "package:riba/widgets/material/skeleton_loaders.dart";
 
 class MangaCard extends StatefulWidget {
 	const MangaCard({super.key, required this.mangaData});
@@ -123,6 +124,39 @@ class _MangaCardState extends State<MangaCard> {
 	void navigateToMangaView(BuildContext context) {
 		Navigator.of(context).push(
 			sharedAxis((_) => MangaView(id: manga.id), SharedAxisTransitionType.vertical),
+		);
+	}
+}
+
+class MangaCardSkeleton extends StatelessWidget {
+	const MangaCardSkeleton({super.key});
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final colors = theme.colorScheme;
+		final text = theme.textTheme;
+
+
+		return SizedBox(
+			width: 150,
+			height: 250,
+			child: Column(
+				mainAxisAlignment: MainAxisAlignment.end,
+				crossAxisAlignment: CrossAxisAlignment.start,
+				children: [
+					Expanded(child: Container(
+						width: 150,
+						margin: Edges.verticalSmall,
+						decoration: BoxDecoration(
+							color: theme.colorScheme.surface.withOpacity(0.75),
+							borderRadius: Corners.allMedium,
+						),
+						// child: const Placeholder(),
+					)),
+					TextSkeleton(style: text.bodyLarge!, color: colors.surface.withOpacity(0.5)),
+				],
+			),
 		);
 	}
 }

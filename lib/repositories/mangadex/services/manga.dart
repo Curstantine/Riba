@@ -202,10 +202,24 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 	}
 
 	@override
-	@Deprecated(
-		"Will not be implemented, used as a stub for the interface. Use the respective sub methods instead.")
-	Future<CollectionData<MangaData>> withFilters({required overrides}) {
-		throw UnimplementedError();
+	Future<CollectionData<MangaData>> withFilters({required overrides}) async {
+		logger.info("withFilters($overrides)");
+
+		final filters = defaultFilters.copyWithSelf(overrides);
+		final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
+
+		final request = await client.get(reqUrl.toUri());
+		final response = MangaCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+
+		final data = response.data.map((e) => e.toInternalMangaData()).toList();
+		await database.isar.writeTxn(() => Future.wait(data.map(insertMeta)));
+
+		return CollectionData(
+			data: data.map((e) => e.toMangaData()).toList(),
+			limit: response.limit,
+			offset: response.offset,
+			total: response.total,
+		);
 	}
 
 	Future<Statistics> getStatistics(String id, {bool checkDB = true}) async {
