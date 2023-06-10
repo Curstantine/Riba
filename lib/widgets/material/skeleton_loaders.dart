@@ -22,7 +22,7 @@ class TextSkeleton extends StatelessWidget {
 			width: width,
 			constraints: BoxConstraints(maxWidth: width),
 			decoration: BoxDecoration(
-				color: color ?? theme.colorScheme.surface,
+				color: color ?? theme.colorScheme.surfaceVariant,
 				borderRadius: Corners.allFull,
 			),
 		);
@@ -58,7 +58,7 @@ class ListTileSkeleton extends StatelessWidget {
 		height: size,
 		width: size,
 		decoration: BoxDecoration(
-			color: colors.surface,
+			color: colors.surfaceVariant,
 			shape: BoxShape.circle,
 		),
 	);

@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:animations/animations.dart";
 import "package:flutter/material.dart" hide Locale;
+import "package:flutter_animate/flutter_animate.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
@@ -153,13 +154,15 @@ class MangaCardSkeleton extends StatelessWidget {
 						width: 150,
 						margin: Edges.verticalSmall,
 						decoration: BoxDecoration(
-							color: theme.colorScheme.surface.withOpacity(0.75),
+							color: theme.colorScheme.surfaceVariant.withOpacity(0.75),
 							borderRadius: Corners.allMedium,
 						),
 						// child: const Placeholder(),
 					)),
-					TextSkeleton(style: text.bodyLarge!, color: colors.surface.withOpacity(0.5)),
-				],
+					TextSkeleton(style: text.bodyLarge!, color: colors.surfaceVariant.withOpacity(0.5)),
+				]
+				.animate(onPlay: (controller) => controller.repeat())
+				.shimmer(delay: Durations.standard, duration: Durations.long),
 			),
 		);
 	}

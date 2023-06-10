@@ -41,10 +41,10 @@ class ExploreViewModel {
 	Future<void> loadSeasonalMangaData({bool force = false}) async {
 		if (_seasonalController.hasValue && !force) {
 			logger.info("Seasonal manga data already loaded, returning cached data.");
-			return _seasonalController.add(_seasonalController.value);
+			return;
 		}
 
-		try {
+		try {			
 			final settings = Settings.instance.contentFilter;
 			final seasonalList = await MangaDex.instance.customList.getSeasonal();
 			final manga = await MangaDex.instance.manga.getMany(

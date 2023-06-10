@@ -362,7 +362,7 @@ class IconButtonStyles {
 class Durations {
 	static const Duration standard = Duration(milliseconds: 300);
 	static const Duration emphasized = Duration(milliseconds: 500);
-	static const Duration long = Duration(milliseconds: 1500);
+	static const Duration long = Duration(seconds: 1);
 }
 
 class Easing {
