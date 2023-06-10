@@ -1,88 +1,18 @@
-
 import "package:flutter/material.dart" hide SearchBar;
 import "package:flutter_animate/flutter_animate.dart";
 import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/home/model.dart";
-import "package:riba/routes/home/views/explore/model.dart";
-import "package:riba/routes/home/widgets/popup_action_button.dart";
+import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
 import "package:riba/utils/constants.dart";
-import "package:riba/utils/debouncer.dart";
 import "package:riba/widgets/error_card.dart";
-import "package:riba/widgets/material/search.dart";
 import "package:riba/widgets/material/skeleton_loaders.dart";
-import "package:rxdart/rxdart.dart";
 
+class QuickSearchView extends StatelessWidget {
+	const QuickSearchView({super.key});
 
-class SearchBarImpl extends StatefulWidget {
-	const SearchBarImpl({super.key});
+	ExploreViewModel get viewModel => ExploreViewModel.instance;
 
-	@override
-	State<SearchBarImpl> createState() => _SearchBarImplState();
-}
-
-class _SearchBarImplState extends State<SearchBarImpl> {
-	final debouncer = Debounce(duration: const Duration(milliseconds: 500));
-
-	ExploreContentViewModel get viewModel => HomeViewModel.instance.exploreViewModel;
-
-	@override
-	void initState() {
-		super.initState();
-		viewModel.quickSearchController.addListener(onInputChange);
-		viewModel.initializeQuickSearch();
-	}
-
-	@override
-	void dispose() {
-		super.dispose();
-		viewModel.quickSearchController.removeListener(onInputChange);
-	}
-
-	void onInputChange() => debouncer.run(() => viewModel.refreshQuickSearch());
-
-	@override
-	Widget build(BuildContext context) {
-		return Padding(
-			padding: Edges.horizontalMedium,
-			child: SearchAnchor(
-				searchController: viewModel.quickSearchController,
-				suggestionsBuilder: (_, __) => [],
-				viewBuilder: (_) => _SearchBarSuggestionsView(
-					controller: viewModel.quickSearchController,
-					historyStream: viewModel.quickSearchHistoryStream,
-					mangaStream: viewModel.quickSearchMangaStream,
-				),
-				viewLeading: IconButton(
-					icon: const Icon(Icons.arrow_back_rounded),
-					onPressed: () => viewModel.quickSearchController.closeView(null)
-				),
-				builder: (context, controller) => SearchBar(
-					controller: controller,
-					trailing: const [
-						PopupActionButton()
-					],
-				),
-			),
-		);
-	}
-
-	Color getSearchBarShadow(Set<MaterialState> states) {
-		return Colors.transparent;
-	}
-}
-
-class _SearchBarSuggestionsView extends StatelessWidget {
-	const _SearchBarSuggestionsView({
-		required this.controller,
-		required this.historyStream,
-		required this.mangaStream,
-	});
-
-	final SearchController controller;
-	final ValueStream<List<History>> historyStream;
-	final ValueStream<List<MangaData>> mangaStream;
 
 	@override
 	Widget build(BuildContext context) {
@@ -100,7 +30,7 @@ class _SearchBarSuggestionsView extends StatelessWidget {
 
 	Widget buildRecentList(TextTheme text) {
 		return StreamBuilder<List<History>>(
-			stream: historyStream,
+			stream: viewModel.quickSearchHistoryStream,
 			builder: (context, snapshot) {
 				if (!snapshot.hasData) {
 					return SliverToBoxAdapter(
@@ -131,7 +61,7 @@ class _SearchBarSuggestionsView extends StatelessWidget {
 						ListTile(
 							leading: const Icon(Icons.history),
 							title: Text(history.value),
-							onTap: () => controller.text = history.value)
+							onTap: () => viewModel.quickSearchController.text = history.value)
 				].animate().fadeIn()));
 			},
 		);
@@ -139,7 +69,7 @@ class _SearchBarSuggestionsView extends StatelessWidget {
 
 	Widget buildMangaList(TextTheme text) {
 		return StreamBuilder<List<MangaData>>(
-			stream: mangaStream,
+			stream: viewModel.quickSearchMangaStream,
 			builder: (context, snapshot) {
 				if (snapshot.hasError) {
 					return SliverToBoxAdapter(child: SizedBox(
@@ -198,6 +128,7 @@ class _SearchBarSuggestionsView extends StatelessWidget {
 								return MangaCard(
 									key: ValueKey(mangaData.manga.id),
 									mangaData: mangaData,
+									onPress: () => viewModel.addSearchHistory(mangaData.manga.id, HistoryType.manga),
 								);
 							},
 						)),

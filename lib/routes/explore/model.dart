@@ -10,8 +10,16 @@ import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";
 import "package:rxdart/rxdart.dart";
 
-class ExploreContentViewModel {
-	final logger = Logger("ExploreContent");
+class ExploreViewModel {
+	static ExploreViewModel? _instance;
+	static ExploreViewModel get instance {
+		return _instance ??= ExploreViewModel._internal();
+	}
+
+	ExploreViewModel._internal();
+
+	final logger = Logger("ExploreViewModel");
+
 	final seasonalScroll = ValueNotifier<double>(0);
 	final quickSearchController = SearchController();
 
@@ -24,7 +32,7 @@ class ExploreContentViewModel {
 	final _quickSearchHistoryController = BehaviorSubject<List<History>>();
 	ValueStream<List<History>> get quickSearchHistoryStream => _quickSearchHistoryController.stream;
 	
-	ExploreContentViewModel() {
+	ExploreViewModel() {
 		Settings.instance.contentFilter
 			.watchLazily()
 			.map((e) => loadSeasonalMangaData(force: true));
@@ -86,6 +94,36 @@ class ExploreContentViewModel {
 			_quickSearchMangaController.add(manga.data);
 		} catch (e) {
 			_quickSearchMangaController.addError(e);
+		}
+	}
+
+	Future<void> addSearchHistory(String value, HistoryType type) async {
+		try {
+			await Database.instance.local.writeTxn(() async {
+				final history = await Database.instance.local.history
+					.where()
+					.typeEqualTo(HistoryType.query)
+					.filter()
+					.createdAtBetween(DateTime.now().subtract(const Duration(seconds: 15)), DateTime.now())
+					.valueEqualTo(value)
+					.count();
+
+				if (history == 0) {
+					await Database.instance.local.history.put(History(
+						type: type,
+						value: value,
+						createdAt: DateTime.now(),
+					));
+				}
+
+				await Database.instance.local.history.put(History(
+					type: type,
+					value: value,
+					createdAt: DateTime.now(),
+				));
+			});
+		} catch (e) {
+			logger.warning("Failed to add search history: $e");
 		}
 	}
 }

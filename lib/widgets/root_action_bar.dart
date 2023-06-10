@@ -3,10 +3,10 @@ import "package:riba/repositories/mangadex/models/user.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/theme.dart";
 
-import "popup_action_button.dart";
+import "root_action_popup_button.dart";
 
-class ActionBar extends StatelessWidget implements PreferredSizeWidget {
-	const ActionBar({super.key});
+class RootActionBar extends StatelessWidget implements PreferredSizeWidget {
+	const RootActionBar({super.key});
 
 	@override
 	Size get preferredSize => const Size.fromHeight(64);
@@ -33,7 +33,7 @@ class ActionBar extends StatelessWidget implements PreferredSizeWidget {
 					],
 				),
 				const Spacer(),
-				const PopupActionButton(),
+				const RootActionPopupButton(),
 			]),
 		);
 	}

@@ -16,9 +16,10 @@ import "package:riba/widgets/material/card.dart";
 import "package:riba/widgets/material/skeleton_loaders.dart";
 
 class MangaCard extends StatefulWidget {
-	const MangaCard({super.key, required this.mangaData});
+	const MangaCard({super.key, required this.mangaData, this.onPress});
 
 	final MangaData mangaData;
+	final VoidCallback? onPress;
 
 	@override
 	State<MangaCard> createState() => _MangaCardState();
@@ -47,7 +48,10 @@ class _MangaCardState extends State<MangaCard> {
 
 		return buildCardLayout(
 			theme,
-			onTap: () => navigateToMangaView(context),
+			onTap: () {
+				widget.onPress?.call();
+				navigateToMangaView(context);
+			},
 			child: StreamBuilder<File?>(
 				stream: coverStream,
 				builder: (context, snapshot) {

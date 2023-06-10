@@ -1,30 +1,29 @@
 import "package:animations/animations.dart";
 import "package:flutter/material.dart";
-import "package:riba/routes/home/model.dart";
-import "package:riba/routes/home/views/library.dart";
+import "package:riba/routes/library/library.dart";
 import "package:riba/utils/constants.dart";
 
-import 'explore/view.dart';
-import "home.dart";
+import "explore/view.dart";
+import "home/view.dart";
 
-class HomeView extends StatefulWidget {
-	const HomeView({super.key});
+class RootView extends StatefulWidget {
+	const RootView({super.key});
 
 	@override
-	State<HomeView> createState() => _HomeViewState();
+	State<RootView> createState() => _RootViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
-	HomeViewModel get viewModel => HomeViewModel.instance;
+class _RootViewState extends State<RootView> {
+	final ValueNotifier<RootDestinations> currentPage = ValueNotifier(RootDestinations.home);
 
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
 			bottomNavigationBar: ValueListenableBuilder(
-				valueListenable: viewModel.currentPage,
+				valueListenable: currentPage,
 				builder: (context, value, _) => NavigationBar(
 					selectedIndex: value.index,
-					onDestinationSelected: (i) => viewModel.currentPage.value = HomeViewPage.values[i],
+					onDestinationSelected: (i) => currentPage.value = RootDestinations.values[i],
 					destinations: const [
 						NavigationDestination(
 							label: "Home",
@@ -42,7 +41,7 @@ class _HomeViewState extends State<HomeView> {
 				),
 			),
 			body: ValueListenableBuilder(
-				valueListenable: viewModel.currentPage,
+				valueListenable: currentPage,
 				builder: (context, value, _) => PageTransitionSwitcher(
 					reverse: value.index < 1,
 					duration: Durations.emphasized,
@@ -58,19 +57,19 @@ class _HomeViewState extends State<HomeView> {
 		);
 	}
 
-	Widget buildPageView(HomeViewPage page) {
+	Widget buildPageView(RootDestinations page) {
 		switch (page) {
-			case HomeViewPage.home:
+			case RootDestinations.home:
 				return const HomeContent();
-			case HomeViewPage.library:
+			case RootDestinations.library:
 				return const LibraryContent();
-			case HomeViewPage.explore:
-				return const ExploreContent();
+			case RootDestinations.explore:
+				return const ExploreView();
 		}
 	}
 }
 
-enum HomeViewPage {
+enum RootDestinations {
 	home,
 	library,
 	explore,

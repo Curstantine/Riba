@@ -1,22 +1,21 @@
 
 import "package:flutter/material.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/home/model.dart";
-import "package:riba/routes/home/views/explore/model.dart";
-import "package:riba/routes/home/views/explore/search.dart";
+import "package:riba/routes/explore/model.dart";
+import "package:riba/routes/explore/widgets/quick_search_portal.dart";
 import "package:riba/routes/manga/widgets/lists/horizontal.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 
-class ExploreContent extends StatefulWidget {
-	const ExploreContent({super.key});
+class ExploreView extends StatefulWidget {
+	const ExploreView({super.key});
 
 	@override
-	State<ExploreContent> createState() => _ExploreContentState();
+	State<ExploreView> createState() => _ExploreViewState();
 }
 
-class _ExploreContentState extends State<ExploreContent> {	
-	ExploreContentViewModel get viewModel => HomeViewModel.instance.exploreViewModel;
+class _ExploreViewState extends State<ExploreView> {	
+	ExploreViewModel get viewModel => ExploreViewModel.instance;
 
 	@override
 	void initState() {
@@ -32,7 +31,7 @@ class _ExploreContentState extends State<ExploreContent> {
 		return ListView(
 			primary: true,
 			children: [
-				const SearchBarImpl(),
+				const QuickSearchPortal(),
 				const SizedBox(height: Edges.medium),
 				buildSeasonal(text),
 			],

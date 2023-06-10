@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:riba/routes/home/widgets/action_bar.dart";
+import "package:riba/widgets/root_action_bar.dart";
 
 class HomeContent extends StatefulWidget { 
 	const HomeContent({super.key});
@@ -14,7 +14,7 @@ class _HomeContentState extends State<HomeContent> {
 		return ListView(
 			primary: true,
 			children: const [
-				ActionBar(),
+				RootActionBar(),
 				Text("Home"),
 			],
 		);

@@ -1,8 +1,8 @@
 import "package:flutter/material.dart" hide Router;
 import "package:riba/utils/router.dart";
 
-class PopupActionButton extends StatelessWidget {
-	const PopupActionButton({super.key});
+class RootActionPopupButton extends StatelessWidget {
+	const RootActionPopupButton({super.key});
 
 	@override
 	Widget build(context) {
