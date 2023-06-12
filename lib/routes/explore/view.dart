@@ -1,9 +1,9 @@
 
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/widgets/quick_search_portal.dart";
-import "package:riba/routes/manga/widgets/cards.dart";
 import "package:riba/routes/manga/widgets/lists/horizontal.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
@@ -55,7 +55,9 @@ class _ExploreViewState extends State<ExploreView> {
 							padding: Edges.horizontalLarge,
 							physics: const NeverScrollableScrollPhysics(),
 							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-							itemBuilder: (_, __) => const MangaCardSkeleton(),
+							itemBuilder: (_, __) => const MangaCardSkeleton()
+								.animate(onPlay: (controller) => controller.repeat())
+								.shimmer(delay: Durations.standard, duration: Durations.long),
 						)),
 					]);
 				}

@@ -76,6 +76,7 @@ class ExploreViewModel {
 		}
 	}
 
+
 	Future<void> refreshQuickSearch() async {
 		final query = quickSearchController.text;
 		if (query.isEmpty) {
@@ -86,8 +87,8 @@ class ExploreViewModel {
 		try {
 			final manga = await MangaDex.instance.manga.withFilters(overrides: MangaDexMangaQueryFilter(
 				title: query,
-				contentRatings: Settings.instance.contentFilter.contentRatings.value,
 				limit: 5,
+				contentRatings: Settings.instance.contentFilter.contentRatings.value,
 				originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
 			));
 
