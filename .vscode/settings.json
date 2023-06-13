@@ -45,6 +45,7 @@
 		".flutter-plugins-dependencies": true,
 	},
 	"cSpell.words": [
+		"Checkmark",
 		"curstantine",
 		"debouncer",
 		"deduped",

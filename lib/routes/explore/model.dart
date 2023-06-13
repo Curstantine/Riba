@@ -39,8 +39,9 @@ class ExploreViewModel {
 	final _quickSearchFilterTagsController = BehaviorSubject<Map<TagGroup, List<Tag>>>();
 	ValueStream<Map<TagGroup, List<Tag>>> get quickSearchFilterTagsStream => _quickSearchFilterTagsController.stream;
 
-	final quickSearchIncludedTagIds = <String>[];
-	final quickSearchExcludedTagIds = <String>[];
+	final Map<TagGroup, Map<String, ValueNotifier<TagSelectionMode>>> quickSearchGroupedTagSelectionModes = {
+		for (final tagGroup in TagGroup.values) tagGroup: <String, ValueNotifier<TagSelectionMode>>{},
+	};
 	
 	ExploreViewModel() {
 		Settings.instance.contentFilter
@@ -164,4 +165,10 @@ class ExploreViewModel {
 			builder: (context) => const QuickSearchFilterDialog()
 		);
 	}
+}
+
+enum TagSelectionMode {
+	included,
+	excluded,
+	none;
 }

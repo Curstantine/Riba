@@ -1,5 +1,6 @@
 import "package:flutter/material.dart" hide Chip, Locale;
 import "package:riba/repositories/local/models/localization.dart";
+import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/settings/settings.dart";
@@ -7,9 +8,15 @@ import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 import "package:riba/widgets/material/chip.dart";
 
-class QuickSearchFilterDialog extends StatelessWidget {
+
+class QuickSearchFilterDialog extends StatefulWidget {
 	const QuickSearchFilterDialog({super.key});
 
+	@override
+	State<QuickSearchFilterDialog> createState() => _QuickSearchFilterDialogState();
+}
+
+class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 	ExploreViewModel get viewModel => ExploreViewModel.instance;
 	List<Locale> get preferredLocales => Settings.instance.appearance.preferredDisplayLocales.value; 
 
@@ -61,10 +68,12 @@ class QuickSearchFilterDialog extends StatelessWidget {
 									);
 								}
 
+								final groupSelectionMap = viewModel.quickSearchGroupedTagSelectionModes[group]!;
+
 								return Wrap(
 									spacing: Edges.small,
 									children:  tags[group]!
-										.map((tag) => FilterChipExt(onSelected: (s) => {} , label: Text(tag.name.getPreferred(preferredLocales))))
+										.map((tag) => buildTag(text, colors, tag, groupSelectionMap[tag.id] ??= ValueNotifier(TagSelectionMode.none)))
 										.toList(),
 								);
 							}
@@ -72,6 +81,37 @@ class QuickSearchFilterDialog extends StatelessWidget {
 					);
 				}),
 			]),
+		);
+	}
+
+	Widget buildTag(TextTheme text, ColorScheme colors, Tag tag, ValueNotifier<TagSelectionMode> modeNotifier) {
+		return ValueListenableBuilder(
+			valueListenable: modeNotifier,
+			builder: (context, mode, _) {
+				final background = mode == TagSelectionMode.excluded ? colors.errorContainer : null;
+				final foreground = mode == TagSelectionMode.excluded ? colors.onErrorContainer : null;
+
+				/// TODO: Add leading icons when the chip API supports it
+				return FilterChipExt(
+					showCheckmark: false,
+					label: Text(tag.name.getPreferred(preferredLocales), style: text.labelLarge?.copyWith(color: foreground)),
+					selectedColor: background,
+					selected: mode == TagSelectionMode.included || mode == TagSelectionMode.excluded,
+					onSelected: (_) {
+						switch (mode) {
+							case TagSelectionMode.none:
+								modeNotifier.value = TagSelectionMode.included;
+								break;
+							case TagSelectionMode.included:
+								modeNotifier.value = TagSelectionMode.excluded;
+								break;
+							case TagSelectionMode.excluded:
+								modeNotifier.value = TagSelectionMode.none;
+								break;
+						}
+					},
+				);
+			},
 		);
 	}
 }
