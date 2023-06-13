@@ -21,6 +21,16 @@ class QuickSearchPortal extends StatelessWidget {
 				searchController: viewModel.quickSearchController,
 				suggestionsBuilder: (_, __) => [],
 				viewBuilder: (_) => const QuickSearchView(),
+				viewTrailing: [
+					IconButton(
+						icon: const Icon(Icons.filter_list_rounded),
+						onPressed: () => viewModel.showQuickSearchFilterSheet(context),
+					),
+					IconButton(
+						icon: const Icon(Icons.close_rounded),
+						onPressed: () => viewModel.quickSearchController.value = TextEditingValue.empty,
+					)
+				],
 				viewLeading: IconButton(
 					icon: const Icon(Icons.arrow_back_rounded),
 					onPressed: () => viewModel.quickSearchController.closeView(null)
@@ -33,10 +43,6 @@ class QuickSearchPortal extends StatelessWidget {
 				),
 			),
 		);
-	}
-
-	Color getSearchBarShadow(Set<MaterialState> states) {
-		return Colors.transparent;
 	}
 }
 

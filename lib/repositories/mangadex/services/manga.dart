@@ -13,6 +13,7 @@ import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/general.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/statistics.dart";
+import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/utils/service.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
@@ -275,6 +276,28 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 			tags: (data[2] as List<Tag?>).cast(),
 			cover: data[3] as CoverArt?,
 		);
+	}
+
+	Future<List<Tag>> getAllTags({bool checkDB = true}) async {
+		logger.info("getAllTags($checkDB)");
+
+		if (checkDB) {
+			final inDB = await database.isar.tags
+				.where()
+				.sortByGroup()
+				.findAll();
+			if (inDB.isNotEmpty) return inDB;
+		} 
+
+		await rateLimiter.wait("/manga:GET");
+		final reqUrl = baseUrl.copy().addPathSegment("tag");
+		final request = await client.get(reqUrl.toUri());
+
+		final response = TagCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+		final tags = response.data.map((e) => e.toTag()).toList();
+
+		await database.isar.writeTxn(() => database.isar.tags.putAll(tags));
+		return tags;
 	}
 }
 

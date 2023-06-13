@@ -3,12 +3,16 @@ import "package:flutter/material.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/history.dart";
+import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";
 import "package:rxdart/rxdart.dart";
+
+import "widgets/quick_search_filter_dialog.dart";
 
 class ExploreViewModel {
 	static ExploreViewModel? _instance;
@@ -31,6 +35,12 @@ class ExploreViewModel {
 
 	final _quickSearchHistoryController = BehaviorSubject<List<History>>();
 	ValueStream<List<History>> get quickSearchHistoryStream => _quickSearchHistoryController.stream;
+
+	final _quickSearchFilterTagsController = BehaviorSubject<Map<TagGroup, List<Tag>>>();
+	ValueStream<Map<TagGroup, List<Tag>>> get quickSearchFilterTagsStream => _quickSearchFilterTagsController.stream;
+
+	final quickSearchIncludedTagIds = <String>[];
+	final quickSearchExcludedTagIds = <String>[];
 	
 	ExploreViewModel() {
 		Settings.instance.contentFilter
@@ -73,6 +83,25 @@ class ExploreViewModel {
 			_quickSearchHistoryController.add(history);
 		} catch (e) {
 			_quickSearchHistoryController.addError(e);
+		}
+
+		try {
+			final tags = await MangaDex.instance.manga.getAllTags();
+			final grouped = tags.fold(
+				<TagGroup, List<Tag>>{},
+				(map, tag) {
+					if (!map.containsKey(tag.group)) {
+						map[tag.group] = [];
+					}
+
+					map[tag.group]!.add(tag);
+					return map;
+				}
+			);
+			
+			_quickSearchFilterTagsController.add(grouped);
+		} catch (e) {
+			_quickSearchFilterTagsController.addError(e);
 		}
 	}
 
@@ -126,5 +155,13 @@ class ExploreViewModel {
 		} catch (e) {
 			logger.warning("Failed to add search history: $e");
 		}
+	}
+
+	void showQuickSearchFilterSheet(BuildContext context) {
+		showDialog(
+			context: context,
+			useSafeArea: false,
+			builder: (context) => const QuickSearchFilterDialog()
+		);
 	}
 }

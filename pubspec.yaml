@@ -11,12 +11,12 @@ dependencies:
     copy_with_extension: ^5.0.2
     dash_flags: ^0.1.1
     dynamic_color: ^1.6.5
-    fl_chart: ^0.62.0
+    fl_chart: ^0.63.0
     flutter:
         sdk: flutter
     flutter_animate: ^4.1.1+1
-    google_fonts: ^4.0.4
-    http: ^0.13.6
+    google_fonts: ^5.0.0
+    http: ^1.0.0
     intl: ^0.18.1
     isar: ^3.1.0+1
     isar_flutter_libs: ^3.1.0+1
