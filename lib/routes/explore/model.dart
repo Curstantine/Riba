@@ -42,6 +42,9 @@ class ExploreViewModel {
 	final Map<TagGroup, Map<String, ValueNotifier<TagSelectionMode>>> quickSearchGroupedTagSelectionModes = {
 		for (final tagGroup in TagGroup.values) tagGroup: <String, ValueNotifier<TagSelectionMode>>{},
 	};
+
+	final quickSearchFilterTagInclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.and);
+	final quickSearchFilterTagExclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.or);
 	
 	ExploreViewModel() {
 		Settings.instance.contentFilter
@@ -158,12 +161,24 @@ class ExploreViewModel {
 		}
 	}
 
-	void showQuickSearchFilterSheet(BuildContext context) {
-		showDialog(
+	void resetQuickSearchFilterSheet() {
+		for (final group in quickSearchGroupedTagSelectionModes.values) {
+			for (final notifier in group.values) {
+				notifier.value = TagSelectionMode.none;
+			}
+		}
+	}
+
+	void showQuickSearchFilterSheet(BuildContext context) async {
+		final result = await showDialog(
 			context: context,
 			useSafeArea: false,
 			builder: (context) => const QuickSearchFilterDialog()
 		);
+
+		if (result == null) return resetQuickSearchFilterSheet();
+
+		refreshQuickSearch();
 	}
 }
 
@@ -171,4 +186,18 @@ enum TagSelectionMode {
 	included,
 	excluded,
 	none;
+}
+
+enum TagJoinMode {
+	and,
+	or;
+
+	String asHumanReadable() {
+		switch (this) {
+			case TagJoinMode.and:
+				return "And";
+			case TagJoinMode.or:
+				return "Or";
+		}
+	}
 }

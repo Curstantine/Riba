@@ -10,6 +10,9 @@ import "package:riba/widgets/material/chip.dart";
 
 
 class QuickSearchFilterDialog extends StatefulWidget {
+	/// Dialog that allows the user to filter the quick search results
+	/// 
+	/// The dialog will be dismissed with a `true` value when the user submits the filter.
 	const QuickSearchFilterDialog({super.key});
 
 	@override
@@ -25,6 +28,9 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 		final theme = Theme.of(context);
 		final colors = theme.colorScheme;
 		final text = theme.textTheme;
+
+		final media = MediaQuery.of(context);
+		final deviceWidth = media.size.width;
 		
 		return Scaffold(
 			body: CustomScrollView(slivers: [
@@ -33,9 +39,40 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 					title: Text("Filter", style: text.headlineSmall),
 					leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
 					actions: [
-						IconButton(icon: const Icon(Icons.check), onPressed: () => Navigator.pop(context)),
+						IconButton(icon: const Icon(Icons.check), onPressed: () => Navigator.pop(context, true)),
 					],
 				),
+				SliverPadding(padding: Edges.horizontalMedium.copyWithSelf(Edges.verticalLarge), sliver: Builder(builder: (context) {
+					final width = deviceWidth / 2 - (Edges.medium + Edges.medium / 2);
+
+					return SliverToBoxAdapter(child: Row(children: [
+						DropdownMenu(
+							width: width,
+							label: const Text("Tag inclusion mode"),
+							inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder(), isDense: true),
+							dropdownMenuEntries: TagJoinMode.values
+								.map((e) => DropdownMenuEntry(label: e.asHumanReadable(), value: e))
+								.toList(),
+							initialSelection: viewModel.quickSearchFilterTagInclusionMode.value,
+							onSelected: (value) => {
+								if (value != null) viewModel.quickSearchFilterTagInclusionMode.value = value
+							},
+						),
+						const SizedBox(width: Edges.medium),
+						DropdownMenu(
+							width: width,
+							label: const Text("Tag exclusion mode"),
+							inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder(), isDense: true),
+							dropdownMenuEntries: TagJoinMode.values
+								.map((e) => DropdownMenuEntry(label: e.asHumanReadable(), value: e))
+								.toList(),
+							initialSelection: viewModel.quickSearchFilterTagExclusionMode.value,
+							onSelected: (value) => {
+								if (value != null) viewModel.quickSearchFilterTagExclusionMode.value = value
+							},
+						),
+					]));
+				})),
 				StreamBuilder(stream: viewModel.quickSearchFilterTagsStream, builder: (context, snapshot) {
 					if (snapshot.hasError) {
 						return SliverToBoxAdapter(child: SizedBox(
