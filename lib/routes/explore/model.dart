@@ -45,7 +45,7 @@ class ExploreViewModel {
 
 	final quickSearchFilterTagInclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.and);
 	final quickSearchFilterTagExclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.or);
-	
+
 	ExploreViewModel() {
 		Settings.instance.contentFilter
 			.watchLazily()
@@ -58,7 +58,7 @@ class ExploreViewModel {
 			return;
 		}
 
-		try {			
+		try {
 			final settings = Settings.instance.contentFilter;
 			final seasonalList = await MangaDex.instance.customList.getSeasonal();
 			final manga = await MangaDex.instance.manga.getMany(
@@ -102,7 +102,7 @@ class ExploreViewModel {
 					return map;
 				}
 			);
-			
+
 			_quickSearchFilterTagsController.add(grouped);
 		} catch (e) {
 			_quickSearchFilterTagsController.addError(e);
@@ -182,22 +182,11 @@ class ExploreViewModel {
 	}
 }
 
+
+
 enum TagSelectionMode {
 	included,
 	excluded,
 	none;
 }
 
-enum TagJoinMode {
-	and,
-	or;
-
-	String asHumanReadable() {
-		switch (this) {
-			case TagJoinMode.and:
-				return "And";
-			case TagJoinMode.or:
-				return "Or";
-		}
-	}
-}

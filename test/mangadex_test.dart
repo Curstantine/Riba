@@ -41,14 +41,14 @@ void main() async {
     });
     test(".getMany", () async {
       final manga = await mangadex.manga.getMany(
-        overrides: MangaDexMangaQueryFilter(ids: mangaIds),
+        overrides: const MangaDexMangaQueryFilter(ids: mangaIds),
       );
 
       // MangaIds contain a pornographic title, so the resolved list will be -1
       expect(manga.length, equals(mangaIds.length - 1));
 
       final withRatingFilters = await mangadex.manga.getMany(
-        overrides: MangaDexMangaQueryFilter(ids: mangaIds, contentRatings: [
+        overrides: const MangaDexMangaQueryFilter(ids: mangaIds, contentRatings: [
           ContentRating.safe,
           ContentRating.suggestive,
           ContentRating.erotica,
@@ -60,7 +60,7 @@ void main() async {
     });
     test(".getByAuthorOrArtistId", () async {
       final manga = await mangadex.manga.getByAuthorOrArtistId(
-        overrides: MangaDexMangaQueryFilter(authorOrArtist: authorOrArtistId),
+        overrides: const MangaDexMangaQueryFilter(authorOrArtist: authorOrArtistId),
       );
 
       expect(manga, isNotEmpty);
@@ -72,7 +72,7 @@ void main() async {
       );
 
       final local = await mangadex.manga.getByAuthorOrArtistId(
-        overrides: MangaDexMangaQueryFilter(authorOrArtist: authorOrArtistId),
+        overrides: const MangaDexMangaQueryFilter(authorOrArtist: authorOrArtistId),
       );
 
       expect(local, isNotEmpty);
@@ -236,7 +236,7 @@ void main() async {
   group("MangaDex.Group", () {
     test(".getSimpleMany", () async {
       final groups = await mangadex.group
-          .getManyAsSingle(overrides: MangaDexGenericQueryFilter(ids: groupIds));
+          .getManyAsSingle(overrides: const MangaDexGenericQueryFilter(ids: groupIds));
       expect(groups, isNotNull);
       expect(groups.length, equals(groupIds.length));
     });

@@ -2,6 +2,7 @@
 import "dart:convert";
 import "dart:io";
 
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/author.dart";
@@ -22,6 +23,8 @@ import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
+
+part "manga.g.dart";
 
 class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, MangaData,
 	InternalMangaData, MangaDexMangaQueryFilter> {
@@ -52,7 +55,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 	late final statisticUrl = rootUrl.copyWith(pathSegments: ["statistics", "manga"]);
 
 	@override
-	final defaultFilters = MangaDexMangaQueryFilter(
+	final defaultFilters = const MangaDexMangaQueryFilter(
 		includes: [
 			EntityType.artist,
 			EntityType.author,
@@ -90,20 +93,27 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 			"This method requires ids to be populated",
 		);
 
-		final filters = defaultFilters.copyWithSelf(overrides);
-		final ids = filters.ids!;
-		final contentRatings = filters.contentRatings ?? [];
-		final originalLangs = filters.originalLanguages ?? [];
+		final filters = defaultFilters.copyWith(
+			ids: overrides.ids,
+			contentRatings: overrides.contentRatings,
+			originalLanguages: overrides.originalLanguages,
+			statuses: overrides.statuses,
+		);
 
-		final mapped = <String, MangaData?>{for (final e in ids) e: null};
+		final mapped = <String, MangaData?>{for (final e in filters.ids!) e: null};
 
 		if (checkDB) {
+			final contentRatings = filters.contentRatings ?? [];
+			final originalLangs = filters.originalLanguages ?? [];
+			final statuses = filters.statuses ?? [];
+
 			final inDB = await database
 				.where()
-				.anyOf(ids, (q, e) => q.isarIdEqualTo(fastHash(e)))
+				.anyOf(filters.ids!, (q, e) => q.isarIdEqualTo(fastHash(e)))
 				.filter()
 				.anyOf(contentRatings, (q, e) => q.contentRatingEqualTo(e))
 				.anyOf(originalLangs, (q, e) => q.originalLanguageEqualTo(e))
+				.anyOf(statuses, (q, element) => q.statusEqualTo(element))
 				.findAll();
 
 			for (final manga in inDB) {
@@ -153,12 +163,18 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 			"This method requires artistOrAuthorId to be populated",
 		);
 
-		final filters = defaultFilters.copyWithSelf(overrides);
+		final filters = defaultFilters.copyWith(
+			authorOrArtist: overrides.authorOrArtist,
+			contentRatings: overrides.contentRatings,
+			originalLanguages: overrides.originalLanguages,
+			statuses: overrides.statuses,
+		);
 
 		if (checkDB) {
 			final authorOrArtistId = filters.authorOrArtist!;
-			final originalLangs = filters.originalLanguages ?? [];
 			final contentRatings = filters.contentRatings ?? [];
+			final originalLangs = filters.originalLanguages ?? [];
+			final statuses = filters.statuses ?? [];
 
 			final inDB = await database
 				.where()
@@ -166,8 +182,9 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 				.or()
 				.authorIdsElementEqualTo(authorOrArtistId)
 				.filter()
-				.anyOf(originalLangs, (q, e) => q.originalLanguageEqualTo(e))
 				.anyOf(contentRatings, (q, e) => q.contentRatingEqualTo(e))
+				.anyOf(originalLangs, (q, e) => q.originalLanguageEqualTo(e))
+				.anyOf(statuses, (q, element) => q.statusEqualTo(element))
 				.findAll();
 
 			if (inDB.isNotEmpty) {
@@ -206,7 +223,25 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 	Future<CollectionData<MangaData>> withFilters({required overrides}) async {
 		logger.info("withFilters($overrides)");
 
-		final filters = defaultFilters.copyWithSelf(overrides);
+		final filters = defaultFilters.copyWith(
+			artistId: overrides.artistId,
+			authorId: overrides.authorId,
+			contentRatings: overrides.contentRatings,
+			originalLanguages: overrides.originalLanguages,
+			statuses: overrides.statuses,
+			excludedTagIds: overrides.excludedTagIds,
+			includedTagIds: overrides.includedTagIds,
+			excludedTagJoinMode: overrides.excludedTagJoinMode,
+			includedTagJoinMode: overrides.includedTagJoinMode,
+			availableTranslatedLanguages: overrides.availableTranslatedLanguages,
+			publicationDemographics: overrides.publicationDemographics,
+			title: overrides.title,
+			authorOrArtist: overrides.authorOrArtist,
+			limit: overrides.limit,
+			offset: overrides.offset,
+			
+		);
+
 		final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
 
 		final request = await client.get(reqUrl.toUri());
@@ -301,6 +336,7 @@ class MangaDexMangaService extends MangaDexService<MangaAttributes, Manga, Manga
 	}
 }
 
+@CopyWith()
 class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
 	final List<String>? ids;
 	final List<EntityType>? includes;
@@ -319,7 +355,13 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
 	final List<Language>? originalLanguages;
 	final List<Language>? availableTranslatedLanguages;
 
-	MangaDexMangaQueryFilter({
+	final List<String>? excludedTagIds;
+	final TagJoinMode? excludedTagJoinMode;
+
+	final List<String>? includedTagIds;
+	final TagJoinMode? includedTagJoinMode;
+
+	const MangaDexMangaQueryFilter({
 		this.ids,
 		this.includes,
 		this.limit = 100,
@@ -333,6 +375,10 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
 		this.publicationDemographics,
 		this.originalLanguages,
 		this.availableTranslatedLanguages,
+		this.excludedTagIds,
+		this.excludedTagJoinMode,
+		this.includedTagIds,
+		this.includedTagJoinMode,
 	});
 
 	@override
@@ -356,6 +402,16 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
 			url.setParameter("availableTranslatedLanguage[]", availableTranslatedLanguages);
 		}
 
+		if (excludedTagIds != null) {
+			url.setParameter("excludedTags[]", excludedTagIds);
+			url.setParameter("excludedTagsMode", excludedTagJoinMode);
+		}
+
+		if (includedTagIds != null) {
+			url.setParameter("includedTags[]", includedTagIds);
+			url.setParameter("includedTagsMode", includedTagJoinMode);
+		}
+
 		final generic = MangaDexGenericQueryFilter(
 			ids: ids,
 			includes: includes,
@@ -364,57 +420,5 @@ class MangaDexMangaQueryFilter extends MangaDexQueryFilter {
 		);
 
 		return generic.addFiltersToUrl(url);
-	}
-
-	MangaDexMangaQueryFilter copyWith({
-		List<String>? ids,
-		List<EntityType>? includes,
-		int? limit,
-		int? offset,
-		String? title,
-		String? authorId,
-		String? artistId,
-		String? artistOrAuthorId,
-		List<MangaStatus>? statuses,
-		List<ContentRating>? contentRatings,
-		List<MangaPublicationDemographic>? publicationDemographics,
-		List<Language>? excludedOriginalLanguages,
-		List<Language>? availableTranslatedLanguages,
-	}) {
-		return MangaDexMangaQueryFilter(
-			ids: ids ?? this.ids,
-			includes: includes ?? this.includes,
-			limit: limit ?? this.limit,
-			offset: offset ?? this.offset,
-			title: title ?? this.title,
-			authorId: authorId ?? this.authorId,
-			artistId: artistId ?? this.artistId,
-			authorOrArtist: artistOrAuthorId ?? authorOrArtist,
-			statuses: statuses ?? this.statuses,
-			contentRatings: contentRatings ?? this.contentRatings,
-			publicationDemographics: publicationDemographics ?? this.publicationDemographics,
-			originalLanguages: excludedOriginalLanguages ?? originalLanguages,
-			availableTranslatedLanguages:
-				availableTranslatedLanguages ?? this.availableTranslatedLanguages,
-		);
-	}
-
-	MangaDexMangaQueryFilter copyWithSelf(MangaDexMangaQueryFilter other) {
-		return MangaDexMangaQueryFilter(
-			ids: other.ids ?? ids,
-			includes: other.includes ?? includes,
-			limit: other.limit,
-			offset: other.offset,
-			title: other.title ?? title,
-			authorId: other.authorId ?? authorId,
-			artistId: other.artistId ?? artistId,
-			authorOrArtist: other.authorOrArtist ?? authorOrArtist,
-			statuses: other.statuses ?? statuses,
-			contentRatings: other.contentRatings ?? contentRatings,
-			publicationDemographics: other.publicationDemographics ?? publicationDemographics,
-			originalLanguages: other.originalLanguages ?? originalLanguages,
-			availableTranslatedLanguages:
-				other.availableTranslatedLanguages ?? availableTranslatedLanguages,
-		);
 	}
 }

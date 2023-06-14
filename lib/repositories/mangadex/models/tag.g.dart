@@ -20,3 +20,8 @@ const _$TagGroupEnumMap = {
   TagGroup.genre: "genre",
   TagGroup.theme: "theme",
 };
+
+const _$TagJoinModeEnumMap = {
+  TagJoinMode.and: "and",
+  TagJoinMode.or: "or",
+};

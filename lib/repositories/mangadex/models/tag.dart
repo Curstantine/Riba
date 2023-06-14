@@ -65,3 +65,25 @@ enum TagGroup implements SerializableDataExt {
 		}
 	}
 }
+
+@JsonEnum(alwaysCreate: true)
+enum TagJoinMode implements SerializableDataExt {
+	and,
+	or;
+
+	@override
+	factory TagJoinMode.fromJson(String source) => $enumDecode(_$TagJoinModeEnumMap, source);
+
+	@override
+	String toJson() => _$TagJoinModeEnumMap[this]!;
+
+	@override
+	String asHumanReadable() {
+		switch (this) {
+			case TagJoinMode.and:
+				return "And";
+			case TagJoinMode.or:
+				return "Or";
+		}
+	}
+}

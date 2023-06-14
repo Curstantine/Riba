@@ -32,6 +32,7 @@ void main() {
     url.setParameter("ids[]", [id, id]);
     url.setParameter("sort[title]", "asc");
     url.setParameter("limit", 100);
+	url.setParameter("nullish", null);
 
     final uri = url.toUri();
     expect(

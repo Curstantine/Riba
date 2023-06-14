@@ -152,3 +152,25 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 		);
 	}
 }
+
+class QuickSearchFilterState {
+	final tagInclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.and);
+	final tagExclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.or);
+
+	final Map<TagGroup, Map<String, ValueNotifier<TagSelectionMode>>> groupedTagSelection = {
+		for (final tagGroup in TagGroup.values) tagGroup: <String, ValueNotifier<TagSelectionMode>>{},
+	};
+
+	QuickSearchFilterState();
+
+	QuickSearchFilterState.from(QuickSearchFilterState state) {
+		tagInclusionMode.value = state.tagInclusionMode.value;
+		tagExclusionMode.value = state.tagExclusionMode.value;
+
+		for (final group in state.groupedTagSelection.entries) {
+			for (final tag in group.value.entries) {
+				groupedTagSelection[group.key]![tag.key]!.value = tag.value.value;
+			}
+		}
+	}
+}

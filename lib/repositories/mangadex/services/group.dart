@@ -41,7 +41,7 @@ class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, Group
   late final baseUrl = rootUrl.copyWith(pathSegments: ["group"]);
 
   @override
-  final defaultFilters = MangaDexGenericQueryFilter(
+  final defaultFilters = const MangaDexGenericQueryFilter(
     includes: [EntityType.leader, EntityType.member],
     limit: 100,
   );

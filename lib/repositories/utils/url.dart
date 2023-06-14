@@ -33,7 +33,10 @@ class URL {
 	/// But adding a list of values will replace the existing list.
 	///
 	/// If the value is a list, and it is empty, it will be ignored.
+	/// Same behavior with nullish values.
 	URL setParameter(String key, dynamic value) {
+		if (value == null) return this;
+
 		assert(value is String ||
 			value is int ||
 			value is double ||
