@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/runtime/cover_art.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/settings.dart";
@@ -60,19 +61,12 @@ class _CoverSheetState extends State<CoverSheet> {
 		List<CoverArtData>? coverData;
 
 		try {
-			if (init) {
-				coverData = await MangaDex.instance.cover.getManyByMangaId(
-					checkDB: true,
-					overrides: MangaDexCoverQueryFilter(mangaId: manga.id),
-				);
-		
-				if (coverData.length <= 1) return fetchData(checkDB: false);
-			} else {
-				coverData = await MangaDex.instance.cover.getManyByMangaId(
-					checkDB: checkDB,
-					overrides: MangaDexCoverQueryFilter(mangaId: manga.id)
-				);
-			}
+			coverData = await MangaDex.instance.cover.getManyByMangaId(
+				checkDB: init ? true : checkDB,
+				overrides: MangaDexCoverGetManyByMangaIdQueryFilter(mangaId: manga.id)
+			);
+
+			if (init && coverData.length <= 1) return fetchData(checkDB: false);
 		} catch (e) {
 			coverDataController.addError(e);
 		}

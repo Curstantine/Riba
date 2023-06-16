@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/utils/service.dart";
+import "package:riba/repositories/mangadex/services/group.dart";
 import "package:riba/settings/manga_filter/store.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
@@ -31,7 +31,7 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
 	};
 
 	late final groupFuture = MangaDex.instance.group
-		.getManyAsSingle(overrides: MangaDexGenericQueryFilter(ids: widget.data.groupIds));
+		.getManyAsSingle(overrides: MangaDexGroupGetManyAsSingleQueryFilter(ids: widget.data.groupIds));
 
 	@override
 	Widget build(context) {

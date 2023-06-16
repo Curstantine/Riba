@@ -6,6 +6,7 @@ import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
+import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";
@@ -61,7 +62,7 @@ class ExploreViewModel {
 			final settings = Settings.instance.contentFilter;
 			final seasonalList = await MangaDex.instance.customList.getSeasonal();
 			final manga = await MangaDex.instance.manga.getMany(
-				overrides: MangaDexMangaQueryFilter(
+				overrides: MangaDexMangaGetManyQueryFilter(
 					ids: seasonalList.list.mangaIds,
 					contentRatings: settings.contentRatings.value,
 					originalLanguages: settings.originalLanguages.value,
@@ -117,7 +118,7 @@ class ExploreViewModel {
 		}
 
 		try {
-			final manga = await MangaDex.instance.manga.withFilters(overrides: MangaDexMangaQueryFilter(
+			final manga = await MangaDex.instance.manga.withFilters(overrides: MangaDexMangaWithFiltersQueryFilter(
 				title: query,
 				limit: 5,
 				contentRatings: Settings.instance.contentFilter.contentRatings.value,
@@ -188,4 +189,3 @@ enum TagSelectionMode {
 	excluded,
 	none;
 }
-

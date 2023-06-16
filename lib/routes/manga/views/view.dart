@@ -10,6 +10,7 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
@@ -74,6 +75,10 @@ class _MangaViewState extends State<MangaView> {
 	void initState() {
 		super.initState();
 		fetchMangaData();
+
+		// TODO: Currently, if the user somehow gets into a title w/ higher ordinality than
+		// the user-selected content ratings, the title will be displayed.
+		// We should probably show a small warning.
 
 		scrollController.addListener(onScroll);
 		preferredCoverIdStream.listen((e) {
@@ -158,11 +163,10 @@ class _MangaViewState extends State<MangaView> {
 
 			final data = await MangaDex.instance.chapter.getFeed(
 				checkDB: !reload &&  offset == 0,
-				overrides: MangaDexChapterQueryFilter(
+				overrides: MangaDexChapterGetFeedQueryFilter(
 					mangaId: widget.id,
 					offset: offset,
 					excludedGroups: mangaSettings.excludedGroupIds,
-					contentRatings: contentSettings.contentRatings.value,
 					translatedLanguages: contentSettings.chapterLanguages.value,
 				),
 			);
