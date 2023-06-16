@@ -6,7 +6,6 @@ import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
-import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";

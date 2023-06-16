@@ -6,54 +6,216 @@ part of "manga.dart";
 // CopyWithGenerator
 // **************************************************************************
 
-abstract class _$MangaDexMangaQueryFilterCWProxy {
-  MangaDexMangaQueryFilter ids(List<String>? ids);
+abstract class _$MangaDexMangaGetManyQueryFilterCWProxy {
+  MangaDexMangaGetManyQueryFilter ids(List<String> ids);
 
-  MangaDexMangaQueryFilter includes(List<EntityType>? includes);
+  MangaDexMangaGetManyQueryFilter contentRatings(
+      List<ContentRating>? contentRatings);
 
-  MangaDexMangaQueryFilter limit(int limit);
+  MangaDexMangaGetManyQueryFilter originalLanguages(
+      List<Language>? originalLanguages);
 
-  MangaDexMangaQueryFilter offset(int offset);
-
-  MangaDexMangaQueryFilter title(String? title);
-
-  MangaDexMangaQueryFilter authorId(String? authorId);
-
-  MangaDexMangaQueryFilter artistId(String? artistId);
-
-  MangaDexMangaQueryFilter authorOrArtist(String? authorOrArtist);
-
-  MangaDexMangaQueryFilter statuses(List<MangaStatus>? statuses);
-
-  MangaDexMangaQueryFilter contentRatings(List<ContentRating>? contentRatings);
-
-  MangaDexMangaQueryFilter publicationDemographics(
-      List<MangaPublicationDemographic>? publicationDemographics);
-
-  MangaDexMangaQueryFilter originalLanguages(List<Language>? originalLanguages);
-
-  MangaDexMangaQueryFilter availableTranslatedLanguages(
-      List<Language>? availableTranslatedLanguages);
-
-  MangaDexMangaQueryFilter excludedTagIds(List<String>? excludedTagIds);
-
-  MangaDexMangaQueryFilter excludedTagJoinMode(
-      TagJoinMode? excludedTagJoinMode);
-
-  MangaDexMangaQueryFilter includedTagIds(List<String>? includedTagIds);
-
-  MangaDexMangaQueryFilter includedTagJoinMode(
-      TagJoinMode? includedTagJoinMode);
-
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaGetManyQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// MangaDexMangaQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// MangaDexMangaGetManyQueryFilter(...).copyWith(id: 12, name: "My name")
   /// ````
-  MangaDexMangaQueryFilter call({
+  MangaDexMangaGetManyQueryFilter call({
     List<String>? ids,
-    List<EntityType>? includes,
+    List<ContentRating>? contentRatings,
+    List<Language>? originalLanguages,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaDexMangaGetManyQueryFilter.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaDexMangaGetManyQueryFilter.copyWith.fieldName(...)`
+class _$MangaDexMangaGetManyQueryFilterCWProxyImpl
+    implements _$MangaDexMangaGetManyQueryFilterCWProxy {
+  const _$MangaDexMangaGetManyQueryFilterCWProxyImpl(this._value);
+
+  final MangaDexMangaGetManyQueryFilter _value;
+
+  @override
+  MangaDexMangaGetManyQueryFilter ids(List<String> ids) => this(ids: ids);
+
+  @override
+  MangaDexMangaGetManyQueryFilter contentRatings(
+          List<ContentRating>? contentRatings) =>
+      this(contentRatings: contentRatings);
+
+  @override
+  MangaDexMangaGetManyQueryFilter originalLanguages(
+          List<Language>? originalLanguages) =>
+      this(originalLanguages: originalLanguages);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaGetManyQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaDexMangaGetManyQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaDexMangaGetManyQueryFilter call({
+    Object? ids = const $CopyWithPlaceholder(),
+    Object? contentRatings = const $CopyWithPlaceholder(),
+    Object? originalLanguages = const $CopyWithPlaceholder(),
+  }) {
+    return MangaDexMangaGetManyQueryFilter(
+      ids: ids == const $CopyWithPlaceholder() || ids == null
+          ? _value.ids
+          // ignore: cast_nullable_to_non_nullable
+          : ids as List<String>,
+      contentRatings: contentRatings == const $CopyWithPlaceholder()
+          ? _value.contentRatings
+          // ignore: cast_nullable_to_non_nullable
+          : contentRatings as List<ContentRating>?,
+      originalLanguages: originalLanguages == const $CopyWithPlaceholder()
+          ? _value.originalLanguages
+          // ignore: cast_nullable_to_non_nullable
+          : originalLanguages as List<Language>?,
+    );
+  }
+}
+
+extension $MangaDexMangaGetManyQueryFilterCopyWith
+    on MangaDexMangaGetManyQueryFilter {
+  /// Returns a callable class that can be used as follows: `instanceOfMangaDexMangaGetManyQueryFilter.copyWith(...)` or like so:`instanceOfMangaDexMangaGetManyQueryFilter.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$MangaDexMangaGetManyQueryFilterCWProxy get copyWith =>
+      _$MangaDexMangaGetManyQueryFilterCWProxyImpl(this);
+}
+
+abstract class _$MangaDexMangaAuthorOrArtistQueryFilterCWProxy {
+  MangaDexMangaAuthorOrArtistQueryFilter authorOrArtistId(
+      String authorOrArtistId);
+
+  MangaDexMangaAuthorOrArtistQueryFilter contentRatings(
+      List<ContentRating>? contentRatings);
+
+  MangaDexMangaAuthorOrArtistQueryFilter originalLanguages(
+      List<Language>? originalLanguages);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaAuthorOrArtistQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaDexMangaAuthorOrArtistQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaDexMangaAuthorOrArtistQueryFilter call({
+    String? authorOrArtistId,
+    List<ContentRating>? contentRatings,
+    List<Language>? originalLanguages,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaDexMangaAuthorOrArtistQueryFilter.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaDexMangaAuthorOrArtistQueryFilter.copyWith.fieldName(...)`
+class _$MangaDexMangaAuthorOrArtistQueryFilterCWProxyImpl
+    implements _$MangaDexMangaAuthorOrArtistQueryFilterCWProxy {
+  const _$MangaDexMangaAuthorOrArtistQueryFilterCWProxyImpl(this._value);
+
+  final MangaDexMangaAuthorOrArtistQueryFilter _value;
+
+  @override
+  MangaDexMangaAuthorOrArtistQueryFilter authorOrArtistId(
+          String authorOrArtistId) =>
+      this(authorOrArtistId: authorOrArtistId);
+
+  @override
+  MangaDexMangaAuthorOrArtistQueryFilter contentRatings(
+          List<ContentRating>? contentRatings) =>
+      this(contentRatings: contentRatings);
+
+  @override
+  MangaDexMangaAuthorOrArtistQueryFilter originalLanguages(
+          List<Language>? originalLanguages) =>
+      this(originalLanguages: originalLanguages);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaAuthorOrArtistQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaDexMangaAuthorOrArtistQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaDexMangaAuthorOrArtistQueryFilter call({
+    Object? authorOrArtistId = const $CopyWithPlaceholder(),
+    Object? contentRatings = const $CopyWithPlaceholder(),
+    Object? originalLanguages = const $CopyWithPlaceholder(),
+  }) {
+    return MangaDexMangaAuthorOrArtistQueryFilter(
+      authorOrArtistId: authorOrArtistId == const $CopyWithPlaceholder() ||
+              authorOrArtistId == null
+          ? _value.authorOrArtistId
+          // ignore: cast_nullable_to_non_nullable
+          : authorOrArtistId as String,
+      contentRatings: contentRatings == const $CopyWithPlaceholder()
+          ? _value.contentRatings
+          // ignore: cast_nullable_to_non_nullable
+          : contentRatings as List<ContentRating>?,
+      originalLanguages: originalLanguages == const $CopyWithPlaceholder()
+          ? _value.originalLanguages
+          // ignore: cast_nullable_to_non_nullable
+          : originalLanguages as List<Language>?,
+    );
+  }
+}
+
+extension $MangaDexMangaAuthorOrArtistQueryFilterCopyWith
+    on MangaDexMangaAuthorOrArtistQueryFilter {
+  /// Returns a callable class that can be used as follows: `instanceOfMangaDexMangaAuthorOrArtistQueryFilter.copyWith(...)` or like so:`instanceOfMangaDexMangaAuthorOrArtistQueryFilter.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$MangaDexMangaAuthorOrArtistQueryFilterCWProxy get copyWith =>
+      _$MangaDexMangaAuthorOrArtistQueryFilterCWProxyImpl(this);
+}
+
+abstract class _$MangaDexMangaWithFiltersQueryFilterCWProxy {
+  MangaDexMangaWithFiltersQueryFilter limit(int limit);
+
+  MangaDexMangaWithFiltersQueryFilter offset(int offset);
+
+  MangaDexMangaWithFiltersQueryFilter title(String? title);
+
+  MangaDexMangaWithFiltersQueryFilter authorId(String? authorId);
+
+  MangaDexMangaWithFiltersQueryFilter artistId(String? artistId);
+
+  MangaDexMangaWithFiltersQueryFilter authorOrArtist(String? authorOrArtist);
+
+  MangaDexMangaWithFiltersQueryFilter statuses(List<MangaStatus>? statuses);
+
+  MangaDexMangaWithFiltersQueryFilter contentRatings(
+      List<ContentRating>? contentRatings);
+
+  MangaDexMangaWithFiltersQueryFilter publicationDemographics(
+      List<MangaPublicationDemographic>? publicationDemographics);
+
+  MangaDexMangaWithFiltersQueryFilter originalLanguages(
+      List<Language>? originalLanguages);
+
+  MangaDexMangaWithFiltersQueryFilter availableTranslatedLanguages(
+      List<Language>? availableTranslatedLanguages);
+
+  MangaDexMangaWithFiltersQueryFilter excludedTagIds(
+      List<String>? excludedTagIds);
+
+  MangaDexMangaWithFiltersQueryFilter excludedTagJoinMode(
+      TagJoinMode? excludedTagJoinMode);
+
+  MangaDexMangaWithFiltersQueryFilter includedTagIds(
+      List<String>? includedTagIds);
+
+  MangaDexMangaWithFiltersQueryFilter includedTagJoinMode(
+      TagJoinMode? includedTagJoinMode);
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaWithFiltersQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// MangaDexMangaWithFiltersQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// ````
+  MangaDexMangaWithFiltersQueryFilter call({
     int? limit,
     int? offset,
     String? title,
@@ -72,94 +234,89 @@ abstract class _$MangaDexMangaQueryFilterCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaDexMangaQueryFilter.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaDexMangaQueryFilter.copyWith.fieldName(...)`
-class _$MangaDexMangaQueryFilterCWProxyImpl
-    implements _$MangaDexMangaQueryFilterCWProxy {
-  const _$MangaDexMangaQueryFilterCWProxyImpl(this._value);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfMangaDexMangaWithFiltersQueryFilter.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfMangaDexMangaWithFiltersQueryFilter.copyWith.fieldName(...)`
+class _$MangaDexMangaWithFiltersQueryFilterCWProxyImpl
+    implements _$MangaDexMangaWithFiltersQueryFilterCWProxy {
+  const _$MangaDexMangaWithFiltersQueryFilterCWProxyImpl(this._value);
 
-  final MangaDexMangaQueryFilter _value;
-
-  @override
-  MangaDexMangaQueryFilter ids(List<String>? ids) => this(ids: ids);
+  final MangaDexMangaWithFiltersQueryFilter _value;
 
   @override
-  MangaDexMangaQueryFilter includes(List<EntityType>? includes) =>
-      this(includes: includes);
+  MangaDexMangaWithFiltersQueryFilter limit(int limit) => this(limit: limit);
 
   @override
-  MangaDexMangaQueryFilter limit(int limit) => this(limit: limit);
+  MangaDexMangaWithFiltersQueryFilter offset(int offset) =>
+      this(offset: offset);
 
   @override
-  MangaDexMangaQueryFilter offset(int offset) => this(offset: offset);
+  MangaDexMangaWithFiltersQueryFilter title(String? title) =>
+      this(title: title);
 
   @override
-  MangaDexMangaQueryFilter title(String? title) => this(title: title);
-
-  @override
-  MangaDexMangaQueryFilter authorId(String? authorId) =>
+  MangaDexMangaWithFiltersQueryFilter authorId(String? authorId) =>
       this(authorId: authorId);
 
   @override
-  MangaDexMangaQueryFilter artistId(String? artistId) =>
+  MangaDexMangaWithFiltersQueryFilter artistId(String? artistId) =>
       this(artistId: artistId);
 
   @override
-  MangaDexMangaQueryFilter authorOrArtist(String? authorOrArtist) =>
+  MangaDexMangaWithFiltersQueryFilter authorOrArtist(String? authorOrArtist) =>
       this(authorOrArtist: authorOrArtist);
 
   @override
-  MangaDexMangaQueryFilter statuses(List<MangaStatus>? statuses) =>
+  MangaDexMangaWithFiltersQueryFilter statuses(List<MangaStatus>? statuses) =>
       this(statuses: statuses);
 
   @override
-  MangaDexMangaQueryFilter contentRatings(
+  MangaDexMangaWithFiltersQueryFilter contentRatings(
           List<ContentRating>? contentRatings) =>
       this(contentRatings: contentRatings);
 
   @override
-  MangaDexMangaQueryFilter publicationDemographics(
+  MangaDexMangaWithFiltersQueryFilter publicationDemographics(
           List<MangaPublicationDemographic>? publicationDemographics) =>
       this(publicationDemographics: publicationDemographics);
 
   @override
-  MangaDexMangaQueryFilter originalLanguages(
+  MangaDexMangaWithFiltersQueryFilter originalLanguages(
           List<Language>? originalLanguages) =>
       this(originalLanguages: originalLanguages);
 
   @override
-  MangaDexMangaQueryFilter availableTranslatedLanguages(
+  MangaDexMangaWithFiltersQueryFilter availableTranslatedLanguages(
           List<Language>? availableTranslatedLanguages) =>
       this(availableTranslatedLanguages: availableTranslatedLanguages);
 
   @override
-  MangaDexMangaQueryFilter excludedTagIds(List<String>? excludedTagIds) =>
+  MangaDexMangaWithFiltersQueryFilter excludedTagIds(
+          List<String>? excludedTagIds) =>
       this(excludedTagIds: excludedTagIds);
 
   @override
-  MangaDexMangaQueryFilter excludedTagJoinMode(
+  MangaDexMangaWithFiltersQueryFilter excludedTagJoinMode(
           TagJoinMode? excludedTagJoinMode) =>
       this(excludedTagJoinMode: excludedTagJoinMode);
 
   @override
-  MangaDexMangaQueryFilter includedTagIds(List<String>? includedTagIds) =>
+  MangaDexMangaWithFiltersQueryFilter includedTagIds(
+          List<String>? includedTagIds) =>
       this(includedTagIds: includedTagIds);
 
   @override
-  MangaDexMangaQueryFilter includedTagJoinMode(
+  MangaDexMangaWithFiltersQueryFilter includedTagJoinMode(
           TagJoinMode? includedTagJoinMode) =>
       this(includedTagJoinMode: includedTagJoinMode);
 
   @override
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `MangaDexMangaWithFiltersQueryFilter(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
-  /// MangaDexMangaQueryFilter(...).copyWith(id: 12, name: "My name")
+  /// MangaDexMangaWithFiltersQueryFilter(...).copyWith(id: 12, name: "My name")
   /// ````
-  MangaDexMangaQueryFilter call({
-    Object? ids = const $CopyWithPlaceholder(),
-    Object? includes = const $CopyWithPlaceholder(),
+  MangaDexMangaWithFiltersQueryFilter call({
     Object? limit = const $CopyWithPlaceholder(),
     Object? offset = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
@@ -176,15 +333,7 @@ class _$MangaDexMangaQueryFilterCWProxyImpl
     Object? includedTagIds = const $CopyWithPlaceholder(),
     Object? includedTagJoinMode = const $CopyWithPlaceholder(),
   }) {
-    return MangaDexMangaQueryFilter(
-      ids: ids == const $CopyWithPlaceholder()
-          ? _value.ids
-          // ignore: cast_nullable_to_non_nullable
-          : ids as List<String>?,
-      includes: includes == const $CopyWithPlaceholder()
-          ? _value.includes
-          // ignore: cast_nullable_to_non_nullable
-          : includes as List<EntityType>?,
+    return MangaDexMangaWithFiltersQueryFilter(
       limit: limit == const $CopyWithPlaceholder() || limit == null
           ? _value.limit
           // ignore: cast_nullable_to_non_nullable
@@ -251,9 +400,10 @@ class _$MangaDexMangaQueryFilterCWProxyImpl
   }
 }
 
-extension $MangaDexMangaQueryFilterCopyWith on MangaDexMangaQueryFilter {
-  /// Returns a callable class that can be used as follows: `instanceOfMangaDexMangaQueryFilter.copyWith(...)` or like so:`instanceOfMangaDexMangaQueryFilter.copyWith.fieldName(...)`.
+extension $MangaDexMangaWithFiltersQueryFilterCopyWith
+    on MangaDexMangaWithFiltersQueryFilter {
+  /// Returns a callable class that can be used as follows: `instanceOfMangaDexMangaWithFiltersQueryFilter.copyWith(...)` or like so:`instanceOfMangaDexMangaWithFiltersQueryFilter.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
-  _$MangaDexMangaQueryFilterCWProxy get copyWith =>
-      _$MangaDexMangaQueryFilterCWProxyImpl(this);
+  _$MangaDexMangaWithFiltersQueryFilterCWProxy get copyWith =>
+      _$MangaDexMangaWithFiltersQueryFilterCWProxyImpl(this);
 }

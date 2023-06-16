@@ -1,6 +1,8 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:convert";
 import "dart:io";
 
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/group.dart";
 import "package:riba/repositories/local/models/user.dart";
@@ -12,134 +14,153 @@ import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/utils/enumerate.dart";
 import "package:riba/repositories/utils/exception.dart";
 import "package:riba/repositories/utils/rate_limiter.dart";
+import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-class MangaDexGroupService extends MangaDexService<GroupAttributes, Group, GroupData, GroupData,
-    MangaDexGenericQueryFilter> {
-  MangaDexGroupService({
-    required super.client,
-    required super.rateLimiter,
-    required super.database,
-    required super.rootUrl,
-  });
+part "group.g.dart";
 
-  @override
-  final logger = Logger("MangaDexGroupService");
+class MangaDexGroupService extends MangaDexService<
+	GroupAttributes, Group, GroupData, GroupData,
+    MangaDexGenericQueryFilter,
+	MangaDexGenericQueryFilter,
+	MangaDexGenericQueryFilter
+> {
+	MangaDexGroupService({
+		required super.client,
+		required super.rateLimiter,
+		required super.database,
+		required super.rootUrl,
+	});
 
-  @override
-  final Map<String, Rate> rates = {
-    "/group:GET": const Rate(4, Duration(seconds: 1)),
-  };
+	@override
+	final logger = Logger("MangaDexGroupService");
 
-  @override
-  Directory get cacheDir => throw UnimplementedError();
+	@override
+	final Map<String, Rate> rates = {
+		"/group:GET": const Rate(4, Duration(seconds: 1)),
+	};
 
-  @override
-  Directory get dataDir => throw UnimplementedError();
+	@override
+	Directory get cacheDir => throw UnimplementedError();
 
-  @override
-  late final baseUrl = rootUrl.copyWith(pathSegments: ["group"]);
+	@override
+	Directory get dataDir => throw UnimplementedError();
 
-  @override
-  final defaultFilters = const MangaDexGenericQueryFilter(
-    includes: [EntityType.leader, EntityType.member],
-    limit: 100,
-  );
+	@override
+	late final baseUrl = rootUrl.copyWith(pathSegments: ["group"]);
 
-  @override
-  Future<GroupData> get(String id, {bool checkDB = true}) {
-    // TODO: implement get
-    throw UnimplementedError();
-  }
+	@override
+	final defaultFilters = const MangaDexGenericQueryFilter(
+		includes: [EntityType.leader, EntityType.member],
+		limit: 100,
+	);
 
-  @override
-  @Deprecated(
-      "Will not be implemented, used as a stub for the interface. Use getManyAsSingle instead.")
-  Future<Map<String, GroupData>> getMany({required overrides, checkDB = true}) {
-    throw UnimplementedError();
-  }
+	@override
+	Future<GroupData> get(String id, {bool checkDB = true}) {
+		// TODO: implement get
+		throw UnimplementedError();
+	}
 
-  @override
-  Future<CollectionData<GroupData>> withFilters({required overrides}) {
-    // TODO: implement withFilters
-    throw UnimplementedError();
-  }
+	@override
+	@Deprecated(
+		"Will not be implemented, used as a stub for the interface. Use getManyAsSingle instead.")
+	Future<Map<String, GroupData>> getMany({required overrides, checkDB = true}) {
+		throw UnimplementedError();
+	}
 
-  Future<Map<String, Group>> getManyAsSingle({
-    required MangaDexGenericQueryFilter overrides,
-    bool checkDB = true,
-  }) async {
-    logger.info("getManyAsSingle($overrides, $checkDB)");
+	@override
+	Future<CollectionData<GroupData>> withFilters({required overrides}) {
+		// TODO: implement withFilters
+		throw UnimplementedError();
+	}
 
-    assert(overrides.ids != null, "This method requires ids to be populated.");
-    assert(overrides.offset != 0, "This method does not support pagination, offset must be 0");
+	Future<Map<String, Group>> getManyAsSingle({
+		required MangaDexGroupGetManyAsSingleQueryFilter overrides,
+		bool checkDB = true,
+	}) async {
+		logger.info("getManyAsSingle(${overrides.toString()}, $checkDB)");
 
-    final ids = overrides.ids!;
-    final filters = defaultFilters.copyWith(overrides);
-    final Map<String, Group?> mapped = {for (final e in ids) e: null};
+		final Map<String, Group?> mapped = {for (final e in overrides.ids) e: null};
 
-    if (checkDB) {
-      final inDB = await database.getAll(ids.map(fastHash).toList());
-      for (final group in inDB) {
-        if (group == null) continue;
-        mapped[group.id] = group;
-      }
-    }
+		if (checkDB) {
+			final inDB = await database.getAll(overrides.ids.map(fastHash).toList());
+			for (final group in inDB) {
+				if (group == null) continue;
+				mapped[group.id] = group;
+			}
+		}
 
-    final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    if (missing.isEmpty) return mapped.cast<String, Group>();
+		final missing = mapped.entries.where((e) => e.value == null).map((e) => e.key).toList();
+		if (missing.isEmpty) return mapped.cast<String, Group>();
 
-    final block = Enumerate<String, GroupData>(
-      perStep: 100,
-      items: missing,
-      onStep: (resolved) async {
-        await rateLimiter.wait("/group:GET");
-        final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
-        final request = await client.get(reqUrl.toUri());
-        final response = GroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+		final hoistedUrl = baseUrl.clone().addFilters(defaultFilters).addFilters(overrides);
 
-        for (final data in response.data) {
-          try {
-            resolved[data.id] = data.toGroupData();
-          } on LanguageNotSupportedException catch (e) {
-            logger.warning(e.toString());
-          }
-        }
-      },
-      onMismatch: (missedIds) {
-        logger.warning("Some entries were not in the response, ignoring them: $missedIds");
-        for (final id in missedIds) {
-          mapped.remove(id);
-        }
-      },
-    );
+		final block = Enumerate<String, GroupData>(
+			perStep: defaultFilters.limit!,
+			items: missing,
+			onStep: (resolved) async {
+				await rateLimiter.wait("/group:GET");
 
-    final res = await block.run();
-    await database.isar.writeTxn(() => Future.wait(res.values.map(insertMeta)));
+				final reqUrl = hoistedUrl.setParameter("ids[]", resolved.keys.toList());
+				final request = await client.get(reqUrl.toUri());
+				final response = GroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-    return mapped.cast<String, Group>()..addAll(res.map((k, v) => MapEntry(k, v.group)));
-  }
+				for (final data in response.data) {
+					try {
+						resolved[data.id] = data.toGroupData();
+					} on LanguageNotSupportedException catch (e) {
+						logger.warning(e.toString());
+					}
+				}
+			},
+			onMismatch: (missedIds) {
+				logger.warning("Some entries were not in the response, ignoring them: $missedIds");
+				for (final id in missedIds) {
+					mapped.remove(id);
+				}
+			},
+		);
 
-  @override
-  Future<void> insertMeta(GroupData data) async {
-    await Future.wait([
-      database.put(data.group),
-      database.isar.users.putAll(data.users.values.toList()),
-    ]);
-  }
+		final res = await block.run();
+		await database.isar.writeTxn(() => Future.wait(res.values.map(insertMeta)));
 
-  /// Collects related data for a group to make a [GroupData] object.
-  ///
-  /// [Group.memberIds] should not be null, if it is, [IncompleteDataException] is thrown.
-  @override
-  Future<GroupData> collectMeta(Group single) async {
-    if (single.memberIds == null) throw const IncompleteDataException("Group.memberIds is null");
-    final users =
-        await database.isar.users.getAll(single.memberIds!.map((e) => fastHash(e)).toList());
+		return mapped.cast<String, Group>()..addAll(res.map((k, v) => MapEntry(k, v.group)));
+	}
 
-    return GroupData(
-      group: single,
-      users: {for (final user in users as List<User>) user.id: user},
-    );
-  }
+	@override
+	Future<void> insertMeta(GroupData data) async {
+		await Future.wait([
+			database.put(data.group),
+			database.isar.users.putAll(data.users.values.toList()),
+		]);
+	}
+
+	/// Collects related data for a group to make a [GroupData] object.
+	///
+	/// [Group.memberIds] should not be null, if it is, [IncompleteDataException] is thrown.
+	@override
+	Future<GroupData> collectMeta(Group single) async {
+		if (single.memberIds == null) throw const IncompleteDataException("Group.memberIds is null");
+		final users = await database.isar.users.getAll(single.memberIds!.map((e) => fastHash(e)).toList());
+
+		return GroupData(
+			group: single,
+			users: {for (final user in users as List<User>) user.id: user},
+		);
+	}
+}
+
+@CopyWith()
+class MangaDexGroupGetManyAsSingleQueryFilter implements MangaDexQueryFilter {
+	final List<String> ids;
+
+	const MangaDexGroupGetManyAsSingleQueryFilter({required this.ids});
+
+	@override
+	URL addFiltersToUrl(URL sourceUrl) {
+		return sourceUrl.setParameter("ids[]", ids);
+	}
+
+	@override
+	String toString() => "MangaDexGroupGetManyAsSingleQueryFilter(ids: $ids)";
 }

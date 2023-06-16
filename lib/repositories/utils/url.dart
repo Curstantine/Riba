@@ -86,7 +86,7 @@ class URL {
 		return this;
 	}
 
-	URL copy() {
+	URL clone() {
 		return copyWith(
 			useHttps: useHttps,
 			hostname: hostname,

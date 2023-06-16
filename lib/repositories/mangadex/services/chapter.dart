@@ -2,6 +2,7 @@
 import "dart:convert";
 import "dart:io";
 
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/chapter.dart";
@@ -19,88 +20,91 @@ import "package:riba/repositories/utils/rate_limiter.dart";
 import "package:riba/repositories/utils/url.dart";
 import "package:riba/utils/hash.dart";
 
-class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter, ChapterData,
-    ChapterData, MangaDexChapterQueryFilter> {
-  MangaDexChapterService({
-    required super.client,
-    required super.rateLimiter,
-    required super.database,
-    required super.rootUrl,
-  });
+part "chapter.g.dart";
 
-  @override
-  final logger = Logger("MangaDexChapterService");
+class MangaDexChapterService extends MangaDexService<
+	ChapterAttributes, Chapter, ChapterData, ChapterData,
+	MangaDexGenericQueryFilter,
+	MangaDexGenericQueryFilter,
+	MangaDexChapterWithFiltersQueryFilter
+> {
+	MangaDexChapterService({
+		required super.client,
+		required super.rateLimiter,
+		required super.database,
+		required super.rootUrl,
+	});
 
-  @override
-  final rates = {
-    "/chapter:GET": const Rate(4, Duration(seconds: 1)),
-    "/manga/feed:GET": const Rate(2, Duration(seconds: 1)),
-  };
+	@override
+	final logger = Logger("MangaDexChapterService");
 
-  @override
-  Directory get cacheDir => throw UnimplementedError();
+	@override
+	final rates = {
+		"/chapter:GET": const Rate(4, Duration(seconds: 1)),
+		"/manga/feed:GET": const Rate(2, Duration(seconds: 1)),
+	};
 
-  @override
-  Directory get dataDir => throw UnimplementedError();
+	@override
+	Directory get cacheDir => throw UnimplementedError();
 
-  @override
-  late final baseUrl = rootUrl.copyWith(pathSegments: ["chapter"]);
-  late final mangaUrl = rootUrl.copyWith(pathSegments: ["manga"]);
+	@override
+	Directory get dataDir => throw UnimplementedError();
 
-  @override
-  final defaultFilters = MangaDexChapterQueryFilter(
-    includes: [
-      EntityType.user,
-      EntityType.scanlationGroup,
-    ],
-    orderByChapterDesc: true,
-  );
+	@override
+	late final baseUrl = rootUrl.copyWith(pathSegments: ["chapter"]);
+	late final mangaUrl = rootUrl.copyWith(pathSegments: ["manga"]);
 
-  @override
-  Future<ChapterData> get(String id, {checkDB = true}) {
-    // TODO: implement get
-    throw UnimplementedError();
-  }
+	@override
+	final defaultFilters = 	const MangaDexGenericQueryFilter(
+		includes: [
+			EntityType.user,
+			EntityType.scanlationGroup,
+		],
+	);
 
-  @override
-  @Deprecated("Will not be implemented, used as a stub for the interface.")
-  Future<Map<String, ChapterData>> getMany({required overrides, checkDB = true}) async {
-    throw UnimplementedError();
-  }
+	@override
+	Future<ChapterData> get(String id, {checkDB = true}) {
+		// TODO: implement get
+		throw UnimplementedError();
+	}
 
-  /// Returns a list of chapters that match the given filters.
-  ///
-  /// These results are not read from the database, but are always fetched from the MangaDex API.
-  @override
-  Future<CollectionData<ChapterData>> withFilters({required overrides}) async {
-    logger.info("withFilters($overrides)");
+	@override
+	@Deprecated("Will not be implemented, used as a stub for the interface.")
+	Future<Map<String, ChapterData>> getMany({required overrides, checkDB = true}) async {
+		throw UnimplementedError();
+	}
 
-    final filters = defaultFilters.copyWithSelf(overrides);
-    await rateLimiter.wait("/chapter:GET");
+	/// Returns a list of chapters that match the given filters.
+	///
+	/// These results are not read from the database, but are always fetched from the MangaDex API.
+	@override
+	Future<CollectionData<ChapterData>> withFilters({required overrides}) async {
+		logger.info("withFilters(${overrides.toString()})");
 
-    final reqUrl = filters.addFiltersToUrl(baseUrl.copy());
-    final request = await client.get(reqUrl.toUri());
-    final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+		await rateLimiter.wait("/chapter:GET");
 
-    final chapters = <ChapterData>[];
-    for (final data in response.data) {
-      try {
-        final chapter = data.toChapterData();
-        chapters.add(chapter);
-      } on LanguageNotSupportedException catch (e) {
-        logger.warning(e.toString());
-      }
-    }
+		final reqUrl = baseUrl.clone().addFilters(defaultFilters).addFilters(overrides);
+		final request = await client.get(reqUrl.toUri());
+		final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
-    await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+		final chapters = <ChapterData>[];
+		for (final data in response.data) {
+			try {
+				final chapter = data.toChapterData();
+				chapters.add(chapter);
+			} on LanguageNotSupportedException catch (e) {
+				logger.warning(e.toString());
+			}
+		}
 
-    return CollectionData(
-      data: chapters,
-      offset: response.offset,
-      limit: response.limit,
-      total: response.total,
-    );
-  }
+		await database.isar.writeTxn(() => Future.wait(chapters.map(insertMeta)));
+		return CollectionData(
+			data: chapters,
+			offset: response.offset,
+			limit: response.limit,
+			total: response.total,
+		);
+	}
 
 	/// Returns a list of chapters related to the given manga.
 	///
@@ -111,23 +115,18 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
 	/// Local fetches does not handle limit and offset internally as it is
 	/// impossible to do so with sorts and filters.
 	Future<CollectionData<ChapterData>> getFeed({
-		required MangaDexChapterQueryFilter overrides,
+		required MangaDexChapterGetFeedQueryFilter overrides,
 		bool checkDB = true,
 	}) async {
-		logger.info("getFeed($overrides, $checkDB)");
-		assert(overrides.mangaId != null, "Manga ID must be specified");
-
-		// Manga ID in the filter should be ignored, since id is part of the path segments.
-		final filters = defaultFilters.copyWithSelf(overrides)..mangaId = null;
-		final mangaId = overrides.mangaId!;
-		final excludedGroups = filters.excludedGroups ?? [];
-		final translatedLangs = filters.translatedLanguages ?? [];
-		final orderByChapterDesc = filters.orderByChapterDesc;
+		logger.info("getFeed(${overrides.toString()}, $checkDB)");
 
 		if (checkDB) {
+			final excludedGroups = overrides.excludedGroups ?? const [];
+			final translatedLangs = overrides.translatedLanguages ?? const [];
+
 			final inDB = await database
 				.where()
-				.mangaIdEqualTo(mangaId)
+				.mangaIdEqualTo(overrides.mangaId)
 				.filter()
 				.not()
 				.group((q) => q.anyOf(excludedGroups, (q, e) => q.groupIdsElementContains(e)))
@@ -136,22 +135,20 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
 				.findAll();
 			
 			if (inDB.isNotEmpty) {
-				if (orderByChapterDesc == true) inDB.sortInDesc();
-				final data = await database.isar
-					.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
+				if (overrides.orderByChapterDesc) inDB.sortInDesc();
+				final data = await database.isar.txn(() => Future.wait(inDB.map((e) => collectMeta(e))));
 
 				return CollectionData(
 					data: data,
-					offset: filters.offset,
-					limit: filters.limit,
+					offset: -1,
+					limit: -1,
 					total: data.length,
 				);
 			}
 		}
 
 		await rateLimiter.wait("/manga/feed:GET");
-		final tempBaseUrl = mangaUrl.copy().addPathSegments([mangaId, "feed"]);
-		final reqUrl = filters.addFiltersToUrl(tempBaseUrl);
+		final reqUrl = mangaUrl.clone().addFilters(defaultFilters).addFilters(overrides);
 		final request = await client.get(reqUrl.toUri());
 		final response = ChapterCollection.fromMap(jsonDecode(request.body), url: reqUrl);
 
@@ -174,126 +171,102 @@ class MangaDexChapterService extends MangaDexService<ChapterAttributes, Chapter,
 		);
 	}
 
-  @override
-  Future<void> insertMeta(ChapterData data) async {
-    await Future.wait([
-      database.put(data.chapter),
-      database.isar.groups.putAll(data.groups),
-      database.isar.users.put(data.uploader),
-    ]);
-  }
-
-  @override
-  Future<ChapterData> collectMeta(Chapter single) async {
-    final data = await Future.wait([
-      database.isar.groups.getAll(single.groupIds.map((e) => fastHash(e)).toList()),
-      database.isar.users.get(fastHash(single.uploaderId)),
-    ]);
-
-    return ChapterData(
-      chapter: single,
-      groups: (data[0] as List<Group?>).cast(),
-      uploader: data[1] as User,
-    );
-  }
-}
-
-class MangaDexChapterQueryFilter extends MangaDexQueryFilter {
-  final List<String>? ids;
-  final List<EntityType>? includes;
-  final int limit;
-  final int offset;
-
-  String? mangaId;
-  final bool? orderByChapterDesc;
-  final List<Language>? translatedLanguages;
-  final List<String>? excludedGroups;
-  final List<ContentRating>? contentRatings;
-
-  MangaDexChapterQueryFilter({
-    this.ids,
-    this.includes,
-    this.offset = 0,
-    this.limit = 250,
-    this.mangaId,
-    this.orderByChapterDesc,
-    this.translatedLanguages,
-    this.excludedGroups,
-	this.contentRatings,
-  });
-
-  @override
-  URL addFiltersToUrl(URL url) {
-    if (orderByChapterDesc == true) {
-      url.setParameter("order[chapter]", "desc");
-    }
-
-    if (mangaId != null) {
-      url.setParameter("manga", mangaId);
-    }
-
-    if (translatedLanguages != null) {
-      url.setParameter("translatedLanguage[]", translatedLanguages!.map((e) => e.isoCode).toList());
-    }
-
-    if (excludedGroups != null) {
-      url.setParameter("excludedGroups[]", excludedGroups);
-    }
-
-	if (contentRatings != null) {
-	  url.setParameter("contentRating[]", contentRatings);
+	@override
+	Future<void> insertMeta(ChapterData data) async {
+		await Future.wait([
+			database.put(data.chapter),
+			database.isar.groups.putAll(data.groups),
+			database.isar.users.put(data.uploader),
+		]);
 	}
 
-    final generic = MangaDexGenericQueryFilter(
-      ids: ids,
-      includes: includes,
-      limit: limit,
-      offset: offset,
-    );
+	@override
+	Future<ChapterData> collectMeta(Chapter single) async {
+		final data = await Future.wait([
+			database.isar.groups.getAll(single.groupIds.map((e) => fastHash(e)).toList()),
+			database.isar.users.get(fastHash(single.uploaderId)),
+		]);
 
-    return generic.addFiltersToUrl(url);
-  }
+		return ChapterData(
+			chapter: single,
+			groups: (data[0] as List<Group?>).cast(),
+			uploader: data[1] as User,
+		);
+	}
+}
 
-  MangaDexChapterQueryFilter copyWith({
-    List<String>? ids,
-    List<EntityType>? includes,
-    int? limit,
-    int? offset,
-    String? mangaId,
-    bool? orderByChapterDesc,
-    List<Language>? translatedLanguages,
-    List<String>? excludedGroups,
-	List<ContentRating>? contentRatings,
-  }) {
-    return MangaDexChapterQueryFilter(
-      ids: ids ?? this.ids,
-      includes: includes ?? this.includes,
-      limit: limit ?? this.limit,
-      offset: offset ?? this.offset,
-      mangaId: mangaId ?? this.mangaId,
-      orderByChapterDesc: orderByChapterDesc ?? this.orderByChapterDesc,
-      translatedLanguages: translatedLanguages ?? this.translatedLanguages,
-      excludedGroups: excludedGroups ?? this.excludedGroups,
-	  contentRatings: contentRatings ?? this.contentRatings,
-    );
-  }
+@CopyWith()
+class MangaDexChapterGetFeedQueryFilter implements MangaDexQueryFilter {
+	final int limit;
+	final int offset;
 
-  MangaDexChapterQueryFilter copyWithSelf(MangaDexChapterQueryFilter other) {
-    return MangaDexChapterQueryFilter(
-      ids: other.ids ?? ids,
-      includes: other.includes ?? includes,
-      limit: other.limit,
-      offset: other.offset,
-      mangaId: other.mangaId ?? mangaId,
-      orderByChapterDesc: other.orderByChapterDesc ?? orderByChapterDesc,
-      translatedLanguages: other.translatedLanguages ?? translatedLanguages,
-      excludedGroups: other.excludedGroups ?? excludedGroups,
-	  contentRatings: other.contentRatings ?? contentRatings,
-    );
-  }
+	/// Get feed method uses the /manga/{id}/feed endpoint, so the manga id is applied as a path segment.
+	final String mangaId;
 
-  @override
-  String toString() {
-    return "MangaDexChapterQueryFilter(ids: $ids, includes: $includes, limit: $limit, offset: $offset, mangaId: $mangaId, orderByChapterDesc: $orderByChapterDesc, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups, contentRatings: $contentRatings)";
-  }
+	final bool orderByChapterDesc;
+	final List<Language>? translatedLanguages;
+	final List<String>? excludedGroups;
+
+	const MangaDexChapterGetFeedQueryFilter({
+		this.limit = 100,
+		this.offset = 0,
+		required this.mangaId,
+		this.orderByChapterDesc = true,
+		this.translatedLanguages,
+		this.excludedGroups,
+	});
+	
+	@override
+	URL addFiltersToUrl(URL sourceUrl) {
+		sourceUrl.addPathSegments([mangaId, "feed"]);
+
+		if (orderByChapterDesc) sourceUrl.setParameter("order[chapter]", "desc");
+		if (translatedLanguages != null) sourceUrl.setParameter("translatedLanguage[]", translatedLanguages);
+		if (excludedGroups != null) sourceUrl.setParameter("excludedGroups[]", excludedGroups);
+
+		return MangaDexGenericQueryFilter(limit: limit, offset: offset).addFiltersToUrl(sourceUrl);
+	}
+
+	@override
+	String toString() {
+		return "MangaDexChapterGetFeedQueryFilter(limit: $limit, offset: $offset, mangaId: $mangaId, orderByChapterDesc: $orderByChapterDesc, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups)";
+	}
+}
+
+@CopyWith()
+class MangaDexChapterWithFiltersQueryFilter implements MangaDexQueryFilter {
+	final int limit;
+	final int offset;
+	final bool orderByChapterDesc;
+
+	final List<String>? ids;
+	final List<Language>? translatedLanguages;
+	final List<String>? excludedGroups;
+	final List<ContentRating>? contentRatings;
+
+	const MangaDexChapterWithFiltersQueryFilter({
+		this.limit = 100,
+		this.offset = 0,
+		this.orderByChapterDesc = true,
+		this.ids,
+		this.translatedLanguages,
+		this.excludedGroups,
+		this.contentRatings,
+	});
+	
+	@override
+	URL addFiltersToUrl(URL sourceUrl) {
+		if (orderByChapterDesc) sourceUrl.setParameter("order[chapter]", "desc");
+		if (ids != null) sourceUrl.setParameter("ids[]", ids);
+		if (translatedLanguages != null) sourceUrl.setParameter("translatedLanguage[]", translatedLanguages);
+		if (excludedGroups != null) sourceUrl.setParameter("excludedGroups[]", excludedGroups);
+		if (contentRatings != null) sourceUrl.setParameter("contentRating[]", contentRatings);
+
+		return MangaDexGenericQueryFilter(limit: limit, offset: offset).addFiltersToUrl(sourceUrl);
+	}
+
+	@override
+	String toString() {
+		return "MangaDexChapterWithFiltersQueryFilter(limit: $limit, offset: $offset, orderByChapterDesc: $orderByChapterDesc, ids: $ids, translatedLanguages: $translatedLanguages, excludedGroups: $excludedGroups, contentRatings: $contentRatings)";
+	}
 }

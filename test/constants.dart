@@ -2,6 +2,7 @@ const mangaId = "f9c33607-9180-4ba6-b85c-e4b5faee7192";
 const coverId = "d3b3a942-6cf4-4fa4-a9f4-627d8b361f8f";
 const coverFile = "c18da525-e34f-4128-a696-4477b6ce6827.png";
 const authorOrArtistId = "26f72ab8-a251-4286-ba6d-a38e164f1c72";
+const title = "Official \"Test\" Manga";
 
 const mangaIds = [
   "d473d946-e086-454a-9cb4-62d14f8491da",

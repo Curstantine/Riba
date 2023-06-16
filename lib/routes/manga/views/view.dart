@@ -10,7 +10,6 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
