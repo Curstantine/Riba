@@ -65,19 +65,33 @@ extension SortChapter on List<Chapter> {
 	/// If both [chapter] and [volume] are null, it will not be sorted.
 	void sortInDesc() => sort((a, b) {
 		if (a.chapter != null && b.chapter != null) {
-			final aChapter = double.parse(a.chapter!);
-			final bChapter = double.parse(b.chapter!);
+			final aChapter = double.tryParse(a.chapter!) ?? parseFromLTR(a.chapter!) ?? 0;
+			final bChapter = double.tryParse(b.chapter!) ?? parseFromLTR(b.chapter!) ?? 0;
 
 			return bChapter.compareTo(aChapter);
 		}
 
 		if (a.volume != null && b.volume != null) {
-			final aVolume = double.parse(a.volume!);
-			final bVolume = double.parse(b.volume!);
+			final aVolume = double.tryParse(a.volume!) ?? parseFromLTR(a.volume!) ?? 0;
+			final bVolume = double.tryParse(b.volume!) ?? parseFromLTR(b.volume!) ?? 0;
 
 			return bVolume.compareTo(aVolume);
 		}
 
 		return 0;
 	});
+}
+
+/// Parses a string to a double.
+/// Uses a mechanism where it will parse the first number it finds if [double.tryParse] cannot parse it.
+/// 
+/// E.g.
+/// 1. "9y" -> 9
+/// 2. "y9" -> 9
+/// 3. "9.5" -> 9.5
+/// 4. "yooe" -> null
+double? parseFromLTR(String str) {
+	final match = RegExp(r"\d+").firstMatch(str);
+	if (match == null) return null;
+	return double.parse(match.group(0)!);
 }
