@@ -142,6 +142,12 @@ class QuickSearchViewModel implements ViewModel {
 
 	@override
 	void dispose() {
+		filterState.dispose();
+
+		_mangaController.close();
+		_historyController.close();
+		_tagsController.close();
+
 		_instance = null;
 	}
 }
@@ -212,5 +218,17 @@ class QuickSearchFilterState {
 				},
 			},
 		);
+	}
+
+	/// Disposes all the notifiers
+	void dispose() {
+		tagInclusionMode.dispose();
+		tagExclusionMode.dispose();
+
+		for (final group in TagGroup.values) {
+			for (final notifier in groupedTagSelection[group]!.values) {
+				notifier.dispose();
+			}
+		}
 	}
 }

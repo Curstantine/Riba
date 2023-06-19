@@ -40,6 +40,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 	void dispose() {
 		rootViewModel.searchController.removeListener(onSearchControllerChange);
 		textValueListenable.removeListener(onTextValueChange);
+		viewModel.dispose();
 		super.dispose();
 	}
 
