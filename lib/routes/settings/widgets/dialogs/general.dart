@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/utils/constants.dart";
 
 class FullScreenDialog extends StatelessWidget {
@@ -30,17 +31,17 @@ class FullScreenDialog extends StatelessWidget {
 				SliverAppBar.medium(
 					title: Text(title, overflow: TextOverflow.visible, maxLines: 1),
 					leading: IconButton(
-						icon: const Icon(Icons.close_rounded),
+						icon: const Icon(Symbols.close_rounded),
 						onPressed: () => Navigator.pop(context),
 					),
 					actions: [	
 						IconButton(
 							onPressed: onReset == null ? null : () => handleReset.call(context),
-							icon: const Icon(Icons.restore_rounded),
+							icon: const Icon(Symbols.restore_rounded),
 						),
 						IconButton(
 							onPressed: () => handleConfirm.call(context),
-							icon: const Icon(Icons.check_rounded),
+							icon: const Icon(Symbols.check_rounded),
 						),
 					],
 				),

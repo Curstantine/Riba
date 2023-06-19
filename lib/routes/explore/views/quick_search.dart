@@ -1,8 +1,10 @@
 import "package:flutter/material.dart" hide SearchBar;
 import "package:flutter_animate/flutter_animate.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
+import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/debouncer.dart";
@@ -16,24 +18,33 @@ class QuickSearchView extends StatefulWidget {
 }
 
 class _QuickSearchViewState extends State<QuickSearchView> {
+	/// Why?
+	/// 
+	/// [SearchController]'s [ValueNotifier] gets updated on input renders,
+	/// so if the view is rebuilt, regardless of the input value, notifyListeners
+	/// will be called.
+	final textValueListenable = ValueNotifier<String?>(ExploreViewModel.instance.searchController.text);
 	final debouncer = Debounce(duration: const Duration(milliseconds: 500));
 
-	ExploreViewModel get viewModel => ExploreViewModel.instance;
+	ExploreViewModel get rootViewModel => ExploreViewModel.instance;
+	QuickSearchViewModel get viewModel => QuickSearchViewModel.instance;
 
 	@override
 	void initState() {
 		super.initState();
-		viewModel.quickSearchController.addListener(onInputChange);
-		viewModel.initializeQuickSearch();
+		rootViewModel.searchController.addListener(onSearchControllerChange);
+		textValueListenable.addListener(onTextValueChange);
 	}
 
 	@override
 	void dispose() {
-		viewModel.quickSearchController.removeListener(onInputChange);
+		rootViewModel.searchController.removeListener(onSearchControllerChange);
+		textValueListenable.removeListener(onTextValueChange);
 		super.dispose();
 	}
 
-	void onInputChange() => debouncer.run(() => viewModel.refreshQuickSearch());
+	void onSearchControllerChange() => textValueListenable.value = rootViewModel.searchController.text;
+	void onTextValueChange() => debouncer.run(() => viewModel.refresh());
 
 	@override
 	Widget build(BuildContext context) {
@@ -52,7 +63,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 
 	Widget buildRecentList(TextTheme text) {
 		return StreamBuilder<List<History>>(
-			stream: viewModel.quickSearchHistoryStream,
+			stream: viewModel.historyStream,
 			builder: (context, snapshot) {
 				if (snapshot.hasError) {
 					return SliverToBoxAdapter(child: SizedBox(
@@ -72,9 +83,9 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 						child: Text("Recent searches", style: text.titleSmall)),
 					for (final history in histories)
 						ListTile(
-							leading: const Icon(Icons.history),
+							leading: const Icon(Symbols.history_rounded),
 							title: Text(history.value),
-							onTap: () => viewModel.quickSearchController.text = history.value),
+							onTap: () => rootViewModel.searchController.text = history.value),
 					const Padding(padding: Edges.topMedium),
 				].animate().fadeIn()));
 			},
@@ -83,7 +94,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 
 	Widget buildMangaList(TextTheme text, ColorScheme colors) {
 		return StreamBuilder<List<MangaData>>(
-			stream: viewModel.quickSearchMangaStream,
+			stream: viewModel.mangaStream,
 			builder: (context, snapshot) {
 				if (snapshot.hasError) {
 					return SliverToBoxAdapter(child: SizedBox(

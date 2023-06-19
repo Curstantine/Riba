@@ -1,4 +1,5 @@
 import "package:flutter/material.dart" hide SearchBar;
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/utils/constants.dart";
 
 class SearchBar extends StatelessWidget {
@@ -40,7 +41,7 @@ class SearchBar extends StatelessWidget {
 					child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
 						Padding(
 							padding: Edges.horizontalLarge,
-							child: Icon(Icons.search_rounded, size: 24, color: colors.onSurface)),
+							child: Icon(Symbols.search_rounded, size: 24, color: colors.onSurface)),
 						Expanded(
 							child: TextField(
 								readOnly: true,

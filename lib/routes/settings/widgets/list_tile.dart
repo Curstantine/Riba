@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 
 class StreamingListTile<T> extends StatelessWidget {
 	const StreamingListTile({
@@ -40,7 +41,7 @@ class StreamingListTile<T> extends StatelessWidget {
 			}
 
 			if (snapshot.hasError) {
-				trailing = Icon(Icons.error_outline, color: colors.error);
+				trailing = Icon(Symbols.error_outline, color: colors.error);
 			}
 
 			if (snapshot.hasData) {

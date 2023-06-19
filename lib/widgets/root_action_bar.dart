@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/mangadex/models/user.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/theme.dart";
@@ -22,7 +23,7 @@ class RootActionBar extends StatelessWidget implements PreferredSizeWidget {
 			padding: Edges.horizontalSmall,
 			margin: EdgeInsets.only(top: media.padding.top),
 			child: Row(children: [
-				IconButton(onPressed: () => {}, icon: const Icon(Icons.person)),
+				IconButton(onPressed: () => {}, icon: const Icon(Symbols.person_rounded, fill: 1)),
 				Column(
 					mainAxisAlignment: MainAxisAlignment.center,
 					crossAxisAlignment: CrossAxisAlignment.start,

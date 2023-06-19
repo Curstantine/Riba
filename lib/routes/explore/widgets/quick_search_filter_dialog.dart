@@ -1,8 +1,10 @@
 import "package:flutter/material.dart" hide Chip, Locale;
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/routes/explore/model.dart";
+import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
@@ -12,7 +14,7 @@ import "package:riba/widgets/material/chip.dart";
 class QuickSearchFilterDialog extends StatefulWidget {
 	/// Dialog that allows the user to filter the quick search results
 	/// 
-	/// The dialog will be dismissed with a `true` value when the user submits the filter.
+	/// The dialog will be dismissed with a [QuickSearchFilterState] value when the user submits the filter.
 	const QuickSearchFilterDialog({super.key});
 
 	@override
@@ -20,7 +22,10 @@ class QuickSearchFilterDialog extends StatefulWidget {
 }
 
 class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
-	ExploreViewModel get viewModel => ExploreViewModel.instance;
+	QuickSearchViewModel get viewModel => QuickSearchViewModel.instance;
+	ExploreViewModel get rootViewModel => ExploreViewModel.instance;
+
+	final state = QuickSearchViewModel.instance.filterState.copy();
 	List<Locale> get preferredLocales => Settings.instance.appearance.preferredDisplayLocales.value; 
 
 	@override
@@ -37,9 +42,14 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 				SliverAppBar(
 					floating: true,
 					title: Text("Filter", style: text.headlineSmall),
-					leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+					leading: IconButton(icon: const Icon(Symbols.close), onPressed: () => Navigator.pop(context)),
 					actions: [
-						IconButton(icon: const Icon(Icons.check), onPressed: () => Navigator.pop(context, true)),
+						IconButton(
+							icon: const Icon(Symbols.restore_rounded),
+							onPressed: () => Navigator.pop(context, QuickSearchFilterState.empty())),
+						IconButton(
+							icon: const Icon(Symbols.check_rounded),
+							onPressed: () => Navigator.pop(context, state)),
 					],
 				),
 				SliverPadding(padding: Edges.horizontalMedium.copyWithSelf(Edges.verticalLarge), sliver: Builder(builder: (context) {
@@ -53,9 +63,9 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 							dropdownMenuEntries: TagJoinMode.values
 								.map((e) => DropdownMenuEntry(label: e.asHumanReadable(), value: e))
 								.toList(),
-							initialSelection: viewModel.quickSearchFilterTagInclusionMode.value,
+							initialSelection: state.tagInclusionMode.value,
 							onSelected: (value) => {
-								if (value != null) viewModel.quickSearchFilterTagInclusionMode.value = value
+								if (value != null) state.tagInclusionMode.value = value
 							},
 						),
 						const SizedBox(width: Edges.medium),
@@ -66,14 +76,14 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 							dropdownMenuEntries: TagJoinMode.values
 								.map((e) => DropdownMenuEntry(label: e.asHumanReadable(), value: e))
 								.toList(),
-							initialSelection: viewModel.quickSearchFilterTagExclusionMode.value,
+							initialSelection: state.tagExclusionMode.value,
 							onSelected: (value) => {
-								if (value != null) viewModel.quickSearchFilterTagExclusionMode.value = value
+								if (value != null) state.tagExclusionMode.value = value
 							},
 						),
 					]));
 				})),
-				StreamBuilder(stream: viewModel.quickSearchFilterTagsStream, builder: (context, snapshot) {
+				StreamBuilder(stream: viewModel.tagsStream, builder: (context, snapshot) {
 					if (snapshot.hasError) {
 						return SliverToBoxAdapter(child: SizedBox(
 							height: 100,
@@ -105,7 +115,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 									);
 								}
 
-								final groupSelectionMap = viewModel.quickSearchGroupedTagSelectionModes[group]!;
+								final groupSelectionMap = state.groupedTagSelection[group]!;
 
 								return Wrap(
 									spacing: Edges.small,
@@ -150,27 +160,5 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 				);
 			},
 		);
-	}
-}
-
-class QuickSearchFilterState {
-	final tagInclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.and);
-	final tagExclusionMode = ValueNotifier<TagJoinMode>(TagJoinMode.or);
-
-	final Map<TagGroup, Map<String, ValueNotifier<TagSelectionMode>>> groupedTagSelection = {
-		for (final tagGroup in TagGroup.values) tagGroup: <String, ValueNotifier<TagSelectionMode>>{},
-	};
-
-	QuickSearchFilterState();
-
-	QuickSearchFilterState.from(QuickSearchFilterState state) {
-		tagInclusionMode.value = state.tagInclusionMode.value;
-		tagExclusionMode.value = state.tagExclusionMode.value;
-
-		for (final group in state.groupedTagSelection.entries) {
-			for (final tag in group.value.entries) {
-				groupedTagSelection[group.key]![tag.key]!.value = tag.value.value;
-			}
-		}
 	}
 }

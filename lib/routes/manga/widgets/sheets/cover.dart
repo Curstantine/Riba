@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
@@ -103,12 +104,12 @@ class _CoverSheetState extends State<CoverSheet> {
 					title: const Text("Covers"),
 					actions: [
 						IconButton(
-							icon: const Icon(Icons.refresh),
+							icon: const Icon(Symbols.refresh),
 							onPressed: () => fetchData(checkDB: false)),
 						ValueListenableBuilder<String?>(
 							valueListenable: selectedCoverId,
 							builder: (context, selectedId, child) => IconButton(
-								icon: const Icon(Icons.check_rounded),
+								icon: const Icon(Symbols.check_rounded),
 								onPressed: selectedId != (manga.preferredCoverId ?? manga.defaultCoverId) 
 									? setUsedCover
 									: null,
@@ -142,7 +143,7 @@ class _CoverSheetState extends State<CoverSheet> {
 
 						if (snapshot.hasData && snapshot.data!.isEmpty) {
 							child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-								const Icon(Icons.image_search_rounded, size: 36),
+								const Icon(Symbols.image_search_rounded, size: 36),
 								const SizedBox(height: Edges.small),
 								Text("Couldn't find any covers for this title!",
 									style: theme.textTheme.titleMedium),
@@ -182,7 +183,7 @@ class _CoverSheetState extends State<CoverSheet> {
 				Padding(
 					padding: Edges.bottomMedium,
 					child: Row(children: [
-						Icon(Icons.info_outline_rounded, size: 24, color: colors.primary),
+						Icon(Symbols.info_rounded, size: 24, color: colors.primary),
 						const SizedBox(width: Edges.large),
 						Expanded(
 							child: Text(
@@ -291,7 +292,7 @@ class _BigPicture extends StatelessWidget {
 					!snapshot.hasError &&
 					snapshot.connectionState == ConnectionState.done) {
 					children = [
-						Icon(Icons.image_not_supported_rounded, size: 42, color: colors.primary),
+						Icon(Symbols.image_not_supported_rounded, size: 42, color: colors.primary),
 						const SizedBox(height: Edges.small),
 						Text("Covers are not available.", style: text.bodyMedium),
 					];
@@ -373,7 +374,7 @@ class _BigPicture extends StatelessWidget {
 						child: Row(children: [
 							ElevatedButton.icon(
 								onPressed: () => saveCoverImage(context),
-								icon: const Icon(Icons.save),
+								icon: const Icon(Symbols.save),
 								label: const Text("Save"))
 						]),
 					),
@@ -438,7 +439,7 @@ class _CoverPreview extends StatelessWidget {
 				if (snapshot.hasError) {
 					final error = handleError(snapshot.error!);
 					child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-						Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+						Icon(Symbols.image_not_supported_rounded, size: 32, color: colors.error),
 						const SizedBox(height: Edges.small),
 						Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
 					]);
@@ -518,7 +519,7 @@ class _CoverPreviewList extends StatelessWidget {
 			return SizedBox(
 				height: 200,
 				child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-					Icon(Icons.image_search_rounded, size: 32, color: colors.onSurfaceVariant),
+					Icon(Symbols.image_search_rounded, size: 32, color: colors.onSurfaceVariant),
 					const SizedBox(height: Edges.small),
 					Text("No other covers found!",
 						style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
@@ -541,7 +542,7 @@ class _CoverPreviewList extends StatelessWidget {
 						final error = handleError(snapshot.error!);
 
 						child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-							Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+							Icon(Symbols.image_not_supported_rounded, size: 32, color: colors.error),
 							const SizedBox(height: Edges.small),
 							Text(error.title, style: text.bodySmall, textAlign: TextAlign.center)
 						]);

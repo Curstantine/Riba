@@ -1,5 +1,6 @@
 import "package:animations/animations.dart";
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/routes/library/library.dart";
 import "package:riba/utils/constants.dart";
 
@@ -27,16 +28,16 @@ class _RootViewState extends State<RootView> {
 					destinations: const [
 						NavigationDestination(
 							label: "Home",
-							icon: Icon(Icons.home_outlined),
-							selectedIcon: Icon(Icons.home_rounded)),
+							icon: Icon(Symbols.home_rounded),
+							selectedIcon: Icon(Symbols.home_rounded, fill: 1)),
 						NavigationDestination(
 							label: "Library",
-							icon: Icon(Icons.library_books_outlined),
-							selectedIcon: Icon(Icons.library_books_rounded)),
+							icon: Icon(Symbols.library_books_rounded),
+							selectedIcon: Icon(Symbols.library_books_rounded, fill: 1)),
 						NavigationDestination(
 							label: "Explore",
-							icon: Icon(Icons.explore_outlined),
-							selectedIcon: Icon(Icons.explore_rounded)),
+							icon: Icon(Symbols.explore_rounded),
+							selectedIcon: Icon(Symbols.explore_rounded, fill: 1)),
 					],
 				),
 			),

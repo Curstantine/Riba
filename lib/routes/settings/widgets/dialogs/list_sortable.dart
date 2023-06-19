@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/utils/theme.dart";
 
@@ -75,7 +76,7 @@ class _ListSortableDialogState<T extends SerializableDataExt> extends State<List
 							: Text(itemData.subtitle!, style: text.bodySmall?.withColorOpacity(0.75)),
 						trailing: ReorderableDragStartListener(
 							index: i,
-							child: const Icon(Icons.drag_handle_rounded),
+							child: const Icon(Symbols.drag_handle_rounded),
 						),
 					),
 				);

@@ -1,6 +1,7 @@
 import "package:animations/animations.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/utils/animations.dart";
 
 import "appearance/view.dart";
@@ -21,20 +22,20 @@ class SettingsView extends StatelessWidget {
 						delegate: SliverChildListDelegate([
 							ListTile(
 								title: const Text("Appearance"), 
-								leading: const Icon(Icons.palette_rounded),
+								leading: const Icon(Symbols.palette_rounded),
 								onTap: () => navigateTo(context, const SettingsAppearanceView())),
 							ListTile(
 								title: const Text("Filtering"),
-								leading: const Icon(Icons.filter_alt_rounded),
+								leading: const Icon(Symbols.filter_alt_rounded),
 								onTap: () => navigateTo(context, const SettingsFilteringView())),
 							ListTile(
 								title: const Text("Persistence"),
-								leading: const Icon(Icons.save_alt_rounded),
+								leading: const Icon(Symbols.save_alt_rounded),
 								onTap: () => navigateTo(context, const SettingsPersistenceView())),
 							if (kDebugMode)
 								ListTile(
 									title: const Text("Debug"),
-									leading: const Icon(Icons.bug_report_rounded),
+									leading: const Icon(Symbols.bug_report_rounded),
 									onTap: () => navigateTo(context, const SettingsDebugView())),
 						]),
 					),

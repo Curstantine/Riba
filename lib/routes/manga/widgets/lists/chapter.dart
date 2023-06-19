@@ -1,6 +1,7 @@
 import "package:dash_flags/dash_flags.dart" show LanguageFlag;
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/runtime/chapter.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/routes/manga/widgets/sheets/filter.dart";
@@ -132,8 +133,8 @@ class ChapterList extends StatelessWidget {
 								onPressed: () {},
 								isSelected: actualIndex % 2 == 0,
 								color: colors.primary,
-								icon: const Icon(Icons.download_rounded),
-								selectedIcon: const Icon(Icons.download_done_rounded),
+								icon: const Icon(Symbols.download_rounded),
+								selectedIcon: const Icon(Symbols.download_done_rounded),
 							),
 						),
 					),
@@ -200,8 +201,8 @@ class ChapterInfoBar extends StatelessWidget {
 				final filterData = snapshot.requireData;
 				return IconButton(
 					isSelected: !filterData.isDefault,
-					icon: const Icon(Icons.filter_list_rounded),
-					selectedIcon: Icon(Icons.filter_list_rounded, color: colors.primary),
+					icon: const Icon(Symbols.filter_list_rounded),
+					selectedIcon: Icon(Symbols.filter_list_rounded, color: colors.primary),
 					visualDensity: VisualDensity.comfortable,
 					onPressed: () => showFilterSheet(context, chapters, filterData),
 				);

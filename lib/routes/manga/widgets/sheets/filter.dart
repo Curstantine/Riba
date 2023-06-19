@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/group.dart";
 import "package:riba/settings/manga_filter/store.dart";
@@ -70,7 +71,7 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
 						
 						return Center(
 							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-								Icon(Icons.image_not_supported_rounded, size: 32, color: colors.error),
+								Icon(Symbols.image_not_supported_rounded, size: 32, color: colors.error),
 								const SizedBox(height: Edges.small),
 								Text(error.description, style: text.bodySmall)
 							]),

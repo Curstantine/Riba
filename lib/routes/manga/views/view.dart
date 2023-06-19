@@ -5,6 +5,7 @@ import "package:flutter/material.dart" hide Locale, Localizations;
 import "package:flutter/services.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
+import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
@@ -405,7 +406,7 @@ class DetailsHeader extends StatelessWidget {
 						!snapshot.hasError &&
 						snapshot.connectionState == ConnectionState.done) {
 						children = [
-							Icon(Icons.image_not_supported_rounded, size: 42, color: colors.primary),
+							Icon(Symbols.image_not_supported_rounded, size: 42, color: colors.primary),
 							const SizedBox(height: Edges.small),
 							Text("Covers are not available.", style: text.bodyMedium),
 						];
@@ -524,7 +525,7 @@ class DetailsHeader extends StatelessWidget {
 						TinyButton(
 							enabled: rating != null,
 							text: bayesian.toStringAsFixed(2),
-							icon: Icons.star_border_rounded,
+							icon: Symbols.star_rate_rounded,
 							onTap: () => rating == null
 								? null
 								: showRatingStatisticSheet(context, rating),
@@ -533,13 +534,13 @@ class DetailsHeader extends StatelessWidget {
 						TinyButton(
 							enabled: snapshot.data?.follows != null,
 							text: follows.toString(),
-							icon: Icons.bookmark_border_rounded,
+							icon: Symbols.bookmark_rounded,
 						),
 						const SizedBox(width: Edges.small),
 						TinyButton(
 							enabled: snapshot.data?.comments != null,
 							text: comments.toString(),
-							icon: Icons.comment_outlined,
+							icon: Symbols.comment_rounded,
 						),
 					]);
 				},
@@ -552,7 +553,7 @@ class DetailsHeader extends StatelessWidget {
 			valueListenable: isFollowed,
 			builder: (context, value, _) => FilledButton.icon(
 				onPressed: handleFollowTap,
-				icon: value ? const Icon(Icons.check_rounded) : const Icon(Icons.add_rounded),
+				icon: value ? const Icon(Symbols.check_rounded) : const Icon(Symbols.add_rounded),
 				label: AnimatedSize(
 					duration: Durations.standard,
 					curve: Easing.standard,
@@ -568,7 +569,7 @@ class DetailsHeader extends StatelessWidget {
 			valueListenable: hasTrackers,
 			builder: (context, value, _) => OutlinedButton.icon(
 				onPressed: handleTrackerPress,
-				icon: value ? const Icon(Icons.sync_rounded) : const Icon(Icons.add_rounded),
+				icon: value ? const Icon(Symbols.sync_rounded) : const Icon(Symbols.add_rounded),
 				label: AnimatedSize(
 					duration: Durations.standard,
 					curve: Easing.standard,
@@ -722,7 +723,7 @@ class DescriptionSection extends StatelessWidget {
 					duration: Durations.emphasized,
 					turns: expanded ? 0.5 : 0,
 					curve: Curves.easeInOutCubic,
-					child: const Icon(Icons.expand_more_rounded),
+					child: const Icon(Symbols.expand_more_rounded),
 				),
 				visualDensity: VisualDensity.compact,
 				tooltip: expanded ? "Collapse" : "Expand",
