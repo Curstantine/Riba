@@ -43,7 +43,7 @@ void main() {
   test("URL creation with custom type enums.", () {
     final url = URL(hostname: "api.mangadex.org", pathSegments: ["manga"]);
     url.setParameter("includes[]", [EntityType.artist, EntityType.author]);
-    url.setParameter("status", MangaStatus.cancelled);
+    url.setParameter("status", MangaPublicationStatus.cancelled);
     url.setParameter("publicationDemographic", MangaPublicationDemographic.shounen);
     url.setParameter("contentRating", ContentRating.safe);
 

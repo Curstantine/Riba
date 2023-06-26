@@ -23,7 +23,7 @@ class MangaAttributes {
   final Map<String, String> description;
   final String originalLanguage;
   final MangaPublicationDemographic? publicationDemographic;
-  final MangaStatus status;
+  final MangaPublicationStatus status;
   final ContentRating contentRating;
   final List<MDResponseData<TagAttributes>> tags;
   final int version;
@@ -46,14 +46,14 @@ class MangaAttributes {
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(alwaysCreate: true)
-enum MangaStatus implements SerializableDataExt {
+enum MangaPublicationStatus implements SerializableDataExt {
   ongoing,
   completed,
   hiatus,
   cancelled;
 
   @override
-  factory MangaStatus.fromJsonValue(String source) => $enumDecode(_$MangaStatusEnumMap, source);
+  factory MangaPublicationStatus.fromJsonValue(String source) => $enumDecode(_$MangaStatusEnumMap, source);
 
   @override
   String toJson() => _$MangaStatusEnumMap[this]!;
@@ -61,13 +61,13 @@ enum MangaStatus implements SerializableDataExt {
   @override
   String asHumanReadable() {
     switch (this) {
-      case MangaStatus.ongoing:
+      case MangaPublicationStatus.ongoing:
         return "Ongoing";
-      case MangaStatus.completed:
+      case MangaPublicationStatus.completed:
         return "Completed";
-      case MangaStatus.hiatus:
+      case MangaPublicationStatus.hiatus:
         return "Hiatus";
-      case MangaStatus.cancelled:
+      case MangaPublicationStatus.cancelled:
         return "Cancelled";
     }
   }

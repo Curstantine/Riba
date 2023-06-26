@@ -358,7 +358,7 @@ class MangaDexMangaWithFiltersQueryFilter implements MangaDexQueryFilter {
 	final String? artistId;
 	final String? authorOrArtist;
 
-	final List<MangaStatus>? statuses;
+	final List<MangaPublicationStatus>? statuses;
 	final List<ContentRating>? contentRatings;
 	final List<MangaPublicationDemographic>? publicationDemographics;
 

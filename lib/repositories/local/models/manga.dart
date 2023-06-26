@@ -38,7 +38,7 @@ class Manga {
 	final Language originalLanguage;
 
 	@Enumerated(EnumType.ordinal)
-	final MangaStatus status;
+	final MangaPublicationStatus status;
 
 	@Enumerated(EnumType.ordinal)
 	final MangaPublicationDemographic publicationDemographic;

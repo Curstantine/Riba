@@ -67,7 +67,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 				SliverPadding(padding: Edges.horizontalMedium, sliver: SliverList.list(children: [
 					Text("Publication Status", style: text.labelLarge),
 					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
-						for (final status in MangaStatus.values) ...[
+						for (final status in MangaPublicationStatus.values) ...[
 							_FilterGenericListChip(status: status, notifier: state.publicationStatus),
 							const SizedBox(width: Edges.small),
 						]

@@ -183,7 +183,8 @@ abstract class _$MangaDexMangaWithFiltersQueryFilterCWProxy {
 
   MangaDexMangaWithFiltersQueryFilter authorOrArtist(String? authorOrArtist);
 
-  MangaDexMangaWithFiltersQueryFilter statuses(List<MangaStatus>? statuses);
+  MangaDexMangaWithFiltersQueryFilter statuses(
+      List<MangaPublicationStatus>? statuses);
 
   MangaDexMangaWithFiltersQueryFilter contentRatings(
       List<ContentRating>? contentRatings);
@@ -222,7 +223,7 @@ abstract class _$MangaDexMangaWithFiltersQueryFilterCWProxy {
     String? authorId,
     String? artistId,
     String? authorOrArtist,
-    List<MangaStatus>? statuses,
+    List<MangaPublicationStatus>? statuses,
     List<ContentRating>? contentRatings,
     List<MangaPublicationDemographic>? publicationDemographics,
     List<Language>? originalLanguages,
@@ -265,7 +266,8 @@ class _$MangaDexMangaWithFiltersQueryFilterCWProxyImpl
       this(authorOrArtist: authorOrArtist);
 
   @override
-  MangaDexMangaWithFiltersQueryFilter statuses(List<MangaStatus>? statuses) =>
+  MangaDexMangaWithFiltersQueryFilter statuses(
+          List<MangaPublicationStatus>? statuses) =>
       this(statuses: statuses);
 
   @override
@@ -361,7 +363,7 @@ class _$MangaDexMangaWithFiltersQueryFilterCWProxyImpl
       statuses: statuses == const $CopyWithPlaceholder()
           ? _value.statuses
           // ignore: cast_nullable_to_non_nullable
-          : statuses as List<MangaStatus>?,
+          : statuses as List<MangaPublicationStatus>?,
       contentRatings: contentRatings == const $CopyWithPlaceholder()
           ? _value.contentRatings
           // ignore: cast_nullable_to_non_nullable

@@ -167,7 +167,7 @@ enum TagSelectionMode {
 
 class QuickSearchFilterState {
 	final ValueNotifier<List<ContentRating>> contentRating;
-	final ValueNotifier<List<MangaStatus>> publicationStatus;
+	final ValueNotifier<List<MangaPublicationStatus>> publicationStatus;
 
 	final ValueNotifier<TagJoinMode> tagInclusionMode;
 	final ValueNotifier<TagJoinMode> tagExclusionMode;
@@ -187,7 +187,7 @@ class QuickSearchFilterState {
 	factory QuickSearchFilterState.empty() {
 		return QuickSearchFilterState(
 			contentRating: ValueNotifier(Settings.instance.contentFilter.contentRatings.value),
-			publicationStatus: ValueNotifier(MangaStatus.values.toList()),
+			publicationStatus: ValueNotifier(MangaPublicationStatus.values.toList()),
 			tagInclusionMode: ValueNotifier(TagJoinMode.and),
 			tagExclusionMode: ValueNotifier(TagJoinMode.or),
 			tagSelection: {},

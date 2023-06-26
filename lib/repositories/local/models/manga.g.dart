@@ -29,7 +29,7 @@ abstract class _$MangaCWProxy {
 
   Manga version(int version);
 
-  Manga status(MangaStatus status);
+  Manga status(MangaPublicationStatus status);
 
   Manga publicationDemographic(
       MangaPublicationDemographic publicationDemographic);
@@ -54,7 +54,7 @@ abstract class _$MangaCWProxy {
     String? preferredCoverId,
     Language? originalLanguage,
     int? version,
-    MangaStatus? status,
+    MangaPublicationStatus? status,
     MangaPublicationDemographic? publicationDemographic,
     ContentRating? contentRating,
   });
@@ -104,7 +104,7 @@ class _$MangaCWProxyImpl implements _$MangaCWProxy {
   Manga version(int version) => this(version: version);
 
   @override
-  Manga status(MangaStatus status) => this(status: status);
+  Manga status(MangaPublicationStatus status) => this(status: status);
 
   @override
   Manga publicationDemographic(
@@ -189,7 +189,7 @@ class _$MangaCWProxyImpl implements _$MangaCWProxy {
       status: status == const $CopyWithPlaceholder() || status == null
           ? _value.status
           // ignore: cast_nullable_to_non_nullable
-          : status as MangaStatus,
+          : status as MangaPublicationStatus,
       publicationDemographic:
           publicationDemographic == const $CopyWithPlaceholder() ||
                   publicationDemographic == null
@@ -491,7 +491,7 @@ Manga _mangaDeserialize(
             reader.readByteOrNull(offsets[9])] ??
         MangaPublicationDemographic.unknown,
     status: _MangastatusValueEnumMap[reader.readByteOrNull(offsets[10])] ??
-        MangaStatus.ongoing,
+        MangaPublicationStatus.ongoing,
     tagsIds: reader.readStringList(offsets[11]) ?? [],
     titles: reader.readObjectOrNull<Localizations>(
           offsets[12],
@@ -549,7 +549,7 @@ P _mangaDeserializeProp<P>(
           MangaPublicationDemographic.unknown) as P;
     case 10:
       return (_MangastatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          MangaStatus.ongoing) as P;
+          MangaPublicationStatus.ongoing) as P;
     case 11:
       return (reader.readStringList(offset) ?? []) as P;
     case 12:
@@ -623,10 +623,10 @@ const _MangastatusEnumValueMap = {
   "cancelled": 3,
 };
 const _MangastatusValueEnumMap = {
-  0: MangaStatus.ongoing,
-  1: MangaStatus.completed,
-  2: MangaStatus.hiatus,
-  3: MangaStatus.cancelled,
+  0: MangaPublicationStatus.ongoing,
+  1: MangaPublicationStatus.completed,
+  2: MangaPublicationStatus.hiatus,
+  3: MangaPublicationStatus.cancelled,
 };
 
 Id _mangaGetId(Manga object) {
@@ -2001,7 +2001,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> statusEqualTo(
-      MangaStatus value) {
+      MangaPublicationStatus value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r"status",
@@ -2011,7 +2011,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> statusGreaterThan(
-    MangaStatus value, {
+    MangaPublicationStatus value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2024,7 +2024,7 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> statusLessThan(
-    MangaStatus value, {
+    MangaPublicationStatus value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2037,8 +2037,8 @@ extension MangaQueryFilter on QueryBuilder<Manga, Manga, QFilterCondition> {
   }
 
   QueryBuilder<Manga, Manga, QAfterFilterCondition> statusBetween(
-    MangaStatus lower,
-    MangaStatus upper, {
+    MangaPublicationStatus lower,
+    MangaPublicationStatus upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -2695,7 +2695,8 @@ extension MangaQueryProperty on QueryBuilder<Manga, Manga, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Manga, MangaStatus, QQueryOperations> statusProperty() {
+  QueryBuilder<Manga, MangaPublicationStatus, QQueryOperations>
+      statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r"status");
     });
