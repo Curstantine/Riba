@@ -35,6 +35,7 @@ class _MangaCardState extends State<MangaCard> {
 	@override
 	void initState() {
 		super.initState();
+		addCover();
 		Settings.instance.coverPersistence.previewSize.addListener(addCover);
 	}
 
