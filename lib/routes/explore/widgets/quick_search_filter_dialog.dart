@@ -116,12 +116,11 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 									);
 								}
 
-								final groupSelectionMap = state.groupedTagSelection[group]!;
 
 								return Wrap(
 									spacing: Edges.small,
 									children: tags[group]!
-										.map((tag) => _FilterTagChip(tag: tag, modeNotifier: groupSelectionMap[tag.id] ??= ValueNotifier(TagSelectionMode.none)))
+										.map((tag) => _FilterTagChip(tag: tag, modeNotifier: state.tagSelection[tag.id] ??= ValueNotifier(TagSelectionMode.none)))
 										.toList(),
 								);
 							}

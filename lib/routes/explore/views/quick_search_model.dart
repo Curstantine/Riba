@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
@@ -75,7 +77,7 @@ class QuickSearchViewModel implements ViewModel {
 
 	Future<void> refresh() async {
 		final query = ExploreViewModel.instance.searchController.text;
-		if (query.isEmpty) {
+		if (query.isEmpty && filterState.isEmpty) {
 			_mangaController.add([]);
 			return;
 		}
@@ -86,6 +88,10 @@ class QuickSearchViewModel implements ViewModel {
 				limit: 5,
 				contentRatings: Settings.instance.contentFilter.contentRatings.value,
 				originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
+				includedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.included),
+				excludedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.excluded),
+				includedTagJoinMode: filterState.tagInclusionMode.value,
+				excludedTagJoinMode: filterState.tagExclusionMode.value,
 			));
 
 			_mangaController.add(manga.data);
@@ -161,26 +167,22 @@ enum TagSelectionMode {
 class QuickSearchFilterState {
 	final ValueNotifier<TagJoinMode> tagInclusionMode;
 	final ValueNotifier<TagJoinMode> tagExclusionMode;
-	final Map<TagGroup, Map<String, ValueNotifier<TagSelectionMode>>> groupedTagSelection;
+	final Map<String, ValueNotifier<TagSelectionMode>> tagSelection;
 
 	QuickSearchFilterState({
 		required this.tagInclusionMode,
 		required this.tagExclusionMode,
-		required this.groupedTagSelection,
-	}) :
-		assert(
-			groupedTagSelection.keys.toSet().containsAll(TagGroup.values),
-			"groupedTagSelection must contain all TagGroups"
-		);
+		required this.tagSelection,
+	});
+
+	bool get isEmpty => this == QuickSearchFilterState.empty();
 
 	/// Creates a default [QuickSearchFilterState]
 	factory QuickSearchFilterState.empty() {
 		return QuickSearchFilterState(
 			tagInclusionMode: ValueNotifier(TagJoinMode.and),
 			tagExclusionMode: ValueNotifier(TagJoinMode.or),
-			groupedTagSelection: { 
-				for (final tagGroup in TagGroup.values) tagGroup: <String, ValueNotifier<TagSelectionMode>>{},
-			},
+			tagSelection: {},
 		);
 	}
 
@@ -190,19 +192,11 @@ class QuickSearchFilterState {
 		tagInclusionMode.value = other.tagInclusionMode.value;
 		tagExclusionMode.value = other.tagExclusionMode.value;
 
-		for (final group in TagGroup.values) {
-			final otherGroup = other.groupedTagSelection[group]!;
-			final thisGroup = groupedTagSelection[group]!;
-
-			for (final tag in otherGroup.keys) {
-				final oldNotifier = thisGroup[tag];
-
-				if (oldNotifier != null) {
-					oldNotifier.value = otherGroup[tag]!.value;
-					continue;
-				}
-
-				thisGroup[tag] = ValueNotifier(otherGroup[tag]!.value);
+		for (final key in other.tagSelection.keys) {
+			if (tagSelection.containsKey(key)) {
+				tagSelection[key]!.value = other.tagSelection[key]!.value;
+			} else {
+				tagSelection[key] = other.tagSelection[key]!;
 			}
 		}
 	}
@@ -212,12 +206,12 @@ class QuickSearchFilterState {
 		return QuickSearchFilterState(
 			tagInclusionMode: ValueNotifier(tagInclusionMode.value),
 			tagExclusionMode: ValueNotifier(tagExclusionMode.value),
-			groupedTagSelection: {
-				for (final group in TagGroup.values) group: {
-					for (final tag in groupedTagSelection[group]!.keys) tag: ValueNotifier(groupedTagSelection[group]![tag]!.value),
-				},
-			},
+			tagSelection: tagSelection.map((key, value) => MapEntry(key, ValueNotifier(value.value))),
 		);
+	}
+
+	List<String> getAllTagIdsFor(TagSelectionMode mode) {
+		return tagSelection.entries.where((e) => e.value.value == mode).map((e) => e.key).toList();
 	}
 
 	/// Disposes all the notifiers
@@ -225,10 +219,21 @@ class QuickSearchFilterState {
 		tagInclusionMode.dispose();
 		tagExclusionMode.dispose();
 
-		for (final group in TagGroup.values) {
-			for (final notifier in groupedTagSelection[group]!.values) {
-				notifier.dispose();
-			}
+		for (final notifier in tagSelection.values) {
+			notifier.dispose();
 		}
 	}
+
+	@override
+	bool operator ==(covariant QuickSearchFilterState other) {
+		if (identical(this, other)) return true;
+	
+		return 
+		other.tagInclusionMode == tagInclusionMode &&
+		other.tagExclusionMode == tagExclusionMode &&
+		mapEquals(other.tagSelection, tagSelection);
+	}
+
+	@override
+	int get hashCode => tagInclusionMode.hashCode ^ tagExclusionMode.hashCode ^ tagSelection.hashCode;
 }

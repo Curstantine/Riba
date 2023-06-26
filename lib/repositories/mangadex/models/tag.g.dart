@@ -22,6 +22,6 @@ const _$TagGroupEnumMap = {
 };
 
 const _$TagJoinModeEnumMap = {
-  TagJoinMode.and: "and",
-  TagJoinMode.or: "or",
+  TagJoinMode.and: "AND",
+  TagJoinMode.or: "OR",
 };

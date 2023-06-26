@@ -68,7 +68,9 @@ enum TagGroup implements SerializableDataExt {
 
 @JsonEnum(alwaysCreate: true)
 enum TagJoinMode implements SerializableDataExt {
+	@JsonValue("AND")
 	and,
+	@JsonValue("OR")
 	or;
 
 	@override
