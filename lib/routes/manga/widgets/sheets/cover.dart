@@ -128,7 +128,7 @@ class _CoverSheetState extends State<CoverSheet> {
 
 						if ((snapshot.hasError || !snapshot.hasData) &&
 							snapshot.connectionState == ConnectionState.active) {
-							final error = handleError(snapshot.error ?? "Data was null without errors.");
+							final error = ErrorState.fromSource(snapshot.error ?? "Data was null without errors.");
 
 							child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 								Text(error.title, style: theme.textTheme.titleLarge),
@@ -281,7 +281,7 @@ class _BigPicture extends StatelessWidget {
 				}
 
 				if (snapshot.hasError) {
-					final error = handleError(snapshot.error!);
+					final error = ErrorState.fromSource(snapshot.error!);
 					children = [
 						Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
 						Text(error.description)
@@ -437,7 +437,7 @@ class _CoverPreview extends StatelessWidget {
 				}
 
 				if (snapshot.hasError) {
-					final error = handleError(snapshot.error!);
+					final error = ErrorState.fromSource(snapshot.error!);
 					child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 						Icon(Symbols.image_not_supported_rounded, size: 32, color: colors.error),
 						const SizedBox(height: Edges.small),
@@ -539,7 +539,7 @@ class _CoverPreviewList extends StatelessWidget {
 					}
 
 					if (snapshot.hasError) {
-						final error = handleError(snapshot.error!);
+						final error = ErrorState.fromSource(snapshot.error!);
 
 						child = Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 							Icon(Symbols.image_not_supported_rounded, size: 32, color: colors.error),

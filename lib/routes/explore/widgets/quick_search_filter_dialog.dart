@@ -4,13 +4,13 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
-import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 import "package:riba/widgets/material/chip.dart";
+import "package:riba/widgets/premade/filter_chip.dart";
 
 
 class QuickSearchFilterDialog extends StatefulWidget {
@@ -57,7 +57,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 					Text("Content Rating", style: text.labelLarge),
 					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
 						for (final rating in ContentRating.values) ...[
-							_FilterGenericListChip(status: rating, notifier: state.contentRating),
+							GenericFilterListChip(status: rating, notifier: state.contentRating),
 							const SizedBox(width: Edges.small),
 						]
 						
@@ -68,7 +68,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 					Text("Publication Status", style: text.labelLarge),
 					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
 						for (final status in MangaPublicationStatus.values) ...[
-							_FilterGenericListChip(status: status, notifier: state.publicationStatus),
+							GenericFilterListChip(status: status, notifier: state.publicationStatus),
 							const SizedBox(width: Edges.small),
 						]
 					])),
@@ -155,34 +155,6 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 	}
 }
 
-class _FilterGenericListChip<T extends SerializableDataExt> extends StatelessWidget {
-	final T status;
-	final ValueNotifier<List<T>> notifier;
-
-	const _FilterGenericListChip({
-		required this.status,
-		required this.notifier,
-	});
-
-	@override
-	Widget build(BuildContext context) {
-		return ValueListenableBuilder(
-			valueListenable: notifier,
-			builder: (context, selectedList, _) => FilterChipExt(
-				showCheckmark: false,
-				selected: selectedList.contains(status),
-				label: Text(status.asHumanReadable()),
-				onSelected: (select) { 
-					if (select) {
-						notifier.value = [...selectedList, status];
-					} else {
-						notifier.value = selectedList.where((e) => e != status).toList();
-					}
-				},
-			),
-		);
-	}
-}
 
 class _FilterTagChip extends StatelessWidget {
 	final Tag tag;

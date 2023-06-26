@@ -18,7 +18,7 @@ class ErrorCard extends StatelessWidget {
 		final text = theme.textTheme;
 		final colors = theme.colorScheme;
 
-		final error = handleError(this.error);
+		final error = ErrorState.fromSource(this.error);
 
 		return Card(
 			margin: margin,

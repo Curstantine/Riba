@@ -33,7 +33,7 @@ class ChapterList extends StatelessWidget {
 			stream: chapterStream,
 			builder: (context, snapshot) {
 				if (snapshot.hasError) {
-					final error = handleError(snapshot.error!);
+					final error = ErrorState.fromSource(snapshot.error!);
 
 					return SliverToBoxAdapter(
 						child: SizedBox(

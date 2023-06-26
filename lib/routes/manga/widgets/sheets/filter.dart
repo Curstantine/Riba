@@ -67,7 +67,7 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
 					}
 
 					if (snapshot.hasError) {
-						final error = handleError(snapshot.error!);
+						final error = ErrorState.fromSource(snapshot.error!);
 						
 						return Center(
 							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [

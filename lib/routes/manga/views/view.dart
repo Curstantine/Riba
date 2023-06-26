@@ -205,7 +205,7 @@ class _MangaViewState extends State<MangaView> {
 					}
 
 					if (mangaSnapshot.hasError || !mangaSnapshot.hasData) {
-						final error = handleError(mangaSnapshot.error ?? "Data was null without errors.");
+						final error = ErrorState.fromSource(mangaSnapshot.error ?? "Data was null without errors.");
 
 						return Center(
 							child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -395,7 +395,7 @@ class DetailsHeader extends StatelessWidget {
 					}
 
 					if (snapshot.hasError) {
-						final error = handleError(snapshot.error!);
+						final error = ErrorState.fromSource(snapshot.error!);
 						children = [
 							Text(error.title, style: text.titleMedium?.copyWith(color: colors.error)),
 							Text(error.description)
@@ -500,7 +500,7 @@ class DetailsHeader extends StatelessWidget {
 				future: statisticsFuture,
 				builder: (context, snapshot) {
 					if (snapshot.hasError) {
-						final error = handleError(snapshot.error!);
+						final error = ErrorState.fromSource(snapshot.error!);
 						final label = text.bodyMedium?.copyWith(color: colors.error);
 
 						return InkWell(
@@ -524,8 +524,8 @@ class DetailsHeader extends StatelessWidget {
 					return Row(children: [
 						TinyButton(
 							enabled: rating != null,
-							text: bayesian.toStringAsFixed(2),
-							icon: Symbols.star_rate_rounded,
+							label: bayesian.toStringAsFixed(2),
+							leadingIcon: Symbols.star_rate_rounded,
 							onTap: () => rating == null
 								? null
 								: showRatingStatisticSheet(context, rating),
@@ -533,14 +533,14 @@ class DetailsHeader extends StatelessWidget {
 						const SizedBox(width: Edges.small),
 						TinyButton(
 							enabled: snapshot.data?.follows != null,
-							text: follows.toString(),
-							icon: Symbols.bookmark_rounded,
+							label: follows.toString(),
+							leadingIcon: Symbols.bookmark_rounded,
 						),
 						const SizedBox(width: Edges.small),
 						TinyButton(
 							enabled: snapshot.data?.comments != null,
-							text: comments.toString(),
-							icon: Symbols.comment_rounded,
+							label: comments.toString(),
+							leadingIcon: Symbols.comment_rounded,
 						),
 					]);
 				},
