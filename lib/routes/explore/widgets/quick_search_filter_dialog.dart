@@ -52,6 +52,8 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 							onPressed: () => Navigator.pop(context, state)),
 					],
 				),
+				/// Looks like this is expensive. (24ms on SM-M215F /w profile mode)
+				/// TODO: Tweak it.
 				SliverPadding(padding: Edges.horizontalMedium.copyWithSelf(Edges.verticalLarge), sliver: Builder(builder: (context) {
 					final width = deviceWidth / 2 - (Edges.medium + Edges.medium / 2);
 
