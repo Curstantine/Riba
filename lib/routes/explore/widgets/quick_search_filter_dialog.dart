@@ -31,7 +31,6 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 	@override
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
-		final colors = theme.colorScheme;
 		final text = theme.textTheme;
 
 		final media = MediaQuery.of(context);
@@ -41,7 +40,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 			body: CustomScrollView(slivers: [
 				SliverAppBar(
 					floating: true,
-					title: Text("Filter", style: text.headlineSmall),
+					title: const Text("Filter"),
 					leading: IconButton(icon: const Icon(Symbols.close), onPressed: () => Navigator.pop(context)),
 					actions: [
 						IconButton(
@@ -121,8 +120,8 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 
 								return Wrap(
 									spacing: Edges.small,
-									children:  tags[group]!
-										.map((tag) => buildTag(text, colors, tag, groupSelectionMap[tag.id] ??= ValueNotifier(TagSelectionMode.none)))
+									children: tags[group]!
+										.map((tag) => _FilterTagChip(tag: tag, modeNotifier: groupSelectionMap[tag.id] ??= ValueNotifier(TagSelectionMode.none)))
 										.toList(),
 								);
 							}
@@ -132,8 +131,25 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 			]),
 		);
 	}
+}
 
-	Widget buildTag(TextTheme text, ColorScheme colors, Tag tag, ValueNotifier<TagSelectionMode> modeNotifier) {
+class _FilterTagChip extends StatelessWidget {
+	const _FilterTagChip({
+		required this.tag,
+		required this.modeNotifier,
+	});
+
+	final Tag tag;
+	final ValueNotifier<TagSelectionMode> modeNotifier;
+
+	List<Locale> get preferredLocales => Settings.instance.appearance.preferredDisplayLocales.value; 
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final colors = theme.colorScheme;
+		final text = theme.textTheme;
+
 		return ValueListenableBuilder(
 			valueListenable: modeNotifier,
 			builder: (context, mode, _) {
