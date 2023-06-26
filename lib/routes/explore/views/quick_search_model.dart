@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
@@ -165,11 +166,16 @@ enum TagSelectionMode {
 }
 
 class QuickSearchFilterState {
+	final ValueNotifier<List<ContentRating>> contentRating;
+	final ValueNotifier<List<MangaStatus>> publicationStatus;
+
 	final ValueNotifier<TagJoinMode> tagInclusionMode;
 	final ValueNotifier<TagJoinMode> tagExclusionMode;
 	final Map<String, ValueNotifier<TagSelectionMode>> tagSelection;
 
 	QuickSearchFilterState({
+		required this.contentRating,
+		required this.publicationStatus,
 		required this.tagInclusionMode,
 		required this.tagExclusionMode,
 		required this.tagSelection,
@@ -180,6 +186,8 @@ class QuickSearchFilterState {
 	/// Creates a default [QuickSearchFilterState]
 	factory QuickSearchFilterState.empty() {
 		return QuickSearchFilterState(
+			contentRating: ValueNotifier(Settings.instance.contentFilter.contentRatings.value),
+			publicationStatus: ValueNotifier(MangaStatus.values.toList()),
 			tagInclusionMode: ValueNotifier(TagJoinMode.and),
 			tagExclusionMode: ValueNotifier(TagJoinMode.or),
 			tagSelection: {},
@@ -189,6 +197,8 @@ class QuickSearchFilterState {
 	/// Inherit all the values of [other] while updating the old
 	/// notifiers if they exist.
 	void inheritFrom(QuickSearchFilterState other) {
+		contentRating.value = other.contentRating.value;
+		publicationStatus.value = other.publicationStatus.value;
 		tagInclusionMode.value = other.tagInclusionMode.value;
 		tagExclusionMode.value = other.tagExclusionMode.value;
 
@@ -204,6 +214,8 @@ class QuickSearchFilterState {
 	/// Copies self into a new instance
 	QuickSearchFilterState copy() {
 		return QuickSearchFilterState(
+			contentRating: ValueNotifier(contentRating.value),
+			publicationStatus: ValueNotifier(publicationStatus.value),
 			tagInclusionMode: ValueNotifier(tagInclusionMode.value),
 			tagExclusionMode: ValueNotifier(tagExclusionMode.value),
 			tagSelection: tagSelection.map((key, value) => MapEntry(key, ValueNotifier(value.value))),
@@ -216,6 +228,8 @@ class QuickSearchFilterState {
 
 	/// Disposes all the notifiers
 	void dispose() {
+		contentRating.dispose();
+		publicationStatus.dispose();
 		tagInclusionMode.dispose();
 		tagExclusionMode.dispose();
 
@@ -229,11 +243,18 @@ class QuickSearchFilterState {
 		if (identical(this, other)) return true;
 	
 		return 
+		other.contentRating == contentRating &&
+		other.publicationStatus == publicationStatus &&
 		other.tagInclusionMode == tagInclusionMode &&
 		other.tagExclusionMode == tagExclusionMode &&
 		mapEquals(other.tagSelection, tagSelection);
 	}
 
 	@override
-	int get hashCode => tagInclusionMode.hashCode ^ tagExclusionMode.hashCode ^ tagSelection.hashCode;
+	int get hashCode => 
+		contentRating.hashCode ^ 
+		publicationStatus.hashCode ^
+		tagInclusionMode.hashCode ^
+		tagExclusionMode.hashCode ^
+		tagSelection.hashCode;
 }

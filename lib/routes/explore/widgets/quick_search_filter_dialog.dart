@@ -2,7 +2,9 @@ import "package:flutter/material.dart" hide Chip, Locale;
 import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
+import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
+import "package:riba/repositories/mangadex/utils/serde_ext.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/settings/settings.dart";
@@ -51,9 +53,30 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 							onPressed: () => Navigator.pop(context, state)),
 					],
 				),
+				SliverPadding(padding: Edges.horizontalMedium, sliver: SliverList.list(children: [
+					Text("Content Rating", style: text.labelLarge),
+					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
+						for (final rating in ContentRating.values) ...[
+							_FilterGenericListChip(status: rating, notifier: state.contentRating),
+							const SizedBox(width: Edges.small),
+						]
+						
+					])),
+					const SizedBox(height: Edges.small),
+				])),
+				SliverPadding(padding: Edges.horizontalMedium, sliver: SliverList.list(children: [
+					Text("Publication Status", style: text.labelLarge),
+					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
+						for (final status in MangaStatus.values) ...[
+							_FilterGenericListChip(status: status, notifier: state.publicationStatus),
+							const SizedBox(width: Edges.small),
+						]
+					])),
+				])),
+				const SliverToBoxAdapter(child: SizedBox(height: 32)),
 				/// Looks like this is expensive. (24ms on SM-M215F /w profile mode)
 				/// TODO: Tweak it.
-				SliverPadding(padding: Edges.horizontalMedium.copyWithSelf(Edges.verticalLarge), sliver: Builder(builder: (context) {
+				SliverPadding(padding: Edges.horizontalMedium, sliver: Builder(builder: (context) {
 					final width = deviceWidth / 2 - (Edges.medium + Edges.medium / 2);
 
 					return SliverToBoxAdapter(child: Row(children: [
@@ -132,14 +155,43 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 	}
 }
 
+class _FilterGenericListChip<T extends SerializableDataExt> extends StatelessWidget {
+	final T status;
+	final ValueNotifier<List<T>> notifier;
+
+	const _FilterGenericListChip({
+		required this.status,
+		required this.notifier,
+	});
+
+	@override
+	Widget build(BuildContext context) {
+		return ValueListenableBuilder(
+			valueListenable: notifier,
+			builder: (context, selectedList, _) => FilterChipExt(
+				showCheckmark: false,
+				selected: selectedList.contains(status),
+				label: Text(status.asHumanReadable()),
+				onSelected: (select) { 
+					if (select) {
+						notifier.value = [...selectedList, status];
+					} else {
+						notifier.value = selectedList.where((e) => e != status).toList();
+					}
+				},
+			),
+		);
+	}
+}
+
 class _FilterTagChip extends StatelessWidget {
+	final Tag tag;
+	final ValueNotifier<TagSelectionMode> modeNotifier;
+
 	const _FilterTagChip({
 		required this.tag,
 		required this.modeNotifier,
 	});
-
-	final Tag tag;
-	final ValueNotifier<TagSelectionMode> modeNotifier;
 
 	List<Locale> get preferredLocales => Settings.instance.appearance.preferredDisplayLocales.value; 
 
