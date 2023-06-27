@@ -227,6 +227,7 @@ class ChapterInfoBar extends StatelessWidget {
 		showModalBottomSheet(
 			context: context,
 			isScrollControlled: true,
+			showDragHandle: true,
 			builder: (context) => ChapterFilterSheet(
 				padding: EdgeInsets.only(bottom: media.padding.bottom),
 				data: ChapterFilterSheetData(
