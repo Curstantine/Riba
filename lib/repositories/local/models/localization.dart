@@ -100,48 +100,21 @@ class Locale implements SerializableDataExt {
 		return Locale(language: language, romanized: roman);
 	}
 
-	@override
-	int get hashCode => language.hashCode ^ romanized.hashCode;
-
-	@override
-	operator ==(Object other) =>
-		identical(this, other) ||
-		(other is Locale &&
-			runtimeType == other.runtimeType &&
-			language == other.language &&
-			romanized == other.romanized);
-
 	static Locale en = Locale(language: Language.english, romanized: false);
 	static Locale ja = Locale(language: Language.japanese, romanized: false);
-	static Locale zh = Locale(language: Language.simpleChinese, romanized: false);
-	static Locale zhHk = Locale(language: Language.traditionalChinese, romanized: false);
+	static Locale zh = Locale(language: Language.chineseSimplified, romanized: false);
+	static Locale zhHk = Locale(language: Language.chineseTraditional, romanized: false);
 	static Locale ko = Locale(language: Language.korean, romanized: false);
-	static Locale fr = Locale(language: Language.french, romanized: false);
-	static Locale ru = Locale(language: Language.russian, romanized: false);
-	static Locale vi = Locale(language: Language.vietnamese, romanized: false);
-	static Locale ptBr = Locale(language: Language.portugueseBrazil, romanized: false);
-	static Locale id = Locale(language: Language.indonesian, romanized: false);
 
 	static Locale jaRo = Locale(language: Language.japanese, romanized: true);
-	static Locale zhRo = Locale(language: Language.simpleChinese, romanized: true);
-	static Locale zhHkRo = Locale(language: Language.traditionalChinese, romanized: true);
+	static Locale zhRo = Locale(language: Language.chineseSimplified, romanized: true);
+	static Locale zhHkRo = Locale(language: Language.chineseTraditional, romanized: true);
 
-	static final values = [
-		en,
-		ja,
-		jaRo,
-		zh,
-		zhRo,
-		zhHk,
-		zhHkRo,
-		ko,
-		fr,
-		ru,
-		vi,
-		ptBr,
-		id,
-	];
-	
+	static List<Locale> getAll() {
+		final direct = Language.values.map((e) => Locale(language: e, romanized: false));
+		return [jaRo, zhRo, zhHkRo, ...direct].toList();
+	}
+
 	@override
 	String asHumanReadable() {
 		return romanized ? "Romanized ${language.asHumanReadable()}" : language.asHumanReadable();
@@ -149,20 +122,76 @@ class Locale implements SerializableDataExt {
 	
 	@override
 	String toJson() => romanized ? "${language.isoCode}-ro" : language.isoCode;
+
+	@override
+	bool operator ==(covariant Locale other) {
+		if (identical(this, other)) return true;
+	
+		return 
+		other.language == language &&
+		other.romanized == romanized;
+	}
+
+	@override
+	int get hashCode => language.hashCode ^ romanized.hashCode;
 }
 
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUMS
 enum Language implements SerializableDataExt {
 	english("en"),
-	japanese("ja"),
-	simpleChinese("zh"),
-	traditionalChinese("zh-hk"),
-	korean("ko"),
+	albanian("sq"),
+	arabic("ar"),
+	azerbaijani("az"),
+	bengali("bn"),
+	bulgarian("bg"),
+	burmese("my"),
+	catalan("ca"),
+	chineseSimplified("zh"),
+	chineseTraditional("zh-hk"),
+	croatian("hr"),
+	czech("cs"),
+	danish("da"),
+	dutch("nl"),
+	esperanto("eo"),
+	estonian("et"),
+	filipino("tl"),
+	finnish("fi"),
 	french("fr"),
-	russian("ru"),
-	vietnamese("vi"),
+	georgian("ka"),
+	german("de"),
+	greek("el"),
+	hebrew("he"),
+	hindi("hi"),
+	hungarian("hu"),
+	indonesian("id"),
+	italian("it"),
+	japanese("ja"),
+	kazakh("kk"),
+	korean("ko"),
+	latin("la"),
+	lithuanian("lt"),
+	malay("ms"),
+	mongolian("mn"),
+	nepali("ne"),
+	norwegian("no"),
+	persian("fa"),
+	polish("pl"),
+	portuguese("pt"),
 	portugueseBrazil("pt-br"),
-	indonesian("id");
+	romanian("ro"),
+	russian("ru"),
+	serbian("sr"),
+	slovak("sk"),
+	spanish("es"),
+	spanishLatinAmerica("es-la"),
+	swedish("sv"),
+	tamil("ta"),
+	telugu("te"),
+	thai("th"),
+	turkish("tr"),
+	ukrainian("uk"),
+	vietnamese("vi");
+
 
 	final String isoCode;
 	const Language(this.isoCode);
@@ -170,45 +199,128 @@ enum Language implements SerializableDataExt {
 	/// Returns a language based on an ISO code.
 	///
 	/// Throws a [LanguageNotSupportedException] if the language is not supported.
-	static Language fromIsoCode(String isoCode) {
+	factory Language.fromIsoCode(String isoCode) {
 		return values.firstWhere(
 			(e) => e.isoCode == isoCode,
 			orElse: () => throw LanguageNotSupportedException(isoCode),
 		);
-	}
-
-	static Map<Language, String> _humanNames = {
-		Language.english: "English",
-		Language.japanese: "Japanese",
-		Language.simpleChinese: "Simplified Chinese",
-		Language.traditionalChinese: "Traditional Chinese",
-		Language.korean: "Korean",
-		Language.french: "French",
-		Language.russian: "Russian",
-		Language.vietnamese: "Vietnamese",
-		Language.portugueseBrazil: "Portuguese (Brazil)",
-		Language.indonesian: "Indonesian",
-	};
-
-	static Map<Language, flag.Language> _flagLanguages = {
-		Language.english: flag.Language.en,
-		Language.japanese: flag.Language.ja,
-		Language.simpleChinese: flag.Language.zh,
-		Language.traditionalChinese: flag.Language.zh_TW,
-		Language.korean: flag.Language.ko,
-		Language.french: flag.Language.fr,
-		Language.russian: flag.Language.ru,
-		Language.vietnamese: flag.Language.vi,
-		Language.portugueseBrazil: flag.Language.pt_br,
-		Language.indonesian: flag.Language.id,
-	};
-
+	}	
 
 	@override
 	String toJson() => isoCode;
 
 	@override
-	String asHumanReadable() => _humanNames[this]!;
+	String asHumanReadable() {
+		// plz kill me
+		switch (this) {
+			case Language.english:
+				return "English";
+			case Language.albanian:
+				return "Albanian";
+			case Language.arabic:
+				return "Arabic";
+			case Language.azerbaijani:
+				return "Azerbaijani";
+			case Language.bengali:
+				return "Bengali";
+			case Language.bulgarian:
+				return "Bulgarian";
+			case Language.burmese:
+				return "Burmese";
+			case Language.catalan:
+				return "Catalan";
+			case Language.chineseSimplified:
+				return "Chinese (Simplified)";
+			case Language.chineseTraditional:
+				return "Chinese (Traditional)";
+			case Language.croatian:
+				return "Croatian";
+			case Language.czech:
+				return "Czech";
+			case Language.danish:
+				return "Danish";
+			case Language.dutch:
+				return "Dutch";
+			case Language.esperanto:
+				return "Esperanto";
+			case Language.estonian:
+				return "Estonian";
+			case Language.filipino:
+				return "Filipino";
+			case Language.finnish:
+				return "Finnish";
+			case Language.french:
+				return "French";
+			case Language.georgian:
+				return "Georgian";
+			case Language.german:
+				return "German";
+			case Language.greek:
+				return "Greek";
+			case Language.hebrew:
+				return "Hebrew";
+			case Language.hindi:
+				return "Hindi";
+			case Language.hungarian:
+				return "Hungarian";
+			case Language.indonesian:
+				return "Indonesian";
+			case Language.italian:
+				return "Italian";
+			case Language.japanese:
+				return "Japanese";
+			case Language.kazakh:
+				return "Kazakh";
+			case Language.korean:
+				return "Korean";
+			case Language.latin:
+				return "Latin";
+			case Language.lithuanian:
+				return "Lithuanian";
+			case Language.malay:
+				return "Malay";
+			case Language.mongolian:
+				return "Mongolian";
+			case Language.nepali:
+				return "Nepali";
+			case Language.norwegian:
+				return "Norwegian";
+			case Language.persian:
+				return "Persian";
+			case Language.polish:
+				return "Polish";
+			case Language.portuguese:
+				return "Portuguese";
+			case Language.portugueseBrazil:
+				return "Portuguese (Brazil)";
+			case Language.romanian:
+				return "Romanian";
+			case Language.russian:
+				return "Russian";
+			case Language.serbian:
+				return "Serbian";
+			case Language.slovak:
+				return "Slovak";
+			case Language.spanish:
+				return "Spanish";
+			case Language.spanishLatinAmerica:
+				return "Spanish (Latin America)";
+			case Language.swedish:
+				return "Swedish";
+			case Language.tamil:
+				return "Tamil";
+			case Language.telugu:
+				return "Telugu";
+			case Language.thai:
+				return "Thai";
+			case Language.turkish:
+				return "Turkish";
+			case Language.ukrainian:
+				return "Ukrainian";
+			case Language.vietnamese:
+				return "Vietnamese";
+		}
+	}
 
-	flag.Language getFlag() => _flagLanguages[this]!;
+	flag.Language getFlag() => flag.Language.fromCode(isoCode);	
 }

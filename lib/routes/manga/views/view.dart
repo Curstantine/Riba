@@ -3,188 +3,52 @@ import "dart:io";
 
 import "package:flutter/material.dart" hide Locale, Localizations;
 import "package:flutter/services.dart";
-import "package:isar/isar.dart";
-import "package:logging/logging.dart";
 import "package:material_symbols_icons/symbols.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/localization.dart";
-import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/statistics.dart";
-import "package:riba/repositories/mangadex/mangadex.dart";
-import "package:riba/repositories/mangadex/services/chapter.dart";
-import "package:riba/repositories/runtime/chapter.dart";
-import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/routes/manga/views/model.dart";
 import "package:riba/routes/manga/widgets/buttons.dart";
 import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/routes/manga/widgets/lists/chapter.dart";
 import "package:riba/routes/manga/widgets/sheets/cover.dart";
 import "package:riba/routes/manga/widgets/sheets/rating.dart";
-import "package:riba/settings/manga_filter/store.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
-import "package:riba/utils/hash.dart";
 import "package:riba/utils/lazy.dart";
 import "package:riba/utils/theme.dart";
 
 class MangaView extends StatefulWidget {
-	const MangaView({super.key, required this.id});
+	const MangaView({super.key, required this.viewModel, this.initialData});
 
-	final String id;
+	final MangaViewModel viewModel;
+	final MangaData? initialData;
 
 	@override
 	State<MangaView> createState() => _MangaViewState();
 }
 
 class _MangaViewState extends State<MangaView> {
-	final expandedAppBarHeight = 500.0;
-	final logger = Logger("MangaView");
-	final scrollController = ScrollController();
+	MangaViewModel get viewModel => widget.viewModel;
+	List<Locale> get preferredDisplayLocales => Settings.instance.appearance.preferredDisplayLocales.value;
 
-	final showAppBar = ValueNotifier(false);
 	final isDescriptionExpanded = ValueNotifier(false);
 	final areFiltersApplied = ValueNotifier(false);
 
-	late final preferredCoverIdStream = MangaDex.instance.manga.database.where()
-		.isarIdEqualTo(fastHash(widget.id))
-		.preferredCoverIdProperty()
-		.watch()
-		.asyncMap((e) => e.first);
-
-	late Future<MangaData> mangaFuture;
-	late Future<Statistics> statisticsFuture;
-
-	final coverController = StreamController<File?>();
-	final chapterController = StreamController<CollectionData<ChapterData>>();
-
-	final isFollowed = ValueNotifier(false);
-	final hasTrackers = ValueNotifier(false);
-	final hasCustomLists = ValueNotifier(false);
-
-	int chapterOffset = 0;
-	bool areChaptersEntirelyFetched = false;
-
-	/// Cache of all the chapters fetched in this view.
-	/// This is useful since the [chapterController] used is a one-time stream that
-	/// discards rendered data.
-	CollectionData<ChapterData>? chapterCache;
-
-	Future<MangaFilterSettingsStore> get mangaFilterSettingsFuture => Settings.instance.mangaFilter.get(widget.id);
-
 	@override
 	void initState() {
+		viewModel.initialize();
 		super.initState();
-		fetchMangaData();
-
-		// TODO: Currently, if the user somehow gets into a title w/ higher ordinality than
-		// the user-selected content ratings, the title will be displayed.
-		// We should probably show a small warning.
-
-		scrollController.addListener(onScroll);
-		preferredCoverIdStream.listen((e) {
-			// While this behavior is somewhat undefined, all we 
-			// want from this is to temporarily set the preferred id
-			// so that the internal events could be triggered with
-			// the fresh value.
-			mangaFuture.then((x) => x.manga.copyWith.preferredCoverId(e));
-			fetchCover(e);
-		});
 	}
 
 	@override
 	void dispose() {
-		chapterController.close();
-		coverController.close();
-		scrollController.dispose();
+		viewModel.dispose();
+		isDescriptionExpanded.dispose();
+		areFiltersApplied.dispose();
 		super.dispose();
-	}
-
-	Future<void> fetchMangaData({bool reload = false}) async {
-		mangaFuture = MangaDex.instance.manga.get(widget.id, checkDB: !reload);
-		statisticsFuture = MangaDex.instance.manga.getStatistics(widget.id, checkDB: !reload);
-
-		await Future.wait([
-			fetchCover(),
-			fetchChapters(reload: reload),
-		]);
-	}
-
-	Future<void> fetchCover([String? coverId]) async {
-		try {
-			final data = await mangaFuture;
-			final cover = coverId == null
-				? data.cover
-				: (await MangaDex.instance.cover.get(coverId)).cover;
-
-			if (cover == null) {
-				coverController.add(null);
-				return coverController.close();
-			}
-
-			final settings = Settings.instance.coverPersistence;
-			final image = await MangaDex.instance.cover.getImage(
-				widget.id,
-				cover,
-				size: settings.fullSize.value,
-				cache: settings.enabled.value,
-			);
-
-			coverController.add(image);
-		} catch (e) {
-			coverController.addError(e);
-		}
-	}
-
-	/// The initial fetch will first check if there are data available in the database, if it is,
-	/// it will display everything available without prioritizing [offset] or [limit].
-	///
-	/// If there are no data available in the database, it will fetch everything from the API, 
-	/// where it will [limit] accordingly.
-	///
-	/// In all cases, [areChaptersEntirelyFetched] will be set to true if the total number of
-	/// chapters displayed is equal to the number of chapters available. This will not account
-	/// for chapters that are out-of-sync from the server
-	/// (e.g. deleted chapters, chapters published after the last sync.)
-	/// 
-	/// [chapterOffset] is only used for memo-ing the last offset. Instead, use [offset]
-	/// to specify the offset to fetch from.
-	/// 
-	/// Issues:
-	/// 1. When the whole list is not fetched from the get go, any session that
-	/// did not load the data from the server will not be able to get chapters after the
-	/// initial [offset] since the [areChaptersEntirelyFetched] is true in a database fetch.
-	/// Reloading will fix this issue.
-	Future<void> fetchChapters({bool reload = false, int offset = 0}) async {
-		logger.info("Fetching chapters with offset $offset");
-	
-		try {
-			final mangaSettings = await mangaFilterSettingsFuture;
-			final contentSettings = Settings.instance.contentFilter;
-
-			final data = await MangaDex.instance.chapter.getFeed(
-				checkDB: !reload &&  offset == 0,
-				overrides: MangaDexChapterGetFeedQueryFilter(
-					mangaId: widget.id,
-					offset: offset,
-					excludedGroups: mangaSettings.excludedGroupIds,
-					translatedLanguages: contentSettings.chapterLanguages.value,
-				),
-			);
-
-			chapterOffset += data.data.length;
-			areChaptersEntirelyFetched = data.total <= chapterOffset;
-			chapterCache = chapterCache == null ? data : CollectionData(
-				data: chapterCache!.data..addAll(data.data),
-				total: data.total,
-				limit: data.limit,
-				offset: data.offset,
-			);
-
-			chapterController.add(chapterCache!);
-		} catch (e) {
-			chapterController.addError(e);
-		}
 	}
 
 	@override
@@ -194,13 +58,13 @@ class _MangaViewState extends State<MangaView> {
 		final colors = theme.colorScheme;
 
 		final media = MediaQuery.of(context);
-		final preferredDisplayLocales = Settings.instance.appearance.preferredDisplayLocales.value;
 
 		return Scaffold(
-			body: FutureBuilder(
-				future: mangaFuture,
+			body: StreamBuilder<MangaData>(
+				stream: viewModel.dataStream,
+				initialData: widget.initialData,
 				builder: (context, mangaSnapshot) {
-					if (mangaSnapshot.connectionState != ConnectionState.done) {
+					if (mangaSnapshot.connectionState != ConnectionState.active) {
 						return const Center(child: CircularProgressIndicator());
 					}
 
@@ -213,7 +77,7 @@ class _MangaViewState extends State<MangaView> {
 								Text(error.description, style: theme.textTheme.bodyMedium),
 								const SizedBox(height: Edges.large),
 								ElevatedButton(
-									onPressed: () => setState(() => fetchMangaData(reload: true)),
+									onPressed: () => setState(() => viewModel.refresh()),
 									child: const Text("Retry"),
 								),
 							]),
@@ -223,8 +87,8 @@ class _MangaViewState extends State<MangaView> {
 					final mangaData = mangaSnapshot.requireData;
 
 					return RefreshIndicator(
-						onRefresh: refresh,
-						child: CustomScrollView(controller: scrollController, slivers: [
+						onRefresh: viewModel.refresh,
+						child: CustomScrollView(controller: viewModel.scrollController, slivers: [
 							buildAppBar(text, colors, media, preferredDisplayLocales, mangaData),
 							SliverToBoxAdapter(child: DescriptionSection(
 								description: mangaData.manga.description,
@@ -233,9 +97,9 @@ class _MangaViewState extends State<MangaView> {
 							)),
 							SliverToBoxAdapter(child: buildReadButton()),
 							ChapterList(
-								mangaId: widget.id,
-								chapterStream: chapterController.stream,
-								onFilterApplied: onFiltersApplied
+								mangaId: viewModel.mangaId,
+								chapterStream: viewModel.chapterStream,
+								onFilterApplied: viewModel.onFiltersApplied,
 							),
 						]),
 					);
@@ -253,9 +117,9 @@ class _MangaViewState extends State<MangaView> {
 	) {
 		return SliverAppBar(
 			pinned: true,
-			expandedHeight: expandedAppBarHeight,
+			expandedHeight: viewModel.expandedAppBarHeight,
 			title: ValueListenableBuilder(
-				valueListenable: showAppBar,
+				valueListenable: viewModel.showAppBar,
 				child: Text(
 					mangaData.manga.titles.getPreferred(preferredDisplayLocales),
 					style: text.titleMedium,
@@ -270,14 +134,14 @@ class _MangaViewState extends State<MangaView> {
 				collapseMode: CollapseMode.pin,
 				titlePadding: Edges.allNone,
 				background: DetailsHeader(
-					height: expandedAppBarHeight + media.padding.top,
-					isFollowed: isFollowed,
-					hasTrackers: hasTrackers,
-					hasCustomLists: hasCustomLists,
+					height: viewModel.expandedAppBarHeight + media.padding.top,
+					isFollowed: viewModel.isFollowed,
+					hasTrackers: viewModel.hasTrackers,
+					hasCustomLists: viewModel.hasCustomLists,
 					preferredLocales: preferredDisplayLocales,
 					mangaData: mangaData,
-					coverStream: coverController.stream,
-					statisticsFuture: statisticsFuture,
+					coverStream: viewModel.coverStream,
+					statisticsStream: viewModel.statisticStream,
 				),
 			),
 		);
@@ -292,37 +156,6 @@ class _MangaViewState extends State<MangaView> {
 			),
 		);
 	}
-
-	void onScroll() {
-		final height = expandedAppBarHeight - kToolbarHeight;
-
-		if (showAppBar.value && scrollController.offset < height) {
-			showAppBar.value = false;
-		} else if (!showAppBar.value && scrollController.offset > height) {
-			showAppBar.value = true;
-		}
-
-		if (scrollController.offset >= scrollController.position.maxScrollExtent) {
-			onChapterListBottomReached();
-		}
-	}
-
-	void onChapterListBottomReached() {
-		if (!areChaptersEntirelyFetched) fetchChapters(offset: chapterOffset);
-	}
-
-	Future<void> onFiltersApplied() async {
-		chapterOffset = 0;
-		chapterCache = null;
-		await fetchChapters(offset: 0, reload: !areChaptersEntirelyFetched);
-	}
-
-	Future<void> refresh() async {
-		chapterOffset = 0;
-		chapterCache = null;
-		areChaptersEntirelyFetched = false;
-		await fetchMangaData(reload: true);
-	}
 }
 
 class DetailsHeader extends StatelessWidget {
@@ -330,7 +163,7 @@ class DetailsHeader extends StatelessWidget {
 		super.key,
 		required this.height,
 		required this.mangaData,
-		required this.statisticsFuture,
+		required this.statisticsStream,
 		required this.coverStream,
 		required this.preferredLocales,
 		required this.isFollowed,
@@ -340,7 +173,7 @@ class DetailsHeader extends StatelessWidget {
   
 	final double height;
 	final MangaData mangaData;
-	final Future<Statistics> statisticsFuture;
+	final Stream<Statistics> statisticsStream;
 
 	/// Stream of the cover image.
 	/// 
@@ -496,8 +329,8 @@ class DetailsHeader extends StatelessWidget {
 	Widget buildRatingsRow(TextTheme text, ColorScheme colors) {
 		return SizedBox(
 			height: 25,
-			child: FutureBuilder<Statistics>(
-				future: statisticsFuture,
+			child: StreamBuilder<Statistics>(
+				stream: statisticsStream,
 				builder: (context, snapshot) {
 					if (snapshot.hasError) {
 						final error = ErrorState.fromSource(snapshot.error!);

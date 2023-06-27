@@ -6,6 +6,7 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/routes/manga/views/model.dart";
 import "package:riba/routes/manga/views/view.dart";
 import "package:riba/settings/cover_persistence/controller.dart";
 import "package:riba/settings/settings.dart";
@@ -126,6 +127,10 @@ class _MangaCardState extends State<MangaCard> {
 
 	void onCardPress() {
 		widget.onPress?.call();
-		Navigator.push(context, sharedAxis((_) => MangaView(id: manga.id), SharedAxisTransitionType.vertical));
+		
+		Navigator.push(context, sharedAxis(
+			(_) => MangaView(viewModel: MangaViewModel(mangaId: manga.id), initialData: widget.mangaData),
+			SharedAxisTransitionType.vertical
+		));
 	}
 }

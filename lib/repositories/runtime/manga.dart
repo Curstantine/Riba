@@ -1,8 +1,12 @@
+import "package:copy_with_extension/copy_with_extension.dart";
 import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/local/models/tag.dart";
 
+part "manga.g.dart";
+
+@CopyWith()
 class MangaData {
 	final Manga manga;
 	final CoverArt? cover;

@@ -50,7 +50,7 @@ class _SettingsAppearanceViewState extends State<SettingsAppearanceView> {
 				title: "Preferred Display Locales",
 				description: "The locales that should take precedence when displaying textual content.",
 				currentValue: locales,
-				values: Locale.values,
+				values: Locale.getAll(),
 				itemBuilder: (locale) => ListItemData(
 					locale.language.asHumanReadable(),
 					subtitle: locale.romanized ? "Romanized" : "Native",
