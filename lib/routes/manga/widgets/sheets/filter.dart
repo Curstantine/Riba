@@ -99,10 +99,10 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
 		logger.info("Applying manga filter changes. (${widget.data.mangaId})");
 
 		final newFilter = widget.data.filterSettings.copyWith(
-		excludedGroupIds: _groupValues.entries
-			.where((entry) => !entry.value.value)
-			.map((entry) => entry.key)
-			.toList(),
+			excludedGroupIds: _groupValues.entries
+				.where((entry) => !entry.value.value)
+				.map((entry) => entry.key)
+				.toList(),
 		);
 
 		widget.onApply.call(newFilter);

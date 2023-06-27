@@ -201,6 +201,7 @@ class MangaViewModel {
 
 	Future<void> onFiltersApplied() async {
 		chapterOffset = 0;
+		baseFilterSettings = await Settings.instance.mangaFilter.get(mangaId);
 		loadChapters(offset: 0, reload: !areChaptersEntirelyFetched);
 	}
 
