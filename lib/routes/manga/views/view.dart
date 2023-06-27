@@ -64,7 +64,7 @@ class _MangaViewState extends State<MangaView> {
 				stream: viewModel.dataStream,
 				initialData: widget.initialData,
 				builder: (context, mangaSnapshot) {
-					if (mangaSnapshot.connectionState != ConnectionState.active) {
+					if (!mangaSnapshot.hasData && !mangaSnapshot.hasError) {
 						return const Center(child: CircularProgressIndicator());
 					}
 
@@ -223,7 +223,7 @@ class DetailsHeader extends StatelessWidget {
 				builder: (context, snapshot) {
 					List<Widget>? children;
 
-					if (snapshot.connectionState != ConnectionState.active) {
+					if (!snapshot.hasData && !snapshot.hasError) {
 						children = [const CircularProgressIndicator()];
 					}
 

@@ -47,6 +47,9 @@ class _ChapterFilterSheetState extends State<ChapterFilterSheet> {
 				...buildChapterGroups(text, colors),
 				const SizedBox(height: Edges.large),
 				Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+					TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+					const SizedBox(width: Edges.small),
+					
 					FilledButton.tonal(onPressed: apply, child: const Text("Apply")),
 				])
 			],

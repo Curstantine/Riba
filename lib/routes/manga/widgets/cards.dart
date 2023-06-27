@@ -56,7 +56,7 @@ class _MangaCardState extends State<MangaCard> {
 				cache: persistenceSettings.enabled.value,
 			);
 
-			coverStream.add(cover);
+			if (mounted && !coverStream.isClosed) coverStream.add(cover);
 		} catch (error) {
 			coverStream.addError(ErrorState.fromSource(error));
 		}
