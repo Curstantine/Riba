@@ -8,6 +8,7 @@ import "package:riba/repositories/local/models/cover_art.dart";
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
+import "package:riba/repositories/mangadex/services/author.dart";
 import "package:riba/repositories/mangadex/services/chapter.dart";
 import "package:riba/repositories/mangadex/services/cover_art.dart";
 import "package:riba/repositories/mangadex/services/group.dart";
@@ -31,12 +32,25 @@ void main() async {
 	setUp(() async => await clear(database, mangadex));
 	tearDown(() async => await clear(database, mangadex));
 
+	testAuthor(mangadex, database);
 	testChapter(mangadex, database);
 	testCoverArt(mangadex, database);
 	testCustomList(mangadex, database);
 	testGroup(mangadex, database);
 	testManga(mangadex, database);
 }
+
+void testAuthor(MangaDex mangadex, Database database) => group("MangaDex.Author", () {
+	test(".withFilters", () async {
+		final groups = await mangadex.author.withFilters(
+			overrides: const MangaDexAuthorWithFilterQueryFilter(name: authorName),
+		);
+
+		expect(groups, isNotNull);
+		expect(groups.data.length, equals(1));
+		expect(groups.data.first.name, equals(authorName));
+	});
+});
 
 void testChapter(MangaDex mangadex, Database database) => group("MangaDex.Chapter", () {
 	test(".withFilters", () async {
@@ -205,6 +219,15 @@ void testCustomList(MangaDex mangadex, Database database) => group("MangaDex.Cus
 });
 
 void testGroup(MangaDex mangadex, Database database) => group("MangaDex.Group", () {
+	test(".withFilters", () async {
+		final groups = await mangadex.group.withFilters(
+			overrides: const MangaDexGroupWithFilterQueryFilter(name: groupName),
+		);
+
+		expect(groups, isNotNull);
+		expect(groups.data.length, equals(1));
+		expect(groups.data.first.group.name, equals(groupName));
+	});
 	test(".getSimpleMany", () async {
 		final groups = await mangadex.group.getManyAsSingle(
 			overrides: const MangaDexGroupGetManyAsSingleQueryFilter(ids: groupIds)

@@ -23,7 +23,7 @@ class MangaDexGroupService extends MangaDexService<
 	GroupAttributes, Group, GroupData, GroupData,
     MangaDexGenericQueryFilter,
 	MangaDexGenericQueryFilter,
-	MangaDexGenericQueryFilter
+	MangaDexGroupWithFilterQueryFilter
 > {
 	MangaDexGroupService({
 		required super.client,
@@ -69,9 +69,23 @@ class MangaDexGroupService extends MangaDexService<
 	}
 
 	@override
-	Future<CollectionData<GroupData>> withFilters({required overrides}) {
-		// TODO: implement withFilters
-		throw UnimplementedError();
+	Future<CollectionData<GroupData>> withFilters({required overrides}) async {
+		logger.info("withFilters(${overrides.toString()})");
+
+		await rateLimiter.wait("/group:GET");
+		final reqUrl = baseUrl.clone().addFilters(defaultFilters).addFilters(overrides);
+		final request = await client.get(reqUrl.toUri());
+		final response = GroupCollection.fromMap(jsonDecode(request.body), url: reqUrl);
+
+		final data = response.data.map((e) => e.toGroupData()).toList();
+		await database.isar.writeTxn(() => Future.wait(data.map(insertMeta)));
+
+		return CollectionData(
+			data: data,
+			limit: response.limit,
+			offset: response.offset,
+			total: response.total,
+		);
 	}
 
 	Future<Map<String, Group>> getManyAsSingle({
@@ -163,4 +177,34 @@ class MangaDexGroupGetManyAsSingleQueryFilter implements MangaDexQueryFilter {
 
 	@override
 	String toString() => "MangaDexGroupGetManyAsSingleQueryFilter(ids: $ids)";
+}
+
+@CopyWith()
+class MangaDexGroupWithFilterQueryFilter implements MangaDexQueryFilter {
+	final int limit;
+	final int offset;
+
+	final String? name;
+	final bool orderByFollowedCountDesc;
+
+	const MangaDexGroupWithFilterQueryFilter({
+		this.limit = 100,
+		this.offset = 0,
+		this.name,
+		this.orderByFollowedCountDesc = true, 
+	});
+
+	@override
+	URL addFiltersToUrl(URL sourceUrl) {
+		if (name != null) sourceUrl.setParameter("name", name);
+		if (orderByFollowedCountDesc) sourceUrl.setParameter("order[followedCount]", "desc");
+
+		return MangaDexGenericQueryFilter(limit: limit, offset: offset).addFiltersToUrl(sourceUrl);
+	}
+
+
+	@override
+	String toString() {
+		return "MangaDexGroupWithFilterQueryFilter(limit: $limit, offset: $offset, name: $name, orderByFollowedCountDesc: $orderByFollowedCountDesc)";
+	}
 }

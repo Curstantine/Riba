@@ -3,8 +3,8 @@ import "package:riba/repositories/local/models/group.dart";
 import "package:riba/repositories/local/models/user.dart";
 
 class GroupData {
-  final Group group;
-  final Map<String, User> users;
+	final Group group;
+	final Map<String, User> users;
 
-  const GroupData({required this.group, required this.users});
+	const GroupData({required this.group, required this.users});
 }

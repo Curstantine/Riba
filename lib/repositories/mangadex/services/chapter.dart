@@ -60,6 +60,7 @@ class MangaDexChapterService extends MangaDexService<
 			EntityType.user,
 			EntityType.scanlationGroup,
 		],
+		limit: 100,
 	);
 
 	@override

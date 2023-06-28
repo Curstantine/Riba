@@ -38,10 +38,8 @@ class Database {
 			),
 		);
 
-		await Future.wait([
-			MangaDex.init(instance.local),
-			Settings.init(instance.local),
-		]);
+		MangaDex.init(instance.local);
+		await Settings.init(instance.local);
 
 		return instance;
 	}

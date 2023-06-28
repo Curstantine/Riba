@@ -28,12 +28,8 @@ class URL {
 	/// Supports `List<String>`, `String`, `int`, `double` as values.
 	///
 	/// Enums are supported if [SerializableDataExt] is implemented.
-	///
-	/// Adding a single value to a key will append it to the list of values.
-	/// But adding a list of values will replace the existing list.
-	///
-	/// If the value is a list, and it is empty, it will be ignored.
-	/// Same behavior with nullish values.
+	/// 
+	/// When new values are added, the old ones are overwritten.
 	URL setParameter(String key, dynamic value) {
 		if (value == null) return this;
 
@@ -56,14 +52,12 @@ class URL {
 			case String:
 			case int:
 			case double:
-				parameters[key] ??= [];
-				parameters[key]!.add(value.toString());
+				parameters[key] = [value.toString()];
 				break;
 
 			default:
 				if (value is SerializableDataExt) {
-					parameters[key] ??= [];
-					parameters[key]!.add(value.toJson());
+					parameters[key] = [value.toJson()];
 				}
 
 				if (value is List<SerializableDataExt>) {
