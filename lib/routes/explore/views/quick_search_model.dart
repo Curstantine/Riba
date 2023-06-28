@@ -147,6 +147,10 @@ class QuickSearchViewModel implements ViewModel {
 		} 
 	}
 
+	void onMangaListExpansion(BuildContext context) {
+		// TODO: Implement navigation
+	}
+
 	@override
 	void dispose() {
 		filterState.dispose();

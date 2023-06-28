@@ -78,7 +78,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 					return const SliverToBoxAdapter();
 				}
 
-				return SliverList(delegate: SliverChildListDelegate([
+				return SliverList.list(children: [
 					Padding(
 						padding: Edges.horizontalLarge,
 						child: Text("Recent searches", style: text.titleSmall)),
@@ -88,7 +88,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 							title: Text(history.value),
 							onTap: () => rootViewModel.searchController.text = history.value),
 					const Padding(padding: Edges.topMedium),
-				].animate().fadeIn()));
+				].animate().fadeIn());
 			},
 		);
 	}
@@ -118,7 +118,15 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 					children: [
 						Padding(
 							padding: Edges.horizontalLarge,
-							child: Text("Manga", style: text.titleSmall)),
+							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+								Text("Manga", style: text.titleSmall),
+								IconButton(
+									onPressed: () => {},
+									icon: const Icon(Symbols.navigate_next_rounded), 
+									visualDensity: VisualDensity.compact,
+								),
+							])
+						),
 						SizedBox(height: 275, child: ListView.separated(
 							itemCount: manga.length,
 							scrollDirection: Axis.horizontal,
