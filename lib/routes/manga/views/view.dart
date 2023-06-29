@@ -121,7 +121,7 @@ class _MangaViewState extends State<MangaView> {
 			title: ValueListenableBuilder(
 				valueListenable: viewModel.showAppBar,
 				child: Text(
-					mangaData.manga.titles.getPreferred(preferredDisplayLocales),
+					mangaData.manga.titles.getPreferred(preferredDisplayLocales) ?? "N/A",
 					style: text.titleMedium,
 				),
 				builder: (context, value, child) => AnimatedOpacity(
@@ -287,7 +287,7 @@ class DetailsHeader extends StatelessWidget {
 				crossAxisAlignment: CrossAxisAlignment.start,
 				children: [
 					Expanded(child: InkWell(onTap: () => showCoverSheet(context))),
-					Text(title, style: text.titleLarge),
+					Text(title ?? "N/A", style: text.titleLarge),
 					Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
 					const SizedBox(height: Edges.small),
 					buildRatingsRow(text, colors),
@@ -477,6 +477,10 @@ class DescriptionSection extends StatelessWidget {
 			text: description.getPreferred(preferredLocales),
 			style: text.bodyMedium,
 		);
+
+		if (span.text == null || span.text!.isEmpty) {
+			return const SizedBox();
+		}
 
 		final content = Text.rich(span);
 

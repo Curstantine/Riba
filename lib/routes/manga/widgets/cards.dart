@@ -114,7 +114,7 @@ class _MangaCardState extends State<MangaCard> {
 				SizedBox(height: 50, child: ValueListenableBuilder<List<Locale>>(
 					valueListenable:  Settings.instance.appearance.preferredDisplayLocales,
 					builder: (context, locales, _) => Text(
-						manga.titles.getPreferred(locales),
+						manga.titles.getPreferred(locales) ?? "N/A",
 						maxLines: 2,
 						softWrap: true,
 						overflow: TextOverflow.ellipsis,

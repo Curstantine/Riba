@@ -182,7 +182,7 @@ class _FilterTagChip extends StatelessWidget {
 				/// TODO: Add leading icons when the chip API supports it
 				return FilterChipExt(
 					showCheckmark: false,
-					label: Text(tag.name.getPreferred(preferredLocales), style: text.labelLarge?.copyWith(color: foreground)),
+					label: Text(tag.name.getPreferred(preferredLocales) ?? "N/A", style: text.labelLarge?.copyWith(color: foreground)),
 					selectedColor: background,
 					selected: mode == TagSelectionMode.included || mode == TagSelectionMode.excluded,
 					onSelected: (_) {

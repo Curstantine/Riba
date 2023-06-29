@@ -86,7 +86,7 @@ class TagChip extends StatelessWidget {
 			elevation: 0,
 			outlineColor: theme.colorScheme.outline,
 			labelColor: theme.colorScheme.onSurfaceVariant,
-			label: tag.name.getPreferred(preferredLocales),
+			label: tag.name.getPreferred(preferredLocales) ?? "N/A",
 			onPressed: () => {},
 		);
 	}

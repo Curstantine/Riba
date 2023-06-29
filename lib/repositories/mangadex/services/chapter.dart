@@ -209,7 +209,7 @@ class MangaDexChapterGetFeedQueryFilter implements MangaDexQueryFilter {
 	final List<String>? excludedGroups;
 
 	const MangaDexChapterGetFeedQueryFilter({
-		this.limit = 100,
+		this.limit = 500,
 		this.offset = 0,
 		required this.mangaId,
 		this.orderByChapterDesc = true,
