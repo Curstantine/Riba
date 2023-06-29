@@ -38,24 +38,24 @@ class SearchBar extends StatelessWidget {
 					width: double.infinity,
 					decoration: const BoxDecoration(borderRadius: Corners.allFull),
 					constraints: const BoxConstraints(minWidth: 360, maxHeight: 720),
-					child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+					alignment: Alignment.centerLeft,
+					child: Row(children: [
 						Padding(
 							padding: Edges.horizontalLarge,
-							child: Icon(Symbols.search_rounded, size: 24, color: colors.onSurface)),
-						Expanded(
+							child: Icon(Symbols.search_rounded, color: colors.onSurface)),
+						Expanded(child: Center(
 							child: TextField(
 								readOnly: true,
 								controller: controller,
 								onTap: () => controller.openView(),
-								decoration: InputDecoration(									
+								decoration: InputDecoration(
 									hintText: hintText,
 									hintStyle: text.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
 									border: InputBorder.none,
 								),
 							),
-						),
+						)),
 						if (trailing != null) ...[
-							const SizedBox(width: Edges.small),
 							...trailing!,
 							const SizedBox(width: Edges.small),
 						],

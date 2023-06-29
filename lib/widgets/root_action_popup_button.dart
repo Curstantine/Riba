@@ -10,7 +10,7 @@ class RootActionPopupButton extends StatelessWidget {
 		return PopupMenuButton<String>(
 			icon: const Icon(Symbols.more_vert_rounded),
 			onSelected: (value) => Navigator.pushNamed(context, value),
-			offset: const Offset(-10, 56),
+			offset: const Offset(-12, 58),
 			itemBuilder: (context) => [
 				const PopupMenuItem(value: Router.settings, child: Text("Settings")),
 			],
