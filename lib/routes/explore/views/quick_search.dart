@@ -6,6 +6,7 @@ import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/authors/widgets/cards.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
+import "package:riba/routes/groups/widgets/cards.dart";
 import "package:riba/routes/manga/widgets/cards.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/debouncer.dart";
@@ -60,6 +61,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 				buildRecentList(text),
 				buildMangaList(text, colors),
 				buildAuthorList(text, colors),
+				buildGroupList(text, colors),
 			],
 		);
 	}
@@ -198,6 +200,61 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 									key: ValueKey(author.id),
 									author: author,
 									onPress: () => viewModel.addSearchHistory(author.id, HistoryType.author),
+								);
+							},
+						)),
+					],
+				));
+			},
+		);
+	}
+
+	Widget buildGroupList(TextTheme text, ColorScheme colors) {
+		return StreamBuilder(
+			stream: viewModel.groupStream,
+			builder: (context, snapshot) {
+				if (snapshot.hasError) {
+					return SliverToBoxAdapter(child: SizedBox(
+						height: 100,
+						child: ErrorCard(margin: Edges.horizontalLarge, error: snapshot.error),
+					));
+				}
+
+				final authors = snapshot.data;
+				if (authors == null || authors.isEmpty) {
+					return const SliverToBoxAdapter();
+				}
+
+				return SliverList.list(children: AnimateList(
+					effects: [
+						const FadeEffect(
+							duration: Durations.emphasized,
+							curve: Easing.emphasized)
+					],
+					children: [
+						Padding(
+							padding: Edges.horizontalLarge,
+							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+								Text("Groups", style: text.titleSmall),
+								IconButton(
+									onPressed: () => {},
+									icon: const Icon(Symbols.navigate_next_rounded), 
+									visualDensity: VisualDensity.compact,
+								),
+							])
+						),
+						SizedBox(height: 175, child: ListView.separated(
+							itemCount: authors.length,
+							scrollDirection: Axis.horizontal,
+							padding: Edges.horizontalLarge,
+							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
+							itemBuilder: (_, index) {
+								final groupData = authors[index];
+
+								return GroupCard(
+									key: ValueKey(groupData.group.id),
+									groupData: groupData,
+									onPress: () => viewModel.addSearchHistory(groupData.group.id, HistoryType.author),
 								);
 							},
 						)),

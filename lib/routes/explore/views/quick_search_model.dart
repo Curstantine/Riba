@@ -10,7 +10,9 @@ import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/services/author.dart";
+import "package:riba/repositories/mangadex/services/group.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
+import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/widgets/quick_search_filter_dialog.dart";
@@ -38,6 +40,9 @@ class QuickSearchViewModel implements ViewModel {
 
 	final _authorController = BehaviorSubject<List<Author>>();
 	ValueStream<List<Author>> get authorStream => _authorController.stream;
+
+	final _groupController = BehaviorSubject<List<GroupData>>();
+	ValueStream<List<GroupData>> get groupStream => _groupController.stream;
 
 	final _tagsController = BehaviorSubject<Map<TagGroup, List<Tag>>>();
 	ValueStream<Map<TagGroup, List<Tag>>> get tagsStream => _tagsController.stream;
@@ -111,6 +116,18 @@ class QuickSearchViewModel implements ViewModel {
 			_authorController.add(authors.data);
 		} catch (e) {
 			_authorController.addError(e);
+		}
+
+		try {
+			final groups = await MangaDex.instance.group.withFilters(overrides: MangaDexGroupWithFilterQueryFilter(
+				name: query,
+				limit: 5,
+				orderByFollowedCountDesc: true,
+			));
+
+			_groupController.add(groups.data);
+		} catch (e) {
+			_groupController.addError(e);
 		}
 	}
 

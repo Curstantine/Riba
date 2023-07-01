@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import "package:material_symbols_icons/symbols.dart";
-import "package:riba/repositories/local/models/author.dart";
+import "package:riba/repositories/runtime/group.dart";
 import "package:riba/utils/constants.dart";
 
-class AuthorCard extends StatelessWidget {
-	const AuthorCard({super.key, required this.author, this.onPress});
+class GroupCard extends StatelessWidget {
+	const GroupCard({super.key, required this.groupData, this.onPress});
 
-	final Author author;
+	final GroupData groupData;
 	final VoidCallback? onPress;
 
 	@override
@@ -27,12 +27,12 @@ class AuthorCard extends StatelessWidget {
 					child: InkWell(
 						onTap: onCardPress,
 						borderRadius: Corners.allFull,
-						child: Center(child: Icon(Symbols.person_rounded, size: 36, color: colors.onSurfaceVariant)),
+						child: Center(child: Icon(Symbols.group_rounded, size: 36, color: colors.onSurfaceVariant)),
 					),
 				)),
 				const SizedBox(height: Edges.extraSmall),
 				SizedBox(height: 46, child: Text(
-					author.name,
+					groupData.group.name,
 					maxLines: 2,
 					softWrap: true,
 					overflow: TextOverflow.ellipsis,
