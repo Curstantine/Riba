@@ -17,11 +17,14 @@ import "package:riba/utils/theme.dart";
 import "package:riba/widgets/material/card.dart";
 import "package:rxdart/rxdart.dart";
 
-class MangaCard extends StatefulWidget {
+class MangaCard extends StatefulWidget implements PreferredSizeWidget {
 	const MangaCard({super.key, required this.mangaData, this.onPress});
 
 	final MangaData mangaData;
 	final VoidCallback? onPress;
+	
+	@override
+	Size get preferredSize => const Size(150, 275);
 
 	@override
 	State<MangaCard> createState() => _MangaCardState();
