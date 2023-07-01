@@ -3,11 +3,13 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:isar/isar.dart";
 import "package:logging/logging.dart";
+import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/history.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
+import "package:riba/repositories/mangadex/services/author.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
@@ -28,11 +30,14 @@ class QuickSearchViewModel implements ViewModel {
 	@override
 	final logger = Logger("QuickSearchViewModel");
 
+	final _historyController = BehaviorSubject<List<History>>();
+	ValueStream<List<History>> get historyStream => _historyController.stream;
+
 	final _mangaController = BehaviorSubject<List<MangaData>>();
 	ValueStream<List<MangaData>> get mangaStream => _mangaController.stream;
 
-	final _historyController = BehaviorSubject<List<History>>();
-	ValueStream<List<History>> get historyStream => _historyController.stream;
+	final _authorController = BehaviorSubject<List<Author>>();
+	ValueStream<List<Author>> get authorStream => _authorController.stream;
 
 	final _tagsController = BehaviorSubject<Map<TagGroup, List<Tag>>>();
 	ValueStream<Map<TagGroup, List<Tag>>> get tagsStream => _tagsController.stream;
@@ -78,10 +83,6 @@ class QuickSearchViewModel implements ViewModel {
 
 	Future<void> refresh() async {
 		final query = ExploreViewModel.instance.searchController.text;
-		if (query.isEmpty && filterState.isEmpty) {
-			_mangaController.add([]);
-			return;
-		}
 
 		try {
 			final manga = await MangaDex.instance.manga.withFilters(overrides: MangaDexMangaWithFiltersQueryFilter(
@@ -98,6 +99,18 @@ class QuickSearchViewModel implements ViewModel {
 			_mangaController.add(manga.data);
 		} catch (e) {
 			_mangaController.addError(e);
+		}
+
+		try {
+			final authors = await MangaDex.instance.author.withFilters(overrides: MangaDexAuthorWithFilterQueryFilter(
+				name: query,
+				limit: 5,
+				orderByNameDesc: true,
+			));
+
+			_authorController.add(authors.data);
+		} catch (e) {
+			_authorController.addError(e);
 		}
 	}
 
