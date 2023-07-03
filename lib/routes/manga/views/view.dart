@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:dash_flags/dash_flags.dart";
 import "package:flutter/material.dart" hide Locale, Localizations;
 import "package:flutter/services.dart";
 import "package:material_symbols_icons/symbols.dart";
@@ -277,7 +278,6 @@ class DetailsHeader extends StatelessWidget {
 			.map((e) => e.name)
 			.join(", ");
 
-
 		return Container(
 			height: height,
 			width: double.infinity,
@@ -287,8 +287,16 @@ class DetailsHeader extends StatelessWidget {
 				crossAxisAlignment: CrossAxisAlignment.start,
 				children: [
 					Expanded(child: InkWell(onTap: () => showCoverSheet(context))),
-					Text(title ?? "N/A", style: text.titleLarge),
-					Text(authorList, style: text.labelMedium?.withColorOpacity(0.5)),
+					LanguageFlag(
+						language: mangaData.manga.originalLanguage.getFlag(),
+						height: 20,
+					),
+					const SizedBox(height: Edges.small),
+					GestureDetector(
+						onLongPress: () => handleTitleLongPress(context, title),
+						child: Text(title ?? "N/A", style: text.titleLarge),
+					),
+					Text(authorList, style: text.labelMedium?.copyWith(color: colors.onSurfaceVariant)),
 					const SizedBox(height: Edges.small),
 					buildRatingsRow(text, colors),
 					const SizedBox(height: Edges.small),
@@ -449,6 +457,12 @@ class DetailsHeader extends StatelessWidget {
 
 	void handleFollowTap() {
 		isFollowed.value = !isFollowed.value;
+	}
+
+	void handleTitleLongPress(BuildContext context, String? title) {
+		if (title == null) return;
+		Clipboard.setData(ClipboardData(text: title));
+		showLazyBar(context, "Title copied to clipboard.");
 	}
 }
 

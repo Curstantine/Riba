@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:riba/utils/constants.dart";
 
 class TinyButton extends StatelessWidget {
 	const TinyButton({
@@ -28,7 +27,7 @@ class TinyButton extends StatelessWidget {
 			child: Row(mainAxisSize: MainAxisSize.min, children: [
 				if (leadingIcon != null) ...[
 					Icon(leadingIcon, color: primary, size: 20),
-					const SizedBox(width: Edges.extraSmall),
+					const SizedBox(width: 2),
 				],
 				Text(label, style: textTheme.labelLarge?.copyWith(color: primary)),
 			]),
