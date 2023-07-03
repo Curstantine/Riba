@@ -12,6 +12,7 @@ import "package:riba/repositories/mangadex/models/tag.dart";
 import "package:riba/repositories/mangadex/services/author.dart";
 import "package:riba/repositories/mangadex/services/group.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
+import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
@@ -91,17 +92,7 @@ class QuickSearchViewModel implements ViewModel {
 		final query = ExploreViewModel.instance.searchController.text;
 
 		try {
-			final manga = await MangaDex.instance.manga.withFilters(overrides: MangaDexMangaWithFiltersQueryFilter(
-				title: query,
-				limit: 5,
-				contentRatings: Settings.instance.contentFilter.contentRatings.value,
-				originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
-				includedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.included),
-				excludedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.excluded),
-				includedTagJoinMode: filterState.tagInclusionMode.value,
-				excludedTagJoinMode: filterState.tagExclusionMode.value,
-			));
-
+			final manga = await _fetchMangaWithFilters(query: query);
 			_mangaController.add(manga.data);
 		} catch (e) {
 			_mangaController.addError(e);
@@ -180,15 +171,7 @@ class QuickSearchViewModel implements ViewModel {
 
 	void onMangaListExpansion(BuildContext context) {
 		final query = ExploreViewModel.instance.searchController.text;
-		final future = MangaDex.instance.manga.withFilters(overrides: MangaDexMangaWithFiltersQueryFilter(
-			title: query,
-			contentRatings: Settings.instance.contentFilter.contentRatings.value,
-			originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
-			includedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.included),
-			excludedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.excluded),
-			includedTagJoinMode: filterState.tagInclusionMode.value,
-			excludedTagJoinMode: filterState.tagExclusionMode.value,
-		));
+		final future = _fetchMangaWithFilters(limit: 100, query: query);
 
 		Navigator.push(context, MaterialPageRoute(
 			builder: (context) => MangaResultList(
@@ -197,6 +180,20 @@ class QuickSearchViewModel implements ViewModel {
 			)
 		));
 	}
+
+	Future<CollectionData<MangaData>> _fetchMangaWithFilters({int limit = 5, String? query}) => MangaDex.instance.manga.withFilters(
+		overrides: MangaDexMangaWithFiltersQueryFilter(
+			limit: limit,
+			title: query,
+			contentRatings: filterState.contentRatings.value,
+			statuses: filterState.publicationStatuses.value,
+			includedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.included),
+			excludedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.excluded),
+			includedTagJoinMode: filterState.tagInclusionMode.value,
+			excludedTagJoinMode: filterState.tagExclusionMode.value,
+			originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
+		),
+	);
 
 	@override
 	void dispose() {
@@ -217,16 +214,16 @@ enum TagSelectionMode {
 }
 
 class QuickSearchFilterState {
-	final ValueNotifier<List<ContentRating>> contentRating;
-	final ValueNotifier<List<MangaPublicationStatus>> publicationStatus;
+	final ValueNotifier<List<ContentRating>> contentRatings;
+	final ValueNotifier<List<MangaPublicationStatus>> publicationStatuses;
 
 	final ValueNotifier<TagJoinMode> tagInclusionMode;
 	final ValueNotifier<TagJoinMode> tagExclusionMode;
 	final Map<String, ValueNotifier<TagSelectionMode>> tagSelection;
 
 	QuickSearchFilterState({
-		required this.contentRating,
-		required this.publicationStatus,
+		required this.contentRatings,
+		required this.publicationStatuses,
 		required this.tagInclusionMode,
 		required this.tagExclusionMode,
 		required this.tagSelection,
@@ -237,8 +234,8 @@ class QuickSearchFilterState {
 	/// Creates a default [QuickSearchFilterState]
 	factory QuickSearchFilterState.empty() {
 		return QuickSearchFilterState(
-			contentRating: ValueNotifier(Settings.instance.contentFilter.contentRatings.value),
-			publicationStatus: ValueNotifier(MangaPublicationStatus.values.toList()),
+			contentRatings: ValueNotifier(Settings.instance.contentFilter.contentRatings.value),
+			publicationStatuses: ValueNotifier(MangaPublicationStatus.values.toList()),
 			tagInclusionMode: ValueNotifier(TagJoinMode.and),
 			tagExclusionMode: ValueNotifier(TagJoinMode.or),
 			tagSelection: {},
@@ -248,8 +245,8 @@ class QuickSearchFilterState {
 	/// Inherit all the values of [other] while updating the old
 	/// notifiers if they exist.
 	void inheritFrom(QuickSearchFilterState other) {
-		contentRating.value = other.contentRating.value;
-		publicationStatus.value = other.publicationStatus.value;
+		contentRatings.value = other.contentRatings.value;
+		publicationStatuses.value = other.publicationStatuses.value;
 		tagInclusionMode.value = other.tagInclusionMode.value;
 		tagExclusionMode.value = other.tagExclusionMode.value;
 
@@ -265,8 +262,8 @@ class QuickSearchFilterState {
 	/// Copies self into a new instance
 	QuickSearchFilterState copy() {
 		return QuickSearchFilterState(
-			contentRating: ValueNotifier(contentRating.value),
-			publicationStatus: ValueNotifier(publicationStatus.value),
+			contentRatings: ValueNotifier(contentRatings.value),
+			publicationStatuses: ValueNotifier(publicationStatuses.value),
 			tagInclusionMode: ValueNotifier(tagInclusionMode.value),
 			tagExclusionMode: ValueNotifier(tagExclusionMode.value),
 			tagSelection: tagSelection.map((key, value) => MapEntry(key, ValueNotifier(value.value))),
@@ -279,8 +276,8 @@ class QuickSearchFilterState {
 
 	/// Disposes all the notifiers
 	void dispose() {
-		contentRating.dispose();
-		publicationStatus.dispose();
+		contentRatings.dispose();
+		publicationStatuses.dispose();
 		tagInclusionMode.dispose();
 		tagExclusionMode.dispose();
 
@@ -294,8 +291,8 @@ class QuickSearchFilterState {
 		if (identical(this, other)) return true;
 	
 		return 
-		other.contentRating == contentRating &&
-		other.publicationStatus == publicationStatus &&
+		other.contentRatings == contentRatings &&
+		other.publicationStatuses == publicationStatuses &&
 		other.tagInclusionMode == tagInclusionMode &&
 		other.tagExclusionMode == tagExclusionMode &&
 		mapEquals(other.tagSelection, tagSelection);
@@ -303,8 +300,8 @@ class QuickSearchFilterState {
 
 	@override
 	int get hashCode => 
-		contentRating.hashCode ^ 
-		publicationStatus.hashCode ^
+		contentRatings.hashCode ^ 
+		publicationStatuses.hashCode ^
 		tagInclusionMode.hashCode ^
 		tagExclusionMode.hashCode ^
 		tagSelection.hashCode;

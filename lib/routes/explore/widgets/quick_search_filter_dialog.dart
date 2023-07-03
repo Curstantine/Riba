@@ -57,7 +57,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 					Text("Content Rating", style: text.labelLarge),
 					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
 						for (final rating in ContentRating.values) ...[
-							GenericFilterListChip(status: rating, notifier: state.contentRating),
+							GenericFilterListChip(status: rating, notifier: state.contentRatings),
 							const SizedBox(width: Edges.small),
 						]
 						
@@ -68,7 +68,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 					Text("Publication Status", style: text.labelLarge),
 					SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
 						for (final status in MangaPublicationStatus.values) ...[
-							GenericFilterListChip(status: status, notifier: state.publicationStatus),
+							GenericFilterListChip(status: status, notifier: state.publicationStatuses),
 							const SizedBox(width: Edges.small),
 						]
 					])),
