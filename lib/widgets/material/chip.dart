@@ -23,16 +23,28 @@ class TinyChip extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final textTheme = theme.textTheme;
-		final color = theme.colorScheme;
+		final colors = theme.colorScheme;
 
-		return SizedBox(height: 24, child: ActionChip(
-			elevation: elevation,
-			padding: Edges.bottomSmall,
+
+		return SizedBox(height: 24, child: Material(
+			elevation: elevation ?? 0,
+			color: colors.surface,
 			surfaceTintColor: surfaceTintColor,
-			side: BorderSide(color: outlineColor ?? (surfaceTintColor?.withOpacity(0.5) ?? color.outline)),
-			onPressed: onPressed,
-			label: Text(label),
-			labelStyle: textTheme.labelSmall?.copyWith(color: labelColor),
+			shape: RoundedRectangleBorder(
+				borderRadius: Corners.allSmall,
+				side: BorderSide(color: outlineColor ?? (surfaceTintColor?.withOpacity(0.5) ?? colors.outline)),
+			),
+			child: InkWell(
+				onTap: onPressed,
+				borderRadius: Corners.allSmall,
+				child: Padding(
+					padding: Edges.horizontalSmall,
+					child: Center(
+						widthFactor: 1,
+						child: Text(label, style: textTheme.labelSmall?.copyWith(color: labelColor)),
+					),
+				),
+			),
 		));
 	}
 }
