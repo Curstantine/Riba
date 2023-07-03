@@ -125,7 +125,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
 								Text("Manga", style: text.titleSmall),
 								IconButton(
-									onPressed: () => {},
+									onPressed: () => viewModel.onMangaListExpansion(context),
 									icon: const Icon(Symbols.navigate_next_rounded), 
 									visualDensity: VisualDensity.compact,
 								),

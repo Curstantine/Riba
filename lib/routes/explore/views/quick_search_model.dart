@@ -16,6 +16,7 @@ import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/widgets/quick_search_filter_dialog.dart";
+import "package:riba/routes/manga/views/result_list.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";
 import "package:riba/utils/view_model.dart";
@@ -178,7 +179,23 @@ class QuickSearchViewModel implements ViewModel {
 	}
 
 	void onMangaListExpansion(BuildContext context) {
-		// TODO: Implement navigation
+		final query = ExploreViewModel.instance.searchController.text;
+		final future = MangaDex.instance.manga.withFilters(overrides: MangaDexMangaWithFiltersQueryFilter(
+			title: query,
+			contentRatings: Settings.instance.contentFilter.contentRatings.value,
+			originalLanguages: Settings.instance.contentFilter.originalLanguages.value,
+			includedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.included),
+			excludedTagIds: filterState.getAllTagIdsFor(TagSelectionMode.excluded),
+			includedTagJoinMode: filterState.tagInclusionMode.value,
+			excludedTagJoinMode: filterState.tagExclusionMode.value,
+		));
+
+		Navigator.push(context, MaterialPageRoute(
+			builder: (context) => MangaResultList(
+				title: "Results for \"$query\"",
+				future: future,
+			)
+		));
 	}
 
 	@override
