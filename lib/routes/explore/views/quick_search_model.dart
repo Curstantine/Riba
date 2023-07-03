@@ -52,18 +52,8 @@ class QuickSearchViewModel implements ViewModel {
 	QuickSearchFilterState filterState = QuickSearchFilterState.empty();
 
 	Future<void> _init() async {
-		try {
-			final history = await Database.instance.local.history.where()
-				.typeEqualTo(HistoryType.query)
-				.sortByCreatedAt()
-				.limit(5)
-				.findAll();
-
-			_historyController.add(history);
-		} catch (e) {
-			_historyController.addError(e);
-		}
-
+		_fetchQueryHistory();
+		
 		try {
 			final tags = await MangaDex.instance.manga.getAllTags();
 			final grouped = tags.fold(
@@ -92,13 +82,18 @@ class QuickSearchViewModel implements ViewModel {
 			_mangaController.add([]);
 			_authorController.add([]);
 			_groupController.add([]);
+
+			if (_historyController.value.isEmpty) {
+				await _fetchQueryHistory();
+			}
+
 			return;
-		} else {
+		} else if (_historyController.value.isNotEmpty) {
 			_historyController.add([]);
 		}
 
 		try {
-			final manga = await _fetchMangaWithFilters(query: query);
+			final manga = await _getMangaWithFilters(query: query);
 			_mangaController.add(manga.data);
 		} catch (e) {
 			_mangaController.addError(e);
@@ -171,7 +166,7 @@ class QuickSearchViewModel implements ViewModel {
 
 	void onMangaListExpansion(BuildContext context) {
 		final query = ExploreViewModel.instance.searchController.text;
-		final future = _fetchMangaWithFilters(limit: 100, query: query);
+		final future = _getMangaWithFilters(limit: 100, query: query);
 
 		addSearchHistory(query, HistoryType.query);
 
@@ -183,7 +178,21 @@ class QuickSearchViewModel implements ViewModel {
 		));
 	}
 
-	Future<CollectionData<MangaData>> _fetchMangaWithFilters({int limit = 5, String? query}) => MangaDex.instance.manga.withFilters(
+	Future<void> _fetchQueryHistory() async {
+		try {
+			final history = await Database.instance.local.history.where()
+				.typeEqualTo(HistoryType.query)
+				.sortByCreatedAt()
+				.limit(5)
+				.findAll();
+
+			_historyController.add(history);
+		} catch (e) {
+			_historyController.addError(e);
+		}
+	}
+
+	Future<CollectionData<MangaData>> _getMangaWithFilters({int limit = 5, String? query}) => MangaDex.instance.manga.withFilters(
 		overrides: MangaDexMangaWithFiltersQueryFilter(
 			limit: limit,
 			title: query,
