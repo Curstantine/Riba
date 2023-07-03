@@ -5,6 +5,40 @@ import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/widgets/material/chip.dart";
 
+class PublicationStatusChip extends StatelessWidget {
+	const PublicationStatusChip({super.key, required this.status});
+
+	final MangaPublicationStatus status;
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final colors = theme.colorScheme;
+		final background = getBackgroundColor(colors);
+
+		return TinyChip(
+			elevation: 1,
+			surfaceTintColor: background,
+			labelColor: background,
+			label: status.asHumanReadable(),
+			onPressed: () => {},
+		);
+	}
+
+	Color getBackgroundColor(ColorScheme colors) {
+		switch (status) {
+			case MangaPublicationStatus.ongoing:
+				return Colors.green.harmonizeWith(colors.primary);
+			case MangaPublicationStatus.completed:
+				return Colors.blue.harmonizeWith(colors.primary);
+			case MangaPublicationStatus.hiatus:
+				return Colors.orange.harmonizeWith(colors.primary);
+			case MangaPublicationStatus.cancelled:
+				return Colors.red.harmonizeWith(colors.primary);
+		}
+	}
+}
+
 class ContentRatingChip extends StatelessWidget {
 	const ContentRatingChip({super.key, required this.contentRating});
 
@@ -30,7 +64,7 @@ class ContentRatingChip extends StatelessWidget {
 			case ContentRating.safe:
 				return colors.primary;
 			case ContentRating.suggestive:
-				return Colors.orange.harmonizeWith(colors.primary);
+				return Colors.yellow.shade900.harmonizeWith(colors.primary);
 			case ContentRating.erotica:
 			case ContentRating.pornographic:
 				return Colors.purple.harmonizeWith(colors.primary);
