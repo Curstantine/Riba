@@ -28,7 +28,7 @@ class QuickSearchViewModel implements ViewModel {
 
 	static QuickSearchViewModel? _instance;
 	static QuickSearchViewModel get instance {
-		return _instance ??= QuickSearchViewModel._internal()..init();
+		return _instance ??= QuickSearchViewModel._internal().._init();
 	}
 
 	@override
@@ -49,12 +49,9 @@ class QuickSearchViewModel implements ViewModel {
 	final _tagsController = BehaviorSubject<Map<TagGroup, List<Tag>>>();
 	ValueStream<Map<TagGroup, List<Tag>>> get tagsStream => _tagsController.stream;
 
-	/// TODO: Maybe add filter persistence between sessions?
 	QuickSearchFilterState filterState = QuickSearchFilterState.empty();
 
-
-	Future<void> init() async {
-		logger.info("Initializing quick search");
+	Future<void> _init() async {
 		try {
 			final history = await Database.instance.local.history.where()
 				.typeEqualTo(HistoryType.query)
@@ -90,6 +87,15 @@ class QuickSearchViewModel implements ViewModel {
 
 	Future<void> refresh() async {
 		final query = ExploreViewModel.instance.searchController.text;
+
+		if (query.isEmpty) {
+			_mangaController.add([]);
+			_authorController.add([]);
+			_groupController.add([]);
+			return;
+		} else {
+			_historyController.add([]);
+		}
 
 		try {
 			final manga = await _fetchMangaWithFilters(query: query);
@@ -131,19 +137,13 @@ class QuickSearchViewModel implements ViewModel {
 			await Database.instance.local.writeTxn(() async {
 				final history = await Database.instance.local.history
 					.where()
-					.typeEqualTo(HistoryType.query)
+					.typeEqualTo(type)
 					.filter()
-					.createdAtBetween(DateTime.now().subtract(const Duration(seconds: 15)), DateTime.now())
+					.createdAtBetween(DateTime.now().subtract(const Duration(days: 1)), DateTime.now())
 					.valueEqualTo(value)
 					.count();
 
-				if (history == 0) {
-					await Database.instance.local.history.put(History(
-						type: type,
-						value: value,
-						createdAt: DateTime.now(),
-					));
-				}
+				if (history != 0) return;
 
 				await Database.instance.local.history.put(History(
 					type: type,
@@ -173,6 +173,8 @@ class QuickSearchViewModel implements ViewModel {
 		final query = ExploreViewModel.instance.searchController.text;
 		final future = _fetchMangaWithFilters(limit: 100, query: query);
 
+		addSearchHistory(query, HistoryType.query);
+
 		Navigator.push(context, MaterialPageRoute(
 			builder: (context) => MangaResultList(
 				title: "Results for \"$query\"",
@@ -197,11 +199,13 @@ class QuickSearchViewModel implements ViewModel {
 
 	@override
 	void dispose() {
-		filterState.dispose();
-
-		_mangaController.close();
 		_historyController.close();
+		_mangaController.close();
+		_authorController.close();
+		_groupController.close();
 		_tagsController.close();
+
+		filterState.dispose();
 
 		_instance = null;
 	}

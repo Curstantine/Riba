@@ -1,8 +1,9 @@
 import "package:flutter/material.dart" hide SearchBar;
 import "package:flutter_animate/flutter_animate.dart";
 import "package:material_symbols_icons/symbols.dart";
+import "package:riba/repositories/local/models/author.dart";
 import "package:riba/repositories/local/models/history.dart";
-import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/repositories/runtime/group.dart";
 import "package:riba/routes/authors/widgets/cards.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
@@ -11,6 +12,7 @@ import "package:riba/routes/manga/widgets/cards.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/debouncer.dart";
 import "package:riba/widgets/error_card.dart";
+import "package:rxdart/rxdart.dart";
 
 class QuickSearchView extends StatefulWidget {
 	const QuickSearchView({super.key});
@@ -82,136 +84,95 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 					return const SliverToBoxAdapter();
 				}
 
-				return SliverList.list(children: [
-					Padding(
-						padding: Edges.horizontalLarge,
-						child: Text("Recent searches", style: text.titleSmall)),
-					for (final history in histories)
-						ListTile(
-							leading: const Icon(Symbols.history_rounded),
-							title: Text(history.value),
-							onTap: () => rootViewModel.searchController.text = history.value),
-					const Padding(padding: Edges.topMedium),
-				].animate().fadeIn());
+				return SliverList.list(children: AnimateList(
+					effects: [
+						const FadeEffect(
+							duration: Durations.emphasized,
+							curve: Easing.emphasized)
+					],
+					children: [
+						Padding(
+							padding: Edges.horizontalLarge,
+							child: Text("Recent searches", style: text.titleSmall)),
+						for (final history in histories)
+							ListTile(
+								leading: const Icon(Symbols.history_rounded),
+								title: Text(history.value),
+								onTap: () => rootViewModel.searchController.text = history.value),
+						const Padding(padding: Edges.topMedium),
+					],
+				));
 			},
 		);
 	}
 
 	Widget buildMangaList(TextTheme text, ColorScheme colors) {
-		return StreamBuilder<List<MangaData>>(
+		return _QuickSearchHorizontalScrollableCategory(
+			title: "Manga",
 			stream: viewModel.mangaStream,
-			builder: (context, snapshot) {
-				if (snapshot.hasError) {
-					return SliverToBoxAdapter(child: SizedBox(
-						height: 100,
-						child: ErrorCard(margin: Edges.horizontalLarge, error: snapshot.error),
-					));
-				}
-
-				final manga = snapshot.data;
-				if (manga == null || manga.isEmpty) {
-					return const SliverToBoxAdapter();
-				}
-
-				return SliverList.list(children: AnimateList(
-					effects: [
-						const FadeEffect(
-							duration: Durations.emphasized,
-							curve: Easing.emphasized)
-					],
-					children: [
-						Padding(
-							padding: Edges.horizontalLarge,
-							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-								Text("Manga", style: text.titleSmall),
-								IconButton(
-									onPressed: () => viewModel.onMangaListExpansion(context),
-									icon: const Icon(Symbols.navigate_next_rounded), 
-									visualDensity: VisualDensity.compact,
-								),
-							])
-						),
-						SizedBox(height: 275, child: ListView.separated(
-							itemCount: manga.length,
-							scrollDirection: Axis.horizontal,
-							padding: Edges.horizontalLarge,
-							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-							itemBuilder: (_, index) {
-								final mangaData = manga[index];
-								return Align(
-									alignment: Alignment.bottomLeft,
-									child: MangaCard(
-										key: ValueKey(mangaData.manga.id),
-										mangaData: mangaData,
-										onPress: () => viewModel.addSearchHistory(mangaData.manga.id, HistoryType.manga),
-									),
-								);
-							},
-						)),
-					],
-				));
-			},
+			onExpansionPressed: () => viewModel.onMangaListExpansion(context),
+			listHeight: 275,
+			builder: (mangaData) => MangaCard(
+				key: ValueKey(mangaData.manga.id),
+				mangaData: mangaData,
+				onPress: () => viewModel.addSearchHistory(mangaData.manga.id, HistoryType.manga),
+			),
 		);
 	}
 
 	Widget buildAuthorList(TextTheme text, ColorScheme colors) {
-		return StreamBuilder(
+		return _QuickSearchHorizontalScrollableCategory<Author>(
+			title: "Authors",
 			stream: viewModel.authorStream,
-			builder: (context, snapshot) {
-				if (snapshot.hasError) {
-					return SliverToBoxAdapter(child: SizedBox(
-						height: 100,
-						child: ErrorCard(margin: Edges.horizontalLarge, error: snapshot.error),
-					));
-				}
-
-				final authors = snapshot.data;
-				if (authors == null || authors.isEmpty) {
-					return const SliverToBoxAdapter();
-				}
-
-				return SliverList.list(children: AnimateList(
-					effects: [
-						const FadeEffect(
-							duration: Durations.emphasized,
-							curve: Easing.emphasized)
-					],
-					children: [
-						Padding(
-							padding: Edges.horizontalLarge,
-							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-								Text("Authors", style: text.titleSmall),
-								IconButton(
-									onPressed: () => {},
-									icon: const Icon(Symbols.navigate_next_rounded), 
-									visualDensity: VisualDensity.compact,
-								),
-							])
-						),
-						SizedBox(height: 175, child: ListView.separated(
-							itemCount: authors.length,
-							scrollDirection: Axis.horizontal,
-							padding: Edges.horizontalLarge,
-							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-							itemBuilder: (_, index) {
-								final author = authors[index];
-
-								return AuthorCard(
-									key: ValueKey(author.id),
-									author: author,
-									onPress: () => viewModel.addSearchHistory(author.id, HistoryType.author),
-								);
-							},
-						)),
-					],
-				));
-			},
+			onExpansionPressed: () => {},
+			listHeight: 175,
+			builder: (author) => AuthorCard(
+				key: ValueKey(author.id),
+				author: author,
+				onPress: () => viewModel.addSearchHistory(author.id, HistoryType.author),
+			),
 		);
 	}
 
 	Widget buildGroupList(TextTheme text, ColorScheme colors) {
-		return StreamBuilder(
+		return _QuickSearchHorizontalScrollableCategory<GroupData>(
+			title: "Groups",
 			stream: viewModel.groupStream,
+			onExpansionPressed: () => {},
+			listHeight: 175,
+			builder: (groupData) => GroupCard(
+				key: ValueKey(groupData.group.id),
+				groupData: groupData,
+				onPress: () => viewModel.addSearchHistory(groupData.group.id, HistoryType.author),
+			),
+		);
+	}
+}
+
+class _QuickSearchHorizontalScrollableCategory<T> extends StatelessWidget {
+	final String title;
+	final ValueStream<List<T>> stream;
+	final VoidCallback onExpansionPressed;
+
+	final double listHeight;
+	final Widget Function(T) builder;
+
+	const _QuickSearchHorizontalScrollableCategory({
+		super.key,
+		required this.title,
+		required this.stream,
+		required this.onExpansionPressed,
+		required this.listHeight,
+		required this.builder,
+	});
+
+	@override
+	Widget build(BuildContext context) {
+		final theme = Theme.of(context);
+		final text = theme.textTheme;
+
+		return StreamBuilder<List<T>>(
+			stream: stream,
 			builder: (context, snapshot) {
 				if (snapshot.hasError) {
 					return SliverToBoxAdapter(child: SizedBox(
@@ -220,8 +181,8 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 					));
 				}
 
-				final authors = snapshot.data;
-				if (authors == null || authors.isEmpty) {
+				final data = snapshot.data;
+				if (data == null || data.isEmpty) {
 					return const SliverToBoxAdapter();
 				}
 
@@ -235,32 +196,24 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 						Padding(
 							padding: Edges.horizontalLarge,
 							child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-								Text("Groups", style: text.titleSmall),
+								Text(title, style: text.titleSmall),
 								IconButton(
-									onPressed: () => {},
+									onPressed: onExpansionPressed,
 									icon: const Icon(Symbols.navigate_next_rounded), 
 									visualDensity: VisualDensity.compact,
 								),
 							])
 						),
-						SizedBox(height: 175, child: ListView.separated(
-							itemCount: authors.length,
+						SizedBox(height: listHeight, child: ListView.separated(
+							itemCount: data.length,
 							scrollDirection: Axis.horizontal,
 							padding: Edges.horizontalLarge,
 							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
-							itemBuilder: (_, index) {
-								final groupData = authors[index];
-
-								return GroupCard(
-									key: ValueKey(groupData.group.id),
-									groupData: groupData,
-									onPress: () => viewModel.addSearchHistory(groupData.group.id, HistoryType.author),
-								);
-							},
+							itemBuilder: (_, index) => builder(data[index]),
 						)),
 					],
 				));
 			},
 		);
-	}
+	} 
 }
