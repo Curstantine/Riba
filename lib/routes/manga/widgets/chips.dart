@@ -6,9 +6,14 @@ import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/widgets/material/chip.dart";
 
 class PublicationStatusChip extends StatelessWidget {
-	const PublicationStatusChip({super.key, required this.status});
+	const PublicationStatusChip({
+		super.key,
+		required this.status,
+		this.surfaceColor,
+	});
 
 	final MangaPublicationStatus status;
+	final Color? surfaceColor;
 
 	@override
 	Widget build(BuildContext context) {
@@ -18,8 +23,9 @@ class PublicationStatusChip extends StatelessWidget {
 
 		return TinyChip(
 			elevation: 1,
-			surfaceTintColor: background,
 			labelColor: background,
+			surfaceColor: surfaceColor,
+			surfaceTintColor: background,
 			label: status.asHumanReadable(),
 			onPressed: () => {},
 		);
@@ -40,9 +46,14 @@ class PublicationStatusChip extends StatelessWidget {
 }
 
 class ContentRatingChip extends StatelessWidget {
-	const ContentRatingChip({super.key, required this.contentRating});
+	const ContentRatingChip({
+		super.key,
+		required this.contentRating,
+		this.surfaceColor,
+	});
 
 	final ContentRating contentRating;
+	final Color? surfaceColor;
 
 	@override
 	Widget build(BuildContext context) {
@@ -52,8 +63,9 @@ class ContentRatingChip extends StatelessWidget {
 
 		return TinyChip(
 			elevation: 1,
-			surfaceTintColor: background,
 			labelColor: background,
+			surfaceColor: surfaceColor,
+			surfaceTintColor: background,
 			label: contentRating.asHumanReadable(),
 			onPressed: () => {},
 		);
@@ -73,9 +85,14 @@ class ContentRatingChip extends StatelessWidget {
 }
 
 class DemographicChip extends StatelessWidget {
-	const DemographicChip({super.key, required this.demographic});
+	const DemographicChip({
+		super.key,
+		required this.demographic,
+		this.surfaceColor,
+	});
 
 	final MangaPublicationDemographic demographic;
+	final Color? surfaceColor;
 
 	@override
 	Widget build(BuildContext context) {
@@ -85,8 +102,9 @@ class DemographicChip extends StatelessWidget {
 
 		return TinyChip(
 			elevation: 1,
-			surfaceTintColor: background,
 			labelColor: background,
+			surfaceColor: surfaceColor,
+			surfaceTintColor: background,
 			label: demographic.asHumanReadable(),
 			onPressed: () => {},
 		);
@@ -107,10 +125,16 @@ class DemographicChip extends StatelessWidget {
 }
 
 class TagChip extends StatelessWidget {
-	const TagChip({super.key, required this.tag, required this.preferredLocales});
+	const TagChip({
+		super.key,
+		required this.tag,
+		required this.preferredLocales,
+		this.surfaceColor,
+	});
 	
 	final Tag tag;
 	final List<Locale> preferredLocales;
+	final Color? surfaceColor;
 
 	@override
 	Widget build(BuildContext context) {
@@ -120,6 +144,7 @@ class TagChip extends StatelessWidget {
 			elevation: 0,
 			outlineColor: theme.colorScheme.outline,
 			labelColor: theme.colorScheme.onSurfaceVariant,
+			surfaceColor: surfaceColor,
 			label: tag.name.getPreferred(preferredLocales) ?? "N/A",
 			onPressed: () => {},
 		);

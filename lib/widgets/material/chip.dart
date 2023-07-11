@@ -7,16 +7,18 @@ class TinyChip extends StatelessWidget {
 		required this.label,
 		this.elevation,
 		this.labelColor,
-		this.surfaceTintColor,
 		this.outlineColor,
+		this.surfaceColor,
+		this.surfaceTintColor,
 		this.onPressed,
 	});
 
 	final String label;
 	final double? elevation;
 	final Color? labelColor;
-	final Color? surfaceTintColor;
 	final Color? outlineColor;
+	final Color? surfaceColor;
+	final Color? surfaceTintColor;
 	final void Function()? onPressed;
 
 	@override
@@ -28,8 +30,9 @@ class TinyChip extends StatelessWidget {
 
 		return SizedBox(height: 24, child: Material(
 			elevation: elevation ?? 0,
-			color: colors.surface,
+			color: surfaceColor ?? Colors.transparent,
 			surfaceTintColor: surfaceTintColor,
+			shadowColor: Colors.transparent,
 			shape: RoundedRectangleBorder(
 				borderRadius: Corners.allSmall,
 				side: BorderSide(color: outlineColor ?? (surfaceTintColor?.withOpacity(0.5) ?? colors.outline)),

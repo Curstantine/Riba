@@ -255,8 +255,8 @@ class _MangaListCardState extends State<MangaListCard> {
 									),
 									const Spacer(),
 									Wrap(spacing: Edges.extraSmall, children: [
-										PublicationStatusChip(status: manga.status),
-										ContentRatingChip(contentRating: manga.contentRating),
+										PublicationStatusChip(status: manga.status, surfaceColor: colors.surface),
+										ContentRatingChip(contentRating: manga.contentRating, surfaceColor: colors.surface),
 									]),
 								]),
 								Align(
