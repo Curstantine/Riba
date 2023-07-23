@@ -112,7 +112,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 			stream: viewModel.mangaStream,
 			onExpansionPressed: () => viewModel.onMangaListExpansion(context),
 			listHeight: 275,
-			builder: (mangaData) => MangaCard(
+			builder: (mangaData) => MangaPreviewCard(
 				key: ValueKey(mangaData.manga.id),
 				mangaData: mangaData,
 				onPress: () => viewModel.addSearchHistory(mangaData.manga.id, HistoryType.manga),

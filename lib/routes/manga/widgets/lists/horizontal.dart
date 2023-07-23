@@ -78,7 +78,7 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 				final id = ids[i];
 				final mangaData = data[id]!;
 
-				return MangaCard(
+				return MangaPreviewCard(
 					key: ValueKey(id),
 					mangaData: mangaData,
 					reactToCoverSizeChanges: widget.reactToCoverSizeChanges,
