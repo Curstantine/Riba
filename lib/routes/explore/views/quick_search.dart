@@ -8,7 +8,7 @@ import "package:riba/routes/authors/widgets/cards.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/routes/groups/widgets/cards.dart";
-import "package:riba/routes/manga/widgets/cards.dart";
+import "package:riba/routes/manga/widgets/cards/preview.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/debouncer.dart";
 import "package:riba/widgets/error_card.dart";

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart" hide Locale;
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/manga/widgets/cards.dart";
+import "package:riba/routes/manga/widgets/cards/preview.dart";
 import "package:riba/utils/constants.dart";
 
 class MangaHorizontalList extends StatefulWidget {

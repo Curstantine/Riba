@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:riba/repositories/runtime/collection.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/manga/widgets/cards.dart";
+import "package:riba/routes/manga/widgets/cards/list.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 
