@@ -3,6 +3,8 @@ import "package:logging/logging.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/mangadex/services/manga.dart";
 import "package:riba/repositories/runtime/manga.dart";
+import "package:riba/routes/manga/views/model.dart";
+import "package:riba/routes/manga/views/view.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/view_model.dart";
 import "package:rxdart/rxdart.dart";
@@ -49,6 +51,14 @@ class ExploreViewModel implements ViewModel {
 		} catch (e) {
 			_seasonalController.addError(e);
 		}
+	}
+
+	void onMangaCardPress(BuildContext context, MangaData mangaData) {
+		final nestedViewModel = MangaViewModel(mangaId: mangaData.manga.id);
+
+		Navigator.push(context, MaterialPageRoute(
+			builder: (_) => MangaView(viewModel: nestedViewModel, initialData: mangaData)
+		));
 	}
 
 	@override

@@ -75,6 +75,10 @@ class _ExploreViewState extends State<ExploreView> {
 					title: "Seasonal",
 					scrollOffset: viewModel.seasonalScroll,
 					mangaData: snapshot.requireData,
+					reactToCoverSizeChanges: true,
+					onCardPress: (mangaData) {
+						viewModel.onMangaCardPress(context, mangaData);
+					},
 				);
 			},
 		);

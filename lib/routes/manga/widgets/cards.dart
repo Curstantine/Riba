@@ -1,18 +1,14 @@
 import "dart:io";
 
-import "package:animations/animations.dart";
 import "package:dash_flags/dash_flags.dart";
 import "package:flutter/material.dart" hide Locale;
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/manga.dart";
 import "package:riba/repositories/mangadex/mangadex.dart";
 import "package:riba/repositories/runtime/manga.dart";
-import "package:riba/routes/manga/views/model.dart";
-import "package:riba/routes/manga/views/view.dart";
 import "package:riba/routes/manga/widgets/chips.dart";
 import "package:riba/settings/cover_persistence/controller.dart";
 import "package:riba/settings/settings.dart";
-import "package:riba/utils/animations.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
@@ -20,8 +16,9 @@ import "package:riba/widgets/material/card.dart";
 import "package:rxdart/rxdart.dart";
 
 class MangaCard extends StatefulWidget implements PreferredSizeWidget {
-	const MangaCard({super.key, required this.mangaData, this.onPress});
+	const MangaCard({super.key, required this.mangaData, this.onPress, this.reactToCoverSizeChanges = false});
 
+	final bool reactToCoverSizeChanges;
 	final MangaData mangaData;
 	final VoidCallback? onPress;
 	
@@ -42,12 +39,18 @@ class _MangaCardState extends State<MangaCard> {
 	void initState() {
 		super.initState();
 		addCover();
-		Settings.instance.coverPersistence.previewSize.addListener(addCover);
+
+		if (widget.reactToCoverSizeChanges) {
+			persistenceSettings.previewSize.addListener(addCover);
+		}
 	}
 
 	@override
 	void dispose() {
-		Settings.instance.coverPersistence.previewSize.removeListener(addCover);
+		if (widget.reactToCoverSizeChanges) {
+			persistenceSettings.previewSize.removeListener(addCover);
+		}
+
 		coverStream.close();
 		super.dispose();
 	}
@@ -82,7 +85,7 @@ class _MangaCardState extends State<MangaCard> {
 					child: OutlinedCard(
 						clipBehavior: Clip.hardEdge,
 						margin: Edges.verticalExtraSmall,
-						child: InkWell(onTap: onCardPress, child: StreamBuilder<File?>(
+						child: InkWell(onTap: widget.onPress, child: StreamBuilder<File?>(
 							stream: coverStream,
 							builder: (context, snapshot) {
 								if (snapshot.connectionState != ConnectionState.active) {
@@ -128,15 +131,6 @@ class _MangaCardState extends State<MangaCard> {
 				)),
 			]),
 		);
-	}
-
-	void onCardPress() {
-		widget.onPress?.call();
-		
-		Navigator.push(context, sharedAxis(
-			(_) => MangaView(viewModel: MangaViewModel(mangaId: manga.id), initialData: widget.mangaData),
-			SharedAxisTransitionType.vertical
-		));
 	}
 }
 
@@ -194,90 +188,75 @@ class _MangaListCardState extends State<MangaListCard> {
 
 		return SizedBox(height: 150, child: FilledCard(
 				margin: Edges.horizontalMedium.copyWithSelf(Edges.verticalExtraSmall),
-				child: InkWell(onTap: onCardPress, child: Row(children: [
-					SizedBox(
-						width: 100,
-						height: double.infinity,
-						child: StreamBuilder<File?>(
-							stream: coverStream,
-							builder: (context, snapshot) {
-								if (snapshot.connectionState != ConnectionState.active) {
-									return const Center(child: CircularProgressIndicator());
-								}
+				child: InkWell(onTap: widget.onPress, child: Row(children: [
+					SizedBox(width: 100, height: double.infinity, child: StreamBuilder<File?>(
+						stream: coverStream,
+						builder: (context, snapshot) {
+							if (snapshot.connectionState != ConnectionState.active) {
+								return const Center(child: CircularProgressIndicator());
+							}
 
-								if (snapshot.hasError) {
-									final error = ErrorState.fromSource(snapshot.error);
-									return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-										Text(error.title,
-											style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error, height: 1),
-											textAlign: TextAlign.center),
-										const SizedBox(height: Edges.small),
-										Text(error.description,
-											style: theme.textTheme.bodySmall?.copyWith(height: 1), textAlign: TextAlign.center),
-									]));
-								}
+							if (snapshot.hasError) {
+								final error = ErrorState.fromSource(snapshot.error);
+								return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+									Text(error.title,
+										style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error, height: 1),
+										textAlign: TextAlign.center),
+									const SizedBox(height: Edges.small),
+									Text(error.description,
+										style: theme.textTheme.bodySmall?.copyWith(height: 1), textAlign: TextAlign.center),
+								]));
+							}
 
-								if (!snapshot.hasData) {
-									return Center(
-										child: Text(
-											"Cover art not found.",
-											style: text.bodySmall?.withColorOpacity(0.85),
-											textAlign: TextAlign.center,
-										),
-									);
-								}
-
-								return ClipRRect(
-									borderRadius: Corners.leftMedium,
-									child: Image.file(snapshot.data!, fit: BoxFit.cover),
+							if (!snapshot.hasData) {
+								return Center(
+									child: Text(
+										"Cover art not found.",
+										style: text.bodySmall?.withColorOpacity(0.85),
+										textAlign: TextAlign.center,
+									),
 								);
-							},
-						),
-					),
-					Expanded(
-						child: Padding(
-							padding: Edges.allSmall,
-							child: Stack(children: [
-								Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-									Text(
-										manga.titles.getPreferred(Settings.instance.appearance.preferredDisplayLocales.value) ?? "N/A",
-										style: text.bodyMedium!.copyWith(height: 1.2),
-										// Shit like these exist:
-										// https://mangadex.org/title/7c5cbad4-8bfe-48b3-af13-18c338dda5da
-										maxLines: 4,
-										overflow: TextOverflow.ellipsis,
-									),
-									Text(
-										widget.mangaData.authors.map((e) => e.name).join(", "),
-										style: text.labelMedium!.copyWith(color: colors.onSurfaceVariant),
-									),
-									const Spacer(),
-									Wrap(spacing: Edges.extraSmall, children: [
-										PublicationStatusChip(status: manga.status, surfaceColor: colors.surface),
-										ContentRatingChip(contentRating: manga.contentRating, surfaceColor: colors.surface),
-									]),
+							}
+
+							return ClipRRect(
+								borderRadius: Corners.leftMedium,
+								child: Image.file(snapshot.data!, fit: BoxFit.cover),
+							);
+						},
+					)),
+					Expanded(child: Padding(
+						padding: Edges.allSmall,
+						child: Stack(children: [
+							Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+								Text(
+									manga.titles.getPreferred(Settings.instance.appearance.preferredDisplayLocales.value) ?? "N/A",
+									style: text.bodyMedium!.copyWith(height: 1.2),
+									// Shit like these exist:
+									// https://mangadex.org/title/7c5cbad4-8bfe-48b3-af13-18c338dda5da
+									maxLines: 4,
+									overflow: TextOverflow.ellipsis,
+								),
+								Text(
+									widget.mangaData.authors.map((e) => e.name).join(", "),
+									style: text.labelMedium!.copyWith(color: colors.onSurfaceVariant),
+								),
+								const Spacer(),
+								Wrap(spacing: Edges.extraSmall, children: [
+									PublicationStatusChip(status: manga.status, surfaceColor: colors.surface),
+									ContentRatingChip(contentRating: manga.contentRating, surfaceColor: colors.surface),
 								]),
-								Align(
-									alignment: Alignment.bottomRight,
-									child: LanguageFlag(
-										language: manga.originalLanguage.getFlag(),
-										height: 18,
-									),
-								)
 							]),
-						),
-					),
+							Align(
+								alignment: Alignment.bottomRight,
+								child: LanguageFlag(
+									language: manga.originalLanguage.getFlag(),
+									height: 18,
+								),
+							)
+						]),
+					)),
 				])),
 			),
 		);
-	}
-
-	void onCardPress() {
-		widget.onPress?.call();
-		
-		Navigator.push(context, sharedAxis(
-			(_) => MangaView(viewModel: MangaViewModel(mangaId: manga.id), initialData: widget.mangaData),
-			SharedAxisTransitionType.vertical
-		));
 	}
 }

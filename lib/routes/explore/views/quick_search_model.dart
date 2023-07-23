@@ -17,7 +17,9 @@ import "package:riba/repositories/runtime/group.dart";
 import "package:riba/repositories/runtime/manga.dart";
 import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/widgets/quick_search_filter_dialog.dart";
+import "package:riba/routes/manga/views/model.dart";
 import "package:riba/routes/manga/views/result_list.dart";
+import "package:riba/routes/manga/views/view.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/database.dart";
 import "package:riba/utils/view_model.dart";
@@ -174,7 +176,16 @@ class QuickSearchViewModel implements ViewModel {
 			builder: (context) => MangaResultList(
 				title: "Results for \"$query\"",
 				future: future,
+				onListItemPress: (mangaData) => onMangaListItemPress(context, mangaData),
 			)
+		));
+	}
+
+	void onMangaListItemPress(BuildContext context, MangaData mangaData) {
+		final nestedViewModel = MangaViewModel(mangaId: mangaData.manga.id);
+
+		Navigator.push(context, MaterialPageRoute(
+			builder: (_) => MangaView(viewModel: nestedViewModel, initialData: mangaData)
 		));
 	}
 

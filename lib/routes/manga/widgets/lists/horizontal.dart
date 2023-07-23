@@ -9,11 +9,15 @@ class MangaHorizontalList extends StatefulWidget {
 		required this.title,
 		required this.mangaData,
 		required this.scrollOffset,
+		this.reactToCoverSizeChanges = false,
+		this.onCardPress,
 	});
 
 	final String title;
 	final Map<String, MangaData> mangaData;
 	final ValueNotifier<double> scrollOffset;
+	final bool reactToCoverSizeChanges;
+	final void Function(MangaData)? onCardPress;
 
 	@override
 	State<MangaHorizontalList> createState() => _MangaHorizontalListState();
@@ -72,7 +76,14 @@ class _MangaHorizontalListState extends State<MangaHorizontalList> {
 				}
 
 				final id = ids[i];
-				return MangaCard(key: ValueKey(id), mangaData: data[id]!);
+				final mangaData = data[id]!;
+
+				return MangaCard(
+					key: ValueKey(id),
+					mangaData: mangaData,
+					reactToCoverSizeChanges: widget.reactToCoverSizeChanges,
+					onPress: () => widget.onCardPress?.call(mangaData),
+				);
 			},
 		);
 	}

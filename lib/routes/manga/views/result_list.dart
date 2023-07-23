@@ -6,10 +6,16 @@ import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 
 class MangaResultList extends StatelessWidget {
-	const MangaResultList({super.key, required this.title, required this.future});
+	const MangaResultList({
+		super.key,
+		required this.title,
+		required this.future,
+		this.onListItemPress,
+	});
 
 	final String title;
 	final Future<CollectionData<MangaData>> future;
+	final void Function(MangaData)? onListItemPress;
 
 	@override
 	Widget build(BuildContext context) {
@@ -51,6 +57,9 @@ class MangaResultList extends StatelessWidget {
 						return MangaListCard(
 							key: ValueKey(mangaData.manga.id),
 							mangaData: mangaData,
+							onPress: onListItemPress == null 
+								? null
+								: () => onListItemPress?.call(mangaData),
 						);
 					},
 				);
