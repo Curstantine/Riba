@@ -163,12 +163,10 @@ class _MangaListCardState extends State<MangaListCard> {
 	void initState() {
 		super.initState();
 		addCover();
-		Settings.instance.coverPersistence.previewSize.addListener(addCover);
 	}
 
 	@override
 	void dispose() {
-		Settings.instance.coverPersistence.previewSize.removeListener(addCover);
 		coverStream.close();
 		super.dispose();
 	}
