@@ -33,8 +33,8 @@ class MangaResultList extends StatelessWidget {
 
 				if (snapshot.hasError || !snapshot.hasData) {
 					return SliverFillRemaining(
-						child: Center(child: SizedBox(
-							height: 150,
+						child: Center(child: Container(
+							constraints: const BoxConstraints(minHeight: 150),
 							width: double.infinity,
 							child: ErrorCard(error: snapshot.error, margin: Edges.horizontalMedium),
 						))
