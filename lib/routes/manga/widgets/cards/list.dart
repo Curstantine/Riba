@@ -112,7 +112,7 @@ class _MangaListCardCoverState extends State<_MangaListCardCover> {
 		return SizedBox(width: 100, height: double.infinity, child: FutureBuilder<File?>(
 			future: coverFuture,
 			builder: (context, snapshot) {
-				if (snapshot.connectionState == ConnectionState.active) {
+				if (snapshot.connectionState == ConnectionState.waiting) {
 					return const Center(child: CircularProgressIndicator());
 				}
 
@@ -145,7 +145,18 @@ class _MangaListCardCoverState extends State<_MangaListCardCover> {
 
 				return ClipRRect(
 					borderRadius: Corners.leftMedium,
-					child: Image.file(snapshot.data!, fit: BoxFit.cover),
+					child: Image.file(
+						snapshot.data!,
+						fit: BoxFit.cover,
+						frameBuilder: (_, child, frame, __) {
+							return AnimatedOpacity(
+								opacity: frame == null ? 0 : 1,
+								duration: Durations.emphasized,
+								curve: Easing.emphasized,
+								child: child,
+							);
+						},
+					),
 				);
 			},
 		));
