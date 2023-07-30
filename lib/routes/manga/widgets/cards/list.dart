@@ -12,7 +12,6 @@ import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/utils/errors.dart";
 import "package:riba/utils/theme.dart";
-import "package:riba/widgets/material/card.dart";
 
 class MangaListCard extends StatelessWidget implements PreferredSizeWidget {
 	const MangaListCard({super.key, required this.mangaData, this.onPress});
@@ -31,7 +30,8 @@ class MangaListCard extends StatelessWidget implements PreferredSizeWidget {
 		final text = theme.textTheme;
 		final colors = theme.colorScheme;
 
-		return SizedBox(height: 150, child: FilledCard(
+		return SizedBox(height: 150, child: Card(
+			shadowColor: Colors.transparent,
 			margin: Edges.horizontalMedium.copyWithSelf(Edges.verticalExtraSmall),
 			child: InkWell(onTap: onPress, child: Row(children: [
 				_MangaListCardCover(mangaId: manga.id, cover: mangaData.cover!),
