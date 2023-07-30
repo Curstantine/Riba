@@ -4,8 +4,9 @@ import "package:riba/repositories/local/models/author.dart";
 import "package:riba/utils/constants.dart";
 
 class AuthorCard extends StatelessWidget {
-	const AuthorCard({super.key, required this.author, this.onPress});
+	const AuthorCard({super.key, required this.author, this.onPress, this.elevation = 0});
 
+	final double elevation;
 	final Author author;
 	final VoidCallback? onPress;
 
@@ -24,9 +25,11 @@ class AuthorCard extends StatelessWidget {
 					color: colors.surface,
 					surfaceTintColor: colors.primary,
 					shadowColor: Colors.transparent,
+					elevation:  elevation,
 					child: InkWell(
 						onTap: onCardPress,
 						borderRadius: Corners.allFull,
+						splashColor: colors.primary.withOpacity(0.1),
 						child: Center(child: Icon(Symbols.person_rounded, size: 36, color: colors.onSurfaceVariant)),
 					),
 				)),

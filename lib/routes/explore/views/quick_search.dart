@@ -128,6 +128,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 			listHeight: 175,
 			builder: (author) => AuthorCard(
 				key: ValueKey(author.id),
+				elevation: 20,
 				author: author,
 				onPress: () => viewModel.addSearchHistory(author.id, HistoryType.author),
 			),
@@ -142,6 +143,7 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 			listHeight: 175,
 			builder: (groupData) => GroupCard(
 				key: ValueKey(groupData.group.id),
+				elevation: 20,
 				groupData: groupData,
 				onPress: () => viewModel.addSearchHistory(groupData.group.id, HistoryType.author),
 			),

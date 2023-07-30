@@ -4,8 +4,9 @@ import "package:riba/repositories/runtime/group.dart";
 import "package:riba/utils/constants.dart";
 
 class GroupCard extends StatelessWidget {
-	const GroupCard({super.key, required this.groupData, this.onPress});
+	const GroupCard({super.key, required this.groupData, this.onPress, this.elevation = 0});
 
+	final double elevation;
 	final GroupData groupData;
 	final VoidCallback? onPress;
 
@@ -24,9 +25,11 @@ class GroupCard extends StatelessWidget {
 					color: colors.surface,
 					surfaceTintColor: colors.primary,
 					shadowColor: Colors.transparent,
+					elevation: elevation,
 					child: InkWell(
 						onTap: onCardPress,
 						borderRadius: Corners.allFull,
+						splashColor: colors.primary.withOpacity(0.1),
 						child: Center(child: Icon(Symbols.group_rounded, size: 36, color: colors.onSurfaceVariant)),
 					),
 				)),
