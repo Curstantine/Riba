@@ -1,4 +1,3 @@
-import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter/material.dart" hide Locale;
 import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
@@ -10,19 +9,20 @@ class PublicationStatusChip extends StatelessWidget {
 		super.key,
 		required this.status,
 		this.surfaceColor,
+		this.elevation = 1,
 	});
 
+	final double elevation;
 	final MangaPublicationStatus status;
 	final Color? surfaceColor;
 
 	@override
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
-		final colors = theme.colorScheme;
-		final background = getBackgroundColor(colors);
+		final background = getBackgroundColor(theme.brightness);
 
 		return TinyChip(
-			elevation: 1,
+			elevation: elevation,
 			labelColor: background,
 			surfaceColor: surfaceColor,
 			surfaceTintColor: background,
@@ -31,16 +31,16 @@ class PublicationStatusChip extends StatelessWidget {
 		);
 	}
 
-	Color getBackgroundColor(ColorScheme colors) {
+	Color getBackgroundColor(Brightness brightness) {
 		switch (status) {
 			case MangaPublicationStatus.ongoing:
-				return Colors.green.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.green.shade900 : Colors.green.shade300;
 			case MangaPublicationStatus.completed:
-				return Colors.blue.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.blue.shade900 : Colors.blue.shade300;
 			case MangaPublicationStatus.hiatus:
-				return Colors.orange.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.orange.shade900 : Colors.orange.shade300;
 			case MangaPublicationStatus.cancelled:
-				return Colors.red.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.red.shade900 : Colors.red.shade300;
 		}
 	}
 }
@@ -50,8 +50,10 @@ class ContentRatingChip extends StatelessWidget {
 		super.key,
 		required this.contentRating,
 		this.surfaceColor,
+		this.elevation = 1,
 	});
 
+	final double elevation;
 	final ContentRating contentRating;
 	final Color? surfaceColor;
 
@@ -59,10 +61,10 @@ class ContentRatingChip extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final colors = theme.colorScheme;
-		final background = getBackgroundColor(colors);
+		final background = getBackgroundColor(theme.brightness, colors);
 
 		return TinyChip(
-			elevation: 1,
+			elevation: elevation,
 			labelColor: background,
 			surfaceColor: surfaceColor,
 			surfaceTintColor: background,
@@ -71,15 +73,15 @@ class ContentRatingChip extends StatelessWidget {
 		);
 	}
 
-	Color getBackgroundColor(ColorScheme colors) {
+	Color getBackgroundColor(Brightness brightness, ColorScheme colors) {
 		switch (contentRating) {
 			case ContentRating.safe:
 				return colors.primary;
 			case ContentRating.suggestive:
-				return Colors.yellow.shade900.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.orange.shade900 : Colors.orange.shade300;
 			case ContentRating.erotica:
 			case ContentRating.pornographic:
-				return Colors.purple.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.purple.shade700 : Colors.purple.shade300;
 		}
 	}
 }
@@ -89,8 +91,10 @@ class DemographicChip extends StatelessWidget {
 		super.key,
 		required this.demographic,
 		this.surfaceColor,
+		this.elevation = 1,
 	});
 
+	final double elevation;
 	final MangaPublicationDemographic demographic;
 	final Color? surfaceColor;
 
@@ -98,10 +102,10 @@ class DemographicChip extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final theme = Theme.of(context);
 		final colors = theme.colorScheme;
-		final background = getBackgroundColor(colors);
+		final background = getBackgroundColor(theme.brightness, colors);
 
 		return TinyChip(
-			elevation: 1,
+			elevation: elevation,
 			labelColor: background,
 			surfaceColor: surfaceColor,
 			surfaceTintColor: background,
@@ -110,14 +114,14 @@ class DemographicChip extends StatelessWidget {
 		);
 	}
 
-	Color getBackgroundColor(ColorScheme colors) {
+	Color getBackgroundColor(Brightness brightness, ColorScheme colors) {
 		switch (demographic) {
 			case MangaPublicationDemographic.shounen:
 			case MangaPublicationDemographic.seinen:
-				return Colors.lightBlue.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.blue.shade900 : Colors.blue.shade300;
 			case MangaPublicationDemographic.shoujo:
 			case MangaPublicationDemographic.josei:
-				return Colors.pink.harmonizeWith(colors.primary);
+				return brightness == Brightness.light ? Colors.pink.shade900 : Colors.pink.shade300;
 			case MangaPublicationDemographic.unknown:
 				return colors.error;
 		}
