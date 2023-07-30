@@ -2,6 +2,8 @@
 
 MangaDex client written in Flutter from the ground up with the goal of being fast and MD3 compliant.
 
+Check [this](#1) issue to find what is implemented and what's missing.
+
 ## Commands
 
 To generate required type adapters and such:
@@ -12,7 +14,7 @@ dart run build_runner build && dart fix . --apply
 
 ## Prerequisites
 
--   Latest version of Flutter.
+- Latest version of Flutter.
 
 ## Formatting
 
@@ -20,9 +22,9 @@ All the formatting is done hand from now on. The `dartfmt` utility is not reliab
 
 This project will format according to the [flutter style](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#formatting) with its own quirks.
 
--   100 character limit if possible.
+- 100 character limit if possible.
 
--   4 tab indent.
+- 4 tab indent.
 
 Since this project was using `dartfmt` with 2 space indent prior to the migration,
 the codebase as of now is not consistent with the above rules.
