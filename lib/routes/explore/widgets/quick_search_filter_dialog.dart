@@ -4,30 +4,34 @@ import "package:riba/repositories/local/models/localization.dart";
 import "package:riba/repositories/local/models/tag.dart";
 import "package:riba/repositories/mangadex/models/manga.dart";
 import "package:riba/repositories/mangadex/models/tag.dart";
-import "package:riba/routes/explore/model.dart";
 import "package:riba/routes/explore/views/quick_search_model.dart";
 import "package:riba/settings/settings.dart";
 import "package:riba/utils/constants.dart";
 import "package:riba/widgets/error_card.dart";
 import "package:riba/widgets/material/chip.dart";
 import "package:riba/widgets/premade/filter_chip.dart";
+import "package:rxdart/rxdart.dart";
 
 
 class QuickSearchFilterDialog extends StatefulWidget {
 	/// Dialog that allows the user to filter the quick search results
 	/// 
 	/// The dialog will be dismissed with a [QuickSearchFilterState] value when the user submits the filter.
-	const QuickSearchFilterDialog({super.key});
+	const QuickSearchFilterDialog({super.key, required this.initialState, required this.tagStream});
+
+	/// The initial state of the filters.
+	/// 
+	/// This value gets mutated as the user interacts with the dialog,
+	/// so make sure to use a copy of the original state.
+	final QuickSearchFilterState initialState;
+	final ValueStream<Map<TagGroup, List<Tag>>> tagStream;
 
 	@override
 	State<QuickSearchFilterDialog> createState() => _QuickSearchFilterDialogState();
 }
 
 class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
-	QuickSearchViewModel get viewModel => QuickSearchViewModel.instance;
-	ExploreViewModel get rootViewModel => ExploreViewModel.instance;
-
-	final state = QuickSearchViewModel.instance.filterState.copy();
+	QuickSearchFilterState get state => widget.initialState;
 	List<Locale> get preferredLocales => Settings.instance.appearance.preferredDisplayLocales.value; 
 
 	@override
@@ -107,7 +111,7 @@ class _QuickSearchFilterDialogState extends State<QuickSearchFilterDialog> {
 						),
 					]));
 				})),
-				StreamBuilder(stream: viewModel.tagsStream, builder: (context, snapshot) {
+				StreamBuilder(stream: widget.tagStream, builder: (context, snapshot) {
 					if (snapshot.hasError) {
 						return SliverToBoxAdapter(child: SizedBox(
 							height: 100,
@@ -178,10 +182,17 @@ class _FilterTagChip extends StatelessWidget {
 			builder: (context, mode, _) {
 				final background = mode == TagSelectionMode.excluded ? colors.errorContainer : null;
 				final foreground = mode == TagSelectionMode.excluded ? colors.onErrorContainer : null;
-
-				/// TODO: Add leading icons when the chip API supports it
+				
+				Widget? leadingWidget;
+				if (mode == TagSelectionMode.included) {
+					leadingWidget = Icon(Symbols.add_rounded, size: 24, grade: 100, color: foreground);
+				} else if (mode == TagSelectionMode.excluded) {
+					leadingWidget = Icon(Symbols.remove_rounded, size: 24, grade: 100, color: foreground);
+				}
+	
 				return FilterChipExt(
 					showCheckmark: false,
+					avatar: leadingWidget,
 					label: Text(tag.name.getPreferred(preferredLocales) ?? "N/A", style: text.labelLarge?.copyWith(color: foreground)),
 					selectedColor: background,
 					selected: mode == TagSelectionMode.included || mode == TagSelectionMode.excluded,

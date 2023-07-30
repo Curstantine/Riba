@@ -70,6 +70,13 @@ class QuickSearchViewModel implements ViewModel {
 				}
 			);
 
+			// Sort the tags by their name
+			for (final group in grouped.keys) {
+				grouped[group]!.sort(
+					(a, b) => a.name.compareTo(b.name, Settings.instance.appearance.preferredDisplayLocales.value),
+				);
+			}
+
 			_tagsController.add(grouped);
 		} catch (e) {
 			_tagsController.addError(e);
@@ -157,7 +164,10 @@ class QuickSearchViewModel implements ViewModel {
 		final QuickSearchFilterState? result = await showDialog(
 			context: context,
 			useSafeArea: false,
-			builder: (context) => const QuickSearchFilterDialog()
+			builder: (context) => QuickSearchFilterDialog(
+				initialState: filterState.copy(),
+				tagStream: tagsStream,
+			),
 		);
 
 		if (result != null) {

@@ -20,7 +20,7 @@ class GenericFilterListChip<T extends SerializableDataExt> extends StatelessWidg
 				showCheckmark: false,
 				selected: selectedList.contains(status),
 				label: Text(status.asHumanReadable()),
-				onSelected: (select) { 
+				onSelected: (select) {
 					if (select) {
 						notifier.value = [...selectedList, status];
 					} else {

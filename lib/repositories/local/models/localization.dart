@@ -59,6 +59,36 @@ class Localizations {
 		return values.isEmpty ? null : values.first;
 	}
 
+	/// Compares this [Localization] to [other].
+	/// Returns a negative value if this is ordered before other, a positive value if this is ordered after other, or zero if this and other are equivalent.
+	/// 
+	/// First, it compares the preferred locales of both localizations. <br />
+	/// If the preferred locales are not found, it compares the first locale that matches both localizations and compare based on their related values. <br />
+	/// If no locale matches, it compares the first value of both localizations.
+	/// 
+	/// Refrain from using this on cases where you don't know what localized values are available ahead of time.
+	int compareTo(Localizations other, List<Locale> preferred) {
+		for (final locale in preferred) {
+			final thisLocale = get(locale);
+			final otherLocale = other.get(locale);
+
+			if (thisLocale != null && otherLocale != null) {
+				return thisLocale.compareTo(otherLocale);
+			}
+		}
+
+		for (final locale in localizations) {
+			final thisLocale = get(locale);
+			final otherLocale = other.get(locale);
+
+			if (thisLocale != null && otherLocale != null) {
+				return thisLocale.compareTo(otherLocale);
+			}
+		}
+
+		return values.first.compareTo(other.values.first);
+	}
+
 	factory Localizations.fromMap(Map<String, String> map) {
 		final List<Locale> localizations = [];
 		final List<String> values = [];
