@@ -8,7 +8,7 @@ typedef PageBuilder = Widget Function(BuildContext context);
 Route<T> sharedAxis<T>(
 	PageBuilder page, [
 	SharedAxisTransitionType type = SharedAxisTransitionType.scaled,
-	Duration duration = Durations.standard,
+	Duration duration = LocalDurations.standard,
 ]) {
 	return PageRouteBuilder<T>(
 		transitionDuration: duration,

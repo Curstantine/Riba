@@ -258,8 +258,8 @@ class _BigPicture extends StatelessWidget {
 		
 		return OutlinedCard(
 			child: AnimatedSize(
-				duration: Durations.emphasized,
-				curve: Easing.emphasized,
+				duration: LocalDurations.emphasized,
+				curve: LocalEasing.emphasized,
 				child: Stack(alignment: Alignment.bottomRight, children: [
 					buildImage(text, colors),
 					buildInfoTags(text, colors),
@@ -426,7 +426,7 @@ class _CoverPreview extends StatelessWidget {
 
 	Widget buildImage(TextTheme text, ColorScheme colors) {
 		return AnimatedSize(
-			duration: Durations.emphasized,
+			duration: LocalDurations.emphasized,
 			curve: Curves.easeInOutCirc,
 			alignment: Alignment.bottomCenter,
 			child: FutureBuilder(future: imageFuture, builder: (context, snapshot) {

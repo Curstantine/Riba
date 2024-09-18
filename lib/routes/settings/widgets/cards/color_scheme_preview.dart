@@ -26,9 +26,9 @@ class ColorSchemePreviewCard extends StatelessWidget {
 			future: ThemeManager.getColorScheme(id, brightness),
 			builder: (context, snapshot) => Column(mainAxisSize: MainAxisSize.min,children: [
 				AnimatedSwitcher(
-					duration: Durations.emphasized,
-					switchInCurve: Easing.emphasized,
-					switchOutCurve: Easing.emphasized,
+					duration: LocalDurations.emphasized,
+					switchInCurve: LocalEasing.emphasized,
+					switchOutCurve: LocalEasing.emphasized,
 					child: snapshot.hasData
 						? buildCard(text, snapshot.requireData)
 						: buildSkeletonCard(colors),

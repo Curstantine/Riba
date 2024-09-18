@@ -127,7 +127,7 @@ class _MangaViewState extends State<MangaView> {
 				),
 				builder: (context, value, child) => AnimatedOpacity(
 					opacity: value ? 1 : 0,
-					duration: Durations.standard,
+					duration: LocalDurations.standard,
 					child: child,
 				),
 			),
@@ -396,8 +396,8 @@ class DetailsHeader extends StatelessWidget {
 				onPressed: handleFollowTap,
 				icon: value ? const Icon(Symbols.check_rounded) : const Icon(Symbols.add_rounded),
 				label: AnimatedSize(
-					duration: Durations.standard,
-					curve: Easing.standard,
+					duration: LocalDurations.standard,
+					curve: LocalEasing.standard,
 					alignment: Alignment.centerLeft,
 					child: value ?  const Text("Reading") : const Text("Add to Library"),
 				),
@@ -412,8 +412,8 @@ class DetailsHeader extends StatelessWidget {
 				onPressed: handleTrackerPress,
 				icon: value ? const Icon(Symbols.sync_rounded) : const Icon(Symbols.add_rounded),
 				label: AnimatedSize(
-					duration: Durations.standard,
-					curve: Easing.standard,
+					duration: LocalDurations.standard,
+					curve: LocalEasing.standard,
 					alignment: Alignment.centerLeft,
 					child: value ?  const Text("Tracking") : const Text("Track"),
 				),
@@ -541,8 +541,8 @@ class DescriptionSection extends StatelessWidget {
 	) {
 		return AnimatedContainer(
 			height: expanded ? maxTp.height + Edges.extraLarge : minTp.height,
-			curve: Easing.emphasized,
-			duration: Durations.emphasized,
+			curve: LocalEasing.emphasized,
+			duration: LocalDurations.emphasized,
 			clipBehavior: Clip.hardEdge,
 			decoration: const BoxDecoration(),
 			foregroundDecoration: BoxDecoration(
@@ -571,7 +571,7 @@ class DescriptionSection extends StatelessWidget {
 			child: IconButton(
 				isSelected: expanded,
 				icon: AnimatedRotation(
-					duration: Durations.emphasized,
+					duration: LocalDurations.emphasized,
 					turns: expanded ? 0.5 : 0,
 					curve: Curves.easeInOutCubic,
 					child: const Icon(Symbols.expand_more_rounded),

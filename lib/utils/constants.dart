@@ -359,13 +359,13 @@ class IconButtonStyles {
 	);
 }
 
-class Durations {
+class LocalDurations {
 	static const Duration standard = Duration(milliseconds: 300);
 	static const Duration emphasized = Duration(milliseconds: 500);
 	static const Duration long = Duration(seconds: 1);
 }
 
-class Easing {
+class LocalEasing {
 	static const Curve standard = Cubic(0.2, 0.0, 0, 1.0);
 	static const Curve emphasized = Curves.easeInOutCubicEmphasized;
 }

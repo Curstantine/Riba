@@ -87,8 +87,8 @@ class _QuickSearchViewState extends State<QuickSearchView> {
 				return SliverList.list(children: AnimateList(
 					effects: [
 						const FadeEffect(
-							duration: Durations.emphasized,
-							curve: Easing.emphasized)
+							duration: LocalDurations.emphasized,
+							curve: LocalEasing.emphasized)
 					],
 					children: [
 						Padding(
@@ -191,8 +191,8 @@ class _QuickSearchHorizontalScrollableCategory<T> extends StatelessWidget {
 				return SliverList.list(children: AnimateList(
 					effects: [
 						const FadeEffect(
-							duration: Durations.emphasized,
-							curve: Easing.emphasized)
+							duration: LocalDurations.emphasized,
+							curve: LocalEasing.emphasized)
 					],
 					children: [
 						Padding(

@@ -45,7 +45,7 @@ class _RootViewState extends State<RootView> {
 				valueListenable: currentPage,
 				builder: (context, value, _) => PageTransitionSwitcher(
 					reverse: value.index < 1,
-					duration: Durations.emphasized,
+					duration: LocalDurations.emphasized,
 					transitionBuilder: (child, x, y) => SharedAxisTransition(
 						animation: x,
 						secondaryAnimation: y,

@@ -151,8 +151,8 @@ class _MangaListCardCoverState extends State<_MangaListCardCover> {
 						frameBuilder: (_, child, frame, __) {
 							return AnimatedOpacity(
 								opacity: frame == null ? 0 : 1,
-								duration: Durations.emphasized,
-								curve: Easing.emphasized,
+								duration: LocalDurations.emphasized,
+								curve: LocalEasing.emphasized,
 								child: child,
 							);
 						},

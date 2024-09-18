@@ -57,7 +57,7 @@ class _ExploreViewState extends State<ExploreView> {
 							separatorBuilder: (_, __) => const SizedBox(width: Edges.small),
 							itemBuilder: (_, __) => const MangaCardSkeleton()
 								.animate(onPlay: (controller) => controller.repeat())
-								.shimmer(delay: Durations.standard, duration: Durations.long),
+								.shimmer(delay: LocalDurations.standard, duration: LocalDurations.long),
 						)),
 					]);
 				}
