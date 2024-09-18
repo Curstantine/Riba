@@ -21,6 +21,8 @@ class UserAttributes {
 // CAUTION: DO NOT CHANGE THE ORDER OF THE ENUM
 @JsonEnum(alwaysCreate: true)
 enum UserRole implements SerializableDataExt {
+	@JsonValue("ROLE_BOT")
+	bot,
 	@JsonValue("ROLE_USER")
 	user,
 	@JsonValue("ROLE_MEMBER")
@@ -61,6 +63,8 @@ enum UserRole implements SerializableDataExt {
 	@override
 	String asHumanReadable() {
 		switch (this) {
+			case UserRole.bot:
+				return "Bot";
 			case UserRole.user:
 				return "User";
 			case UserRole.member:
@@ -69,6 +73,7 @@ enum UserRole implements SerializableDataExt {
 				return "Group Member";
 			case UserRole.groupLeader:
 				return "Group Leader";
+				
 			case UserRole.mdAtHome:
 				return "MD@Home";
 			case UserRole.supporter:

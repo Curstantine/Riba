@@ -87,7 +87,7 @@ User _userDeserialize(
     id: reader.readString(offsets[0]),
     roles: reader
             .readByteList(offsets[1])
-            ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.user)
+            ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.bot)
             .toList() ??
         [],
     username: reader.readString(offsets[2]),
@@ -108,7 +108,7 @@ P _userDeserializeProp<P>(
     case 1:
       return (reader
               .readByteList(offset)
-              ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.user)
+              ?.map((e) => _UserrolesValueEnumMap[e] ?? UserRole.bot)
               .toList() ??
           []) as P;
     case 2:
@@ -121,38 +121,40 @@ P _userDeserializeProp<P>(
 }
 
 const _UserrolesEnumValueMap = {
-  'user': 0,
-  'member': 1,
-  'groupMember': 2,
-  'groupLeader': 3,
-  'mdAtHome': 4,
-  'contributor': 5,
-  'supporter': 6,
-  'powerUploader': 7,
-  'vip': 8,
-  'staff': 9,
-  'publicRelations': 10,
-  'forumModerator': 11,
-  'globalModerator': 12,
-  'developer': 13,
-  'administrator': 14,
+  'bot': 0,
+  'user': 1,
+  'member': 2,
+  'groupMember': 3,
+  'groupLeader': 4,
+  'mdAtHome': 5,
+  'contributor': 6,
+  'supporter': 7,
+  'powerUploader': 8,
+  'vip': 9,
+  'staff': 10,
+  'publicRelations': 11,
+  'forumModerator': 12,
+  'globalModerator': 13,
+  'developer': 14,
+  'administrator': 15,
 };
 const _UserrolesValueEnumMap = {
-  0: UserRole.user,
-  1: UserRole.member,
-  2: UserRole.groupMember,
-  3: UserRole.groupLeader,
-  4: UserRole.mdAtHome,
-  5: UserRole.contributor,
-  6: UserRole.supporter,
-  7: UserRole.powerUploader,
-  8: UserRole.vip,
-  9: UserRole.staff,
-  10: UserRole.publicRelations,
-  11: UserRole.forumModerator,
-  12: UserRole.globalModerator,
-  13: UserRole.developer,
-  14: UserRole.administrator,
+  0: UserRole.bot,
+  1: UserRole.user,
+  2: UserRole.member,
+  3: UserRole.groupMember,
+  4: UserRole.groupLeader,
+  5: UserRole.mdAtHome,
+  6: UserRole.contributor,
+  7: UserRole.supporter,
+  8: UserRole.powerUploader,
+  9: UserRole.vip,
+  10: UserRole.staff,
+  11: UserRole.publicRelations,
+  12: UserRole.forumModerator,
+  13: UserRole.globalModerator,
+  14: UserRole.developer,
+  15: UserRole.administrator,
 };
 
 Id _userGetId(User object) {

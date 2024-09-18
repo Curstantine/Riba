@@ -16,6 +16,7 @@ UserAttributes _$UserAttributesFromJson(Map<String, dynamic> json) =>
     );
 
 const _$UserRoleEnumMap = {
+  UserRole.bot: 'ROLE_BOT',
   UserRole.user: 'ROLE_USER',
   UserRole.member: 'ROLE_MEMBER',
   UserRole.groupMember: 'ROLE_GROUP_MEMBER',
