@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "tag.dart";
+part of 'tag.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -8,20 +8,20 @@ part of "tag.dart";
 
 TagAttributes _$TagAttributesFromJson(Map<String, dynamic> json) =>
     TagAttributes(
-      name: Map<String, String>.from(json["name"] as Map),
-      group: TagGroup.fromJson(json["group"] as String),
-      description: Map<String, String>.from(json["description"] as Map),
-      version: json["version"] as int,
+      name: Map<String, String>.from(json['name'] as Map),
+      group: TagGroup.fromJson(json['group'] as String),
+      description: Map<String, String>.from(json['description'] as Map),
+      version: (json['version'] as num).toInt(),
     );
 
 const _$TagGroupEnumMap = {
-  TagGroup.content: "content",
-  TagGroup.format: "format",
-  TagGroup.genre: "genre",
-  TagGroup.theme: "theme",
+  TagGroup.content: 'content',
+  TagGroup.format: 'format',
+  TagGroup.genre: 'genre',
+  TagGroup.theme: 'theme',
 };
 
 const _$TagJoinModeEnumMap = {
-  TagJoinMode.and: "AND",
-  TagJoinMode.or: "OR",
+  TagJoinMode.and: 'AND',
+  TagJoinMode.or: 'OR',
 };

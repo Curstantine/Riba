@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "cover_art.dart";
+part of 'cover_art.dart';
 
 // **************************************************************************
 // CopyWithGenerator

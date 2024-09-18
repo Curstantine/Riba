@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "store.dart";
+part of 'store.dart';
 
 // **************************************************************************
 // CopyWithGenerator
@@ -96,23 +96,23 @@ extension GetCoverPersistenceSettingsStoreCollection on Isar {
 }
 
 const CoverPersistenceSettingsStoreSchema = CollectionSchema(
-  name: r"CoverPersistenceSettingsStore",
+  name: r'CoverPersistenceSettingsStore',
   id: 4222908783201711202,
   properties: {
-    r"enabled": PropertySchema(
+    r'enabled': PropertySchema(
       id: 0,
-      name: r"enabled",
+      name: r'enabled',
       type: IsarType.bool,
     ),
-    r"fullSize": PropertySchema(
+    r'fullSize': PropertySchema(
       id: 1,
-      name: r"fullSize",
+      name: r'fullSize',
       type: IsarType.byte,
       enumMap: _CoverPersistenceSettingsStorefullSizeEnumValueMap,
     ),
-    r"previewSize": PropertySchema(
+    r'previewSize': PropertySchema(
       id: 2,
-      name: r"previewSize",
+      name: r'previewSize',
       type: IsarType.byte,
       enumMap: _CoverPersistenceSettingsStorepreviewSizeEnumValueMap,
     )
@@ -121,14 +121,14 @@ const CoverPersistenceSettingsStoreSchema = CollectionSchema(
   serialize: _coverPersistenceSettingsStoreSerialize,
   deserialize: _coverPersistenceSettingsStoreDeserialize,
   deserializeProp: _coverPersistenceSettingsStoreDeserializeProp,
-  idName: r"id",
+  idName: r'id',
   indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _coverPersistenceSettingsStoreGetId,
   getLinks: _coverPersistenceSettingsStoreGetLinks,
   attach: _coverPersistenceSettingsStoreAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _coverPersistenceSettingsStoreEstimateSize(
@@ -187,14 +187,14 @@ P _coverPersistenceSettingsStoreDeserializeProp<P>(
               reader.readByteOrNull(offset)] ??
           CoverSize.original) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _CoverPersistenceSettingsStorefullSizeEnumValueMap = {
-  "original": 0,
-  "medium": 1,
-  "small": 2,
+  'original': 0,
+  'medium': 1,
+  'small': 2,
 };
 const _CoverPersistenceSettingsStorefullSizeValueEnumMap = {
   0: CoverSize.original,
@@ -202,9 +202,9 @@ const _CoverPersistenceSettingsStorefullSizeValueEnumMap = {
   2: CoverSize.small,
 };
 const _CoverPersistenceSettingsStorepreviewSizeEnumValueMap = {
-  "original": 0,
-  "medium": 1,
-  "small": 2,
+  'original': 0,
+  'medium': 1,
+  'small': 2,
 };
 const _CoverPersistenceSettingsStorepreviewSizeValueEnumMap = {
   0: CoverSize.original,
@@ -315,7 +315,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> enabledEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"enabled",
+        property: r'enabled',
         value: value,
       ));
     });
@@ -325,7 +325,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> fullSizeEqualTo(CoverSize value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"fullSize",
+        property: r'fullSize',
         value: value,
       ));
     });
@@ -339,7 +339,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"fullSize",
+        property: r'fullSize',
         value: value,
       ));
     });
@@ -353,7 +353,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"fullSize",
+        property: r'fullSize',
         value: value,
       ));
     });
@@ -368,7 +368,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"fullSize",
+        property: r'fullSize',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -381,7 +381,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -395,7 +395,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -409,7 +409,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -424,7 +424,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -437,7 +437,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> previewSizeEqualTo(CoverSize value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"previewSize",
+        property: r'previewSize',
         value: value,
       ));
     });
@@ -451,7 +451,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"previewSize",
+        property: r'previewSize',
         value: value,
       ));
     });
@@ -465,7 +465,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"previewSize",
+        property: r'previewSize',
         value: value,
       ));
     });
@@ -480,7 +480,7 @@ extension CoverPersistenceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"previewSize",
+        property: r'previewSize',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -505,42 +505,42 @@ extension CoverPersistenceSettingsStoreQuerySortBy on QueryBuilder<
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByEnabled() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"enabled", Sort.asc);
+      return query.addSortBy(r'enabled', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"enabled", Sort.desc);
+      return query.addSortBy(r'enabled', Sort.desc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByFullSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fullSize", Sort.asc);
+      return query.addSortBy(r'fullSize', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByFullSizeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fullSize", Sort.desc);
+      return query.addSortBy(r'fullSize', Sort.desc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"previewSize", Sort.asc);
+      return query.addSortBy(r'previewSize', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> sortByPreviewSizeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"previewSize", Sort.desc);
+      return query.addSortBy(r'previewSize', Sort.desc);
     });
   }
 }
@@ -550,56 +550,56 @@ extension CoverPersistenceSettingsStoreQuerySortThenBy on QueryBuilder<
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByEnabled() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"enabled", Sort.asc);
+      return query.addSortBy(r'enabled', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"enabled", Sort.desc);
+      return query.addSortBy(r'enabled', Sort.desc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByFullSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fullSize", Sort.asc);
+      return query.addSortBy(r'fullSize', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByFullSizeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fullSize", Sort.desc);
+      return query.addSortBy(r'fullSize', Sort.desc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"previewSize", Sort.asc);
+      return query.addSortBy(r'previewSize', Sort.asc);
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QAfterSortBy> thenByPreviewSizeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"previewSize", Sort.desc);
+      return query.addSortBy(r'previewSize', Sort.desc);
     });
   }
 }
@@ -609,21 +609,21 @@ extension CoverPersistenceSettingsStoreQueryWhereDistinct on QueryBuilder<
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QDistinct> distinctByEnabled() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"enabled");
+      return query.addDistinctBy(r'enabled');
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QDistinct> distinctByFullSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"fullSize");
+      return query.addDistinctBy(r'fullSize');
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverPersistenceSettingsStore,
       QDistinct> distinctByPreviewSize() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"previewSize");
+      return query.addDistinctBy(r'previewSize');
     });
   }
 }
@@ -635,28 +635,28 @@ extension CoverPersistenceSettingsStoreQueryProperty on QueryBuilder<
   QueryBuilder<CoverPersistenceSettingsStore, int, QQueryOperations>
       idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, bool, QQueryOperations>
       enabledProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"enabled");
+      return query.addPropertyName(r'enabled');
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverSize, QQueryOperations>
       fullSizeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"fullSize");
+      return query.addPropertyName(r'fullSize');
     });
   }
 
   QueryBuilder<CoverPersistenceSettingsStore, CoverSize, QQueryOperations>
       previewSizeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"previewSize");
+      return query.addPropertyName(r'previewSize');
     });
   }
 }

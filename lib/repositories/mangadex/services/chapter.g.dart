@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "chapter.dart";
+part of 'chapter.dart';
 
 // **************************************************************************
 // CopyWithGenerator

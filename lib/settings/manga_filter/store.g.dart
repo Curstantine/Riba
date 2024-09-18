@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "store.dart";
+part of 'store.dart';
 
 // **************************************************************************
 // CopyWithGenerator
@@ -83,22 +83,22 @@ extension GetMangaFilterSettingsStoreCollection on Isar {
 }
 
 const MangaFilterSettingsStoreSchema = CollectionSchema(
-  name: r"MangaFilterSettingsStore",
+  name: r'MangaFilterSettingsStore',
   id: -7852478692418679483,
   properties: {
-    r"excludedGroupIds": PropertySchema(
+    r'excludedGroupIds': PropertySchema(
       id: 0,
-      name: r"excludedGroupIds",
+      name: r'excludedGroupIds',
       type: IsarType.stringList,
     ),
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 1,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"isDefault": PropertySchema(
+    r'isDefault': PropertySchema(
       id: 2,
-      name: r"isDefault",
+      name: r'isDefault',
       type: IsarType.bool,
     )
   },
@@ -106,14 +106,14 @@ const MangaFilterSettingsStoreSchema = CollectionSchema(
   serialize: _mangaFilterSettingsStoreSerialize,
   deserialize: _mangaFilterSettingsStoreDeserialize,
   deserializeProp: _mangaFilterSettingsStoreDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _mangaFilterSettingsStoreGetId,
   getLinks: _mangaFilterSettingsStoreGetLinks,
   attach: _mangaFilterSettingsStoreAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _mangaFilterSettingsStoreEstimateSize(
@@ -171,7 +171,7 @@ P _mangaFilterSettingsStoreDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
@@ -277,7 +277,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -293,7 +293,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -309,7 +309,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -326,7 +326,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -343,7 +343,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -357,7 +357,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -370,7 +370,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
           {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -383,7 +383,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
           {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"excludedGroupIds",
+        property: r'excludedGroupIds',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -394,8 +394,8 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> excludedGroupIdsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"excludedGroupIds",
-        value: "",
+        property: r'excludedGroupIds',
+        value: '',
       ));
     });
   }
@@ -404,8 +404,8 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> excludedGroupIdsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"excludedGroupIds",
-        value: "",
+        property: r'excludedGroupIds',
+        value: '',
       ));
     });
   }
@@ -414,7 +414,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> excludedGroupIdsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         length,
         true,
         length,
@@ -427,7 +427,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> excludedGroupIdsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         0,
         true,
         0,
@@ -440,7 +440,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> excludedGroupIdsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         0,
         false,
         999999,
@@ -456,7 +456,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         0,
         true,
         length,
@@ -472,7 +472,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         length,
         include,
         999999,
@@ -490,7 +490,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"excludedGroupIds",
+        r'excludedGroupIds',
         lower,
         includeLower,
         upper,
@@ -506,7 +506,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -522,7 +522,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -538,7 +538,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -555,7 +555,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -572,7 +572,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -586,7 +586,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -598,7 +598,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       idContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -610,7 +610,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       idMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -621,8 +621,8 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -631,8 +631,8 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -641,7 +641,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> isDefaultEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isDefault",
+        property: r'isDefault',
         value: value,
       ));
     });
@@ -651,7 +651,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -665,7 +665,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -679,7 +679,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -694,7 +694,7 @@ extension MangaFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -715,28 +715,28 @@ extension MangaFilterSettingsStoreQuerySortBy on QueryBuilder<
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIsDefault() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDefault", Sort.asc);
+      return query.addSortBy(r'isDefault', Sort.asc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       sortByIsDefaultDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDefault", Sort.desc);
+      return query.addSortBy(r'isDefault', Sort.desc);
     });
   }
 }
@@ -746,42 +746,42 @@ extension MangaFilterSettingsStoreQuerySortThenBy on QueryBuilder<
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsDefault() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDefault", Sort.asc);
+      return query.addSortBy(r'isDefault', Sort.asc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsDefaultDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDefault", Sort.desc);
+      return query.addSortBy(r'isDefault', Sort.desc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QAfterSortBy>
       thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 }
@@ -791,21 +791,21 @@ extension MangaFilterSettingsStoreQueryWhereDistinct on QueryBuilder<
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctByExcludedGroupIds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"excludedGroupIds");
+      return query.addDistinctBy(r'excludedGroupIds');
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctById({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, MangaFilterSettingsStore, QDistinct>
       distinctByIsDefault() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"isDefault");
+      return query.addDistinctBy(r'isDefault');
     });
   }
 }
@@ -815,28 +815,28 @@ extension MangaFilterSettingsStoreQueryProperty on QueryBuilder<
   QueryBuilder<MangaFilterSettingsStore, int, QQueryOperations>
       isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, List<String>, QQueryOperations>
       excludedGroupIdsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"excludedGroupIds");
+      return query.addPropertyName(r'excludedGroupIds');
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, String, QQueryOperations>
       idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<MangaFilterSettingsStore, bool, QQueryOperations>
       isDefaultProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isDefault");
+      return query.addPropertyName(r'isDefault');
     });
   }
 }

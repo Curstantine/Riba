@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "statistics.dart";
+part of 'statistics.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -14,34 +14,34 @@ extension GetStatisticsCollection on Isar {
 }
 
 const StatisticsSchema = CollectionSchema(
-  name: r"Statistics",
+  name: r'Statistics',
   id: -3012562703602652036,
   properties: {
-    r"comments": PropertySchema(
+    r'comments': PropertySchema(
       id: 0,
-      name: r"comments",
+      name: r'comments',
       type: IsarType.object,
-      target: r"CommentStatistics",
+      target: r'CommentStatistics',
     ),
-    r"follows": PropertySchema(
+    r'follows': PropertySchema(
       id: 1,
-      name: r"follows",
+      name: r'follows',
       type: IsarType.long,
     ),
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 2,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"rating": PropertySchema(
+    r'rating': PropertySchema(
       id: 3,
-      name: r"rating",
+      name: r'rating',
       type: IsarType.object,
-      target: r"RatingStatistics",
+      target: r'RatingStatistics',
     ),
-    r"type": PropertySchema(
+    r'type': PropertySchema(
       id: 4,
-      name: r"type",
+      name: r'type',
       type: IsarType.byte,
       enumMap: _StatisticstypeEnumValueMap,
     )
@@ -50,17 +50,17 @@ const StatisticsSchema = CollectionSchema(
   serialize: _statisticsSerialize,
   deserialize: _statisticsDeserialize,
   deserializeProp: _statisticsDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {
-    r"CommentStatistics": CommentStatisticsSchema,
-    r"RatingStatistics": RatingStatisticsSchema
+    r'CommentStatistics': CommentStatisticsSchema,
+    r'RatingStatistics': RatingStatisticsSchema
   },
   getId: _statisticsGetId,
   getLinks: _statisticsGetLinks,
   attach: _statisticsAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _statisticsEstimateSize(
@@ -164,23 +164,23 @@ P _statisticsDeserializeProp<P>(
       return (_StatisticstypeValueEnumMap[reader.readByteOrNull(offset)] ??
           EntityType.manga) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _StatisticstypeEnumValueMap = {
-  "manga": 0,
-  "chapter": 1,
-  "customList": 2,
-  "author": 3,
-  "artist": 4,
-  "user": 5,
-  "tag": 6,
-  "coverArt": 7,
-  "scanlationGroup": 8,
-  "leader": 9,
-  "member": 10,
-  "creator": 11,
+  'manga': 0,
+  'chapter': 1,
+  'customList': 2,
+  'author': 3,
+  'artist': 4,
+  'user': 5,
+  'tag': 6,
+  'coverArt': 7,
+  'scanlationGroup': 8,
+  'leader': 9,
+  'member': 10,
+  'creator': 11,
 };
 const _StatisticstypeValueEnumMap = {
   0: EntityType.manga,
@@ -293,7 +293,7 @@ extension StatisticsQueryFilter
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> commentsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"comments",
+        property: r'comments',
       ));
     });
   }
@@ -302,7 +302,7 @@ extension StatisticsQueryFilter
       commentsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"comments",
+        property: r'comments',
       ));
     });
   }
@@ -310,7 +310,7 @@ extension StatisticsQueryFilter
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> followsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"follows",
+        property: r'follows',
       ));
     });
   }
@@ -319,7 +319,7 @@ extension StatisticsQueryFilter
       followsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"follows",
+        property: r'follows',
       ));
     });
   }
@@ -328,7 +328,7 @@ extension StatisticsQueryFilter
       int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"follows",
+        property: r'follows',
         value: value,
       ));
     });
@@ -342,7 +342,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"follows",
+        property: r'follows',
         value: value,
       ));
     });
@@ -355,7 +355,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"follows",
+        property: r'follows',
         value: value,
       ));
     });
@@ -369,7 +369,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"follows",
+        property: r'follows',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -384,7 +384,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -399,7 +399,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -414,7 +414,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -430,7 +430,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -446,7 +446,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -459,7 +459,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -471,7 +471,7 @@ extension StatisticsQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -483,7 +483,7 @@ extension StatisticsQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -493,8 +493,8 @@ extension StatisticsQueryFilter
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -502,8 +502,8 @@ extension StatisticsQueryFilter
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -512,7 +512,7 @@ extension StatisticsQueryFilter
       Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -525,7 +525,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -538,7 +538,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -552,7 +552,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -564,7 +564,7 @@ extension StatisticsQueryFilter
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> ratingIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"rating",
+        property: r'rating',
       ));
     });
   }
@@ -573,7 +573,7 @@ extension StatisticsQueryFilter
       ratingIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"rating",
+        property: r'rating',
       ));
     });
   }
@@ -582,7 +582,7 @@ extension StatisticsQueryFilter
       EntityType value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"type",
+        property: r'type',
         value: value,
       ));
     });
@@ -595,7 +595,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"type",
+        property: r'type',
         value: value,
       ));
     });
@@ -608,7 +608,7 @@ extension StatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"type",
+        property: r'type',
         value: value,
       ));
     });
@@ -622,7 +622,7 @@ extension StatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"type",
+        property: r'type',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -637,14 +637,14 @@ extension StatisticsQueryObject
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> comments(
       FilterQuery<CommentStatistics> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"comments");
+      return query.object(q, r'comments');
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterFilterCondition> rating(
       FilterQuery<RatingStatistics> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"rating");
+      return query.object(q, r'rating');
     });
   }
 }
@@ -656,37 +656,37 @@ extension StatisticsQuerySortBy
     on QueryBuilder<Statistics, Statistics, QSortBy> {
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortByFollows() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"follows", Sort.asc);
+      return query.addSortBy(r'follows', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortByFollowsDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"follows", Sort.desc);
+      return query.addSortBy(r'follows', Sort.desc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortByType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"type", Sort.asc);
+      return query.addSortBy(r'type', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> sortByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"type", Sort.desc);
+      return query.addSortBy(r'type', Sort.desc);
     });
   }
 }
@@ -695,49 +695,49 @@ extension StatisticsQuerySortThenBy
     on QueryBuilder<Statistics, Statistics, QSortThenBy> {
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByFollows() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"follows", Sort.asc);
+      return query.addSortBy(r'follows', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByFollowsDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"follows", Sort.desc);
+      return query.addSortBy(r'follows', Sort.desc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"type", Sort.asc);
+      return query.addSortBy(r'type', Sort.asc);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QAfterSortBy> thenByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"type", Sort.desc);
+      return query.addSortBy(r'type', Sort.desc);
     });
   }
 }
@@ -746,20 +746,20 @@ extension StatisticsQueryWhereDistinct
     on QueryBuilder<Statistics, Statistics, QDistinct> {
   QueryBuilder<Statistics, Statistics, QDistinct> distinctByFollows() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"follows");
+      return query.addDistinctBy(r'follows');
     });
   }
 
   QueryBuilder<Statistics, Statistics, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<Statistics, Statistics, QDistinct> distinctByType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"type");
+      return query.addDistinctBy(r'type');
     });
   }
 }
@@ -768,39 +768,39 @@ extension StatisticsQueryProperty
     on QueryBuilder<Statistics, Statistics, QQueryProperty> {
   QueryBuilder<Statistics, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<Statistics, CommentStatistics?, QQueryOperations>
       commentsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"comments");
+      return query.addPropertyName(r'comments');
     });
   }
 
   QueryBuilder<Statistics, int?, QQueryOperations> followsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"follows");
+      return query.addPropertyName(r'follows');
     });
   }
 
   QueryBuilder<Statistics, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<Statistics, RatingStatistics?, QQueryOperations>
       ratingProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"rating");
+      return query.addPropertyName(r'rating');
     });
   }
 
   QueryBuilder<Statistics, EntityType, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"type");
+      return query.addPropertyName(r'type');
     });
   }
 }
@@ -813,17 +813,17 @@ extension StatisticsQueryProperty
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
 const CommentStatisticsSchema = Schema(
-  name: r"CommentStatistics",
+  name: r'CommentStatistics',
   id: 5590073889979445643,
   properties: {
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 0,
-      name: r"id",
+      name: r'id',
       type: IsarType.long,
     ),
-    r"total": PropertySchema(
+    r'total': PropertySchema(
       id: 1,
-      name: r"total",
+      name: r'total',
       type: IsarType.long,
     )
   },
@@ -877,7 +877,7 @@ P _commentStatisticsDeserializeProp<P>(
     case 1:
       return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
@@ -887,7 +887,7 @@ extension CommentStatisticsQueryFilter
       idEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -901,7 +901,7 @@ extension CommentStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -915,7 +915,7 @@ extension CommentStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -930,7 +930,7 @@ extension CommentStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -943,7 +943,7 @@ extension CommentStatisticsQueryFilter
       totalEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"total",
+        property: r'total',
         value: value,
       ));
     });
@@ -957,7 +957,7 @@ extension CommentStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"total",
+        property: r'total',
         value: value,
       ));
     });
@@ -971,7 +971,7 @@ extension CommentStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"total",
+        property: r'total',
         value: value,
       ));
     });
@@ -986,7 +986,7 @@ extension CommentStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"total",
+        property: r'total',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1003,22 +1003,22 @@ extension CommentStatisticsQueryObject
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
 const RatingStatisticsSchema = Schema(
-  name: r"RatingStatistics",
+  name: r'RatingStatistics',
   id: -1063738768541718830,
   properties: {
-    r"average": PropertySchema(
+    r'average': PropertySchema(
       id: 0,
-      name: r"average",
+      name: r'average',
       type: IsarType.double,
     ),
-    r"bayesian": PropertySchema(
+    r'bayesian': PropertySchema(
       id: 1,
-      name: r"bayesian",
+      name: r'bayesian',
       type: IsarType.double,
     ),
-    r"distribution": PropertySchema(
+    r'distribution': PropertySchema(
       id: 2,
-      name: r"distribution",
+      name: r'distribution',
       type: IsarType.longList,
     )
   },
@@ -1077,7 +1077,7 @@ P _ratingStatisticsDeserializeProp<P>(
     case 2:
       return (reader.readLongList(offset) ?? const []) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
@@ -1090,7 +1090,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"average",
+        property: r'average',
         value: value,
         epsilon: epsilon,
       ));
@@ -1106,7 +1106,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"average",
+        property: r'average',
         value: value,
         epsilon: epsilon,
       ));
@@ -1122,7 +1122,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"average",
+        property: r'average',
         value: value,
         epsilon: epsilon,
       ));
@@ -1139,7 +1139,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"average",
+        property: r'average',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1156,7 +1156,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"bayesian",
+        property: r'bayesian',
         value: value,
         epsilon: epsilon,
       ));
@@ -1172,7 +1172,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"bayesian",
+        property: r'bayesian',
         value: value,
         epsilon: epsilon,
       ));
@@ -1188,7 +1188,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"bayesian",
+        property: r'bayesian',
         value: value,
         epsilon: epsilon,
       ));
@@ -1205,7 +1205,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"bayesian",
+        property: r'bayesian',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1219,7 +1219,7 @@ extension RatingStatisticsQueryFilter
       distributionElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"distribution",
+        property: r'distribution',
         value: value,
       ));
     });
@@ -1233,7 +1233,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"distribution",
+        property: r'distribution',
         value: value,
       ));
     });
@@ -1247,7 +1247,7 @@ extension RatingStatisticsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"distribution",
+        property: r'distribution',
         value: value,
       ));
     });
@@ -1262,7 +1262,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"distribution",
+        property: r'distribution',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1275,7 +1275,7 @@ extension RatingStatisticsQueryFilter
       distributionLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         length,
         true,
         length,
@@ -1288,7 +1288,7 @@ extension RatingStatisticsQueryFilter
       distributionIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         0,
         true,
         0,
@@ -1301,7 +1301,7 @@ extension RatingStatisticsQueryFilter
       distributionIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         0,
         false,
         999999,
@@ -1317,7 +1317,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         0,
         true,
         length,
@@ -1333,7 +1333,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         length,
         include,
         999999,
@@ -1351,7 +1351,7 @@ extension RatingStatisticsQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"distribution",
+        r'distribution',
         lower,
         includeLower,
         upper,

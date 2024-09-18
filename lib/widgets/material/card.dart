@@ -23,7 +23,7 @@ class FilledCard extends StatelessWidget {
 			shape: shape,
 			margin: margin,
 			clipBehavior: clipBehavior,
-			color: theme.colorScheme.surfaceVariant,
+			color: theme.colorScheme.surfaceContainerHighest,
 			elevation: 0,
 			child: child,
 		);

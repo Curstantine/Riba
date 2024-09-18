@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "store.dart";
+part of 'store.dart';
 
 // **************************************************************************
 // CopyWithGenerator
@@ -102,24 +102,24 @@ extension GetContentFilterSettingsStoreCollection on Isar {
 }
 
 const ContentFilterSettingsStoreSchema = CollectionSchema(
-  name: r"ContentFilterSettingsStore",
+  name: r'ContentFilterSettingsStore',
   id: 818445002339399232,
   properties: {
-    r"chapterLanguages": PropertySchema(
+    r'chapterLanguages': PropertySchema(
       id: 0,
-      name: r"chapterLanguages",
+      name: r'chapterLanguages',
       type: IsarType.byteList,
       enumMap: _ContentFilterSettingsStorechapterLanguagesEnumValueMap,
     ),
-    r"contentRatings": PropertySchema(
+    r'contentRatings': PropertySchema(
       id: 1,
-      name: r"contentRatings",
+      name: r'contentRatings',
       type: IsarType.byteList,
       enumMap: _ContentFilterSettingsStorecontentRatingsEnumValueMap,
     ),
-    r"originalLanguages": PropertySchema(
+    r'originalLanguages': PropertySchema(
       id: 2,
-      name: r"originalLanguages",
+      name: r'originalLanguages',
       type: IsarType.byteList,
       enumMap: _ContentFilterSettingsStoreoriginalLanguagesEnumValueMap,
     )
@@ -128,14 +128,14 @@ const ContentFilterSettingsStoreSchema = CollectionSchema(
   serialize: _contentFilterSettingsStoreSerialize,
   deserialize: _contentFilterSettingsStoreDeserialize,
   deserializeProp: _contentFilterSettingsStoreDeserializeProp,
-  idName: r"id",
+  idName: r'id',
   indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _contentFilterSettingsStoreGetId,
   getLinks: _contentFilterSettingsStoreGetLinks,
   attach: _contentFilterSettingsStoreAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _contentFilterSettingsStoreEstimateSize(
@@ -228,64 +228,64 @@ P _contentFilterSettingsStoreDeserializeProp<P>(
               .toList() ??
           []) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _ContentFilterSettingsStorechapterLanguagesEnumValueMap = {
-  "english": 0,
-  "albanian": 1,
-  "arabic": 2,
-  "azerbaijani": 3,
-  "bengali": 4,
-  "bulgarian": 5,
-  "burmese": 6,
-  "catalan": 7,
-  "chineseSimplified": 8,
-  "chineseTraditional": 9,
-  "croatian": 10,
-  "czech": 11,
-  "danish": 12,
-  "dutch": 13,
-  "esperanto": 14,
-  "estonian": 15,
-  "filipino": 16,
-  "finnish": 17,
-  "french": 18,
-  "georgian": 19,
-  "german": 20,
-  "greek": 21,
-  "hebrew": 22,
-  "hindi": 23,
-  "hungarian": 24,
-  "indonesian": 25,
-  "italian": 26,
-  "japanese": 27,
-  "kazakh": 28,
-  "korean": 29,
-  "latin": 30,
-  "lithuanian": 31,
-  "malay": 32,
-  "mongolian": 33,
-  "nepali": 34,
-  "norwegian": 35,
-  "persian": 36,
-  "polish": 37,
-  "portuguese": 38,
-  "portugueseBrazil": 39,
-  "romanian": 40,
-  "russian": 41,
-  "serbian": 42,
-  "slovak": 43,
-  "spanish": 44,
-  "spanishLatinAmerica": 45,
-  "swedish": 46,
-  "tamil": 47,
-  "telugu": 48,
-  "thai": 49,
-  "turkish": 50,
-  "ukrainian": 51,
-  "vietnamese": 52,
+  'english': 0,
+  'albanian': 1,
+  'arabic': 2,
+  'azerbaijani': 3,
+  'bengali': 4,
+  'bulgarian': 5,
+  'burmese': 6,
+  'catalan': 7,
+  'chineseSimplified': 8,
+  'chineseTraditional': 9,
+  'croatian': 10,
+  'czech': 11,
+  'danish': 12,
+  'dutch': 13,
+  'esperanto': 14,
+  'estonian': 15,
+  'filipino': 16,
+  'finnish': 17,
+  'french': 18,
+  'georgian': 19,
+  'german': 20,
+  'greek': 21,
+  'hebrew': 22,
+  'hindi': 23,
+  'hungarian': 24,
+  'indonesian': 25,
+  'italian': 26,
+  'japanese': 27,
+  'kazakh': 28,
+  'korean': 29,
+  'latin': 30,
+  'lithuanian': 31,
+  'malay': 32,
+  'mongolian': 33,
+  'nepali': 34,
+  'norwegian': 35,
+  'persian': 36,
+  'polish': 37,
+  'portuguese': 38,
+  'portugueseBrazil': 39,
+  'romanian': 40,
+  'russian': 41,
+  'serbian': 42,
+  'slovak': 43,
+  'spanish': 44,
+  'spanishLatinAmerica': 45,
+  'swedish': 46,
+  'tamil': 47,
+  'telugu': 48,
+  'thai': 49,
+  'turkish': 50,
+  'ukrainian': 51,
+  'vietnamese': 52,
 };
 const _ContentFilterSettingsStorechapterLanguagesValueEnumMap = {
   0: Language.english,
@@ -343,10 +343,10 @@ const _ContentFilterSettingsStorechapterLanguagesValueEnumMap = {
   52: Language.vietnamese,
 };
 const _ContentFilterSettingsStorecontentRatingsEnumValueMap = {
-  "safe": 0,
-  "suggestive": 1,
-  "erotica": 2,
-  "pornographic": 3,
+  'safe': 0,
+  'suggestive': 1,
+  'erotica': 2,
+  'pornographic': 3,
 };
 const _ContentFilterSettingsStorecontentRatingsValueEnumMap = {
   0: ContentRating.safe,
@@ -355,59 +355,59 @@ const _ContentFilterSettingsStorecontentRatingsValueEnumMap = {
   3: ContentRating.pornographic,
 };
 const _ContentFilterSettingsStoreoriginalLanguagesEnumValueMap = {
-  "english": 0,
-  "albanian": 1,
-  "arabic": 2,
-  "azerbaijani": 3,
-  "bengali": 4,
-  "bulgarian": 5,
-  "burmese": 6,
-  "catalan": 7,
-  "chineseSimplified": 8,
-  "chineseTraditional": 9,
-  "croatian": 10,
-  "czech": 11,
-  "danish": 12,
-  "dutch": 13,
-  "esperanto": 14,
-  "estonian": 15,
-  "filipino": 16,
-  "finnish": 17,
-  "french": 18,
-  "georgian": 19,
-  "german": 20,
-  "greek": 21,
-  "hebrew": 22,
-  "hindi": 23,
-  "hungarian": 24,
-  "indonesian": 25,
-  "italian": 26,
-  "japanese": 27,
-  "kazakh": 28,
-  "korean": 29,
-  "latin": 30,
-  "lithuanian": 31,
-  "malay": 32,
-  "mongolian": 33,
-  "nepali": 34,
-  "norwegian": 35,
-  "persian": 36,
-  "polish": 37,
-  "portuguese": 38,
-  "portugueseBrazil": 39,
-  "romanian": 40,
-  "russian": 41,
-  "serbian": 42,
-  "slovak": 43,
-  "spanish": 44,
-  "spanishLatinAmerica": 45,
-  "swedish": 46,
-  "tamil": 47,
-  "telugu": 48,
-  "thai": 49,
-  "turkish": 50,
-  "ukrainian": 51,
-  "vietnamese": 52,
+  'english': 0,
+  'albanian': 1,
+  'arabic': 2,
+  'azerbaijani': 3,
+  'bengali': 4,
+  'bulgarian': 5,
+  'burmese': 6,
+  'catalan': 7,
+  'chineseSimplified': 8,
+  'chineseTraditional': 9,
+  'croatian': 10,
+  'czech': 11,
+  'danish': 12,
+  'dutch': 13,
+  'esperanto': 14,
+  'estonian': 15,
+  'filipino': 16,
+  'finnish': 17,
+  'french': 18,
+  'georgian': 19,
+  'german': 20,
+  'greek': 21,
+  'hebrew': 22,
+  'hindi': 23,
+  'hungarian': 24,
+  'indonesian': 25,
+  'italian': 26,
+  'japanese': 27,
+  'kazakh': 28,
+  'korean': 29,
+  'latin': 30,
+  'lithuanian': 31,
+  'malay': 32,
+  'mongolian': 33,
+  'nepali': 34,
+  'norwegian': 35,
+  'persian': 36,
+  'polish': 37,
+  'portuguese': 38,
+  'portugueseBrazil': 39,
+  'romanian': 40,
+  'russian': 41,
+  'serbian': 42,
+  'slovak': 43,
+  'spanish': 44,
+  'spanishLatinAmerica': 45,
+  'swedish': 46,
+  'tamil': 47,
+  'telugu': 48,
+  'thai': 49,
+  'turkish': 50,
+  'ukrainian': 51,
+  'vietnamese': 52,
 };
 const _ContentFilterSettingsStoreoriginalLanguagesValueEnumMap = {
   0: Language.english,
@@ -564,7 +564,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> chapterLanguagesElementEqualTo(Language value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"chapterLanguages",
+        property: r'chapterLanguages',
         value: value,
       ));
     });
@@ -578,7 +578,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"chapterLanguages",
+        property: r'chapterLanguages',
         value: value,
       ));
     });
@@ -592,7 +592,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"chapterLanguages",
+        property: r'chapterLanguages',
         value: value,
       ));
     });
@@ -607,7 +607,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"chapterLanguages",
+        property: r'chapterLanguages',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -620,7 +620,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> chapterLanguagesLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         length,
         true,
         length,
@@ -633,7 +633,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> chapterLanguagesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         0,
         true,
         0,
@@ -646,7 +646,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> chapterLanguagesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         0,
         false,
         999999,
@@ -662,7 +662,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         0,
         true,
         length,
@@ -678,7 +678,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         length,
         include,
         999999,
@@ -696,7 +696,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"chapterLanguages",
+        r'chapterLanguages',
         lower,
         includeLower,
         upper,
@@ -709,7 +709,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> contentRatingsElementEqualTo(ContentRating value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"contentRatings",
+        property: r'contentRatings',
         value: value,
       ));
     });
@@ -723,7 +723,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"contentRatings",
+        property: r'contentRatings',
         value: value,
       ));
     });
@@ -737,7 +737,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"contentRatings",
+        property: r'contentRatings',
         value: value,
       ));
     });
@@ -752,7 +752,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"contentRatings",
+        property: r'contentRatings',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -765,7 +765,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> contentRatingsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         length,
         true,
         length,
@@ -778,7 +778,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> contentRatingsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         0,
         true,
         0,
@@ -791,7 +791,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> contentRatingsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         0,
         false,
         999999,
@@ -807,7 +807,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         0,
         true,
         length,
@@ -823,7 +823,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         length,
         include,
         999999,
@@ -841,7 +841,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"contentRatings",
+        r'contentRatings',
         lower,
         includeLower,
         upper,
@@ -854,7 +854,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -868,7 +868,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -882,7 +882,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -897,7 +897,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -910,7 +910,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> originalLanguagesElementEqualTo(Language value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"originalLanguages",
+        property: r'originalLanguages',
         value: value,
       ));
     });
@@ -924,7 +924,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"originalLanguages",
+        property: r'originalLanguages',
         value: value,
       ));
     });
@@ -938,7 +938,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"originalLanguages",
+        property: r'originalLanguages',
         value: value,
       ));
     });
@@ -953,7 +953,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"originalLanguages",
+        property: r'originalLanguages',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -966,7 +966,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> originalLanguagesLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         length,
         true,
         length,
@@ -979,7 +979,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> originalLanguagesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         0,
         true,
         0,
@@ -992,7 +992,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> originalLanguagesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         0,
         false,
         999999,
@@ -1008,7 +1008,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         0,
         true,
         length,
@@ -1024,7 +1024,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         length,
         include,
         999999,
@@ -1042,7 +1042,7 @@ extension ContentFilterSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"originalLanguages",
+        r'originalLanguages',
         lower,
         includeLower,
         upper,
@@ -1066,14 +1066,14 @@ extension ContentFilterSettingsStoreQuerySortThenBy on QueryBuilder<
   QueryBuilder<ContentFilterSettingsStore, ContentFilterSettingsStore,
       QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, ContentFilterSettingsStore,
       QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 }
@@ -1083,21 +1083,21 @@ extension ContentFilterSettingsStoreQueryWhereDistinct on QueryBuilder<
   QueryBuilder<ContentFilterSettingsStore, ContentFilterSettingsStore,
       QDistinct> distinctByChapterLanguages() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"chapterLanguages");
+      return query.addDistinctBy(r'chapterLanguages');
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, ContentFilterSettingsStore,
       QDistinct> distinctByContentRatings() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"contentRatings");
+      return query.addDistinctBy(r'contentRatings');
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, ContentFilterSettingsStore,
       QDistinct> distinctByOriginalLanguages() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"originalLanguages");
+      return query.addDistinctBy(r'originalLanguages');
     });
   }
 }
@@ -1106,28 +1106,28 @@ extension ContentFilterSettingsStoreQueryProperty on QueryBuilder<
     ContentFilterSettingsStore, ContentFilterSettingsStore, QQueryProperty> {
   QueryBuilder<ContentFilterSettingsStore, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, List<Language>, QQueryOperations>
       chapterLanguagesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"chapterLanguages");
+      return query.addPropertyName(r'chapterLanguages');
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, List<ContentRating>,
       QQueryOperations> contentRatingsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"contentRatings");
+      return query.addPropertyName(r'contentRatings');
     });
   }
 
   QueryBuilder<ContentFilterSettingsStore, List<Language>, QQueryOperations>
       originalLanguagesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"originalLanguages");
+      return query.addPropertyName(r'originalLanguages');
     });
   }
 }

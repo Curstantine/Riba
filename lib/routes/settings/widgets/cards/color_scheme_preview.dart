@@ -50,7 +50,7 @@ class ColorSchemePreviewCard extends StatelessWidget {
 
 				return Card(
 					elevation: isSelected ? 2 : 0,
-					color: scheme.background,
+					color: scheme.surface,
 					surfaceTintColor: Colors.transparent,
 					shape: RoundedRectangleBorder(
 						borderRadius: Corners.allLarge,
@@ -78,7 +78,7 @@ class ColorSchemePreviewCard extends StatelessWidget {
 	Widget buildSkeletonCard(ColorScheme scheme) {
 		return Card(
 			elevation: 0,
-			color: scheme.background,
+			color: scheme.surface,
 			surfaceTintColor: Colors.transparent,
 			shape: RoundedRectangleBorder(
 				borderRadius: Corners.allLarge,
@@ -98,7 +98,7 @@ class ColorSchemePreviewCard extends StatelessWidget {
 	Widget buildNavigationBar(ColorScheme scheme, {bool isLoading = false}) {
 		return Material(
 			elevation: 2,
-			color: scheme.background.withOpacity(0.5),
+			color: scheme.surface.withOpacity(0.5),
 			shadowColor: Colors.transparent,
 			surfaceTintColor: scheme.surfaceTint,
 			shape: const RoundedRectangleBorder(

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "chapter_local_meta.dart";
+part of 'chapter_local_meta.dart';
 
 // **************************************************************************
 // CopyWithGenerator
@@ -129,37 +129,37 @@ extension GetChapterLocalMetaCollection on Isar {
 }
 
 const ChapterLocalMetaSchema = CollectionSchema(
-  name: r"ChapterLocalMeta",
+  name: r'ChapterLocalMeta',
   id: -4760458010664121924,
   properties: {
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 0,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"isDownloaded": PropertySchema(
+    r'isDownloaded': PropertySchema(
       id: 1,
-      name: r"isDownloaded",
+      name: r'isDownloaded',
       type: IsarType.bool,
     ),
-    r"isFavorite": PropertySchema(
+    r'isFavorite': PropertySchema(
       id: 2,
-      name: r"isFavorite",
+      name: r'isFavorite',
       type: IsarType.bool,
     ),
-    r"isRead": PropertySchema(
+    r'isRead': PropertySchema(
       id: 3,
-      name: r"isRead",
+      name: r'isRead',
       type: IsarType.bool,
     ),
-    r"lastReadAt": PropertySchema(
+    r'lastReadAt': PropertySchema(
       id: 4,
-      name: r"lastReadAt",
+      name: r'lastReadAt',
       type: IsarType.dateTime,
     ),
-    r"lastReadPage": PropertySchema(
+    r'lastReadPage': PropertySchema(
       id: 5,
-      name: r"lastReadPage",
+      name: r'lastReadPage',
       type: IsarType.long,
     )
   },
@@ -167,14 +167,14 @@ const ChapterLocalMetaSchema = CollectionSchema(
   serialize: _chapterLocalMetaSerialize,
   deserialize: _chapterLocalMetaDeserialize,
   deserializeProp: _chapterLocalMetaDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _chapterLocalMetaGetId,
   getLinks: _chapterLocalMetaGetLinks,
   attach: _chapterLocalMetaAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _chapterLocalMetaEstimateSize(
@@ -238,7 +238,7 @@ P _chapterLocalMetaDeserializeProp<P>(
     case 5:
       return (reader.readLong(offset)) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
@@ -342,7 +342,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -358,7 +358,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -374,7 +374,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -391,7 +391,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -408,7 +408,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -422,7 +422,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -433,7 +433,7 @@ extension ChapterLocalMetaQueryFilter
       idContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -444,7 +444,7 @@ extension ChapterLocalMetaQueryFilter
       idMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -455,8 +455,8 @@ extension ChapterLocalMetaQueryFilter
       idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -465,8 +465,8 @@ extension ChapterLocalMetaQueryFilter
       idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -475,7 +475,7 @@ extension ChapterLocalMetaQueryFilter
       isDownloadedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isDownloaded",
+        property: r'isDownloaded',
         value: value,
       ));
     });
@@ -485,7 +485,7 @@ extension ChapterLocalMetaQueryFilter
       isFavoriteEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isFavorite",
+        property: r'isFavorite',
         value: value,
       ));
     });
@@ -495,7 +495,7 @@ extension ChapterLocalMetaQueryFilter
       isReadEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isRead",
+        property: r'isRead',
         value: value,
       ));
     });
@@ -505,7 +505,7 @@ extension ChapterLocalMetaQueryFilter
       isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -519,7 +519,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -533,7 +533,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -548,7 +548,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -561,7 +561,7 @@ extension ChapterLocalMetaQueryFilter
       lastReadAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"lastReadAt",
+        property: r'lastReadAt',
         value: value,
       ));
     });
@@ -575,7 +575,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"lastReadAt",
+        property: r'lastReadAt',
         value: value,
       ));
     });
@@ -589,7 +589,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"lastReadAt",
+        property: r'lastReadAt',
         value: value,
       ));
     });
@@ -604,7 +604,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"lastReadAt",
+        property: r'lastReadAt',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -617,7 +617,7 @@ extension ChapterLocalMetaQueryFilter
       lastReadPageEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"lastReadPage",
+        property: r'lastReadPage',
         value: value,
       ));
     });
@@ -631,7 +631,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"lastReadPage",
+        property: r'lastReadPage',
         value: value,
       ));
     });
@@ -645,7 +645,7 @@ extension ChapterLocalMetaQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"lastReadPage",
+        property: r'lastReadPage',
         value: value,
       ));
     });
@@ -660,7 +660,7 @@ extension ChapterLocalMetaQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"lastReadPage",
+        property: r'lastReadPage',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -680,84 +680,84 @@ extension ChapterLocalMetaQuerySortBy
     on QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QSortBy> {
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsDownloaded() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDownloaded", Sort.asc);
+      return query.addSortBy(r'isDownloaded', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsDownloadedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDownloaded", Sort.desc);
+      return query.addSortBy(r'isDownloaded', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsFavorite() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isFavorite", Sort.asc);
+      return query.addSortBy(r'isFavorite', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsFavoriteDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isFavorite", Sort.desc);
+      return query.addSortBy(r'isFavorite', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsRead() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isRead", Sort.asc);
+      return query.addSortBy(r'isRead', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByIsReadDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isRead", Sort.desc);
+      return query.addSortBy(r'isRead', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadAt", Sort.asc);
+      return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadAt", Sort.desc);
+      return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByLastReadPage() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadPage", Sort.asc);
+      return query.addSortBy(r'lastReadPage', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       sortByLastReadPageDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadPage", Sort.desc);
+      return query.addSortBy(r'lastReadPage', Sort.desc);
     });
   }
 }
@@ -766,98 +766,98 @@ extension ChapterLocalMetaQuerySortThenBy
     on QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QSortThenBy> {
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsDownloaded() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDownloaded", Sort.asc);
+      return query.addSortBy(r'isDownloaded', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsDownloadedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isDownloaded", Sort.desc);
+      return query.addSortBy(r'isDownloaded', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsFavorite() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isFavorite", Sort.asc);
+      return query.addSortBy(r'isFavorite', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsFavoriteDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isFavorite", Sort.desc);
+      return query.addSortBy(r'isFavorite', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsRead() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isRead", Sort.asc);
+      return query.addSortBy(r'isRead', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsReadDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isRead", Sort.desc);
+      return query.addSortBy(r'isRead', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadAt", Sort.asc);
+      return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadAt", Sort.desc);
+      return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByLastReadPage() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadPage", Sort.asc);
+      return query.addSortBy(r'lastReadPage', Sort.asc);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QAfterSortBy>
       thenByLastReadPageDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lastReadPage", Sort.desc);
+      return query.addSortBy(r'lastReadPage', Sort.desc);
     });
   }
 }
@@ -867,42 +867,42 @@ extension ChapterLocalMetaQueryWhereDistinct
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct>
       distinctByIsDownloaded() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"isDownloaded");
+      return query.addDistinctBy(r'isDownloaded');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct>
       distinctByIsFavorite() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"isFavorite");
+      return query.addDistinctBy(r'isFavorite');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct>
       distinctByIsRead() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"isRead");
+      return query.addDistinctBy(r'isRead');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct>
       distinctByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"lastReadAt");
+      return query.addDistinctBy(r'lastReadAt');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QDistinct>
       distinctByLastReadPage() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"lastReadPage");
+      return query.addDistinctBy(r'lastReadPage');
     });
   }
 }
@@ -911,45 +911,45 @@ extension ChapterLocalMetaQueryProperty
     on QueryBuilder<ChapterLocalMeta, ChapterLocalMeta, QQueryProperty> {
   QueryBuilder<ChapterLocalMeta, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, bool, QQueryOperations>
       isDownloadedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isDownloaded");
+      return query.addPropertyName(r'isDownloaded');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, bool, QQueryOperations> isFavoriteProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isFavorite");
+      return query.addPropertyName(r'isFavorite');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, bool, QQueryOperations> isReadProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isRead");
+      return query.addPropertyName(r'isRead');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, DateTime, QQueryOperations>
       lastReadAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"lastReadAt");
+      return query.addPropertyName(r'lastReadAt');
     });
   }
 
   QueryBuilder<ChapterLocalMeta, int, QQueryOperations> lastReadPageProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"lastReadPage");
+      return query.addPropertyName(r'lastReadPage');
     });
   }
 }

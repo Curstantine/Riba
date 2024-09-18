@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "cover_art.dart";
+part of 'cover_art.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -14,64 +14,64 @@ extension GetCoverArtCollection on Isar {
 }
 
 const CoverArtSchema = CollectionSchema(
-  name: r"CoverArt",
+  name: r'CoverArt',
   id: 2191863464653854851,
   properties: {
-    r"createdAt": PropertySchema(
+    r'createdAt': PropertySchema(
       id: 0,
-      name: r"createdAt",
+      name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r"description": PropertySchema(
+    r'description': PropertySchema(
       id: 1,
-      name: r"description",
+      name: r'description',
       type: IsarType.string,
     ),
-    r"fileId": PropertySchema(
+    r'fileId': PropertySchema(
       id: 2,
-      name: r"fileId",
+      name: r'fileId',
       type: IsarType.string,
     ),
-    r"fileType": PropertySchema(
+    r'fileType': PropertySchema(
       id: 3,
-      name: r"fileType",
+      name: r'fileType',
       type: IsarType.byte,
       enumMap: _CoverArtfileTypeEnumValueMap,
     ),
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 4,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"locale": PropertySchema(
+    r'locale': PropertySchema(
       id: 5,
-      name: r"locale",
+      name: r'locale',
       type: IsarType.object,
-      target: r"Locale",
+      target: r'Locale',
     ),
-    r"mangaId": PropertySchema(
+    r'mangaId': PropertySchema(
       id: 6,
-      name: r"mangaId",
+      name: r'mangaId',
       type: IsarType.string,
     ),
-    r"updatedAt": PropertySchema(
+    r'updatedAt': PropertySchema(
       id: 7,
-      name: r"updatedAt",
+      name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r"userId": PropertySchema(
+    r'userId': PropertySchema(
       id: 8,
-      name: r"userId",
+      name: r'userId',
       type: IsarType.string,
     ),
-    r"version": PropertySchema(
+    r'version': PropertySchema(
       id: 9,
-      name: r"version",
+      name: r'version',
       type: IsarType.long,
     ),
-    r"volume": PropertySchema(
+    r'volume': PropertySchema(
       id: 10,
-      name: r"volume",
+      name: r'volume',
       type: IsarType.string,
     )
   },
@@ -79,16 +79,16 @@ const CoverArtSchema = CollectionSchema(
   serialize: _coverArtSerialize,
   deserialize: _coverArtDeserialize,
   deserializeProp: _coverArtDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {
-    r"mangaId": IndexSchema(
+    r'mangaId': IndexSchema(
       id: 7466570075891278896,
-      name: r"mangaId",
+      name: r'mangaId',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
-          name: r"mangaId",
+          name: r'mangaId',
           type: IndexType.hash,
           caseSensitive: true,
         )
@@ -96,11 +96,11 @@ const CoverArtSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {r"Locale": LocaleSchema},
+  embeddedSchemas: {r'Locale': LocaleSchema},
   getId: _coverArtGetId,
   getLinks: _coverArtGetLinks,
   attach: _coverArtAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _coverArtEstimateSize(
@@ -227,14 +227,14 @@ P _coverArtDeserializeProp<P>(
     case 10:
       return (reader.readStringOrNull(offset)) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _CoverArtfileTypeEnumValueMap = {
-  "jpeg": 0,
-  "png": 1,
-  "gif": 2,
+  'jpeg': 0,
+  'png': 1,
+  'gif': 2,
 };
 const _CoverArtfileTypeValueEnumMap = {
   0: ImageFileType.jpeg,
@@ -332,7 +332,7 @@ extension CoverArtQueryWhere on QueryBuilder<CoverArt, CoverArt, QWhereClause> {
       String mangaId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r"mangaId",
+        indexName: r'mangaId',
         value: [mangaId],
       ));
     });
@@ -344,13 +344,13 @@ extension CoverArtQueryWhere on QueryBuilder<CoverArt, CoverArt, QWhereClause> {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r"mangaId",
+              indexName: r'mangaId',
               lower: [],
               upper: [mangaId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r"mangaId",
+              indexName: r'mangaId',
               lower: [mangaId],
               includeLower: false,
               upper: [],
@@ -358,13 +358,13 @@ extension CoverArtQueryWhere on QueryBuilder<CoverArt, CoverArt, QWhereClause> {
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r"mangaId",
+              indexName: r'mangaId',
               lower: [mangaId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r"mangaId",
+              indexName: r'mangaId',
               lower: [],
               upper: [mangaId],
               includeUpper: false,
@@ -380,7 +380,7 @@ extension CoverArtQueryFilter
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"createdAt",
+        property: r'createdAt',
         value: value,
       ));
     });
@@ -393,7 +393,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"createdAt",
+        property: r'createdAt',
         value: value,
       ));
     });
@@ -406,7 +406,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"createdAt",
+        property: r'createdAt',
         value: value,
       ));
     });
@@ -420,7 +420,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"createdAt",
+        property: r'createdAt',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -432,7 +432,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> descriptionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"description",
+        property: r'description',
       ));
     });
   }
@@ -441,7 +441,7 @@ extension CoverArtQueryFilter
       descriptionIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"description",
+        property: r'description',
       ));
     });
   }
@@ -452,7 +452,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -468,7 +468,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -483,7 +483,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -499,7 +499,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"description",
+        property: r'description',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -515,7 +515,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -528,7 +528,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -540,7 +540,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"description",
+        property: r'description',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -552,7 +552,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"description",
+        property: r'description',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -562,8 +562,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> descriptionIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"description",
-        value: "",
+        property: r'description',
+        value: '',
       ));
     });
   }
@@ -572,8 +572,8 @@ extension CoverArtQueryFilter
       descriptionIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"description",
-        value: "",
+        property: r'description',
+        value: '',
       ));
     });
   }
@@ -584,7 +584,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -599,7 +599,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -614,7 +614,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -630,7 +630,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"fileId",
+        property: r'fileId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -646,7 +646,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -659,7 +659,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -671,7 +671,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"fileId",
+        property: r'fileId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -683,7 +683,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"fileId",
+        property: r'fileId',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -693,8 +693,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> fileIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"fileId",
-        value: "",
+        property: r'fileId',
+        value: '',
       ));
     });
   }
@@ -702,8 +702,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> fileIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"fileId",
-        value: "",
+        property: r'fileId',
+        value: '',
       ));
     });
   }
@@ -712,7 +712,7 @@ extension CoverArtQueryFilter
       ImageFileType value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"fileType",
+        property: r'fileType',
         value: value,
       ));
     });
@@ -725,7 +725,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"fileType",
+        property: r'fileType',
         value: value,
       ));
     });
@@ -738,7 +738,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"fileType",
+        property: r'fileType',
         value: value,
       ));
     });
@@ -752,7 +752,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"fileType",
+        property: r'fileType',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -767,7 +767,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -782,7 +782,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -797,7 +797,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -813,7 +813,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -829,7 +829,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -842,7 +842,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -854,7 +854,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -866,7 +866,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -876,8 +876,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -885,8 +885,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -895,7 +895,7 @@ extension CoverArtQueryFilter
       Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -908,7 +908,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -921,7 +921,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -935,7 +935,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -947,7 +947,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> localeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"locale",
+        property: r'locale',
       ));
     });
   }
@@ -955,7 +955,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> localeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"locale",
+        property: r'locale',
       ));
     });
   }
@@ -966,7 +966,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -981,7 +981,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -996,7 +996,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1012,7 +1012,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"mangaId",
+        property: r'mangaId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1028,7 +1028,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1041,7 +1041,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1053,7 +1053,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"mangaId",
+        property: r'mangaId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1065,7 +1065,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"mangaId",
+        property: r'mangaId',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -1075,8 +1075,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> mangaIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"mangaId",
-        value: "",
+        property: r'mangaId',
+        value: '',
       ));
     });
   }
@@ -1084,8 +1084,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> mangaIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"mangaId",
-        value: "",
+        property: r'mangaId',
+        value: '',
       ));
     });
   }
@@ -1094,7 +1094,7 @@ extension CoverArtQueryFilter
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"updatedAt",
+        property: r'updatedAt',
         value: value,
       ));
     });
@@ -1107,7 +1107,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"updatedAt",
+        property: r'updatedAt',
         value: value,
       ));
     });
@@ -1120,7 +1120,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"updatedAt",
+        property: r'updatedAt',
         value: value,
       ));
     });
@@ -1134,7 +1134,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"updatedAt",
+        property: r'updatedAt',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1146,7 +1146,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> userIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"userId",
+        property: r'userId',
       ));
     });
   }
@@ -1154,7 +1154,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> userIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"userId",
+        property: r'userId',
       ));
     });
   }
@@ -1165,7 +1165,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1180,7 +1180,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1195,7 +1195,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1211,7 +1211,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"userId",
+        property: r'userId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1227,7 +1227,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1240,7 +1240,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1252,7 +1252,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1264,7 +1264,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"userId",
+        property: r'userId',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -1274,8 +1274,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> userIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"userId",
-        value: "",
+        property: r'userId',
+        value: '',
       ));
     });
   }
@@ -1283,8 +1283,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> userIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"userId",
-        value: "",
+        property: r'userId',
+        value: '',
       ));
     });
   }
@@ -1293,7 +1293,7 @@ extension CoverArtQueryFilter
       int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -1306,7 +1306,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -1319,7 +1319,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -1333,7 +1333,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"version",
+        property: r'version',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1345,7 +1345,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> volumeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r"volume",
+        property: r'volume',
       ));
     });
   }
@@ -1353,7 +1353,7 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> volumeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r"volume",
+        property: r'volume',
       ));
     });
   }
@@ -1364,7 +1364,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1379,7 +1379,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1394,7 +1394,7 @@ extension CoverArtQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1410,7 +1410,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"volume",
+        property: r'volume',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1426,7 +1426,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1439,7 +1439,7 @@ extension CoverArtQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1451,7 +1451,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"volume",
+        property: r'volume',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1463,7 +1463,7 @@ extension CoverArtQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"volume",
+        property: r'volume',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -1473,8 +1473,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> volumeIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"volume",
-        value: "",
+        property: r'volume',
+        value: '',
       ));
     });
   }
@@ -1482,8 +1482,8 @@ extension CoverArtQueryFilter
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> volumeIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"volume",
-        value: "",
+        property: r'volume',
+        value: '',
       ));
     });
   }
@@ -1494,7 +1494,7 @@ extension CoverArtQueryObject
   QueryBuilder<CoverArt, CoverArt, QAfterFilterCondition> locale(
       FilterQuery<Locale> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"locale");
+      return query.object(q, r'locale');
     });
   }
 }
@@ -1505,121 +1505,121 @@ extension CoverArtQueryLinks
 extension CoverArtQuerySortBy on QueryBuilder<CoverArt, CoverArt, QSortBy> {
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"createdAt", Sort.asc);
+      return query.addSortBy(r'createdAt', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"createdAt", Sort.desc);
+      return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"description", Sort.asc);
+      return query.addSortBy(r'description', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"description", Sort.desc);
+      return query.addSortBy(r'description', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByFileId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileId", Sort.asc);
+      return query.addSortBy(r'fileId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByFileIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileId", Sort.desc);
+      return query.addSortBy(r'fileId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByFileType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileType", Sort.asc);
+      return query.addSortBy(r'fileType', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByFileTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileType", Sort.desc);
+      return query.addSortBy(r'fileType', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByMangaId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"mangaId", Sort.asc);
+      return query.addSortBy(r'mangaId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByMangaIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"mangaId", Sort.desc);
+      return query.addSortBy(r'mangaId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"updatedAt", Sort.asc);
+      return query.addSortBy(r'updatedAt', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByUpdatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"updatedAt", Sort.desc);
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.asc);
+      return query.addSortBy(r'userId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.desc);
+      return query.addSortBy(r'userId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByVolume() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"volume", Sort.asc);
+      return query.addSortBy(r'volume', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> sortByVolumeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"volume", Sort.desc);
+      return query.addSortBy(r'volume', Sort.desc);
     });
   }
 }
@@ -1628,133 +1628,133 @@ extension CoverArtQuerySortThenBy
     on QueryBuilder<CoverArt, CoverArt, QSortThenBy> {
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"createdAt", Sort.asc);
+      return query.addSortBy(r'createdAt', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"createdAt", Sort.desc);
+      return query.addSortBy(r'createdAt', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"description", Sort.asc);
+      return query.addSortBy(r'description', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"description", Sort.desc);
+      return query.addSortBy(r'description', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByFileId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileId", Sort.asc);
+      return query.addSortBy(r'fileId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByFileIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileId", Sort.desc);
+      return query.addSortBy(r'fileId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByFileType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileType", Sort.asc);
+      return query.addSortBy(r'fileType', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByFileTypeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"fileType", Sort.desc);
+      return query.addSortBy(r'fileType', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByMangaId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"mangaId", Sort.asc);
+      return query.addSortBy(r'mangaId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByMangaIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"mangaId", Sort.desc);
+      return query.addSortBy(r'mangaId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"updatedAt", Sort.asc);
+      return query.addSortBy(r'updatedAt', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByUpdatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"updatedAt", Sort.desc);
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.asc);
+      return query.addSortBy(r'userId', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.desc);
+      return query.addSortBy(r'userId', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByVolume() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"volume", Sort.asc);
+      return query.addSortBy(r'volume', Sort.asc);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QAfterSortBy> thenByVolumeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"volume", Sort.desc);
+      return query.addSortBy(r'volume', Sort.desc);
     });
   }
 }
@@ -1763,67 +1763,67 @@ extension CoverArtQueryWhereDistinct
     on QueryBuilder<CoverArt, CoverArt, QDistinct> {
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"createdAt");
+      return query.addDistinctBy(r'createdAt');
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"description", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByFileId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"fileId", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'fileId', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByFileType() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"fileType");
+      return query.addDistinctBy(r'fileType');
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByMangaId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"mangaId", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'mangaId', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"updatedAt");
+      return query.addDistinctBy(r'updatedAt');
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByUserId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"userId", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"version");
+      return query.addDistinctBy(r'version');
     });
   }
 
   QueryBuilder<CoverArt, CoverArt, QDistinct> distinctByVolume(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"volume", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'volume', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1832,73 +1832,73 @@ extension CoverArtQueryProperty
     on QueryBuilder<CoverArt, CoverArt, QQueryProperty> {
   QueryBuilder<CoverArt, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<CoverArt, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"createdAt");
+      return query.addPropertyName(r'createdAt');
     });
   }
 
   QueryBuilder<CoverArt, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"description");
+      return query.addPropertyName(r'description');
     });
   }
 
   QueryBuilder<CoverArt, String, QQueryOperations> fileIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"fileId");
+      return query.addPropertyName(r'fileId');
     });
   }
 
   QueryBuilder<CoverArt, ImageFileType, QQueryOperations> fileTypeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"fileType");
+      return query.addPropertyName(r'fileType');
     });
   }
 
   QueryBuilder<CoverArt, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<CoverArt, Locale?, QQueryOperations> localeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"locale");
+      return query.addPropertyName(r'locale');
     });
   }
 
   QueryBuilder<CoverArt, String, QQueryOperations> mangaIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"mangaId");
+      return query.addPropertyName(r'mangaId');
     });
   }
 
   QueryBuilder<CoverArt, DateTime, QQueryOperations> updatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"updatedAt");
+      return query.addPropertyName(r'updatedAt');
     });
   }
 
   QueryBuilder<CoverArt, String?, QQueryOperations> userIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"userId");
+      return query.addPropertyName(r'userId');
     });
   }
 
   QueryBuilder<CoverArt, int, QQueryOperations> versionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"version");
+      return query.addPropertyName(r'version');
     });
   }
 
   QueryBuilder<CoverArt, String?, QQueryOperations> volumeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"volume");
+      return query.addPropertyName(r'volume');
     });
   }
 }

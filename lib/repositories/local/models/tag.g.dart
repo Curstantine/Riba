@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "tag.dart";
+part of 'tag.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -14,35 +14,35 @@ extension GetTagCollection on Isar {
 }
 
 const TagSchema = CollectionSchema(
-  name: r"Tag",
+  name: r'Tag',
   id: 4007045862261149568,
   properties: {
-    r"description": PropertySchema(
+    r'description': PropertySchema(
       id: 0,
-      name: r"description",
+      name: r'description',
       type: IsarType.object,
-      target: r"Localizations",
+      target: r'Localizations',
     ),
-    r"group": PropertySchema(
+    r'group': PropertySchema(
       id: 1,
-      name: r"group",
+      name: r'group',
       type: IsarType.byte,
       enumMap: _TaggroupEnumValueMap,
     ),
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 2,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"name": PropertySchema(
+    r'name': PropertySchema(
       id: 3,
-      name: r"name",
+      name: r'name',
       type: IsarType.object,
-      target: r"Localizations",
+      target: r'Localizations',
     ),
-    r"version": PropertySchema(
+    r'version': PropertySchema(
       id: 4,
-      name: r"version",
+      name: r'version',
       type: IsarType.long,
     )
   },
@@ -50,17 +50,17 @@ const TagSchema = CollectionSchema(
   serialize: _tagSerialize,
   deserialize: _tagDeserialize,
   deserializeProp: _tagDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {
-    r"Localizations": LocalizationsSchema,
-    r"Locale": LocaleSchema
+    r'Localizations': LocalizationsSchema,
+    r'Locale': LocaleSchema
   },
   getId: _tagGetId,
   getLinks: _tagGetLinks,
   attach: _tagAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _tagEstimateSize(
@@ -158,15 +158,15 @@ P _tagDeserializeProp<P>(
     case 4:
       return (reader.readLong(offset)) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _TaggroupEnumValueMap = {
-  "content": 0,
-  "format": 1,
-  "genre": 2,
-  "theme": 3,
+  'content': 0,
+  'format': 1,
+  'genre': 2,
+  'theme': 3,
 };
 const _TaggroupValueEnumMap = {
   0: TagGroup.content,
@@ -264,7 +264,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> groupEqualTo(TagGroup value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"group",
+        property: r'group',
         value: value,
       ));
     });
@@ -277,7 +277,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"group",
+        property: r'group',
         value: value,
       ));
     });
@@ -290,7 +290,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"group",
+        property: r'group',
         value: value,
       ));
     });
@@ -304,7 +304,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"group",
+        property: r'group',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -319,7 +319,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -334,7 +334,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -349,7 +349,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -365,7 +365,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -381,7 +381,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -394,7 +394,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -405,7 +405,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -416,7 +416,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -426,8 +426,8 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -435,8 +435,8 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -444,7 +444,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> isarIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -457,7 +457,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -470,7 +470,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -484,7 +484,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -496,7 +496,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> versionEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -509,7 +509,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -522,7 +522,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -536,7 +536,7 @@ extension TagQueryFilter on QueryBuilder<Tag, Tag, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"version",
+        property: r'version',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -550,14 +550,14 @@ extension TagQueryObject on QueryBuilder<Tag, Tag, QFilterCondition> {
   QueryBuilder<Tag, Tag, QAfterFilterCondition> description(
       FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"description");
+      return query.object(q, r'description');
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterFilterCondition> name(
       FilterQuery<Localizations> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"name");
+      return query.object(q, r'name');
     });
   }
 }
@@ -567,37 +567,37 @@ extension TagQueryLinks on QueryBuilder<Tag, Tag, QFilterCondition> {}
 extension TagQuerySortBy on QueryBuilder<Tag, Tag, QSortBy> {
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByGroup() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"group", Sort.asc);
+      return query.addSortBy(r'group', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByGroupDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"group", Sort.desc);
+      return query.addSortBy(r'group', Sort.desc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> sortByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 }
@@ -605,49 +605,49 @@ extension TagQuerySortBy on QueryBuilder<Tag, Tag, QSortBy> {
 extension TagQuerySortThenBy on QueryBuilder<Tag, Tag, QSortThenBy> {
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByGroup() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"group", Sort.asc);
+      return query.addSortBy(r'group', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByGroupDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"group", Sort.desc);
+      return query.addSortBy(r'group', Sort.desc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<Tag, Tag, QAfterSortBy> thenByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 }
@@ -655,19 +655,19 @@ extension TagQuerySortThenBy on QueryBuilder<Tag, Tag, QSortThenBy> {
 extension TagQueryWhereDistinct on QueryBuilder<Tag, Tag, QDistinct> {
   QueryBuilder<Tag, Tag, QDistinct> distinctByGroup() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"group");
+      return query.addDistinctBy(r'group');
     });
   }
 
   QueryBuilder<Tag, Tag, QDistinct> distinctById({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<Tag, Tag, QDistinct> distinctByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"version");
+      return query.addDistinctBy(r'version');
     });
   }
 }
@@ -675,37 +675,37 @@ extension TagQueryWhereDistinct on QueryBuilder<Tag, Tag, QDistinct> {
 extension TagQueryProperty on QueryBuilder<Tag, Tag, QQueryProperty> {
   QueryBuilder<Tag, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<Tag, Localizations, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"description");
+      return query.addPropertyName(r'description');
     });
   }
 
   QueryBuilder<Tag, TagGroup, QQueryOperations> groupProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"group");
+      return query.addPropertyName(r'group');
     });
   }
 
   QueryBuilder<Tag, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<Tag, Localizations, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"name");
+      return query.addPropertyName(r'name');
     });
   }
 
   QueryBuilder<Tag, int, QQueryOperations> versionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"version");
+      return query.addPropertyName(r'version');
     });
   }
 }

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "manga.dart";
+part of 'manga.dart';
 
 // **************************************************************************
 // CopyWithGenerator

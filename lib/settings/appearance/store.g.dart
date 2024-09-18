@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "store.dart";
+part of 'store.dart';
 
 // **************************************************************************
 // CopyWithGenerator
@@ -113,30 +113,30 @@ extension GetAppearanceSettingsStoreCollection on Isar {
 }
 
 const AppearanceSettingsStoreSchema = CollectionSchema(
-  name: r"AppearanceSettingsStore",
+  name: r'AppearanceSettingsStore',
   id: 7080077831121807335,
   properties: {
-    r"darkSchemeId": PropertySchema(
+    r'darkSchemeId': PropertySchema(
       id: 0,
-      name: r"darkSchemeId",
+      name: r'darkSchemeId',
       type: IsarType.byte,
       enumMap: _AppearanceSettingsStoredarkSchemeIdEnumValueMap,
     ),
-    r"lightSchemeId": PropertySchema(
+    r'lightSchemeId': PropertySchema(
       id: 1,
-      name: r"lightSchemeId",
+      name: r'lightSchemeId',
       type: IsarType.byte,
       enumMap: _AppearanceSettingsStorelightSchemeIdEnumValueMap,
     ),
-    r"preferredDisplayLocales": PropertySchema(
+    r'preferredDisplayLocales': PropertySchema(
       id: 2,
-      name: r"preferredDisplayLocales",
+      name: r'preferredDisplayLocales',
       type: IsarType.objectList,
-      target: r"Locale",
+      target: r'Locale',
     ),
-    r"themeMode": PropertySchema(
+    r'themeMode': PropertySchema(
       id: 3,
-      name: r"themeMode",
+      name: r'themeMode',
       type: IsarType.byte,
       enumMap: _AppearanceSettingsStorethemeModeEnumValueMap,
     )
@@ -145,14 +145,14 @@ const AppearanceSettingsStoreSchema = CollectionSchema(
   serialize: _appearanceSettingsStoreSerialize,
   deserialize: _appearanceSettingsStoreDeserialize,
   deserializeProp: _appearanceSettingsStoreDeserializeProp,
-  idName: r"id",
+  idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {r"Locale": LocaleSchema},
+  embeddedSchemas: {r'Locale': LocaleSchema},
   getId: _appearanceSettingsStoreGetId,
   getLinks: _appearanceSettingsStoreGetLinks,
   attach: _appearanceSettingsStoreAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _appearanceSettingsStoreEstimateSize(
@@ -244,30 +244,30 @@ P _appearanceSettingsStoreDeserializeProp<P>(
               reader.readByteOrNull(offset)] ??
           ThemeMode.system) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _AppearanceSettingsStoredarkSchemeIdEnumValueMap = {
-  "dynamic": 0,
-  "brittlePink": 1,
+  'dynamic': 0,
+  'brittlePink': 1,
 };
 const _AppearanceSettingsStoredarkSchemeIdValueEnumMap = {
   0: SchemeId.dynamic,
   1: SchemeId.brittlePink,
 };
 const _AppearanceSettingsStorelightSchemeIdEnumValueMap = {
-  "dynamic": 0,
-  "brittlePink": 1,
+  'dynamic': 0,
+  'brittlePink': 1,
 };
 const _AppearanceSettingsStorelightSchemeIdValueEnumMap = {
   0: SchemeId.dynamic,
   1: SchemeId.brittlePink,
 };
 const _AppearanceSettingsStorethemeModeEnumValueMap = {
-  "system": 0,
-  "light": 1,
-  "dark": 2,
+  'system': 0,
+  'light': 1,
+  'dark': 2,
 };
 const _AppearanceSettingsStorethemeModeValueEnumMap = {
   0: ThemeMode.system,
@@ -374,7 +374,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> darkSchemeIdEqualTo(SchemeId value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"darkSchemeId",
+        property: r'darkSchemeId',
         value: value,
       ));
     });
@@ -388,7 +388,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"darkSchemeId",
+        property: r'darkSchemeId',
         value: value,
       ));
     });
@@ -402,7 +402,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"darkSchemeId",
+        property: r'darkSchemeId',
         value: value,
       ));
     });
@@ -417,7 +417,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"darkSchemeId",
+        property: r'darkSchemeId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -430,7 +430,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -444,7 +444,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -458,7 +458,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
       ));
     });
@@ -473,7 +473,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -486,7 +486,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> lightSchemeIdEqualTo(SchemeId value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"lightSchemeId",
+        property: r'lightSchemeId',
         value: value,
       ));
     });
@@ -500,7 +500,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"lightSchemeId",
+        property: r'lightSchemeId',
         value: value,
       ));
     });
@@ -514,7 +514,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"lightSchemeId",
+        property: r'lightSchemeId',
         value: value,
       ));
     });
@@ -529,7 +529,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"lightSchemeId",
+        property: r'lightSchemeId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -542,7 +542,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> preferredDisplayLocalesLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         length,
         true,
         length,
@@ -555,7 +555,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> preferredDisplayLocalesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         0,
         true,
         0,
@@ -568,7 +568,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> preferredDisplayLocalesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         0,
         false,
         999999,
@@ -584,7 +584,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         0,
         true,
         length,
@@ -600,7 +600,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         length,
         include,
         999999,
@@ -618,7 +618,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"preferredDisplayLocales",
+        r'preferredDisplayLocales',
         lower,
         includeLower,
         upper,
@@ -631,7 +631,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
       QAfterFilterCondition> themeModeEqualTo(ThemeMode value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"themeMode",
+        property: r'themeMode',
         value: value,
       ));
     });
@@ -645,7 +645,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"themeMode",
+        property: r'themeMode',
         value: value,
       ));
     });
@@ -659,7 +659,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"themeMode",
+        property: r'themeMode',
         value: value,
       ));
     });
@@ -674,7 +674,7 @@ extension AppearanceSettingsStoreQueryFilter on QueryBuilder<
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"themeMode",
+        property: r'themeMode',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -690,7 +690,7 @@ extension AppearanceSettingsStoreQueryObject on QueryBuilder<
           QAfterFilterCondition>
       preferredDisplayLocalesElement(FilterQuery<Locale> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r"preferredDisplayLocales");
+      return query.object(q, r'preferredDisplayLocales');
     });
   }
 }
@@ -703,42 +703,42 @@ extension AppearanceSettingsStoreQuerySortBy
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByDarkSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"darkSchemeId", Sort.asc);
+      return query.addSortBy(r'darkSchemeId', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByDarkSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"darkSchemeId", Sort.desc);
+      return query.addSortBy(r'darkSchemeId', Sort.desc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lightSchemeId", Sort.asc);
+      return query.addSortBy(r'lightSchemeId', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByLightSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lightSchemeId", Sort.desc);
+      return query.addSortBy(r'lightSchemeId', Sort.desc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByThemeMode() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeMode", Sort.asc);
+      return query.addSortBy(r'themeMode', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       sortByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeMode", Sort.desc);
+      return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
 }
@@ -748,56 +748,56 @@ extension AppearanceSettingsStoreQuerySortThenBy on QueryBuilder<
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByDarkSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"darkSchemeId", Sort.asc);
+      return query.addSortBy(r'darkSchemeId', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByDarkSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"darkSchemeId", Sort.desc);
+      return query.addSortBy(r'darkSchemeId', Sort.desc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lightSchemeId", Sort.asc);
+      return query.addSortBy(r'lightSchemeId', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByLightSchemeIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"lightSchemeId", Sort.desc);
+      return query.addSortBy(r'lightSchemeId', Sort.desc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByThemeMode() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeMode", Sort.asc);
+      return query.addSortBy(r'themeMode', Sort.asc);
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QAfterSortBy>
       thenByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"themeMode", Sort.desc);
+      return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
 }
@@ -807,21 +807,21 @@ extension AppearanceSettingsStoreQueryWhereDistinct on QueryBuilder<
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QDistinct>
       distinctByDarkSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"darkSchemeId");
+      return query.addDistinctBy(r'darkSchemeId');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QDistinct>
       distinctByLightSchemeId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"lightSchemeId");
+      return query.addDistinctBy(r'lightSchemeId');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, AppearanceSettingsStore, QDistinct>
       distinctByThemeMode() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"themeMode");
+      return query.addDistinctBy(r'themeMode');
     });
   }
 }
@@ -830,35 +830,35 @@ extension AppearanceSettingsStoreQueryProperty on QueryBuilder<
     AppearanceSettingsStore, AppearanceSettingsStore, QQueryProperty> {
   QueryBuilder<AppearanceSettingsStore, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, SchemeId, QQueryOperations>
       darkSchemeIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"darkSchemeId");
+      return query.addPropertyName(r'darkSchemeId');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, SchemeId, QQueryOperations>
       lightSchemeIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"lightSchemeId");
+      return query.addPropertyName(r'lightSchemeId');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, List<Locale>, QQueryOperations>
       preferredDisplayLocalesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"preferredDisplayLocales");
+      return query.addPropertyName(r'preferredDisplayLocales');
     });
   }
 
   QueryBuilder<AppearanceSettingsStore, ThemeMode, QQueryOperations>
       themeModeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"themeMode");
+      return query.addPropertyName(r'themeMode');
     });
   }
 }

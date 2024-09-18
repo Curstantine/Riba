@@ -17,7 +17,7 @@ class SettingsView extends StatelessWidget {
 		return Scaffold(
 			body: CustomScrollView(
 				slivers: [
-					SliverAppBar.large(title: const Text("Settings")),
+					const SliverAppBar.large(title: Text("Settings")),
 					SliverList(
 						delegate: SliverChildListDelegate([
 							ListTile(

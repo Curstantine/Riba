@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "author.dart";
+part of 'author.dart';
 
 // **************************************************************************
 // CopyWithGenerator

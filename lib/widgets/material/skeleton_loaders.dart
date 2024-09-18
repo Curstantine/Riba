@@ -22,7 +22,7 @@ class TextSkeleton extends StatelessWidget {
 			height: style.fontSize,
 			constraints: BoxConstraints(maxWidth: width),
 			decoration: BoxDecoration(
-				color: color ?? theme.colorScheme.surfaceVariant,
+				color: color ?? theme.colorScheme.surfaceContainerHighest,
 				borderRadius: Corners.allFull,
 			),
 		);
@@ -60,7 +60,7 @@ class ListTileSkeleton extends StatelessWidget {
 		height: size,
 		width: size,
 		decoration: BoxDecoration(
-			color: color ?? colors.surfaceVariant,
+			color: color ?? colors.surfaceContainerHighest,
 			shape: BoxShape.circle,
 		),
 	);
@@ -77,7 +77,7 @@ class MangaCardSkeleton extends StatelessWidget {
 		final colors = theme.colorScheme;
 		final text = theme.textTheme;
 
-		final color = this.color ?? colors.surfaceVariant;
+		final color = this.color ?? colors.surfaceContainerHighest;
 
 		return SizedBox(
 			width: 150,

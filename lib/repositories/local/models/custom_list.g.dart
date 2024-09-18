@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of "custom_list.dart";
+part of 'custom_list.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -14,37 +14,37 @@ extension GetCustomListCollection on Isar {
 }
 
 const CustomListSchema = CollectionSchema(
-  name: r"CustomList",
+  name: r'CustomList',
   id: -8525547938508663416,
   properties: {
-    r"id": PropertySchema(
+    r'id': PropertySchema(
       id: 0,
-      name: r"id",
+      name: r'id',
       type: IsarType.string,
     ),
-    r"mangaIds": PropertySchema(
+    r'mangaIds': PropertySchema(
       id: 1,
-      name: r"mangaIds",
+      name: r'mangaIds',
       type: IsarType.stringList,
     ),
-    r"name": PropertySchema(
+    r'name': PropertySchema(
       id: 2,
-      name: r"name",
+      name: r'name',
       type: IsarType.string,
     ),
-    r"userId": PropertySchema(
+    r'userId': PropertySchema(
       id: 3,
-      name: r"userId",
+      name: r'userId',
       type: IsarType.string,
     ),
-    r"version": PropertySchema(
+    r'version': PropertySchema(
       id: 4,
-      name: r"version",
+      name: r'version',
       type: IsarType.long,
     ),
-    r"visibility": PropertySchema(
+    r'visibility': PropertySchema(
       id: 5,
-      name: r"visibility",
+      name: r'visibility',
       type: IsarType.byte,
       enumMap: _CustomListvisibilityEnumValueMap,
     )
@@ -53,14 +53,14 @@ const CustomListSchema = CollectionSchema(
   serialize: _customListSerialize,
   deserialize: _customListDeserialize,
   deserializeProp: _customListDeserializeProp,
-  idName: r"isarId",
+  idName: r'isarId',
   indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _customListGetId,
   getLinks: _customListGetLinks,
   attach: _customListAttach,
-  version: "3.1.0+1",
+  version: '3.1.0+1',
 );
 
 int _customListEstimateSize(
@@ -137,13 +137,13 @@ P _customListDeserializeProp<P>(
               reader.readByteOrNull(offset)] ??
           CustomListVisibility.public) as P;
     default:
-      throw IsarError("Unknown property with id $propertyId");
+      throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _CustomListvisibilityEnumValueMap = {
-  "public": 0,
-  "private": 1,
+  'public': 0,
+  'private': 1,
 };
 const _CustomListvisibilityValueEnumMap = {
   0: CustomListVisibility.public,
@@ -249,7 +249,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -264,7 +264,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -279,7 +279,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -295,7 +295,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"id",
+        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -311,7 +311,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -324,7 +324,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -336,7 +336,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"id",
+        property: r'id',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -348,7 +348,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"id",
+        property: r'id',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -358,8 +358,8 @@ extension CustomListQueryFilter
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition> idIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -367,8 +367,8 @@ extension CustomListQueryFilter
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition> idIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"id",
-        value: "",
+        property: r'id',
+        value: '',
       ));
     });
   }
@@ -377,7 +377,7 @@ extension CustomListQueryFilter
       Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -390,7 +390,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -403,7 +403,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"isarId",
+        property: r'isarId',
         value: value,
       ));
     });
@@ -417,7 +417,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"isarId",
+        property: r'isarId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -433,7 +433,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -449,7 +449,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -465,7 +465,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -482,7 +482,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"mangaIds",
+        property: r'mangaIds',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -499,7 +499,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -513,7 +513,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -524,7 +524,7 @@ extension CustomListQueryFilter
       mangaIdsElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"mangaIds",
+        property: r'mangaIds',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -535,7 +535,7 @@ extension CustomListQueryFilter
       mangaIdsElementMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"mangaIds",
+        property: r'mangaIds',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -546,8 +546,8 @@ extension CustomListQueryFilter
       mangaIdsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"mangaIds",
-        value: "",
+        property: r'mangaIds',
+        value: '',
       ));
     });
   }
@@ -556,8 +556,8 @@ extension CustomListQueryFilter
       mangaIdsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"mangaIds",
-        value: "",
+        property: r'mangaIds',
+        value: '',
       ));
     });
   }
@@ -566,7 +566,7 @@ extension CustomListQueryFilter
       mangaIdsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         length,
         true,
         length,
@@ -579,7 +579,7 @@ extension CustomListQueryFilter
       mangaIdsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         0,
         true,
         0,
@@ -592,7 +592,7 @@ extension CustomListQueryFilter
       mangaIdsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         0,
         false,
         999999,
@@ -608,7 +608,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         0,
         true,
         length,
@@ -624,7 +624,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         length,
         include,
         999999,
@@ -642,7 +642,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r"mangaIds",
+        r'mangaIds',
         lower,
         includeLower,
         upper,
@@ -657,7 +657,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -672,7 +672,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -687,7 +687,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -703,7 +703,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"name",
+        property: r'name',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -719,7 +719,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -732,7 +732,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -744,7 +744,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"name",
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -756,7 +756,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"name",
+        property: r'name',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -766,8 +766,8 @@ extension CustomListQueryFilter
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition> nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"name",
-        value: "",
+        property: r'name',
+        value: '',
       ));
     });
   }
@@ -775,8 +775,8 @@ extension CustomListQueryFilter
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition> nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"name",
-        value: "",
+        property: r'name',
+        value: '',
       ));
     });
   }
@@ -787,7 +787,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -802,7 +802,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -817,7 +817,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -833,7 +833,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"userId",
+        property: r'userId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -849,7 +849,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -862,7 +862,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -874,7 +874,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r"userId",
+        property: r'userId',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -886,7 +886,7 @@ extension CustomListQueryFilter
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r"userId",
+        property: r'userId',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -896,8 +896,8 @@ extension CustomListQueryFilter
   QueryBuilder<CustomList, CustomList, QAfterFilterCondition> userIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"userId",
-        value: "",
+        property: r'userId',
+        value: '',
       ));
     });
   }
@@ -906,8 +906,8 @@ extension CustomListQueryFilter
       userIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r"userId",
-        value: "",
+        property: r'userId',
+        value: '',
       ));
     });
   }
@@ -916,7 +916,7 @@ extension CustomListQueryFilter
       int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -930,7 +930,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -943,7 +943,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"version",
+        property: r'version',
         value: value,
       ));
     });
@@ -957,7 +957,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"version",
+        property: r'version',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -970,7 +970,7 @@ extension CustomListQueryFilter
       CustomListVisibility value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r"visibility",
+        property: r'visibility',
         value: value,
       ));
     });
@@ -984,7 +984,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r"visibility",
+        property: r'visibility',
         value: value,
       ));
     });
@@ -998,7 +998,7 @@ extension CustomListQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r"visibility",
+        property: r'visibility',
         value: value,
       ));
     });
@@ -1012,7 +1012,7 @@ extension CustomListQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r"visibility",
+        property: r'visibility',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1032,61 +1032,61 @@ extension CustomListQuerySortBy
     on QueryBuilder<CustomList, CustomList, QSortBy> {
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"name", Sort.asc);
+      return query.addSortBy(r'name', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"name", Sort.desc);
+      return query.addSortBy(r'name', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.asc);
+      return query.addSortBy(r'userId', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.desc);
+      return query.addSortBy(r'userId', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByVisibility() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"visibility", Sort.asc);
+      return query.addSortBy(r'visibility', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> sortByVisibilityDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"visibility", Sort.desc);
+      return query.addSortBy(r'visibility', Sort.desc);
     });
   }
 }
@@ -1095,73 +1095,73 @@ extension CustomListQuerySortThenBy
     on QueryBuilder<CustomList, CustomList, QSortThenBy> {
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.asc);
+      return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"id", Sort.desc);
+      return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.asc);
+      return query.addSortBy(r'isarId', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByIsarIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"isarId", Sort.desc);
+      return query.addSortBy(r'isarId', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"name", Sort.asc);
+      return query.addSortBy(r'name', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByNameDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"name", Sort.desc);
+      return query.addSortBy(r'name', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUserId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.asc);
+      return query.addSortBy(r'userId', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByUserIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"userId", Sort.desc);
+      return query.addSortBy(r'userId', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.asc);
+      return query.addSortBy(r'version', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByVersionDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"version", Sort.desc);
+      return query.addSortBy(r'version', Sort.desc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByVisibility() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"visibility", Sort.asc);
+      return query.addSortBy(r'visibility', Sort.asc);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QAfterSortBy> thenByVisibilityDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r"visibility", Sort.desc);
+      return query.addSortBy(r'visibility', Sort.desc);
     });
   }
 }
@@ -1171,39 +1171,39 @@ extension CustomListQueryWhereDistinct
   QueryBuilder<CustomList, CustomList, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"id", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'id', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QDistinct> distinctByMangaIds() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"mangaIds");
+      return query.addDistinctBy(r'mangaIds');
     });
   }
 
   QueryBuilder<CustomList, CustomList, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"name", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QDistinct> distinctByUserId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"userId", caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<CustomList, CustomList, QDistinct> distinctByVersion() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"version");
+      return query.addDistinctBy(r'version');
     });
   }
 
   QueryBuilder<CustomList, CustomList, QDistinct> distinctByVisibility() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r"visibility");
+      return query.addDistinctBy(r'visibility');
     });
   }
 }
@@ -1212,44 +1212,44 @@ extension CustomListQueryProperty
     on QueryBuilder<CustomList, CustomList, QQueryProperty> {
   QueryBuilder<CustomList, int, QQueryOperations> isarIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"isarId");
+      return query.addPropertyName(r'isarId');
     });
   }
 
   QueryBuilder<CustomList, String, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"id");
+      return query.addPropertyName(r'id');
     });
   }
 
   QueryBuilder<CustomList, List<String>, QQueryOperations> mangaIdsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"mangaIds");
+      return query.addPropertyName(r'mangaIds');
     });
   }
 
   QueryBuilder<CustomList, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"name");
+      return query.addPropertyName(r'name');
     });
   }
 
   QueryBuilder<CustomList, String, QQueryOperations> userIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"userId");
+      return query.addPropertyName(r'userId');
     });
   }
 
   QueryBuilder<CustomList, int, QQueryOperations> versionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"version");
+      return query.addPropertyName(r'version');
     });
   }
 
   QueryBuilder<CustomList, CustomListVisibility, QQueryOperations>
       visibilityProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r"visibility");
+      return query.addPropertyName(r'visibility');
     });
   }
 }
